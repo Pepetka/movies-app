@@ -1,4 +1,7 @@
-import { nextJsConfig } from "@repo/eslint-config/next-js";
+import { config as svelteConfig } from '@repo/eslint-config/svelte';
+import { includeIgnoreFile } from '@eslint/compat';
+import { fileURLToPath } from 'node:url';
 
-/** @type {import("eslint").Linter.Config[]} */
-export default nextJsConfig;
+const gitignorePath = fileURLToPath(new URL('./.gitignore', import.meta.url));
+
+export default [includeIgnoreFile(gitignorePath), ...svelteConfig];
