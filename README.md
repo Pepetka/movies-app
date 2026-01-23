@@ -1,135 +1,134 @@
-# Turborepo starter
+# Movies App
 
-This Turborepo starter is maintained by the Turborepo core team.
+Веб-приложение для работы с фильмами — монорепозиторий на Turborepo с SvelteKit фронтендом и NestJS бэкендом.
 
-## Using this example
+## Технологии
 
-Run the following command:
+- **Package Manager:** pnpm 9.0.0
+- **Build System:** Turborepo 2.7.5
+- **Frontend:** SvelteKit (Svelte 5) + Vite
+- **Backend:** NestJS 11 + Drizzle ORM
+- **Database:** PostgreSQL
+- **Language:** TypeScript 5.9
 
-```sh
-npx create-turbo@latest
+## Требования
+
+- Node.js ≥ 18
+- pnpm 9.0.0+
+- PostgreSQL (или Docker)
+
+## Быстрый старт
+
+```bash
+# Клонировать репозиторий
+git clone <repository-url>
+cd movies-app
+
+# Установить зависимости
+pnpm install
+
+# Создать .env файл
+cp .env.example .env
+# Отредактировать .env с вашими настройками
+
+# Запустить PostgreSQL (через Docker)
+docker compose -f docker-compose.dev.yml up -d db
+
+# Запустить все приложения
+pnpm run dev
 ```
 
-## What's inside?
+Фронтенд будет доступен на http://localhost:5173, API — на http://localhost:3000.
 
-This Turborepo includes the following packages/apps:
+## Команды
 
-### Apps and Packages
+```bash
+# Разработка
+pnpm run dev                    # Все приложения
+pnpm run dev --filter=web       # Только фронтенд
+pnpm run dev --filter=api       # Только бэкенд
 
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `@repo/ui`: a stub React component library shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
+# Сборка
+pnpm run build                  # Все приложения
+pnpm run build --filter=web
+pnpm run build --filter=api
 
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
+# Линтинг и форматирование
+pnpm run lint
+pnpm run format
+pnpm run check:types
 
-### Utilities
-
-This Turborepo has some additional tools already setup for you:
-
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
-
-### Build
-
-To build all apps and packages, run the following command:
-
-```
-cd my-turborepo
-
-# With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended)
-turbo build
-
-# Without [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation), use your package manager
-npx turbo build
-yarn dlx turbo build
-pnpm exec turbo build
+# Тесты API
+cd apps/api
+pnpm run test                   # Unit тесты
+pnpm run test:watch             # Watch режим
+pnpm run test:cov               # Покрытие
+pnpm run test:e2e               # E2E тесты
 ```
 
-You can build a specific package by using a [filter](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters):
+## Production деплой с Docker
 
-```
-# With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended)
-turbo build --filter=docs
+```bash
+# Скопировать и настроить переменные окружения
+cp .env.example .env
+# Отредактировать .env для production
 
-# Without [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation), use your package manager
-npx turbo build --filter=docs
-yarn exec turbo build --filter=docs
-pnpm exec turbo build --filter=docs
-```
-
-### Develop
-
-To develop all apps and packages, run the following command:
-
-```
-cd my-turborepo
-
-# With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended)
-turbo dev
-
-# Without [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation), use your package manager
-npx turbo dev
-yarn exec turbo dev
-pnpm exec turbo dev
+# Запустить все сервисы
+docker compose up -d
 ```
 
-You can develop a specific package by using a [filter](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters):
+### Первичное получение SSL сертификата
 
-```
-# With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended)
-turbo dev --filter=web
+```bash
+# 1. Сначала запустить nginx без SSL (для ACME challenge)
+docker compose up -d nginx
 
-# Without [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation), use your package manager
-npx turbo dev --filter=web
-yarn exec turbo dev --filter=web
-pnpm exec turbo dev --filter=web
-```
+# 2. Получить сертификат
+docker compose run --rm certbot certonly \
+  --webroot \
+  --webroot-path=/var/www/certbot \
+  -d ${DOMAIN} \
+  --email ${CERTBOT_EMAIL} \
+  --agree-tos \
+  --no-eff-email
 
-### Remote Caching
-
-> [!TIP]
-> Vercel Remote Cache is free for all plans. Get started today at [vercel.com](https://vercel.com/signup?/signup?utm_source=remote-cache-sdk&utm_campaign=free_remote_cache).
-
-Turborepo can use a technique known as [Remote Caching](https://turborepo.dev/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
-
-By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup?utm_source=turborepo-examples), then enter the following commands:
-
-```
-cd my-turborepo
-
-# With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended)
-turbo login
-
-# Without [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation), use your package manager
-npx turbo login
-yarn exec turbo login
-pnpm exec turbo login
+# 3. Перезапустить nginx с SSL
+docker compose restart nginx
 ```
 
-This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
-
-Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
+## Структура проекта
 
 ```
-# With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended)
-turbo link
-
-# Without [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation), use your package manager
-npx turbo link
-yarn exec turbo link
-pnpm exec turbo link
+apps/
+  web/                          # SvelteKit фронтенд
+    src/
+      routes/                   # File-based роутинг
+      lib/                      # Утилиты и компоненты
+  api/                          # NestJS бэкенд
+    src/
+      main.ts                   # Точка входа
+      app.module.ts             # Корневой модуль
+      db/                       # Drizzle схемы и модуль БД
+      common/                   # Общие конфиги и утилиты
+packages/
+  eslint-config/                # Общие ESLint конфиги
+  typescript-config/            # Общие TS конфиги
+  ui/                           # UI компоненты (Svelte)
+docker/                         # Docker конфигурации
 ```
 
-## Useful Links
+## Переменные окружения
 
-Learn more about the power of Turborepo:
+### Production (Docker)
 
-- [Tasks](https://turborepo.dev/docs/crafting-your-repository/running-tasks)
-- [Caching](https://turborepo.dev/docs/crafting-your-repository/caching)
-- [Remote Caching](https://turborepo.dev/docs/core-concepts/remote-caching)
-- [Filtering](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters)
-- [Configuration Options](https://turborepo.dev/docs/reference/configuration)
-- [CLI Usage](https://turborepo.dev/docs/reference/command-line-reference)
+| Переменная | Описание | Используется |
+|------------|----------|--------------|
+| `NODE_ENV` | Окружение (development/production/test) | API, Web |
+| `PORT` | Порт API сервера | API |
+| `WEB_URL` | URL фронтенда (https://yourdomain.com) | API |
+| `API_URL` | URL API (https://yourdomain.com/api) | API |
+| `COOKIE_SECRET` | Секрет для cookies (мин. 32 символа) | API |
+| `DATABASE_URL` | Строка подключения PostgreSQL | API |
+| `POSTGRES_*` | Настройки PostgreSQL | Docker |
+| `DOMAIN` | Домен без протокола (yourdomain.com) | nginx, certbot |
+| `CERTBOT_EMAIL` | Email для Let's Encrypt | certbot |

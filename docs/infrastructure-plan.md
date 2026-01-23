@@ -242,7 +242,8 @@ COPY --from=builder --chown=sveltekit:nodejs /app/apps/web/package.json ./
 USER sveltekit
 EXPOSE 3000
 ENV NODE_ENV=production
-ENV ORIGIN=http://localhost:3000
+ENV WEB_URL=http://localhost:3000
+ENV API_URL=http://localhost:3000/api
 CMD ["node", "build"]
 ```
 
@@ -273,6 +274,8 @@ services:
     environment:
       NODE_ENV: production
       DATABASE_URL: postgresql://${POSTGRES_USER:-movies}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-movies_db}
+      WEB_URL: ${WEB_URL:-http://localhost}
+      API_URL: ${API_URL:-http://localhost/api}
     depends_on:
       postgres:
         condition: service_healthy
@@ -284,8 +287,6 @@ services:
     restart: unless-stopped
     environment:
       NODE_ENV: production
-      ORIGIN: ${ORIGIN:-http://localhost}
-      PUBLIC_API_URL: /api
     depends_on:
       - api
     networks:
@@ -646,20 +647,21 @@ POSTGRES_PASSWORD=your_secure_password
 POSTGRES_DB=movies_db
 
 # Web
-ORIGIN=https://yourdomain.com
+WEB_URL=https://yourdomain.com
+API_URL=https://yourdomain.com/api
 
 # Domain (для SSL)
 DOMAIN=yourdomain.com
 ```
-Примечание: `PUBLIC_API_URL` сейчас не используется в коде web. Если будете читать его через `$env/static/public`,
-нужно задавать переменную на этапе build (в Dockerfile builder), иначе использовать `$env/dynamic/public`.
 
 ### 7.2 API .env.example
 **Файл:** `apps/api/.env.example`
 ```bash
 NODE_ENV=development
 PORT=3000
-DATABASE_URL=postgresql://movies:movies_secret@localhost:5432/movies_db
+WEB_URL=http://localhost:5173
+API_URL=http://localhost:3000/api
+DATABASE_URL=postgresql://movies:movies_secret@postgres:5432/movies_db
 ```
 
 ---
