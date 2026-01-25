@@ -38,6 +38,7 @@ cp .env.example .env
 | `POSTGRES_DB` | Имя базы данных | `movies` |
 | `DOMAIN` | Домен (без протокола) | `yourdomain.com` |
 | `CERTBOT_EMAIL` | Email для Let's Encrypt | `admin@yourdomain.com` |
+| `GITHUB_REPOSITORY` | Полное имя репозитория (для pull образов) | `username/movies-app` |
 
 Генерация `COOKIE_SECRET`:
 
@@ -112,6 +113,182 @@ docker compose run --rm certbot renew
 docker compose exec nginx nginx -s reload
 ```
 
+## CI/CD с GitHub Actions
+
+Проект настроен для автоматического развёртывания через GitHub Actions.
+
+### Workflows
+
+#### CI Workflow (Pull Requests)
+
+Автоматически запускается при создании PR в `main`:
+
+- **Lint** — проверка стиля кода
+- **Type Check** — проверка типов TypeScript
+- **Build** — сборка всех приложений
+- **Test** — unit и e2e тесты для API
+
+#### Deploy Workflow (Production)
+
+Автоматически запускается при merge в `main`:
+
+1. **Build and Push** — собирает Docker образы и отправляет в GitHub Container Registry
+2. **Deploy** — развёртывает на VPS через SSH
+
+### Настройка GitHub Secrets
+
+Для работы CI/CD необходимо настроить следующие secrets в репозитории (Settings → Secrets and variables → Actions):
+
+| Secret | Описание | Как получить |
+|--------|----------|--------------|
+| `VPS_HOST` | IP адрес или домен VPS | Из настроек VPS провайдера |
+| `VPS_USER` | SSH пользователь | Обычно `ubuntu`, `root` или custom |
+| `VPS_SSH_KEY` | Приватный SSH ключ | `cat ~/.ssh/id_rsa` (на локальной машине) |
+| `GHCR_USERNAME` | GitHub username для GHCR | Ваш GitHub username |
+| `GHCR_PAT` | GitHub Personal Access Token | См. инструкцию ниже |
+
+### Генерация GHCR Personal Access Token
+
+Для приватных образов требуется токен с расширенными правами:
+
+1. GitHub.com → Settings → Developer settings → Personal access tokens
+2. Fine-grained tokens → Generate new token
+3. Token name: `movies-app-ghcr-pull`
+4. Expiration: 90 days (или custom)
+5. Repository access: Only select repositories → movies-app
+6. Permissions:
+   - **Contents**: Read (для доступа к приватному репозиторию)
+   - **Packages**: Read (для pull образов)
+7. Generate token и скопировать значение
+8. Добавить два secrets в репозиторий:
+   - `GHCR_USERNAME`: ваш GitHub username
+   - `GHCR_PAT`: скопированный токен
+
+**Альтернатива (Classic Token):**
+```bash
+# Если Fine-grained tokens не работают:
+# Personal access tokens → Tokens (classic) → Generate new token
+# Scopes: read:packages, repo (для приватных репозиториев)
+# Expiration: 90 days
+```
+
+### SSH Key Setup на VPS
+
+```bash
+# На локальной машине
+ssh-keygen -t ed25519 -C "github-actions@movies-app" -f ~/.ssh/movies-app-deploy
+
+# Скопировать публичный ключ на VPS
+ssh-copy-id -i ~/.ssh/movies-app-deploy.pub user@vps-ip
+
+# Приватный ключ добавить в GitHub secrets
+cat ~/.ssh/movies-app-deploy
+```
+
+### Подготовка VPS для CI/CD
+
+1. Создайте директорию для приложения:
+```bash
+sudo mkdir -p /opt/movies-app
+sudo chown $USER:$USER /opt/movies-app
+cd /opt/movies-app
+```
+
+2. Скопируйте необходимые файлы:
+```bash
+# На локальной машине
+scp docker-compose.yml user@vps-ip:/opt/movies-app/
+scp -r docker/nginx user@vps-ip:/opt/movies-app/docker/
+scp .env.example user@vps-ip:/opt/movies-app/.env
+```
+
+3. На VPS отредактируйте `.env` с правильными значениями переменных
+
+   **Важно:** Добавьте переменную `GITHUB_REPOSITORY` с полным именем вашего репозитория:
+   ```bash
+   GITHUB_REPOSITORY=username/movies-app
+   ```
+   Эта переменная необходима для pull Docker образов из GitHub Container Registry.
+
+4. Убедитесь что порты 80 и 443 открыты
+
+### Процесс Deploy
+
+При merge в `main` автоматически происходит:
+
+1. Сборка Docker образов (API и Web)
+2. Push образов в GitHub Container Registry с тегами `latest` и SHA коммита
+3. SSH подключение к VPS
+4. Login в GHCR с использованием PAT
+5. Pull новых образов
+6. **Запуск database миграций** (если миграция fails → деплой прерывается)
+7. Перезапуск контейнеров с новыми образами
+8. Health checks для проверки работоспособности
+9. Очистка старых образов с label `project=movies-app`
+
+### Миграции базы данных
+
+Миграции запускаются автоматически перед перезапуском сервисов:
+
+```bash
+docker compose run --rm api node dist/db/migrate.js
+```
+
+**Важно:**
+- Миграции должны быть сгенерированы локально и закоммичены в git
+- В Docker образ попадают только уже существующие миграции из `apps/api/drizzle/`
+- При ошибке миграции деплой прерывается, старые контейнеры продолжают работать
+
+**Генерация новых миграций:**
+```bash
+cd apps/api
+
+# Нужна доступная PostgreSQL БД для генерации
+# Можно использовать временную:
+docker run -d --name temp-postgres \
+  -e POSTGRES_PASSWORD=temppass \
+  -e POSTGRES_DB=movies_db \
+  -p 5432:5432 postgres:16-alpine
+
+# Сгенерировать миграции
+DATABASE_URL="postgres://postgres:temppass@localhost:5432/movies_db" pnpm run db:generate
+
+# Остановить временную БД
+docker stop temp-postgres && docker rm temp-postgres
+
+# Закоммитить миграции
+git add drizzle/
+git commit -m "feat: add new migration"
+```
+
+### Health Checks
+
+После деплоя автоматически проверяются:
+- API: `http://localhost/api/v1/health`
+- Web: `http://localhost/`
+
+Если health check fails, деплой считается неудачным.
+
+### Rollback при ошибке
+
+Если деплой failed, можно откатиться к предыдущей версии:
+
+```bash
+# На VPS откатиться к конкретному SHA
+cd /opt/movies-app
+docker tag ghcr.io/user/movies-app/api:PREVIOUS_SHA ghcr.io/user/movies-app/api:latest
+docker tag ghcr.io/user/movies-app/web:PREVIOUS_SHA ghcr.io/user/movies-app/web:latest
+docker compose up -d
+```
+
+### Ручной Deploy
+
+При необходимости можно запустить deploy вручную:
+
+1. GitHub → Actions → Deploy workflow
+2. Run workflow → выбрать ветку main
+3. Run workflow
+
 ## Устранение проблем
 
 ### Сертификат не получен
@@ -139,3 +316,94 @@ docker compose ps db
 # Проверить логи
 docker compose logs db
 ```
+
+### CI/CD проблемы
+
+#### "failed to authorize: authentication required"
+
+**Причина:** GHCR_PAT не настроен или истёк
+
+**Решение:**
+1. Проверить что `GHCR_PAT` secret добавлен в GitHub
+2. Убедиться что токен имеет права `read:packages` и `repo`
+3. Проверить срок действия токена
+4. Перегенерировать токен если необходимо
+
+#### "Permission denied (publickey)"
+
+**Причина:** SSH ключ не добавлен на VPS или неправильный формат
+
+**Решение:**
+1. Проверить что публичный ключ в `~/.ssh/authorized_keys` на VPS
+2. Убедиться что приватный ключ в secrets без лишних пробелов/переносов
+3. Проверить права на VPS:
+   ```bash
+   chmod 700 ~/.ssh
+   chmod 600 ~/.ssh/authorized_keys
+   ```
+
+#### "database migration failed"
+
+**Причина:** Несовместимые изменения схемы или DATABASE_URL неправильный
+
+**Решение:**
+1. Проверить логи деплоя в GitHub Actions
+2. SSH в VPS и проверить логи: `docker compose logs api`
+3. Запустить миграции вручную:
+   ```bash
+   docker compose run --rm api node dist/db/migrate.js
+   ```
+4. Если ошибка в SQL миграции:
+   - Проверить файлы в `apps/api/drizzle/`
+   - Исправить схему локально
+   - Перегенерировать: `cd apps/api && pnpm run db:generate`
+   - Закоммитить исправленные миграции
+   - Сделать новый деплой
+
+#### "migrations folder not found"
+
+**Причина:** Директория `apps/api/drizzle/` не существует в репозитории
+
+**Решение:**
+1. Локально сгенерировать начальные миграции:
+   ```bash
+   cd apps/api
+   # Поднять временную БД
+   docker run -d --name temp-postgres \
+     -e POSTGRES_PASSWORD=temppass \
+     -e POSTGRES_DB=movies_db \
+     -p 5432:5432 postgres:16-alpine
+
+   # Сгенерировать миграции
+   DATABASE_URL="postgres://postgres:temppass@localhost:5432/movies_db" \
+     pnpm run db:generate
+
+   # Остановить временную БД
+   docker stop temp-postgres && docker rm temp-postgres
+   ```
+
+2. Закоммитить и запушить миграции:
+   ```bash
+   git add drizzle/
+   git commit -m "feat: add initial database migrations"
+   git push origin main
+   ```
+
+3. GitHub Actions пересоберёт образы с миграциями
+
+#### "health check failed"
+
+**Причина:** Сервис не успел запуститься или действительно упал
+
+**Решение:**
+1. Проверить логи на VPS:
+   ```bash
+   docker compose logs api web
+   ```
+2. Проверить переменные окружения в `.env`
+3. Увеличить sleep время в deploy workflow (если нужно больше времени на старт)
+4. Проверить health endpoints вручную:
+   ```bash
+   curl http://localhost/api/v1/health
+   curl http://localhost/
+   ```
