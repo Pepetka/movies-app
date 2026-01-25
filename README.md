@@ -69,32 +69,18 @@ pnpm run test:e2e               # E2E тесты
 ## Production деплой с Docker
 
 ```bash
-# Скопировать и настроить переменные окружения
+# 1. Скопировать и настроить переменные окружения
 cp .env.example .env
-# Отредактировать .env для production
+# Отредактировать .env (DOMAIN, CERTBOT_EMAIL, COOKIE_SECRET и др.)
 
-# Запустить все сервисы
+# 2. Получить SSL сертификат
+./scripts/init-letsencrypt.sh
+
+# 3. Запустить все сервисы
 docker compose up -d
 ```
 
-### Первичное получение SSL сертификата
-
-```bash
-# 1. Сначала запустить nginx без SSL (для ACME challenge)
-docker compose up -d nginx
-
-# 2. Получить сертификат
-docker compose run --rm certbot certonly \
-  --webroot \
-  --webroot-path=/var/www/certbot \
-  -d ${DOMAIN} \
-  --email ${CERTBOT_EMAIL} \
-  --agree-tos \
-  --no-eff-email
-
-# 3. Перезапустить nginx с SSL
-docker compose restart nginx
-```
+Подробное руководство по развёртыванию: [docs/deployment.md](docs/deployment.md)
 
 ## Структура проекта
 
