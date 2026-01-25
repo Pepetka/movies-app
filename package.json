@@ -10,9 +10,14 @@
     "format": "turbo run format",
     "check:types": "turbo run check:types",
     "db:run": "docker compose -f docker-compose.dev.yml up -d",
-    "db:stop": "docker compose -f docker-compose.dev.yml down"
+    "db:stop": "docker compose -f docker-compose.dev.yml down",
+    "changeset": "changeset",
+    "changeset:add": "changeset add",
+    "version-packages": "changeset version",
+    "release": "changeset tag && git push --follow-tags"
   },
   "devDependencies": {
+    "@changesets/cli": "^2.27.0",
     "prettier": "^3.8.0",
     "turbo": "^2.7.5",
     "typescript": "5.9.3"
