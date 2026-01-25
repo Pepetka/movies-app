@@ -38,6 +38,8 @@ RUN pnpm deploy --filter=web --prod /app/deploy
 FROM node:22-alpine AS runner
 WORKDIR /app
 
+LABEL project="movies-app"
+
 ENV NODE_ENV=production
 
 RUN addgroup --system --gid 1001 sveltekit && \

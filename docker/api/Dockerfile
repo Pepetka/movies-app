@@ -36,6 +36,8 @@ RUN pnpm deploy --filter=api --prod /app/deploy
 FROM node:22-alpine AS runner
 WORKDIR /app
 
+LABEL project="movies-app"
+
 ENV NODE_ENV=production
 
 RUN addgroup --system --gid 1001 nestjs && \
@@ -43,6 +45,7 @@ RUN addgroup --system --gid 1001 nestjs && \
 
 COPY --from=builder --chown=nestjs:nestjs /app/deploy/node_modules ./node_modules
 COPY --from=builder --chown=nestjs:nestjs /app/apps/api/dist ./dist
+COPY --from=builder --chown=nestjs:nestjs /app/apps/api/drizzle ./drizzle
 
 USER nestjs
 
