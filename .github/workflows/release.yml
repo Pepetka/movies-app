@@ -40,10 +40,28 @@ jobs:
         id: changesets
         uses: changesets/action@v1
         with:
-          version: pnpm version-packages
-          publish: pnpm release
+          version: pnpm changeset version
           commit: 'chore: version packages'
           title: 'chore(release): version packages'
           createGithubReleases: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Check if versions were updated
+        id: version_check
+        run: |
+          # Проверяем что:
+          # 1. Нет changeset файлов (hasChangesets == false означает что они были обработаны)
+          # 2. Есть изменения в package.json или CHANGELOG.md внутри apps/ или packages/ (версии обновились)
+          if [ "${{ steps.changesets.outputs.hasChangesets }}" == "false" ] && \
+             git diff --name-only HEAD~1..HEAD | grep -qE '^(apps|packages)/.*/(package\.json|CHANGELOG\.md)$'; then
+            echo "versions_updated=true" >> $GITHUB_OUTPUT
+          else
+            echo "versions_updated=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create and push tags for versioned packages
+        if: steps.version_check.outputs.versions_updated == 'true'
+        run: |
+          pnpm changeset tag
+          git push --follow-tags

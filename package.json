@@ -14,7 +14,7 @@
     "changeset": "changeset",
     "changeset:add": "changeset add",
     "version-packages": "changeset version",
-    "release": "changeset tag && git push --follow-tags"
+    "release": "changeset tag"
   },
   "devDependencies": {
     "@changesets/cli": "^2.27.0",
