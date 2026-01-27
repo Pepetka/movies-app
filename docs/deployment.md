@@ -218,13 +218,20 @@ scp .env.example user@vps-ip:/opt/movies-app/.env
 
 1. Сборка Docker образов (API и Web)
 2. Push образов в GitHub Container Registry с тегами `latest` и SHA коммита
-3. SSH подключение к VPS
-4. Login в GHCR с использованием PAT
-5. Pull новых образов
-6. **Запуск database миграций** (если миграция fails → деплой прерывается)
-7. Перезапуск контейнеров с новыми образами
-8. Health checks для проверки работоспособности
-9. Очистка старых образов с label `project=movies-app`
+3. Checkout репозитория для доступа к конфигам
+4. **Синхронизация конфигурационных файлов** на VPS:
+   - `docker-compose.yml`
+   - `docker/nginx/` (nginx.conf и templates)
+   - **Note:** `.env` НЕ синхронизируется (обновляется вручную администратором)
+5. SSH подключение к VPS
+6. Login в GHCR с использованием PAT
+7. Pull новых образов
+8. Явный запуск PostgreSQL контейнера
+9. Ожидание готовности PostgreSQL (настраиваемый timeout через `POSTGRES_READY_TIMEOUT`)
+10. **Запуск database миграций** с логированием при ошибках (если миграция fails → деплой прерывается)
+11. Перезапуск контейнеров с новыми образами
+12. Health checks для проверки работоспособности
+13. Очистка старых образов с label `project=movies-app`
 
 ### Миграции базы данных
 

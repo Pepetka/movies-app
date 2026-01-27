@@ -32,7 +32,7 @@ cp .env.example .env
 # Отредактировать .env с вашими настройками
 
 # Запустить PostgreSQL (через Docker)
-docker compose -f docker-compose.dev.yml up -d db
+docker compose -f docker-compose.dev.yml up -d postgres
 
 # Запустить все приложения
 pnpm run dev
