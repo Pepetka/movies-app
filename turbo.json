@@ -16,5 +16,6 @@
       "persistent": true
     }
   },
-  "globalDependencies": ["**/.env.*local"]
+  "globalDependencies": ["**/.env.*local"],
+  "globalEnv": ["DATABASE_URL"]
 }
