@@ -18,11 +18,22 @@
 - Параллельное выполнение независимых jobs
 - Concurrency с `cancel-in-progress` для экономии минут
 
+### Release Workflow (`release.yml`)
+
+Запускается при push в `main` и управляет версиями через Changesets:
+- Если есть changeset-файлы — создаёт Release PR
+- Если versions уже обновлены — пушит git-теги для пакетов
+
 ### Deploy Workflow (`deploy.yml`)
 
-Запускается автоматически при merge в `main` или вручную через `workflow_dispatch`.
+Запускается автоматически после **успешного** Release workflow в `main` и только если на коммите есть теги,
+или вручную через `workflow_dispatch`.
 
 **Jobs:**
+
+0. **check-tags**
+   - Проверяет наличие git-тегов на коммите
+   - Останавливает деплой, если тегов нет (для автозапуска)
 
 1. **build-and-push**
    - Собирает Docker образы для API и Web
@@ -49,6 +60,7 @@
 |--------|----------|
 | `VPS_HOST` | IP адрес или домен VPS |
 | `VPS_USER` | SSH пользователь (ubuntu/root) |
+| `VPS_PORT` | SSH порт VPS (если нестандартный) |
 | `VPS_SSH_KEY` | Приватный SSH ключ (полное содержимое) |
 | `GHCR_USERNAME` | Ваш GitHub username |
 | `GHCR_PAT` | Personal Access Token с правами `read:packages` и `repo` |
@@ -128,6 +140,8 @@ git commit -m "feat: add new migration"
 1. GitHub → Actions → Deploy workflow
 2. Run workflow → выбрать `main`
 3. Run workflow
+
+Ручной запуск не требует наличия тегов на коммите.
 
 ## Troubleshooting
 

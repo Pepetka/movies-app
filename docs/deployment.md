@@ -128,9 +128,16 @@ docker compose exec nginx nginx -s reload
 - **Build** — сборка всех приложений
 - **Test** — unit и e2e тесты для API
 
+#### Release Workflow (Changesets)
+
+Автоматически запускается при push в `main`:
+
+1. Если есть changeset-файлы — создаёт Release PR (version bumps + CHANGELOG).
+2. Если changeset-файлов нет и версии уже обновлены — создаёт git-теги для пакетов и пушит их в репозиторий.
+
 #### Deploy Workflow (Production)
 
-Автоматически запускается при merge в `main`:
+Автоматически запускается после **успешного** Release workflow в `main` **и только если на коммите есть теги**:
 
 1. **Build and Push** — собирает Docker образы и отправляет в GitHub Container Registry
 2. **Deploy** — развёртывает на VPS через SSH
@@ -143,6 +150,7 @@ docker compose exec nginx nginx -s reload
 |--------|----------|--------------|
 | `VPS_HOST` | IP адрес или домен VPS | Из настроек VPS провайдера |
 | `VPS_USER` | SSH пользователь | Обычно `ubuntu`, `root` или custom |
+| `VPS_PORT` | SSH порт VPS | Если нестандартный, укажите явно |
 | `VPS_SSH_KEY` | Приватный SSH ключ | `cat ~/.ssh/id_rsa` (на локальной машине) |
 | `GHCR_USERNAME` | GitHub username для GHCR | Ваш GitHub username |
 | `GHCR_PAT` | GitHub Personal Access Token | См. инструкцию ниже |
@@ -214,7 +222,7 @@ scp .env.example user@vps-ip:/opt/movies-app/.env
 
 ### Процесс Deploy
 
-При merge в `main` автоматически происходит:
+После успешного Release workflow и появления тегов на коммите автоматически происходит:
 
 1. Сборка Docker образов (API и Web)
 2. Push образов в GitHub Container Registry с тегами `latest` и SHA коммита
@@ -290,7 +298,7 @@ docker compose up -d
 
 ### Ручной Deploy
 
-При необходимости можно запустить deploy вручную:
+При необходимости можно запустить deploy вручную (без требования наличия тегов):
 
 1. GitHub → Actions → Deploy workflow
 2. Run workflow → выбрать ветку main
@@ -325,6 +333,15 @@ docker compose logs db
 ```
 
 ### CI/CD проблемы
+
+#### "deploy workflow не запускается"
+
+**Причина:** на коммите нет git-тегов (deploy запускается только после успешного Release workflow и наличия тегов)
+
+**Решение:**
+1. Убедиться, что есть changeset и был смержен Release PR
+2. Проверить, что Release workflow успешно завершился и запушил теги
+3. Если нужен срочный деплой без тегов — запустить Deploy workflow вручную
 
 #### "failed to authorize: authentication required"
 
