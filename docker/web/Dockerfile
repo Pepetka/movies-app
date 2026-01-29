@@ -30,6 +30,9 @@ COPY packages/ui ./packages/ui
 COPY packages/typescript-config ./packages/typescript-config
 COPY packages/eslint-config ./packages/eslint-config
 
+ARG API_URL
+ENV API_URL=${API_URL}
+
 RUN pnpm run build --filter=@repo/ui && pnpm run build --filter=web
 
 RUN pnpm deploy --filter=web --prod /app/deploy
