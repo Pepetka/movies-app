@@ -1,5 +1,11 @@
 # web
 
+## 0.2.1
+
+### Patch Changes
+
+- c7adf40: - Fixed web envs
+
 ## 0.2.0
 
 ### Minor Changes
