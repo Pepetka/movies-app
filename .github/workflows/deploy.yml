@@ -92,6 +92,8 @@ jobs:
           tags: |
             ghcr.io/${{ env.IMAGE_NAME }}/web:latest
             ghcr.io/${{ env.IMAGE_NAME }}/web:${{ github.sha }}
+          build-args: |
+            API_URL=${{ secrets.API_URL }}
           labels: |
             project=movies-app
           cache-from: type=gha

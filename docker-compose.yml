@@ -48,7 +48,6 @@ services:
     restart: unless-stopped
     environment:
       NODE_ENV: ${NODE_ENV:-production}
-      API_URL: ${API_URL}
     depends_on:
       - api
     networks:
