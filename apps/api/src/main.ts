@@ -62,11 +62,9 @@ async function bootstrap() {
   app.enableShutdownHooks();
 
   if (env !== Environment.Production) {
-    const apiUrl = configService.getOrThrow<string>('API_URL');
     const config = new DocumentBuilder()
       .setTitle('Movies App API')
       .setDescription('REST API for Movies application')
-      .addServer(apiUrl)
       .addBearerAuth(
         {
           type: 'http',

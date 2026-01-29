@@ -17,5 +17,5 @@
     }
   },
   "globalDependencies": ["**/.env.*local"],
-  "globalEnv": ["DATABASE_URL"]
+  "globalEnv": ["DATABASE_URL", "MODE"]
 }

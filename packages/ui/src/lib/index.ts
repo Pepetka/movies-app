@@ -1,1 +1,1 @@
-export { default as CalloutCard } from './CalloutCard.svelte';
+export { default as HealthCheck } from './HealthCheck.svelte';

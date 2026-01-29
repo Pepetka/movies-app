@@ -122,7 +122,7 @@ if [ $STAGING -eq 1 ]; then
     STAGING_ARG="--staging"
 fi
 
-$DOCKER_COMPOSE run --rm certbot certonly --webroot \
+$DOCKER_COMPOSE run --rm --entrypoint "certbot" certbot certonly --webroot \
     -w /var/www/certbot \
     $STAGING_ARG \
     --email "$CERTBOT_EMAIL" \
