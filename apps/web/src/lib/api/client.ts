@@ -5,9 +5,8 @@ import {
 	logRequestFailure
 } from '$lib/utils/logger';
 import type { FetchOptions } from '$lib/types/health';
-import { PUBLIC_API_URL } from '$env/static/public';
 
-const BASE_URL = PUBLIC_API_URL;
+const BASE_URL = import.meta.env.API_URL;
 
 export async function apiFetch<T>(
 	endpoint: string,
