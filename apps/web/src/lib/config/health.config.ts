@@ -14,11 +14,7 @@ export const healthConfig = {
 	maxBackoffInterval: 300000,
 
 	// Logging
-	logLevel: (import.meta.env.MODE === 'production' ? 'warn' : 'info') as
-		| 'debug'
-		| 'info'
-		| 'warn'
-		| 'error'
+	logLevel: (__IS_PROD__ ? 'warn' : 'info') as 'debug' | 'info' | 'warn' | 'error'
 } as const;
 
 export type HealthConfig = typeof healthConfig;
