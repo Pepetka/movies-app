@@ -14,7 +14,7 @@ function getCurrentLogLevel(): LogLevel {
 		return envLevel as LogLevel;
 	}
 
-	return import.meta.env.MODE === 'production' ? 'warn' : 'info';
+	return __IS_PROD__ ? 'warn' : 'info';
 }
 
 function shouldLog(level: LogLevel): boolean {

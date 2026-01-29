@@ -6,7 +6,7 @@ import {
 } from '$lib/utils/logger';
 import type { FetchOptions } from '$lib/types/health';
 
-const BASE_URL = import.meta.env.API_URL;
+const BASE_URL = __API_URL__;
 
 export async function apiFetch<T>(
 	endpoint: string,
