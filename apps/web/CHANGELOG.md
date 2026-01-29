@@ -1,5 +1,11 @@
 # web
 
+## 0.2.2
+
+### Patch Changes
+
+- 5b62110: - fixed web envs
+
 ## 0.2.1
 
 ### Patch Changes
