@@ -431,3 +431,37 @@ docker compose logs db
    curl http://localhost/api/v1/health
    curl http://localhost/
    ```
+
+### SSL/Certbot проблемы
+
+#### "certbot: unauthorized / 403 на /.well-known/acme-challenge"
+
+**Причина:** Nginx не может читать файлы challenge из webroot (права/директория).
+
+**Решение:**
+1. Создать директории и выставить права:
+   ```bash
+   sudo mkdir -p /opt/movies-app/certbot/www/.well-known/acme-challenge
+   sudo chmod -R 755 /opt/movies-app/certbot
+   ```
+2. Проверить доступ снаружи:
+   ```bash
+   echo test | sudo tee /opt/movies-app/certbot/www/.well-known/acme-challenge/ping
+   curl -i http://yourdomain.com/.well-known/acme-challenge/ping
+   ```
+3. Повторить:
+   ```bash
+   ./scripts/init-letsencrypt.sh
+   ```
+
+#### "certbot: unauthorized / 500 на одном из IP"
+
+**Причина:** У домена несколько A-записей, Let’s Encrypt проверяет все, и один из IP отвечает ошибкой.
+
+**Решение:**
+1. Оставить только корректную A-запись для домена
+2. Дождаться обновления DNS
+3. Повторить:
+   ```bash
+   ./scripts/init-letsencrypt.sh
+   ```
