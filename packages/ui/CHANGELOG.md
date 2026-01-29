@@ -1,5 +1,12 @@
 # @repo/ui
 
+## 0.2.0
+
+### Minor Changes
+
+- 50c9de1: - Fixed environment configuration
+  - Added health check functionality
+
 ## 0.1.0
 
 ### Minor Changes
