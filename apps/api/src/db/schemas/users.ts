@@ -9,6 +9,7 @@ export const users = pgTable(
     name: varchar({ length: 256 }).notNull(),
     email: varchar({ length: 256 }).notNull(),
     passwordHash: varchar({ length: 256 }).notNull(),
+    refreshToken: varchar({ length: 256 }),
     ...timestamps,
   },
   (table) => [uniqueIndex('email_idx').on(table.email)],

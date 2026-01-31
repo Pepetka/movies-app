@@ -22,8 +22,6 @@ users ──┬── refresh_tokens
         ├── oauth_accounts
         │
         └── totp_secrets
-
-movies ──── movie_cache (TMDB metadata)
 ```
 
 ---
@@ -40,7 +38,7 @@ movies ──── movie_cache (TMDB metadata)
 | name | varchar(256), NOT NULL | Отображаемое имя |
 | email | varchar(256), NOT NULL, UNIQUE | Email для входа |
 | password_hash | varchar(256), NOT NULL | Хеш пароля (bcrypt) |
-| is_admin | boolean, NOT NULL, default false | Глобальный админ (для MVP) |
+| is_admin | boolean, NOT NULL, default false | Глобальный админ. @deprecated после Этапа 2, использовать group_members.role |
 
 **Индексы:**
 - `UNIQUE INDEX` на `email`
@@ -115,7 +113,7 @@ Refresh-токены для двухтокеновой JWT-схемы. Хран�
 | **id** | serial, PK | |
 | group_id | int, FK → groups.id, NOT NULL | |
 | user_id | int, FK → users.id, NOT NULL | |
-| role | enum('admin', 'member'), NOT NULL, default 'member' | Роль в группе (в MVP: admin / member) |
+| role | enum('admin', 'moderator', 'member'), NOT NULL, default 'member' | Роль в группе. MVP использует только admin/member, moderator добавляется на Этапе 3 |
 
 **Ограничения:**
 - `UNIQUE (group_id, user_id)` — пользователь не может быть дважды в одной группе
@@ -175,11 +173,11 @@ Refresh-токены для двухтокеновой JWT-схемы. Хран�
 
 ## Этап 3: Ролевая модель
 
-На этом этапе значение enum `role` в таблице `group_members` расширяется:
+Роли уже заданы в enum на этапе MVP, этот этап только добавляет бизнес-логику для использования `moderator` роли.
 
 **group_members.role:** `'admin'` | `'moderator'` | `'member'`
 
-Новых таблиц не добавляется — роли хранятся в существующей таблице `group_members`.
+Новых таблиц и миграций не требуется — все роли уже определены в схеме.
 
 ---
 
@@ -194,7 +192,7 @@ Refresh-токены для двухтокеновой JWT-схемы. Хран�
 | **id** | serial, PK | |
 | group_movie_id | int, FK → group_movies.id, NOT NULL | Фильм в конкретной группе |
 | user_id | int, FK → users.id, NOT NULL | Автор отзыва |
-| rating | smallint | Оценка (1-10) |
+| rating | smallint, NOT NULL | Оценка 1-10 |
 | comment | text | Текст отзыва (опционально) |
 
 **Ограничения:**
@@ -280,7 +278,7 @@ Refresh-токены для двухтокеновой JWT-схемы. Хран�
 |------|---------------|--------------------------|
 | **MVP** | users, refresh_tokens, movies, groups, group_members, group_movies | — |
 | **Этап 2** | invitations | — |
-| **Этап 3** | — | group_members.role: добавляется значение 'moderator' |
+| **Этап 3** | — | — (роли уже заданы в enum на MVP) |
 | **Этап 4** | reviews | — |
 | **Этап 5** | telegram_bindings | — |
 | **Этап 6** | oauth_accounts, totp_secrets | users: поле password_hash становится nullable (OAuth-only аккаунты) |
