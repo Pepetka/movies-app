@@ -59,10 +59,10 @@ export class UserRepository {
     return result !== null;
   }
 
-  async updateRefreshToken(id: number, token: string | null): Promise<void> {
+  async updateRefreshTokenHash(id: number, hash: string | null): Promise<void> {
     await this.db
       .update(users)
-      .set({ refreshToken: token, updatedAt: new Date() })
+      .set({ refreshTokenHash: hash, updatedAt: new Date() })
       .where(eq(users.id, id));
   }
 }

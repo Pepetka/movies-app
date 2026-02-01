@@ -1,24 +1,28 @@
-import { Expose } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
+import { Exclude } from 'class-transformer';
 
 export class UserResponseDto {
   @ApiProperty()
-  @Expose()
   id: number;
 
   @ApiProperty()
-  @Expose()
   name: string;
 
   @ApiProperty()
-  @Expose()
   email: string;
 
   @ApiProperty()
-  @Expose()
+  role: string;
+
+  @ApiProperty()
   createdAt: Date;
 
   @ApiProperty()
-  @Expose()
   updatedAt: Date;
+
+  @Exclude()
+  passwordHash: string;
+
+  @Exclude()
+  refreshTokenHash: string;
 }

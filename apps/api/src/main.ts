@@ -56,8 +56,16 @@ async function bootstrap() {
   await app.register(helmet, getHelmetConfig(env === Environment.Production));
   // @ts-expect-error Fastify plugin types are incompatible with NestFastifyApplication.register()
   await app.register(fastifyCookie, { secret });
+
   // @ts-expect-error Fastify plugin types are incompatible with NestFastifyApplication.register()
-  await app.register(csrf, { cookieOpts: { signed: true } });
+  await app.register(csrf, {
+    cookieOpts: {
+      httpOnly: true,
+      secure: configService.get('NODE_ENV') === Environment.Production,
+      sameSite: 'strict',
+      path: '/',
+    },
+  });
 
   app.enableShutdownHooks();
 
@@ -70,13 +78,18 @@ async function bootstrap() {
           type: 'http',
           scheme: 'bearer',
           bearerFormat: 'JWT',
+          description: 'Enter JWT access token',
         },
         'access-token',
       )
+      .addSecurityRequirements('access-token')
       .build();
     const documentFactory = () => SwaggerModule.createDocument(app, config);
     SwaggerModule.setup('api/docs', app, documentFactory, {
       jsonDocumentUrl: 'api/docs/json',
+      swaggerOptions: {
+        persistAuthorization: true,
+      },
     });
   }
 
