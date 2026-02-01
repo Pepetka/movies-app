@@ -3,8 +3,9 @@ import { ConfigModule } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
 import { Module } from '@nestjs/common';
 
-import { AuthGuard, AuthorGuard, RolesGuard } from '$common/guards';
+import { AuthGuard, AuthorGuard, RolesGuard, CsrfGuard } from '$common/guards';
 import { validate } from '$common/configs/validation';
+import { Environment } from '$common/configs';
 
 import { HealthModule } from './health/health.module';
 import { AuthModule } from './auth/auth.module';
@@ -12,9 +13,11 @@ import { UserModule } from './user/user.module';
 import { CsrfModule } from './csrf/csrf.module';
 import { DbModule } from './db/db.module';
 
+const isTest = process.env.NODE_ENV === Environment.Test;
+
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true, validate: validate }),
+    ConfigModule.forRoot({ isGlobal: true, validate }),
     ThrottlerModule.forRoot([
       {
         name: 'short',
@@ -39,10 +42,18 @@ import { DbModule } from './db/db.module';
     CsrfModule,
   ],
   providers: [
-    {
-      provide: APP_GUARD,
-      useClass: ThrottlerGuard,
-    },
+    ...(isTest
+      ? []
+      : [
+          {
+            provide: APP_GUARD,
+            useClass: ThrottlerGuard,
+          },
+          {
+            provide: APP_GUARD,
+            useClass: CsrfGuard,
+          },
+        ]),
     {
       provide: APP_GUARD,
       useClass: AuthGuard,

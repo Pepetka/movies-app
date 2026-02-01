@@ -20,7 +20,6 @@ import { FastifyReply } from 'fastify';
 import { CsrfProtected, Public, User } from '$common/decorators';
 import { Cookie } from '$common/decorators/cookie.decorator';
 import type { User as UserType } from '$db/schemas';
-import { CsrfGuard } from '$common/guards';
 import { THROTTLE } from '$common/configs';
 
 import {
@@ -103,7 +102,7 @@ export class AuthController {
   @CsrfProtected()
   @Post('refresh')
   @HttpCode(HttpStatus.OK)
-  @UseGuards(CsrfGuard, RefreshGuard)
+  @UseGuards(RefreshGuard)
   @Throttle(THROTTLE.auth.refresh)
   @ApiOperation({ summary: 'Refresh access token' })
   @ApiResponse({

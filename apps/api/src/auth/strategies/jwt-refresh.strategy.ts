@@ -4,8 +4,8 @@ import { ExtractJwt, Strategy } from 'passport-jwt';
 import { ConfigService } from '@nestjs/config';
 import type { FastifyRequest } from 'fastify';
 
-import { UserService } from '$src/user/user.service';
 import { REFRESH_COOKIE_NAME } from '$src/auth/auth.constants';
+import { UserService } from '$src/user/user.service';
 
 @Injectable()
 export class JwtRefreshStrategy extends PassportStrategy(
@@ -18,7 +18,8 @@ export class JwtRefreshStrategy extends PassportStrategy(
   ) {
     super({
       jwtFromRequest: ExtractJwt.fromExtractors([
-        (request: FastifyRequest) => request.cookies?.[REFRESH_COOKIE_NAME] ?? null,
+        (request: FastifyRequest) =>
+          request.cookies?.[REFRESH_COOKIE_NAME] ?? null,
       ]),
       ignoreExpiration: false,
       secretOrKey: configService.getOrThrow<string>('JWT_REFRESH_SECRET'),

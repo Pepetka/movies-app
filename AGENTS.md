@@ -11,9 +11,21 @@
 Run commands from the repo root with pnpm (workspace is pnpm-managed).
 - `pnpm dev`: run all dev tasks via Turborepo.
 - `pnpm build`: build all packages/apps.
-- `pnpm lint`, `pnpm lint:fix`, `pnpm format`, `pnpm check:types`: lint, auto-fix lint, format, and type-check across the workspace.
-- Target a single app with filters, e.g. `pnpm --filter web dev` or `pnpm --filter api start:dev`.
-- API-specific tests: `pnpm --filter api test`, `pnpm --filter api test:watch`, `pnpm --filter api test:cov`.
+
+### Code Quality
+- `pnpm lint`: ESLint check only
+- `pnpm lint:fix`: ESLint auto-fix only
+- `pnpm format`: Prettier format only
+- `pnpm check`: ESLint + type-check
+- `pnpm fix`: ESLint auto-fix + Prettier format (recommended order per Prettier docs)
+- `pnpm check:types`: type-check only
+
+### Tests
+- `pnpm test`: unit tests (workspace-wide, runs only where tests exist)
+- `pnpm test:unit`: unit tests
+- `pnpm test:e2e`: E2E tests
+- Target a single app with filters, e.g. `pnpm --filter web dev` or `pnpm --filter api test`.
+- API-specific: `pnpm --filter api test`, `pnpm --filter api test:watch`, `pnpm --filter api test:cov`.
 
 ## Coding Style & Naming Conventions
 - TypeScript is used across the repo.

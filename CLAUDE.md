@@ -29,17 +29,24 @@ pnpm run build
 pnpm run build --filter=web
 pnpm run build --filter=api
 
-# Linting and formatting
-pnpm run lint
-pnpm run format
-pnpm run check:types
+# Code quality
+pnpm run lint                # ESLint check only
+pnpm run lint:fix            # ESLint auto-fix only
+pnpm run format              # Prettier format only
+pnpm run check               # ESLint + type-check
+pnpm run fix                 # ESLint auto-fix + Prettier format
+pnpm run check:types         # Type-check only
 
-# API tests
-cd apps/api
-pnpm run test              # Unit tests
-pnpm run test:watch        # Watch mode
-pnpm run test:cov          # Coverage
-pnpm run test:e2e          # E2E tests
+# Tests (workspace-wide, runs only where tests exist)
+pnpm run test                # Unit tests
+pnpm run test:unit           # Unit tests
+pnpm run test:e2e            # E2E tests
+
+# API-specific tests (cd to apps/api first)
+pnpm run test                # Unit tests
+pnpm run test:watch          # Watch mode
+pnpm run test:cov            # Coverage
+pnpm run test:e2e            # E2E tests
 ```
 
 ## Architecture
