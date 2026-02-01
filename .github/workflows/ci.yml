@@ -147,6 +147,9 @@ jobs:
         run: pnpm --filter=api test:e2e
         env:
           NODE_ENV: test
+          PORT: 3000
+          WEB_URL: http://localhost:5173
+          API_URL: http://localhost:3000
           DATABASE_URL: postgresql://test_user:test_pass@localhost:5432/test_db
           JWT_ACCESS_SECRET: test-jwt-access-secret
           JWT_REFRESH_SECRET: test-jwt-refresh-secret
