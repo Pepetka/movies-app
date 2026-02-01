@@ -26,5 +26,8 @@ export const users = pgTable(
     refreshTokenHash: varchar({ length: 256 }),
     ...timestamps,
   },
-  (table) => [uniqueIndex('email_idx').on(table.email)],
+  (table) => [
+    uniqueIndex('email_idx').on(table.email),
+    uniqueIndex('refresh_token_hash_idx').on(table.refreshTokenHash),
+  ],
 );

@@ -1,6 +1,7 @@
 import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
+import { hashSync } from 'bcrypt';
 
 import { UserService } from '$src/user/user.service';
 import type { User } from '$db/schemas';
@@ -10,9 +11,8 @@ import { AuthRegisterDto } from './dto';
 type ExpiresUnits = 'd' | 'h' | 'm' | 's';
 export type Expires = `${number}${ExpiresUnits}`;
 
-// Dummy hash для constant-time сравнения (валидный bcrypt hash)
-const DUMMY_REFRESH_HASH =
-  '$2b$10$AAAAAAAAAAAAAAAAAAAAAA.AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA';
+// Dummy hash для constant-time сравнения (генерируется при старте)
+const DUMMY_REFRESH_HASH = hashSync('dummy-refresh-token', 10);
 
 @Injectable()
 export class AuthService {

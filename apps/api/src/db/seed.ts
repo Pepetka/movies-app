@@ -8,7 +8,7 @@ import { UserRole } from '$common/enums/user-role.enum';
 
 import { users } from './schemas/users';
 
-const SEED_ADMIN_EMAIL = 'admin@movies.local';
+const SEED_ADMIN_EMAIL = 'admin@example.com';
 const SEED_ADMIN_PASSWORD = 'SecurePass123!';
 
 async function seed() {
