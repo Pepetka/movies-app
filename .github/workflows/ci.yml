@@ -143,6 +143,11 @@ jobs:
           JWT_REFRESH_EXPIRATION: 7d
           COOKIE_SECRET: test-secret-key-not-for-production
 
+      - name: Run migrations
+        run: pnpm --filter=api db:migrate
+        env:
+          DATABASE_URL: postgresql://test_user:test_pass@localhost:5432/test_db
+
       - name: Run e2e tests
         run: pnpm --filter=api test:e2e
         env:

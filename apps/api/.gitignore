@@ -19,5 +19,3 @@ coverage
 # OS
 .DS_Store
 
-# Drizzle metadata
-drizzle/meta/
