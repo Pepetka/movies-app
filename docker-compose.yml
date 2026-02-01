@@ -10,7 +10,11 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-movies} -d ${POSTGRES_DB:-movies_db}"]
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${POSTGRES_USER:-movies} -d ${POSTGRES_DB:-movies_db}",
+        ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -32,6 +36,10 @@ services:
       WEB_URL: ${WEB_URL}
       API_URL: ${API_URL}
       COOKIE_SECRET: ${COOKIE_SECRET:?COOKIE_SECRET is required}
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:?JWT_ACCESS_SECRET is required}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:?JWT_REFRESH_SECRET is required}
+      JWT_ACCESS_EXPIRATION: ${JWT_ACCESS_EXPIRATION:-15m}
+      JWT_REFRESH_EXPIRATION: ${JWT_REFRESH_EXPIRATION:-7d}
     depends_on:
       postgres:
         condition: service_healthy
