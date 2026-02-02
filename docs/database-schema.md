@@ -6,297 +6,249 @@
 
 ---
 
-## Диаграмма связей
+## Текущая реализация (feat/auth)
+
+На текущий момент реализована базовая схема для аутентификации и управления пользователями.
+
+## Диаграмма связей (текущее состояние)
 
 ```
-users ──┬── refresh_tokens
+users ──┬── (future: group_members > groups > group_movies > movies)
         │
-        ├──< group_members >──── groups ──┬── group_movies ──── movies
-        │                                 │
-        │                                 ├── invitations
-        │                                 │
-        │                                 └── telegram_bindings
+        ├── (future: reviews)
         │
-        ├── reviews ──────────────────────── group_movies
+        ├── (future: oauth_accounts)
         │
-        ├── oauth_accounts
-        │
-        └── totp_secrets
+        └── (future: totp_secrets)
+
+movies (placeholder)
 ```
 
 ---
 
-## MVP
+## Реализованные таблицы
 
 ### users
 
-Пользователи приложения.
+Пользователи приложения с встроенным refresh-токеном.
 
-| Поле | Тип | Описание |
-|------|-----|----------|
-| **id** | serial, PK | |
-| name | varchar(256), NOT NULL | Отображаемое имя |
-| email | varchar(256), NOT NULL, UNIQUE | Email для входа |
-| password_hash | varchar(256), NOT NULL | Хеш пароля (bcrypt) |
-| is_admin | boolean, NOT NULL, default false | Глобальный админ. @deprecated после Этапа 2, использовать group_members.role |
+| Поле               | Тип                                             | Описание                                                    |
+| ------------------ | ----------------------------------------------- | ----------------------------------------------------------- |
+| **id**             | serial, PK                                      |                                                             |
+| name               | varchar(256), NOT NULL                          | Отображаемое имя                                            |
+| email              | varchar(256), NOT NULL, UNIQUE                  | Email для входа                                             |
+| password_hash      | varchar(256), NOT NULL                          | Хеш пароля (bcrypt, 12 rounds)                              |
+| role               | enum('USER', 'ADMIN'), NOT NULL, default 'USER' | Роль пользователя                                           |
+| refresh_token_hash | varchar(256), UNIQUE                            | Хеш текущего refresh-токена (null если нет активной сессии) |
+| created_at         | timestamp, NOT NULL, default now()              | Дата создания                                               |
+| updated_at         | timestamp, NOT NULL, default now()              | Дата обновления                                             |
 
 **Индексы:**
+
 - `UNIQUE INDEX` на `email`
+- `UNIQUE INDEX` на `refresh_token_hash`
 
----
+**Примечания:**
 
-### refresh_tokens
-
-Refresh-токены для двухтокеновой JWT-схемы. Хранятся в БД для возможности отзыва.
-
-| Поле | Тип | Описание |
-|------|-----|----------|
-| **id** | uuid, PK | |
-| user_id | int, FK → users.id, NOT NULL | Владелец токена |
-| token_hash | varchar(256), NOT NULL | Хеш refresh-токена |
-| expires_at | timestamp, NOT NULL | Срок действия |
-| revoked | boolean, NOT NULL, default false | Отозван ли токен |
-| user_agent | varchar(512) | Браузер/устройство |
-| ip_address | varchar(45) | IP при выдаче |
-
-**Индексы:**
-- `INDEX` на `user_id`
-- `INDEX` на `token_hash`
-- `INDEX` на `expires_at` (для очистки устаревших)
+- Refresh-токен хранится непосредственно в таблице users (один активный токен на пользователя)
+- При logout или refresh токен перезаписывается (rotation)
 
 ---
 
 ### movies
 
-Фильмы, добавленные в систему. Одна запись на фильм — если один и тот же фильм добавлен в несколько групп, запись в `movies` одна, связи через `group_movies`.
+Заглушка для будущей функциональности фильмов.
 
-| Поле | Тип | Описание |
-|------|-----|----------|
-| **id** | serial, PK | |
-| external_id | varchar(255), NOT NULL, UNIQUE | ID фильма в TMDB |
-| title | varchar(255), NOT NULL | Название фильма |
-| original_title | varchar(255) | Оригинальное название |
-| overview | text | Описание/синопсис |
-| poster_path | varchar(255) | Путь к постеру (TMDB) |
-| release_date | date | Дата выхода |
-| vote_average | numeric(3,1) | Средний рейтинг TMDB |
+| Поле        | Тип                                | Описание                        |
+| ----------- | ---------------------------------- | ------------------------------- |
+| **id**      | serial, PK                         |                                 |
+| external_id | varchar(255), NOT NULL, UNIQUE     | ID фильма во внешнем API (TMDB) |
+| title       | varchar(255), NOT NULL             | Название фильма                 |
+| created_at  | timestamp, NOT NULL, default now() |                                 |
+| updated_at  | timestamp, NOT NULL, default now() |                                 |
 
 **Индексы:**
+
 - `UNIQUE INDEX` на `external_id`
-- `INDEX` на `title`
 
 ---
 
+## Планируемые таблицы (согласно product-roadmap.md)
+
 ### groups
 
-Группы пользователей. В MVP — одна группа, в дальнейшем — множество.
+Группы пользователей для совместного просмотра фильмов.
 
-| Поле | Тип | Описание |
-|------|-----|----------|
-| **id** | serial, PK | |
-| name | varchar(256), NOT NULL | Название группы |
-| description | text | Описание |
-| avatar_url | varchar(512) | URL аватара группы |
-| owner_id | int, FK → users.id, NOT NULL | Создатель / владелец |
-
-**Индексы:**
-- `INDEX` на `owner_id`
+| Поле        | Тип                                | Описание             |
+| ----------- | ---------------------------------- | -------------------- |
+| **id**      | serial, PK                         |                      |
+| name        | varchar(256), NOT NULL             | Название группы      |
+| description | text                               | Описание             |
+| avatar_url  | varchar(512)                       | URL аватара группы   |
+| owner_id    | int, FK → users.id, NOT NULL       | Создатель / владелец |
+| created_at  | timestamp, NOT NULL, default now() |                      |
+| updated_at  | timestamp, NOT NULL, default now() |                      |
 
 ---
 
 ### group_members
 
-Связь пользователей с группами (many-to-many). Определяет, кто состоит в какой группе.
+Связь пользователей с группами (many-to-many) с ролями.
 
-| Поле | Тип | Описание |
-|------|-----|----------|
-| **id** | serial, PK | |
-| group_id | int, FK → groups.id, NOT NULL | |
-| user_id | int, FK → users.id, NOT NULL | |
-| role | enum('admin', 'moderator', 'member'), NOT NULL, default 'member' | Роль в группе. MVP использует только admin/member, moderator добавляется на Этапе 3 |
+| Поле       | Тип                                                              | Описание      |
+| ---------- | ---------------------------------------------------------------- | ------------- |
+| **id**     | serial, PK                                                       |               |
+| group_id   | int, FK → groups.id, NOT NULL                                    |               |
+| user_id    | int, FK → users.id, NOT NULL                                     |               |
+| role       | enum('admin', 'moderator', 'member'), NOT NULL, default 'member' | Роль в группе |
+| created_at | timestamp, NOT NULL, default now()                               |               |
+| updated_at | timestamp, NOT NULL, default now()                               |               |
 
 **Ограничения:**
-- `UNIQUE (group_id, user_id)` — пользователь не может быть дважды в одной группе
 
-**Индексы:**
-- `INDEX` на `group_id`
-- `INDEX` на `user_id`
+- `UNIQUE (group_id, user_id)`
 
 ---
 
 ### group_movies
 
-Связь фильмов с группами. Хранит статус фильма в конкретной группе и дату просмотра.
+Связь фильмов с группами, статусы и даты просмотра.
 
-| Поле | Тип | Описание |
-|------|-----|----------|
-| **id** | serial, PK | |
-| group_id | int, FK → groups.id, NOT NULL | |
-| movie_id | int, FK → movies.id, NOT NULL | |
-| added_by | int, FK → users.id, NOT NULL | Кто добавил фильм |
-| status | enum('tracking', 'planned', 'watched'), NOT NULL, default 'tracking' | Статус фильма в группе |
-| planned_date | timestamp | Дата запланированного просмотра |
-| watched_date | timestamp | Дата фактического просмотра |
+| Поле         | Тип                                                                  | Описание                        |
+| ------------ | -------------------------------------------------------------------- | ------------------------------- |
+| **id**       | serial, PK                                                           |                                 |
+| group_id     | int, FK → groups.id, NOT NULL                                        |                                 |
+| movie_id     | int, FK → movies.id, NOT NULL                                        |                                 |
+| added_by     | int, FK → users.id, NOT NULL                                         | Кто добавил фильм               |
+| status       | enum('tracking', 'planned', 'watched'), NOT NULL, default 'tracking' | Статус фильма                   |
+| planned_date | timestamp                                                            | Дата запланированного просмотра |
+| watched_date | timestamp                                                            | Дата фактического просмотра     |
+| created_at   | timestamp, NOT NULL, default now()                                   |                                 |
+| updated_at   | timestamp, NOT NULL, default now()                                   |                                 |
 
 **Ограничения:**
-- `UNIQUE (group_id, movie_id)` — один фильм в группе не дублируется
 
-**Индексы:**
-- `INDEX` на `group_id`
-- `INDEX` на `(group_id, status)` — фильтрация по статусу внутри группы
-- `INDEX` на `planned_date` — для напоминаний (Telegram бот)
+- `UNIQUE (group_id, movie_id)`
 
 ---
-
-## Этап 2: Многопользовательские группы
 
 ### invitations
 
-Пригласительные ссылки в группу.
+Пригласительные ссылки в группу (Этап 2).
 
-| Поле | Тип | Описание |
-|------|-----|----------|
-| **id** | uuid, PK | |
-| group_id | int, FK → groups.id, NOT NULL | В какую группу |
-| created_by | int, FK → users.id, NOT NULL | Кто создал ссылку |
-| code | varchar(64), NOT NULL, UNIQUE | Уникальный код приглашения |
-| max_uses | int | Макс. число использований (NULL = безлимит) |
-| use_count | int, NOT NULL, default 0 | Сколько раз использована |
-| expires_at | timestamp | Когда истекает (NULL = бессрочно) |
-| is_active | boolean, NOT NULL, default true | Активна ли ссылка |
-
-**Индексы:**
-- `UNIQUE INDEX` на `code`
-- `INDEX` на `group_id`
+| Поле       | Тип                                | Описание                              |
+| ---------- | ---------------------------------- | ------------------------------------- |
+| **id**     | uuid, PK                           |                                       |
+| group_id   | int, FK → groups.id, NOT NULL      |                                       |
+| created_by | int, FK → users.id, NOT NULL       | Кто создал ссылку                     |
+| code       | varchar(64), NOT NULL, UNIQUE      | Уникальный код                        |
+| max_uses   | int                                | Макс. использований (NULL = безлимит) |
+| use_count  | int, NOT NULL, default 0           | Сколько использована                  |
+| expires_at | timestamp                          | Когда истекает (NULL = бессрочно)     |
+| is_active  | boolean, NOT NULL, default true    | Активна ли                            |
+| created_at | timestamp, NOT NULL, default now() |                                       |
+| updated_at | timestamp, NOT NULL, default now() |                                       |
 
 ---
-
-## Этап 3: Ролевая модель
-
-Роли уже заданы в enum на этапе MVP, этот этап только добавляет бизнес-логику для использования `moderator` роли.
-
-**group_members.role:** `'admin'` | `'moderator'` | `'member'`
-
-Новых таблиц и миграций не требуется — все роли уже определены в схеме.
-
----
-
-## Этап 4: Оценки и отзывы
 
 ### reviews
 
-Оценки и текстовые отзывы пользователей на фильмы.
+Оценки и отзывы (Этап 4).
 
-| Поле | Тип | Описание |
-|------|-----|----------|
-| **id** | serial, PK | |
-| group_movie_id | int, FK → group_movies.id, NOT NULL | Фильм в конкретной группе |
-| user_id | int, FK → users.id, NOT NULL | Автор отзыва |
-| rating | smallint, NOT NULL | Оценка 1-10 |
-| comment | text | Текст отзыва (опционально) |
+| Поле           | Тип                                 | Описание     |
+| -------------- | ----------------------------------- | ------------ |
+| **id**         | serial, PK                          |              |
+| group_movie_id | int, FK → group_movies.id, NOT NULL |              |
+| user_id        | int, FK → users.id, NOT NULL        | Автор        |
+| rating         | smallint, NOT NULL                  | Оценка 1-10  |
+| comment        | text                                | Текст отзыва |
+| created_at     | timestamp, NOT NULL, default now()  |              |
+| updated_at     | timestamp, NOT NULL, default now()  |              |
 
 **Ограничения:**
-- `UNIQUE (group_movie_id, user_id)` — один отзыв от пользователя на фильм в группе
+
+- `UNIQUE (group_movie_id, user_id)`
 - `CHECK (rating >= 1 AND rating <= 10)`
 
-**Индексы:**
-- `INDEX` на `group_movie_id`
-- `INDEX` на `user_id`
-
 ---
-
-## Этап 5: Telegram бот
 
 ### telegram_bindings
 
-Привязка Telegram-чатов к группам в приложении.
+Привязка Telegram бота к группам (Этап 5).
 
-| Поле | Тип | Описание |
-|------|-----|----------|
-| **id** | serial, PK | |
-| group_id | int, FK → groups.id, NOT NULL | |
-| telegram_chat_id | bigint, NOT NULL | ID чата в Telegram |
-| bound_by | int, FK → users.id, NOT NULL | Кто привязал |
-| bind_code | varchar(64), UNIQUE | Код привязки (обнуляется после использования) |
-| notify_enabled | boolean, NOT NULL, default true | Включены ли напоминания |
-| notify_time | time, default '10:00' | Время отправки напоминаний |
+| Поле             | Тип                                | Описание             |
+| ---------------- | ---------------------------------- | -------------------- |
+| **id**           | serial, PK                         |                      |
+| group_id         | int, FK → groups.id, NOT NULL      |                      |
+| telegram_chat_id | bigint, NOT NULL                   | ID чата в Telegram   |
+| bound_by         | int, FK → users.id, NOT NULL       | Кто привязал         |
+| bind_code        | varchar(64), UNIQUE                | Код привязки         |
+| notify_enabled   | boolean, NOT NULL, default true    | Напоминания включены |
+| notify_time      | time, default '10:00'              | Время напоминаний    |
+| created_at       | timestamp, NOT NULL, default now() |                      |
+| updated_at       | timestamp, NOT NULL, default now() |                      |
 
 **Ограничения:**
-- `UNIQUE (group_id, telegram_chat_id)`
 
-**Индексы:**
-- `INDEX` на `group_id`
-- `INDEX` на `telegram_chat_id`
-- `INDEX` на `bind_code`
+- `UNIQUE (group_id, telegram_chat_id)`
 
 ---
 
-## Этап 6: Улучшение безопасности
-
 ### oauth_accounts
 
-Привязанные OAuth-провайдеры к аккаунтам пользователей.
+OAuth провайдеры (Этап 6).
 
-| Поле | Тип | Описание |
-|------|-----|----------|
-| **id** | serial, PK | |
-| user_id | int, FK → users.id, NOT NULL | |
-| provider | varchar(32), NOT NULL | Провайдер (google, github, yandex, vk) |
-| provider_account_id | varchar(256), NOT NULL | ID пользователя у провайдера |
-| email | varchar(256) | Email от провайдера |
+| Поле                | Тип                                | Описание             |
+| ------------------- | ---------------------------------- | -------------------- |
+| **id**              | serial, PK                         |                      |
+| user_id             | int, FK → users.id, NOT NULL       |                      |
+| provider            | varchar(32), NOT NULL              | google, github, etc. |
+| provider_account_id | varchar(256), NOT NULL             | ID у провайдера      |
+| email               | varchar(256)                       | Email от провайдера  |
+| created_at          | timestamp, NOT NULL, default now() |                      |
+| updated_at          | timestamp, NOT NULL, default now() |                      |
 
 **Ограничения:**
-- `UNIQUE (provider, provider_account_id)` — один аккаунт провайдера привязан один раз
-- `UNIQUE (user_id, provider)` — один провайдер на пользователя
 
-**Индексы:**
-- `INDEX` на `user_id`
+- `UNIQUE (provider, provider_account_id)`
+- `UNIQUE (user_id, provider)`
 
 ---
 
 ### totp_secrets
 
-Данные для двухфакторной аутентификации (TOTP).
+Двухфакторная аутентификация (Этап 6).
 
-| Поле | Тип | Описание |
-|------|-----|----------|
-| **id** | serial, PK | |
-| user_id | int, FK → users.id, NOT NULL, UNIQUE | |
-| secret | varchar(256), NOT NULL | Зашифрованный TOTP-секрет |
-| is_enabled | boolean, NOT NULL, default false | Активирован ли 2FA |
-| recovery_codes | text | Зашифрованные резервные коды (JSON-массив) |
-| verified_at | timestamp | Когда пользователь подтвердил настройку |
-
-**Индексы:**
-- `UNIQUE INDEX` на `user_id`
+| Поле           | Тип                                  | Описание              |
+| -------------- | ------------------------------------ | --------------------- |
+| **id**         | serial, PK                           |                       |
+| user_id        | int, FK → users.id, NOT NULL, UNIQUE |                       |
+| secret         | varchar(256), NOT NULL               | Зашифрованный секрет  |
+| is_enabled     | boolean, NOT NULL, default false     | Активирован ли        |
+| recovery_codes | text                                 | Резервные коды (JSON) |
+| verified_at    | timestamp                            | Когда подтверждён     |
+| created_at     | timestamp, NOT NULL, default now()   |                       |
+| updated_at     | timestamp, NOT NULL, default now()   |                       |
 
 ---
 
 ## Сводка по этапам
 
-| Этап | Новые таблицы | Изменения в существующих |
-|------|---------------|--------------------------|
-| **MVP** | users, refresh_tokens, movies, groups, group_members, group_movies | — |
-| **Этап 2** | invitations | — |
-| **Этап 3** | — | — (роли уже заданы в enum на MVP) |
-| **Этап 4** | reviews | — |
-| **Этап 5** | telegram_bindings | — |
-| **Этап 6** | oauth_accounts, totp_secrets | users: поле password_hash становится nullable (OAuth-only аккаунты) |
+| Этап             | Новые таблицы                       | Изменения в существующих                     |
+| ---------------- | ----------------------------------- | -------------------------------------------- |
+| **Реализовано**  | users, movies                       | —                                            |
+| **Этап 1 (MVP)** | groups, group_members, group_movies | —                                            |
+| **Этап 2**       | invitations                         | —                                            |
+| **Этап 3**       | —                                   | — (роли уже в group_members)                 |
+| **Этап 4**       | reviews                             | —                                            |
+| **Этап 5**       | telegram_bindings                   | —                                            |
+| **Этап 6**       | oauth_accounts, totp_secrets        | users: password_hash nullable для OAuth-only |
 
 ---
 
-## Каскадное удаление
+## Примечания по текущей реализации
 
-| Родительская таблица | Дочерняя таблица | Поведение при удалении |
-|---------------------|------------------|----------------------|
-| users | refresh_tokens | CASCADE |
-| users | group_members | CASCADE |
-| users | reviews | CASCADE |
-| users | oauth_accounts | CASCADE |
-| users | totp_secrets | CASCADE |
-| groups | group_members | CASCADE |
-| groups | group_movies | CASCADE |
-| groups | invitations | CASCADE |
-| groups | telegram_bindings | CASCADE |
-| movies | group_movies | CASCADE |
-| group_movies | reviews | CASCADE |
+1. **Refresh Tokens**: Хранятся в таблице users как refresh_token_hash, не отдельная таблица
+2. **Роли**: Глобальная роль в users (USER/ADMIN) отличается от ролей в group_members
+3. **Movies**: Текущая таблица — placeholder, будет расширена при интеграции с TMDB API
+4. **Миграции**: Генерируются через Drizzle Kit, хранятся в `apps/api/drizzle/`

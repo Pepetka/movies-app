@@ -1,98 +1,237 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Movies App API
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+NestJS backend для Movies App с Fastify адаптером, JWT аутентификацией и Drizzle ORM.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## Стек технологий
 
-## Description
+- **Framework:** NestJS 11
+- **Adapter:** Fastify
+- **Database:** PostgreSQL + Drizzle ORM
+- **Authentication:** JWT (access + refresh tokens)
+- **Validation:** class-validator + class-transformer
+- **Testing:** Jest
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
-
-## Project setup
+## Локальная разработка
 
 ```bash
-$ pnpm install
+# Установить зависимости
+pnpm install
+
+# Запустить PostgreSQL (через Docker из корня проекта)
+pnpm run db:run
+
+# Настроить переменные окружения
+cp .env.example .env
+# Отредактировать .env
+
+# Применить миграции
+pnpm run db:migrate
+
+# Создать администратора
+ADMIN_EMAIL="admin@example.com" ADMIN_PASSWORD="SecurePass123!" pnpm run db:seed
+
+# Development режим
+pnpm run start:dev
+
+# Production режим
+pnpm run build
+pnpm run start:prod
 ```
 
-## Compile and run the project
+API будет доступен на http://localhost:8080
+
+Swagger документация: http://localhost:8080/api/docs
+
+## Команды
 
 ```bash
-# development
-$ pnpm run start
+# Разработка
+pnpm run start              # Запуск
+pnpm run start:dev          # Watch режим
+pnpm run start:debug        # Debug режим
 
-# watch mode
-$ pnpm run start:dev
+# Сборка
+pnpm run build              # Собрать проект
+pnpm run start:prod         # Запустить production сборку
 
-# production mode
-$ pnpm run start:prod
+# Тесты
+pnpm run test               # Unit тесты
+pnpm run test:watch         # Watch режим
+pnpm run test:cov           # Покрытие
+pnpm run test:e2e           # E2E тесты
+
+# База данных
+pnpm run db:generate        # Сгенерировать миграции
+pnpm run db:migrate         # Применить миграции
+pnpm run db:seed            # Создать администратора
+pnpm run db:grant-admin     # Назначить роль админа
+
+# Линтинг
+pnpm run lint               # Проверить код
+pnpm run lint:fix           # Исправить автоматически
 ```
 
-## Run tests
+## Архитектура
+
+### Модули
+
+```
+src/
+├── main.ts                 # Bootstrap приложения
+├── app.module.ts           # Корневой модуль
+│
+├── auth/                   # Аутентификация
+│   ├── auth.controller.ts  # Endpoints: register, login, logout, refresh
+│   ├── auth.service.ts     # Business logic
+│   ├── auth.constants.ts   # Константы
+│   ├── guards/             # AuthGuard, RefreshGuard
+│   ├── strategies/         # JWT стратегии
+│   ├── dto/                # DTOs для запросов/ответов
+│   └── types/              # TypeScript типы
+│
+├── user/                   # Пользователи
+│   ├── user.controller.ts  # CRUD endpoints
+│   ├── user.service.ts     # Business logic
+│   ├── user.repository.ts  # Database operations
+│   └── dto/                # User DTOs
+│
+├── health/                 # Health check
+│   ├── health.controller.ts
+│   ├── health.service.ts
+│   └── dto/
+│
+├── csrf/                   # CSRF защита
+│   ├── csrf.controller.ts
+│   └── dto/
+│
+├── db/                     # Database
+│   ├── db.module.ts
+│   ├── schemas/            # Drizzle схемы
+│   ├── migrate.ts          # Миграции
+│   ├── seed.ts             # Seeder
+│   └── grant-admin.ts      # Grant admin utility
+│
+└── common/                 # Общие утилиты
+    ├── configs/            # Validation, throttle, helmet
+    ├── decorators/         # @Public, @Roles, @Author, @Cookies
+    ├── guards/             # AuthGuard, RolesGuard, AuthorGuard, CsrfGuard
+    ├── exceptions/         # Custom exceptions
+    └── validators/         # Custom validators
+```
+
+## API Endpoints
+
+### Auth
 
 ```bash
-# unit tests
-$ pnpm run test
-
-# e2e tests
-$ pnpm run test:e2e
-
-# test coverage
-$ pnpm run test:cov
+POST /api/v1/auth/register   # Регистрация (public)
+POST /api/v1/auth/login      # Вход (public, throttled)
+POST /api/v1/auth/logout     # Выход (authenticated)
+POST /api/v1/auth/refresh    # Обновить токен (public, throttled)
 ```
 
-## Deployment
-
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+### Users
 
 ```bash
-$ pnpm install -g @nestjs/mau
-$ mau deploy
+GET    /api/v1/users         # Список пользователей (admin only)
+GET    /api/v1/users/me      # Текущий пользователь (authenticated)
+GET    /api/v1/users/:id     # Пользователь по ID
+PATCH  /api/v1/users/:id     # Обновить (owner or admin)
+DELETE /api/v1/users/:id     # Удалить (owner or admin)
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+### Health
 
-## Resources
+```bash
+GET /api/v1/health           # Health check (public)
+```
 
-Check out a few resources that may come in handy when working with NestJS:
+### CSRF
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+```bash
+GET /api/v1/csrf/token       # CSRF токен (public)
+```
 
-## Support
+## Guards
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+Guuards выполняются в порядке (определено в app.module.ts):
 
-## Stay in touch
+1. **ThrottlerGuard** - Rate limiting (disabled in test)
+2. **CsrfGuard** - CSRF protection (disabled in test)
+3. **AuthGuard** - JWT validation (bypass with @Public())
+4. **RolesGuard** - Role-based access (@Roles('admin'))
+5. **AuthorGuard** - Resource ownership (@Author())
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+### Rate Limiting
 
-## License
+- **short:** 3 requests / 1 second (auth endpoints)
+- **medium:** 20 requests / 10 seconds (refresh tokens)
+- **long:** 100 requests / 60 seconds (general API)
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+## Переменные окружения
+
+| Переменная               | Описание                            | Default     |
+| ------------------------ | ----------------------------------- | ----------- |
+| `NODE_ENV`               | development, production, test       | development |
+| `PORT`                   | Порт API                            | 8080        |
+| `DATABASE_URL`           | PostgreSQL connection string        | -           |
+| `WEB_URL`                | Frontend URL для CORS               | -           |
+| `API_URL`                | API URL                             | -           |
+| `COOKIE_SECRET`          | Cookie signing (min 32 chars)       | -           |
+| `JWT_ACCESS_SECRET`      | Access token secret (min 32 chars)  | -           |
+| `JWT_REFRESH_SECRET`     | Refresh token secret (min 32 chars) | -           |
+| `JWT_ACCESS_EXPIRATION`  | Access token TTL                    | 15m         |
+| `JWT_REFRESH_EXPIRATION` | Refresh token TTL                   | 7d          |
+| `BCRYPT_ROUNDS`          | Bcrypt rounds                       | 12          |
+
+## Тестирование
+
+```bash
+# Unit тесты
+pnpm run test
+
+# E2E тесты
+pnpm run test:e2e
+
+# Покрытие
+pnpm run test:cov
+```
+
+## Миграции базы данных
+
+### Генерация миграций
+
+```bash
+# Нужна доступная PostgreSQL БД
+DATABASE_URL="postgres://user:pass@localhost:5432/db" pnpm run db:generate
+```
+
+### Применение миграций
+
+```bash
+pnpm run db:migrate
+```
+
+## Административные скрипты
+
+### Создать администратора
+
+```bash
+# С кастомными данными
+ADMIN_EMAIL="admin@example.com" ADMIN_PASSWORD="SecurePass123!" pnpm run db:seed
+
+# С дефолтными данными (admin@example.com / SecurePass123!)
+pnpm run db:seed
+```
+
+> **Важно:** Скрипт создаёт пользователя только если он не существует. Без указания `ADMIN_EMAIL` и `ADMIN_PASSWORD` используются дефолтные значения.
+
+### Назначить роль админа существующему пользователю
+
+```bash
+ADMIN_EMAIL="user@example.com" pnpm run db:grant-admin
+```
+
+## Лицензия
+
+MIT

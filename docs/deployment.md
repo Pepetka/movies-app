@@ -28,7 +28,7 @@ cp .env.example .env
 | Переменная          | Описание                                  | Пример                                  |
 | ------------------- | ----------------------------------------- | --------------------------------------- |
 | `NODE_ENV`          | Окружение                                 | `production`                            |
-| `PORT`              | Порт API сервера                          | `3000`                                  |
+| `PORT`              | Порт API сервера                          | `8080`                                  |
 | `WEB_URL`           | URL фронтенда                             | `https://yourdomain.com`                |
 | `API_URL`           | URL API                                   | `https://yourdomain.com/api`            |
 | `COOKIE_SECRET`     | Секрет для cookies (мин. 32 символа)      | см. ниже                                |
