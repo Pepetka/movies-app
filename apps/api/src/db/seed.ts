@@ -8,8 +8,8 @@ import { UserRole } from '$common/enums/user-role.enum';
 
 import { users } from './schemas/users';
 
-const SEED_ADMIN_EMAIL = 'admin@example.com';
-const SEED_ADMIN_PASSWORD = 'SecurePass123!';
+const DEFAULT_ADMIN_EMAIL = 'admin@example.com';
+const DEFAULT_ADMIN_PASSWORD = 'SecurePass123!';
 
 async function seed() {
   const connectionString = process.env.DATABASE_URL;
@@ -17,33 +17,36 @@ async function seed() {
     throw new Error('DATABASE_URL is not set');
   }
 
+  const adminEmail = process.env.ADMIN_EMAIL || DEFAULT_ADMIN_EMAIL;
+  const adminPassword = process.env.ADMIN_PASSWORD || DEFAULT_ADMIN_PASSWORD;
+
   const client = postgres(connectionString);
   const db = drizzle(client, { casing: 'snake_case' });
 
-  const passwordHash = await hash(SEED_ADMIN_PASSWORD, 12);
+  const passwordHash = await hash(adminPassword, 12);
 
   const existingAdmin = await db
     .select()
     .from(users)
-    .where(eq(users.email, SEED_ADMIN_EMAIL))
+    .where(eq(users.email, adminEmail))
     .limit(1);
 
   if (existingAdmin.length > 0) {
-    console.log('Admin user already exists:', SEED_ADMIN_EMAIL);
+    console.log('Admin user already exists:', adminEmail);
     await client.end();
     return;
   }
 
   await db.insert(users).values({
     name: 'Admin',
-    email: SEED_ADMIN_EMAIL,
+    email: adminEmail,
     passwordHash,
     role: UserRole.ADMIN,
   });
 
   console.log('Admin user created successfully');
-  console.log('Email:', SEED_ADMIN_EMAIL);
-  console.log('Password:', SEED_ADMIN_PASSWORD);
+  console.log('Email:', adminEmail);
+  console.log('Password:', adminPassword);
 
   await client.end();
 }

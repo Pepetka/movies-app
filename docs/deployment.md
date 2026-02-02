@@ -25,20 +25,20 @@ cp .env.example .env
 
 Отредактируйте `.env` файл:
 
-| Переменная | Описание | Пример |
-|------------|----------|--------|
-| `NODE_ENV` | Окружение | `production` |
-| `PORT` | Порт API сервера | `3000` |
-| `WEB_URL` | URL фронтенда | `https://yourdomain.com` |
-| `API_URL` | URL API | `https://yourdomain.com/api` |
-| `COOKIE_SECRET` | Секрет для cookies (мин. 32 символа) | см. ниже |
-| `DATABASE_URL` | Строка подключения PostgreSQL | `postgresql://user:pass@db:5432/movies` |
-| `POSTGRES_USER` | Пользователь PostgreSQL | `movies` |
-| `POSTGRES_PASSWORD` | Пароль PostgreSQL | `<strong-password>` |
-| `POSTGRES_DB` | Имя базы данных | `movies` |
-| `DOMAIN` | Домен (без протокола) | `yourdomain.com` |
-| `CERTBOT_EMAIL` | Email для Let's Encrypt | `admin@yourdomain.com` |
-| `GITHUB_REPOSITORY` | Полное имя репозитория (для pull образов) | `username/movies-app` |
+| Переменная          | Описание                                  | Пример                                  |
+| ------------------- | ----------------------------------------- | --------------------------------------- |
+| `NODE_ENV`          | Окружение                                 | `production`                            |
+| `PORT`              | Порт API сервера                          | `3000`                                  |
+| `WEB_URL`           | URL фронтенда                             | `https://yourdomain.com`                |
+| `API_URL`           | URL API                                   | `https://yourdomain.com/api`            |
+| `COOKIE_SECRET`     | Секрет для cookies (мин. 32 символа)      | см. ниже                                |
+| `DATABASE_URL`      | Строка подключения PostgreSQL             | `postgresql://user:pass@db:5432/movies` |
+| `POSTGRES_USER`     | Пользователь PostgreSQL                   | `movies`                                |
+| `POSTGRES_PASSWORD` | Пароль PostgreSQL                         | `<strong-password>`                     |
+| `POSTGRES_DB`       | Имя базы данных                           | `movies`                                |
+| `DOMAIN`            | Домен (без протокола)                     | `yourdomain.com`                        |
+| `CERTBOT_EMAIL`     | Email для Let's Encrypt                   | `admin@yourdomain.com`                  |
+| `GITHUB_REPOSITORY` | Полное имя репозитория (для pull образов) | `username/movies-app`                   |
 
 Генерация `COOKIE_SECRET`:
 
@@ -59,6 +59,7 @@ openssl rand -base64 32
 ```
 
 Скрипт автоматически:
+
 - Скачивает рекомендуемые TLS параметры
 - Создаёт временный сертификат для запуска nginx
 - Запрашивает сертификат Let's Encrypt через ACME challenge
@@ -146,14 +147,14 @@ docker compose exec nginx nginx -s reload
 
 Для работы CI/CD необходимо настроить следующие secrets в репозитории (Settings → Secrets and variables → Actions):
 
-| Secret | Описание | Как получить |
-|--------|----------|--------------|
-| `VPS_HOST` | IP адрес или домен VPS | Из настроек VPS провайдера |
-| `VPS_USER` | SSH пользователь | Обычно `ubuntu`, `root` или custom |
-| `VPS_PORT` | SSH порт VPS | Если нестандартный, укажите явно |
-| `VPS_SSH_KEY` | Приватный SSH ключ | `cat ~/.ssh/id_rsa` (на локальной машине) |
-| `GHCR_USERNAME` | GitHub username для GHCR | Ваш GitHub username |
-| `GHCR_PAT` | GitHub Personal Access Token | См. инструкцию ниже |
+| Secret          | Описание                     | Как получить                              |
+| --------------- | ---------------------------- | ----------------------------------------- |
+| `VPS_HOST`      | IP адрес или домен VPS       | Из настроек VPS провайдера                |
+| `VPS_USER`      | SSH пользователь             | Обычно `ubuntu`, `root` или custom        |
+| `VPS_PORT`      | SSH порт VPS                 | Если нестандартный, укажите явно          |
+| `VPS_SSH_KEY`   | Приватный SSH ключ           | `cat ~/.ssh/id_rsa` (на локальной машине) |
+| `GHCR_USERNAME` | GitHub username для GHCR     | Ваш GitHub username                       |
+| `GHCR_PAT`      | GitHub Personal Access Token | См. инструкцию ниже                       |
 
 ### Генерация GHCR Personal Access Token
 
@@ -173,6 +174,7 @@ docker compose exec nginx nginx -s reload
    - `GHCR_PAT`: скопированный токен
 
 **Альтернатива (Classic Token):**
+
 ```bash
 # Если Fine-grained tokens не работают:
 # Personal access tokens → Tokens (classic) → Generate new token
@@ -196,6 +198,7 @@ cat ~/.ssh/movies-app-deploy
 ### Подготовка VPS для CI/CD
 
 1. Создайте директорию для приложения:
+
 ```bash
 sudo mkdir -p /opt/movies-app
 sudo chown $USER:$USER /opt/movies-app
@@ -203,6 +206,7 @@ cd /opt/movies-app
 ```
 
 2. Скопируйте необходимые файлы:
+
 ```bash
 # На локальной машине
 scp docker-compose.yml user@vps-ip:/opt/movies-app/
@@ -213,9 +217,11 @@ scp .env.example user@vps-ip:/opt/movies-app/.env
 3. На VPS отредактируйте `.env` с правильными значениями переменных
 
    **Важно:** Добавьте переменную `GITHUB_REPOSITORY` с полным именем вашего репозитория:
+
    ```bash
    GITHUB_REPOSITORY=username/movies-app
    ```
+
    Эта переменная необходима для pull Docker образов из GitHub Container Registry.
 
 4. Убедитесь что порты 80 и 443 открыты
@@ -250,11 +256,13 @@ docker compose run --rm api node dist/db/migrate.js
 ```
 
 **Важно:**
+
 - Миграции должны быть сгенерированы локально и закоммичены в git
 - В Docker образ попадают только уже существующие миграции из `apps/api/drizzle/`
 - При ошибке миграции деплой прерывается, старые контейнеры продолжают работать
 
 **Генерация новых миграций:**
+
 ```bash
 cd apps/api
 
@@ -276,9 +284,48 @@ git add drizzle/
 git commit -m "feat: add new migration"
 ```
 
+### Административные скрипты
+
+#### Создание администратора
+
+Для создания начального админ-пользователя используется seed-скрипт:
+
+```bash
+cd apps/api
+ADMIN_EMAIL="admin@example.com" ADMIN_PASSWORD="SecurePass123!" pnpm run db:seed
+```
+
+**Внимание:** Seed-скрипт создаёт пользователя только если он не существует. Используйте дефолтные креды для первого входа, затем смените пароль.
+
+#### Назначение роли администратора
+
+Для назначения админской роли существующему пользователю по email:
+
+**В development:**
+
+```bash
+cd apps/api
+ADMIN_EMAIL="user@example.com" pnpm run db:grant-admin
+```
+
+**В production (на VPS):**
+
+```bash
+cd /opt/movies-app
+ADMIN_EMAIL="user@example.com" docker compose run --rm api node dist/db/grant-admin.js
+```
+
+Скрипт:
+
+- Находит пользователя по email
+- Проверяет текущую роль
+- Назначает роль `admin`, если пользователь ещё не админ
+- Идемпотентен — безопасно запускать несколько раз
+
 ### Health Checks
 
 После деплоя автоматически проверяются:
+
 - API: `http://localhost/api/v1/health`
 - Web: `http://localhost/`
 
@@ -339,6 +386,7 @@ docker compose logs db
 **Причина:** на коммите нет git-тегов (deploy запускается только после успешного Release workflow и наличия тегов)
 
 **Решение:**
+
 1. Убедиться, что есть changeset и был смержен Release PR
 2. Проверить, что Release workflow успешно завершился и запушил теги
 3. Если нужен срочный деплой без тегов — запустить Deploy workflow вручную
@@ -348,6 +396,7 @@ docker compose logs db
 **Причина:** GHCR_PAT не настроен или истёк
 
 **Решение:**
+
 1. Проверить что `GHCR_PAT` secret добавлен в GitHub
 2. Убедиться что токен имеет права `read:packages` и `repo`
 3. Проверить срок действия токена
@@ -358,6 +407,7 @@ docker compose logs db
 **Причина:** SSH ключ не добавлен на VPS или неправильный формат
 
 **Решение:**
+
 1. Проверить что публичный ключ в `~/.ssh/authorized_keys` на VPS
 2. Убедиться что приватный ключ в secrets без лишних пробелов/переносов
 3. Проверить права на VPS:
@@ -371,6 +421,7 @@ docker compose logs db
 **Причина:** Несовместимые изменения схемы или DATABASE_URL неправильный
 
 **Решение:**
+
 1. Проверить логи деплоя в GitHub Actions
 2. SSH в VPS и проверить логи: `docker compose logs api`
 3. Запустить миграции вручную:
@@ -389,7 +440,9 @@ docker compose logs db
 **Причина:** Директория `apps/api/drizzle/` не существует в репозитории
 
 **Решение:**
+
 1. Локально сгенерировать начальные миграции:
+
    ```bash
    cd apps/api
    # Поднять временную БД
@@ -407,6 +460,7 @@ docker compose logs db
    ```
 
 2. Закоммитить и запушить миграции:
+
    ```bash
    git add drizzle/
    git commit -m "feat: add initial database migrations"
@@ -420,6 +474,7 @@ docker compose logs db
 **Причина:** Сервис не успел запуститься или действительно упал
 
 **Решение:**
+
 1. Проверить логи на VPS:
    ```bash
    docker compose logs api web
@@ -439,6 +494,7 @@ docker compose logs db
 **Причина:** Nginx не может читать файлы challenge из webroot (права/директория).
 
 **Решение:**
+
 1. Создать директории и выставить права:
    ```bash
    sudo mkdir -p /opt/movies-app/certbot/www/.well-known/acme-challenge
@@ -459,6 +515,7 @@ docker compose logs db
 **Причина:** У домена несколько A-записей, Let’s Encrypt проверяет все, и один из IP отвечает ошибкой.
 
 **Решение:**
+
 1. Оставить только корректную A-запись для домена
 2. Дождаться обновления DNS
 3. Повторить:
