@@ -22,5 +22,12 @@
     }
   },
   "globalDependencies": ["**/.env.*local"],
-  "globalEnv": ["NODE_ENV", "DATABASE_URL", "MODE", "API_URL"]
+  "globalEnv": [
+    "NODE_ENV",
+    "DATABASE_URL",
+    "MODE",
+    "API_URL",
+    "ADMIN_EMAIL",
+    "ADMIN_PASSWORD"
+  ]
 }
