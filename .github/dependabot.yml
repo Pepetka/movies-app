@@ -1,0 +1,228 @@
+version: 2
+updates:
+  # Root dependencies - tooling updated weekly
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Europe/Moscow"
+    open-pull-requests-limit: 5
+    groups:
+      root-tools:
+        patterns:
+          - "turbo"
+          - "typescript"
+          - "prettier"
+          - "husky"
+          - "lint-staged"
+          - "@changesets/cli"
+    labels:
+      - "dependencies: javascript"
+      - "monorepo: root"
+      - "scope: infra"
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+
+  # API production dependencies - updated weekly (critical backend)
+  - package-ecosystem: "npm"
+    directory: "/apps/api"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Europe/Moscow"
+    open-pull-requests-limit: 10
+    groups:
+      nestjs-core:
+        patterns:
+          - "@nestjs/*"
+        update-types:
+          - "minor"
+          - "patch"
+      fastify-stack:
+        patterns:
+          - "fastify"
+          - "@fastify/*"
+        update-types:
+          - "minor"
+          - "patch"
+      database:
+        patterns:
+          - "drizzle-orm"
+          - "postgres"
+      security-packages:
+        patterns:
+          - "bcrypt"
+          - "passport*"
+          - "@nestjs/jwt"
+    labels:
+      - "dependencies: javascript"
+      - "monorepo: api"
+      - "scope: api"
+      - "scope: security"
+    commit-message:
+      prefix: "fix"
+      include: "scope"
+    versioning-strategy: increase
+
+  # API dev dependencies - updated weekly
+  - package-ecosystem: "npm"
+    directory: "/apps/api"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Europe/Moscow"
+    open-pull-requests-limit: 5
+    groups:
+      nestjs-dev:
+        patterns:
+          - "@nestjs/cli"
+          - "@nestjs/schematics"
+          - "@nestjs/testing"
+      testing:
+        patterns:
+          - "jest*"
+          - "@types/*"
+          - "ts-jest"
+          - "supertest"
+      build-tools:
+        patterns:
+          - "@swc/*"
+          - "ts-node"
+          - "ts-loader"
+          - "tsconfig-paths"
+          - "drizzle-kit"
+    labels:
+      - "dependencies: javascript"
+      - "monorepo: api"
+      - "scope: infra"
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+
+  # Web app (SvelteKit) - updated weekly
+  - package-ecosystem: "npm"
+    directory: "/apps/web"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Europe/Moscow"
+    open-pull-requests-limit: 5
+    groups:
+      svelte-stack:
+        patterns:
+          - "svelte"
+          - "@sveltejs/*"
+        update-types:
+          - "minor"
+          - "patch"
+      vite:
+        patterns:
+          - "vite"
+          - "@sveltejs/vite-plugin-svelte"
+    labels:
+      - "dependencies: javascript"
+      - "monorepo: web"
+      - "scope: web"
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+
+  # UI package - updated weekly
+  - package-ecosystem: "npm"
+    directory: "/packages/ui"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Europe/Moscow"
+    open-pull-requests-limit: 5
+    groups:
+      svelte-stack:
+        patterns:
+          - "svelte"
+          - "@sveltejs/*"
+        update-types:
+          - "minor"
+          - "patch"
+    labels:
+      - "dependencies: javascript"
+      - "monorepo: packages"
+      - "scope: web"
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+
+  # ESLint config package - updated weekly
+  - package-ecosystem: "npm"
+    directory: "/packages/eslint-config"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Europe/Moscow"
+    open-pull-requests-limit: 5
+    groups:
+      eslint-plugins:
+        patterns:
+          - "eslint*"
+          - "typescript-eslint"
+          - "eslint-plugin-*"
+        update-types:
+          - "minor"
+          - "patch"
+    labels:
+      - "dependencies: javascript"
+      - "monorepo: packages"
+      - "scope: infra"
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+
+  # GitHub Actions - updated weekly
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Europe/Moscow"
+    open-pull-requests-limit: 5
+    groups:
+      github-actions:
+        patterns:
+          - "actions/*"
+          - "pnpm/*"
+    labels:
+      - "dependencies: github-actions"
+      - "scope: infra"
+    commit-message:
+      prefix: "ci"
+      include: "scope"
+
+  # Docker images - updated weekly
+  - package-ecosystem: "docker"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Europe/Moscow"
+    open-pull-requests-limit: 3
+    groups:
+      docker-images:
+        patterns:
+          - "postgres"
+          - "nginx"
+          - "certbot"
+    labels:
+      - "dependencies: docker"
+      - "scope: infra"
+    commit-message:
+      prefix: "chore"
+      include: "scope"
