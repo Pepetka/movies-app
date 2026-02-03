@@ -8,6 +8,9 @@
   },
   "moduleNameMapper": {
     "^\\$common/(.*)$": "<rootDir>/../src/common/$1",
-    "^\\$src/(.*)$": "<rootDir>/../src/$1"
-  }
+    "^\\$src/(.*)$": "<rootDir>/../src/$1",
+    "^\\$db/(.*)$": "<rootDir>/../src/db/$1"
+  },
+  "forceExit": true,
+  "maxWorkers": 1
 }

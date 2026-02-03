@@ -6,7 +6,8 @@
     "baseUrl": "./",
     "paths": {
       "$src/*": ["./src/*"],
-      "$common/*": ["./src/common/*"]
+      "$common/*": ["./src/common/*"],
+      "$db/*": ["./src/db/*"]
     }
   }
 }

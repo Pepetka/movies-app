@@ -1,5 +1,5 @@
 {
-  "id": "5aed9fb0-3ecf-45e2-b354-0245dc460dcc",
+  "id": "ce0d540e-a0e5-4e43-9391-0b88fdf9f496",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -26,21 +26,27 @@
           "primaryKey": false,
           "notNull": true
         },
-        "passwordHash": {
-          "name": "passwordHash",
+        "password_hash": {
+          "name": "password_hash",
           "type": "varchar(256)",
           "primaryKey": false,
           "notNull": true
         },
-        "createdAt": {
-          "name": "createdAt",
+        "refresh_token": {
+          "name": "refresh_token",
+          "type": "varchar(256)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
           "type": "timestamp",
           "primaryKey": false,
           "notNull": true,
           "default": "now()"
         },
-        "updatedAt": {
-          "name": "updatedAt",
+        "updated_at": {
+          "name": "updated_at",
           "type": "timestamp",
           "primaryKey": false,
           "notNull": true,
@@ -81,8 +87,8 @@
           "primaryKey": true,
           "notNull": true
         },
-        "externalId": {
-          "name": "externalId",
+        "external_id": {
+          "name": "external_id",
           "type": "varchar(255)",
           "primaryKey": false,
           "notNull": true
@@ -93,15 +99,15 @@
           "primaryKey": false,
           "notNull": true
         },
-        "createdAt": {
-          "name": "createdAt",
+        "created_at": {
+          "name": "created_at",
           "type": "timestamp",
           "primaryKey": false,
           "notNull": true,
           "default": "now()"
         },
-        "updatedAt": {
-          "name": "updatedAt",
+        "updated_at": {
+          "name": "updated_at",
           "type": "timestamp",
           "primaryKey": false,
           "notNull": true,
@@ -113,7 +119,7 @@
           "name": "external_id_idx",
           "columns": [
             {
-              "expression": "externalId",
+              "expression": "external_id",
               "isExpression": false,
               "asc": true,
               "nulls": "last"

@@ -2,7 +2,7 @@ name: Deploy
 
 on:
   workflow_run:
-    workflows: ['Release']
+    workflows: ["Release"]
     types: [completed]
     branches: [main]
   workflow_dispatch:
@@ -133,6 +133,15 @@ jobs:
           key: ${{ secrets.VPS_SSH_KEY }}
           script: |
             cd /opt/movies-app
+
+            echo "Verifying required environment variables..."
+            for var in POSTGRES_PASSWORD COOKIE_SECRET JWT_ACCESS_SECRET JWT_REFRESH_SECRET; do
+              if ! grep -q "^${var}=" .env 2>/dev/null; then
+                echo "ERROR: Required variable ${var} is not set in .env"
+                exit 1
+              fi
+            done
+            echo "All required environment variables are set."
 
             echo "Logging in to GitHub Container Registry..."
             echo "${{ secrets.GHCR_PAT }}" | docker login ghcr.io -u "${{ secrets.GHCR_USERNAME }}" --password-stdin

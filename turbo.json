@@ -10,12 +10,24 @@
     "lint": {},
     "lint:fix": {},
     "format": {},
+    "check": {},
+    "fix": {},
     "check:types": {},
+    "test": {},
+    "test:unit": {},
+    "test:e2e": {},
     "dev": {
       "cache": false,
       "persistent": true
     }
   },
   "globalDependencies": ["**/.env.*local"],
-  "globalEnv": ["DATABASE_URL", "MODE", "API_URL"]
+  "globalEnv": [
+    "NODE_ENV",
+    "DATABASE_URL",
+    "MODE",
+    "API_URL",
+    "ADMIN_EMAIL",
+    "ADMIN_PASSWORD"
+  ]
 }

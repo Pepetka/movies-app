@@ -1,38 +1,119 @@
-# sv
+# Movies App Web
 
-Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
+SvelteKit фронтенд для Movies App с Svelte 5.
 
-## Creating a project
+## Стек технологий
 
-If you're seeing this, you've probably already done this step. Congrats!
+- **Framework:** SvelteKit
+- **UI:** Svelte 5 (runes syntax)
+- **Styling:** Tailwind CSS
+- **Build Tool:** Vite
 
-```sh
-# create a new project in the current directory
-npx sv create
+## Локальная разработка
 
-# create a new project in my-app
-npx sv create my-app
+```bash
+# Установить зависимости
+pnpm install
+
+# Development режим
+pnpm run dev
+
+# Build
+pnpm run build
+
+# Preview production build
+pnpm run preview
 ```
 
-## Developing
+Приложение будет доступно на http://localhost:5173
 
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
+## Команды
 
-```sh
-npm run dev
+```bash
+# Разработка
+pnpm run dev                 # Запустить dev сервер
+pnpm run dev -- --open       # Открыть в браузере
+pnpm run build               # Собрать для production
+pnpm run preview             # Preview production build
 
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
+# Проверка
+pnpm run check               # Проверить типы
+pnpm run check:ts            # Только TypeScript
+pnpm run lint                # ESLint
+pnpm run lint:fix            # ESLint auto-fix
+pnpm run format              # Prettier format
 ```
 
-## Building
+## Текущее состояние
 
-To create a production version of your app:
+Фронтенд находится на начальной стадии разработки.
 
-```sh
-npm run build
+### Реализовано
+
+- Базовая структура SvelteKit приложения
+- Компонент HealthCheck для мониторинга API
+- Инфраструктура для API запросов
+
+### В разработке
+
+- UI для аутентификации (register, login, logout)
+- Страницы пользователей
+- UI для управления фильмами
+- Группы и приглашения
+
+## Структура проекта
+
+```
+src/
+├── routes/                  # SvelteKit file-based routing
+│   ├── +layout.svelte       # Root layout
+│   ├── +layout.ts           # Root layout server logic
+│   └── +page.svelte         # Home page
+│
+└── lib/                     # Shared utilities
+    ├── components/          # Svelte компоненты
+    │   └── health/          # Health check components
+    ├── stores/              # Svelte stores
+    │   └── health.ts        # Health check store
+    └── utils/               # Utility functions
+        └── api-fetch.ts     # API client
 ```
 
-You can preview the production build with `npm run preview`.
+## Компоненты
 
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
+### HealthCheck
+
+Компонент для отображения статуса API в реальном времени.
+
+```svelte
+<script lang="ts">
+	import { HealthCheck } from '$lib/components';
+</script>
+
+<HealthCheck />
+```
+
+## Stores
+
+### health store
+
+Реактивное хранилище для статуса API с автоматическим опросом.
+
+```typescript
+import { health } from '$lib/stores/health';
+
+// Подписка на изменения
+health.subscribe((status) => {
+	console.log(status.isOnline, status.latency);
+});
+```
+
+## Styling
+
+Приложение использует Tailwind CSS.
+
+Конфигурация: `tailwind.config.js`
+
+## Лицензия
+
+MIT

@@ -8,11 +8,13 @@
 		"build": "vite build",
 		"preview": "vite preview",
 		"prepare": "svelte-kit sync || echo ''",
-		"check:types": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
-		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
 		"format": "prettier --write .",
-		"lint": "prettier --check . && eslint .",
-		"lint:fix": "prettier --write . && eslint . --fix"
+		"lint": "eslint .",
+		"lint:fix": "eslint . --fix",
+		"check": "eslint . && svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
+		"fix": "eslint . --fix && prettier --write .",
+		"check:types": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
+		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch"
 	},
 	"dependencies": {
 		"@repo/ui": "workspace:*"
