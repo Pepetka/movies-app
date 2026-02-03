@@ -1,5 +1,11 @@
 # api
 
+## 0.3.2
+
+### Patch Changes
+
+- a5d1744: Fixed API port forwarding in nginx
+
 ## 0.3.1
 
 ### Patch Changes
