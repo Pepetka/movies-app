@@ -28,7 +28,7 @@ updates:
       prefix: "chore"
       include: "scope"
 
-  # API production dependencies - updated weekly (critical backend)
+  # API dependencies - updated weekly (production + dev)
   - package-ecosystem: "npm"
     directory: "/apps/api"
     schedule:
@@ -51,6 +51,11 @@ updates:
         update-types:
           - "minor"
           - "patch"
+      nestjs-dev:
+        patterns:
+          - "@nestjs/cli"
+          - "@nestjs/schematics"
+          - "@nestjs/testing"
       fastify-stack:
         patterns:
           - "fastify"
@@ -67,31 +72,6 @@ updates:
           - "bcrypt"
           - "passport*"
           - "@nestjs/jwt"
-    labels:
-      - "dependencies: javascript"
-      - "monorepo: api"
-      - "scope: api"
-      - "scope: security"
-    commit-message:
-      prefix: "fix"
-      include: "scope"
-    versioning-strategy: increase
-
-  # API dev dependencies - updated weekly
-  - package-ecosystem: "npm"
-    directory: "/apps/api"
-    schedule:
-      interval: "weekly"
-      day: "monday"
-      time: "09:00"
-      timezone: "Europe/Moscow"
-    open-pull-requests-limit: 5
-    groups:
-      nestjs-dev:
-        patterns:
-          - "@nestjs/cli"
-          - "@nestjs/schematics"
-          - "@nestjs/testing"
       testing:
         patterns:
           - "jest*"
@@ -118,10 +98,11 @@ updates:
     labels:
       - "dependencies: javascript"
       - "monorepo: api"
-      - "scope: infra"
+      - "scope: api"
     commit-message:
       prefix: "chore"
       include: "scope"
+    versioning-strategy: increase
 
   # Web app (SvelteKit) - updated weekly
   - package-ecosystem: "npm"
