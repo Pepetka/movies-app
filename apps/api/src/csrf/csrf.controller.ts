@@ -1,7 +1,7 @@
 import { Controller, Get, HttpCode, HttpStatus, Res } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
-import { FastifyReply } from 'fastify';
+import type { FastifyReply } from 'fastify';
 
 import { Public } from '$common/decorators';
 import { THROTTLE } from '$common/configs';

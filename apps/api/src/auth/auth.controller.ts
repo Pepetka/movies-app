@@ -15,7 +15,7 @@ import {
   ApiBearerAuth,
 } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
-import { FastifyReply } from 'fastify';
+import type { FastifyReply } from 'fastify';
 
 import { CsrfProtected, Public, User } from '$common/decorators';
 import { Cookie } from '$common/decorators/cookie.decorator';

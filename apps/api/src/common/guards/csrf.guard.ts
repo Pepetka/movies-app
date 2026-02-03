@@ -1,5 +1,5 @@
 import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
-import { FastifyReply, FastifyRequest } from 'fastify';
+import type { FastifyReply, FastifyRequest } from 'fastify';
 import { Reflector } from '@nestjs/core';
 
 import { CSRF_PROTECTED_KEY } from '$common/decorators';
