@@ -1,6 +1,6 @@
 version: 2
 updates:
-  # Root dependencies - tooling updated weekly
+  # Root dependencies - monorepo tooling updated weekly
   - package-ecosystem: "npm"
     directory: "/"
     schedule:
@@ -13,11 +13,13 @@ updates:
       root-tools:
         patterns:
           - "turbo"
-          - "typescript"
-          - "prettier"
           - "husky"
           - "lint-staged"
           - "@changesets/cli"
+          - "syncpack"
+        update-types:
+          - "minor"
+          - "patch"
     labels:
       - "dependencies: javascript"
       - "monorepo: root"
@@ -35,6 +37,13 @@ updates:
       time: "09:00"
       timezone: "Europe/Moscow"
     open-pull-requests-limit: 10
+    ignore:
+      - dependency-name: "drizzle-orm"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "passport*"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "bcrypt"
+        update-types: ["version-update:semver-major"]
     groups:
       nestjs-core:
         patterns:
@@ -96,6 +105,16 @@ updates:
           - "ts-loader"
           - "tsconfig-paths"
           - "drizzle-kit"
+      typescript:
+        patterns:
+          - "typescript"
+        update-types:
+          - "minor"
+          - "patch"
+      tooling:
+        patterns:
+          - "prettier"
+          - "eslint"
     labels:
       - "dependencies: javascript"
       - "monorepo: api"
@@ -125,6 +144,16 @@ updates:
         patterns:
           - "vite"
           - "@sveltejs/vite-plugin-svelte"
+      typescript:
+        patterns:
+          - "typescript"
+        update-types:
+          - "minor"
+          - "patch"
+      tooling:
+        patterns:
+          - "prettier*"
+          - "eslint"
     labels:
       - "dependencies: javascript"
       - "monorepo: web"
@@ -150,6 +179,16 @@ updates:
         update-types:
           - "minor"
           - "patch"
+      typescript:
+        patterns:
+          - "typescript"
+        update-types:
+          - "minor"
+          - "patch"
+      tooling:
+        patterns:
+          - "prettier*"
+          - "eslint"
     labels:
       - "dependencies: javascript"
       - "monorepo: packages"
@@ -168,11 +207,23 @@ updates:
       timezone: "Europe/Moscow"
     open-pull-requests-limit: 5
     groups:
+      eslint-core:
+        patterns:
+          - "@eslint/*"
+          - "eslint*"
+        update-types:
+          - "minor"
+          - "patch"
       eslint-plugins:
         patterns:
-          - "eslint*"
-          - "typescript-eslint"
           - "eslint-plugin-*"
+          - "eslint-config-*"
+        update-types:
+          - "minor"
+          - "patch"
+      typescript-eslint:
+        patterns:
+          - "typescript-eslint"
         update-types:
           - "minor"
           - "patch"
@@ -193,6 +244,11 @@ updates:
       time: "09:00"
       timezone: "Europe/Moscow"
     open-pull-requests-limit: 5
+    ignore:
+      - dependency-name: "actions/*"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "pnpm/*"
+        update-types: ["version-update:semver-major"]
     groups:
       github-actions:
         patterns:
@@ -214,6 +270,11 @@ updates:
       time: "09:00"
       timezone: "Europe/Moscow"
     open-pull-requests-limit: 3
+    ignore:
+      - dependency-name: "postgres"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "nginx"
+        update-types: ["version-update:semver-major"]
     groups:
       docker-images:
         patterns:
