@@ -1,5 +1,5 @@
 import { createParamDecorator, ExecutionContext } from '@nestjs/common';
-import { FastifyRequest } from 'fastify';
+import type { FastifyRequest } from 'fastify';
 
 export const Cookie = createParamDecorator(
   (data: string, ctx: ExecutionContext) => {
