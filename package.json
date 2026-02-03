@@ -20,12 +20,15 @@
     "changeset:add": "changeset add",
     "version-packages": "changeset version",
     "release": "changeset tag",
+    "deps:lint": "syncpack lint",
+    "deps:fix": "syncpack fix",
     "prepare": "husky"
   },
   "devDependencies": {
     "@changesets/cli": "^2.27.0",
     "husky": "^9.1.7",
     "lint-staged": "^16.2.7",
+    "syncpack": "14.0.0-alpha.40",
     "turbo": "^2.7.5"
   },
   "packageManager": "pnpm@9.0.0",

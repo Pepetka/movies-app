@@ -16,6 +16,9 @@ importers:
       lint-staged:
         specifier: ^16.2.7
         version: 16.2.7
+      syncpack:
+        specifier: 14.0.0-alpha.40
+        version: 14.0.0-alpha.40
       turbo:
         specifier: ^2.7.5
         version: 2.7.5
@@ -47,7 +50,7 @@ importers:
         specifier: ^11.0.2
         version: 11.0.2(@nestjs/common@11.1.12(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2))
       "@nestjs/mapped-types":
-        specifier: "*"
+        specifier: ^2.1.0
         version: 2.1.0(@nestjs/common@11.1.12(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2))(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)
       "@nestjs/passport":
         specifier: ^11.0.5
@@ -288,8 +291,8 @@ importers:
         specifier: ^9.39.0
         version: 9.39.2
       globals:
-        specifier: ^16.5.0
-        version: 16.5.0
+        specifier: ^17.0.0
+        version: 17.0.0
       prettier:
         specifier: ^3.8.0
         version: 3.8.0
@@ -7975,6 +7978,78 @@ packages:
       }
     engines: { node: ">=0.10" }
 
+  syncpack-darwin-arm64@14.0.0-alpha.40:
+    resolution:
+      {
+        integrity: sha512-mlxjJ9M9W35o/gL+1F1ojP96wL8TarZ7TXZV15H0nS/M3O/LmtF+Qym21Z7HK7K+0wbsdxhKGaNFEB6Cyl/quQ==,
+      }
+    cpu: [arm64]
+    os: [darwin]
+
+  syncpack-darwin-x64@14.0.0-alpha.40:
+    resolution:
+      {
+        integrity: sha512-JMGKwBgAE8/IxwhojIDDz1p1ponpjv/DkRSr1MaAlzLgqhRgVyAjHMOLtdODL0yJ6Xscd2614BZw5b86CFaveQ==,
+      }
+    cpu: [x64]
+    os: [darwin]
+
+  syncpack-linux-arm64-musl@14.0.0-alpha.40:
+    resolution:
+      {
+        integrity: sha512-5rkbGObrr//nSlw2sMmhFkZ2FGK3cOh/fUzvfaTAajwbAMF6AKvRe3hlV9+PGrEOvXxbAZkd3seKhrQOODhmpg==,
+      }
+    cpu: [arm64]
+    os: [linux]
+
+  syncpack-linux-arm64@14.0.0-alpha.40:
+    resolution:
+      {
+        integrity: sha512-ArywM6z452T+Jal0TeRy1I9F3fQ8dY02DCxY85xP3n6IxTexMUtUXeIjnHTM/IL6nqTs7osaea6KpsNcCmpGZw==,
+      }
+    cpu: [arm64]
+    os: [linux]
+
+  syncpack-linux-x64-musl@14.0.0-alpha.40:
+    resolution:
+      {
+        integrity: sha512-cUCdD63h/4CGwtvZhfZaSMyLaijod0rX7HEziLW0d4JjNzJmyYipSoIsTpX+Gsx3G1/shnTn2CVzMfu9im0/Vw==,
+      }
+    cpu: [x64]
+    os: [linux]
+
+  syncpack-linux-x64@14.0.0-alpha.40:
+    resolution:
+      {
+        integrity: sha512-2avgGXwZOxDhiYO5JIbynWgxAZN20xZAlGTGdDHsHu7gwbDf1WlI54RIuyIJhlV37zwGH13rXwnBITdmCykefQ==,
+      }
+    cpu: [x64]
+    os: [linux]
+
+  syncpack-windows-arm64@14.0.0-alpha.40:
+    resolution:
+      {
+        integrity: sha512-Qojg5rhKVnqK4d1OKtYGnC2m5gut01ZdDO34f6oih8IrSWTiVGXyLZxG/XMhl3YxmKyrvk3ViSU4XukfEaRTVg==,
+      }
+    cpu: [arm64]
+    os: [win32]
+
+  syncpack-windows-x64@14.0.0-alpha.40:
+    resolution:
+      {
+        integrity: sha512-PdFGTD4cZlpS3TSxOpqeZSeV/1Gt9HOOWoqQVv9qoqXo6/EaMso6cWRodFzW4SZ6gyykSKwX5+OjR5XYi9FbYQ==,
+      }
+    cpu: [x64]
+    os: [win32]
+
+  syncpack@14.0.0-alpha.40:
+    resolution:
+      {
+        integrity: sha512-WH2rXC/281kNDSfC0iriqBIGrpcg56EtQAuGd/NZNXBZN2/uhidd16RPo5P3Kds9XHymDwsH2tWWbrSUTdeElg==,
+      }
+    engines: { node: ">=14.17.0" }
+    hasBin: true
+
   tapable@2.3.0:
     resolution:
       {
@@ -13535,6 +13610,41 @@ snapshots:
       "@scarf/scarf": 1.4.0
 
   symbol-observable@4.0.0: {}
+
+  syncpack-darwin-arm64@14.0.0-alpha.40:
+    optional: true
+
+  syncpack-darwin-x64@14.0.0-alpha.40:
+    optional: true
+
+  syncpack-linux-arm64-musl@14.0.0-alpha.40:
+    optional: true
+
+  syncpack-linux-arm64@14.0.0-alpha.40:
+    optional: true
+
+  syncpack-linux-x64-musl@14.0.0-alpha.40:
+    optional: true
+
+  syncpack-linux-x64@14.0.0-alpha.40:
+    optional: true
+
+  syncpack-windows-arm64@14.0.0-alpha.40:
+    optional: true
+
+  syncpack-windows-x64@14.0.0-alpha.40:
+    optional: true
+
+  syncpack@14.0.0-alpha.40:
+    optionalDependencies:
+      syncpack-darwin-arm64: 14.0.0-alpha.40
+      syncpack-darwin-x64: 14.0.0-alpha.40
+      syncpack-linux-arm64: 14.0.0-alpha.40
+      syncpack-linux-arm64-musl: 14.0.0-alpha.40
+      syncpack-linux-x64: 14.0.0-alpha.40
+      syncpack-linux-x64-musl: 14.0.0-alpha.40
+      syncpack-windows-arm64: 14.0.0-alpha.40
+      syncpack-windows-x64: 14.0.0-alpha.40
 
   tapable@2.3.0: {}
 
