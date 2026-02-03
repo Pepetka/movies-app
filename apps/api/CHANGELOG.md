@@ -1,5 +1,11 @@
 # api
 
+## 0.3.3
+
+### Patch Changes
+
+- 3bd97f4: Configure nginx API port via environment variable
+
 ## 0.3.2
 
 ### Patch Changes
