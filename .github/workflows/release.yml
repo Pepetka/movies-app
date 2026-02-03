@@ -63,6 +63,8 @@ jobs:
 
       - name: Create and push tags for versioned packages
         if: steps.version_check.outputs.versions_updated == 'true'
+        env:
+          HUSKY: 0
         run: |
           pnpm changeset tag
           git push --follow-tags
