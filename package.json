@@ -20,15 +20,16 @@
     "changeset:add": "changeset add",
     "version-packages": "changeset version",
     "release": "changeset tag",
+    "deps:lint": "syncpack lint",
+    "deps:fix": "syncpack fix",
     "prepare": "husky"
   },
   "devDependencies": {
     "@changesets/cli": "^2.27.0",
     "husky": "^9.1.7",
     "lint-staged": "^16.2.7",
-    "prettier": "^3.8.0",
-    "turbo": "^2.7.5",
-    "typescript": "5.9.3"
+    "syncpack": "14.0.0-alpha.40",
+    "turbo": "^2.7.5"
   },
   "packageManager": "pnpm@9.0.0",
   "engines": {
@@ -37,11 +38,6 @@
   "pnpm": {
     "onlyBuiltDependencies": [
       "esbuild"
-    ],
-    "overrides": {
-      "typescript": "5.9.3",
-      "prettier": "^3.8.0",
-      "@types/node": "^22.10.7"
-    }
+    ]
   }
 }
