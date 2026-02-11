@@ -135,7 +135,7 @@ jobs:
             cd /opt/movies-app
 
             echo "Verifying required environment variables..."
-            for var in POSTGRES_PASSWORD COOKIE_SECRET JWT_ACCESS_SECRET JWT_REFRESH_SECRET; do
+            for var in POSTGRES_PASSWORD COOKIE_SECRET JWT_ACCESS_SECRET JWT_REFRESH_SECRET KINOPOISK_API_KEY KINOPOISK_BASE_URL; do
               if ! grep -q "^${var}=" .env 2>/dev/null; then
                 echo "ERROR: Required variable ${var} is not set in .env"
                 exit 1
