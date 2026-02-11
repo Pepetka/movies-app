@@ -11,7 +11,7 @@ import { AuthRegisterDto } from './dto';
 type ExpiresUnits = 'd' | 'h' | 'm' | 's';
 export type Expires = `${number}${ExpiresUnits}`;
 
-// Dummy hash для constant-time сравнения (генерируется при старте)
+// Dummy hash for constant-time comparison (generated at startup)
 const DUMMY_REFRESH_HASH = hashSync('dummy-refresh-token', 10);
 
 @Injectable()
@@ -98,7 +98,7 @@ export class AuthService {
 
     if (!user || !isValid) {
       this._logger.warn(`Failed refresh token: userId=${userId}`);
-      // Dummy operation для выравнивания времени ответа (timing attack prevention)
+      // Dummy operation to align response time (timing attack prevention)
       await this.userService.hashToken('dummy');
       throw new UnauthorizedException();
     }

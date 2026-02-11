@@ -1,10 +1,14 @@
 import { createParamDecorator, ExecutionContext } from '@nestjs/common';
 
-import type { UserRequest } from '$src/auth/types/user-request.type';
+import type { User as UserType } from '$db/schemas';
 
 export const User = createParamDecorator(
-  (_data: unknown, ctx: ExecutionContext) => {
-    const request = ctx.switchToHttp().getRequest<UserRequest>();
-    return request.user;
+  (data: keyof UserType | undefined, ctx: ExecutionContext) => {
+    const request = ctx.switchToHttp().getRequest();
+    const user = request.user as UserType | undefined;
+    if (!user) {
+      return undefined;
+    }
+    return data ? user[data] : user;
   },
 );

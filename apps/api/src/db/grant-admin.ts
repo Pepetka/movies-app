@@ -32,7 +32,6 @@ async function grantAdmin() {
     console.error('User not found:', targetEmail);
     await client.end();
     process.exit(1);
-    return;
   }
 
   if (existingUser[0].role === UserRole.ADMIN) {

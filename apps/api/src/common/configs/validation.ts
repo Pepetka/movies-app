@@ -1,6 +1,7 @@
 import {
   IsEnum,
   IsNumber,
+  IsOptional,
   IsString,
   Max,
   Min,
@@ -46,6 +47,18 @@ class EnvironmentVariables {
 
   @IsString()
   JWT_REFRESH_EXPIRATION: string;
+
+  @IsString()
+  KINOPOISK_API_KEY: string;
+
+  @IsString()
+  KINOPOISK_BASE_URL: string;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(4)
+  @Max(16)
+  BCRYPT_ROUNDS: number;
 }
 
 export const validate = (config: Record<string, unknown>) => {
@@ -63,5 +76,9 @@ export const validate = (config: Record<string, unknown>) => {
       .join('; ');
     throw new Error(`Environment validation failed: ${messages}`);
   }
-  return validatedConfig;
+
+  return {
+    ...validatedConfig,
+    BCRYPT_ROUNDS: validatedConfig.BCRYPT_ROUNDS ?? 12,
+  };
 };

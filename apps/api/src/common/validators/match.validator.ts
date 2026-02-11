@@ -3,13 +3,16 @@ import {
   ValidatorConstraintInterface,
   ValidationArguments,
   registerDecorator,
+  ValidationOptions,
 } from 'class-validator';
 
 @ValidatorConstraint({ name: 'match', async: false })
 export class MatchConstraint implements ValidatorConstraintInterface {
-  validate(value: any, args: ValidationArguments) {
+  validate(value: unknown, args: ValidationArguments) {
     const [relatedPropertyName] = args.constraints;
-    const relatedValue = (args.object as any)[relatedPropertyName];
+    const relatedValue = (args.object as Record<string, unknown>)[
+      relatedPropertyName
+    ];
     return value === relatedValue;
   }
 
@@ -19,7 +22,7 @@ export class MatchConstraint implements ValidatorConstraintInterface {
   }
 }
 
-export function Match(property: string, validationOptions?: any) {
+export function Match(property: string, validationOptions?: ValidationOptions) {
   return function (object: object, propertyName: string) {
     registerDecorator({
       target: object.constructor,

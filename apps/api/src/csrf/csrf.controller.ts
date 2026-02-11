@@ -8,7 +8,7 @@ import { THROTTLE } from '$common/configs';
 
 import { CsrfResponseDto } from './dto';
 
-@ApiTags('csrf')
+@ApiTags('CSRF')
 @Controller('csrf')
 export class CsrfController {
   @Public()
