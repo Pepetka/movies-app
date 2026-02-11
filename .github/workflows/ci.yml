@@ -4,14 +4,60 @@ on:
   pull_request:
     branches: [main]
 
+permissions:
+  contents: write
+
 concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
+  prepare:
+    name: Prepare
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.0.0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "pnpm"
+
+      - name: Check if already processed
+        id: check
+        if: github.event.pull_request.user.login == 'dependabot[bot]'
+        run: |
+          if [ "$(git log -1 --format='%an')" = "github-actions[bot]" ]; then
+            echo "skip=true" >> $GITHUB_OUTPUT
+          else
+            echo "skip=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Update lockfile for Dependabot
+        if: |
+          github.event.pull_request.user.login == 'dependabot[bot]' &&
+          steps.check.outputs.skip != 'true'
+        run: |
+          pnpm install --no-frozen-lockfile
+          git config user.name 'github-actions[bot]'
+          git config user.email 'github-actions[bot]@users.noreply.github.com'
+          git add pnpm-lock.yaml
+          if ! git diff --staged --quiet; then
+            git commit -m "chore: update pnpm-lock.yaml for dependabot"
+            git push
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
   lint:
     name: Lint
     runs-on: ubuntu-latest
+    needs: prepare
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -39,7 +85,7 @@ jobs:
   type-check:
     name: Type Check
     runs-on: ubuntu-latest
-    needs: lint
+    needs: prepare
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -100,7 +146,7 @@ jobs:
   test:
     name: Test
     runs-on: ubuntu-latest
-    needs: lint
+    needs: prepare
 
     services:
       postgres:
