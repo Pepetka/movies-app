@@ -19,7 +19,32 @@ import {
   customMovies,
 } from '../src/db/schemas';
 import { registerUserViaApi, createGroup } from './helpers';
+import { KinopoiskService } from '../src/movies/providers';
 import { AppModule } from '../src/app.module';
+
+const mockKinopoiskService = {
+  name: 'kinopoisk',
+  search: jest.fn().mockResolvedValue({
+    page: 1,
+    totalPages: 1,
+    totalResults: 1,
+    results: [
+      {
+        externalId: 'kp-mock-1',
+        imdbId: 'tt0133093',
+        title: 'The Matrix',
+        posterPath: 'https://example.com/poster.jpg',
+        overview: 'A computer hacker learns about the true nature of reality.',
+        releaseYear: 1999,
+        rating: 8.7,
+      },
+    ],
+  }),
+  getMovieDetails: jest.fn(),
+  findByImdbId: jest.fn(),
+  mapToNewMovie: jest.fn(),
+  getPosterUrl: jest.fn((path) => path),
+};
 
 describe('Group Movies E2E', () => {
   let app: NestFastifyApplication;
@@ -30,7 +55,10 @@ describe('Group Movies E2E', () => {
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
-    }).compile();
+    })
+      .overrideProvider(KinopoiskService)
+      .useValue(mockKinopoiskService)
+      .compile();
 
     app = moduleFixture.createNestApplication<NestFastifyApplication>(
       new FastifyAdapter(),
@@ -215,26 +243,21 @@ describe('Group Movies E2E', () => {
   });
 
   describe('Search', () => {
-    const shouldSkip = !process.env.KINOPOISK_API_KEY;
+    it('should search movies in group context', async () => {
+      const { accessToken } = await registerUserViaApi(
+        app,
+        'search@example.com',
+      );
+      const group = await createGroup(app, accessToken, 'Search Group');
 
-    (shouldSkip ? it.skip : it)(
-      'should search movies in group context',
-      async () => {
-        const { accessToken } = await registerUserViaApi(
-          app,
-          'search@example.com',
-        );
-        const group = await createGroup(app, accessToken, 'Search Group');
+      const res = await request(app.getHttpServer())
+        .get(`/groups/${group.id}/movies/search`)
+        .query({ query: 'matrix' })
+        .set('Authorization', `Bearer ${accessToken}`)
+        .expect(200);
 
-        const res = await request(app.getHttpServer())
-          .get(`/groups/${group.id}/movies/search`)
-          .query({ query: 'matrix' })
-          .set('Authorization', `Bearer ${accessToken}`)
-          .expect(200);
-
-        expect(res.body).toHaveProperty('provider');
-        expect(res.body).toHaveProperty('currentGroup');
-      },
-    );
+      expect(res.body).toHaveProperty('provider');
+      expect(res.body).toHaveProperty('currentGroup');
+    });
   });
 });

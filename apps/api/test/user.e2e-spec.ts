@@ -335,17 +335,16 @@ describe('User E2E', () => {
 
   describe('Pagination', () => {
     const createUsers = async (adminToken: string, count: number) => {
-      const promises = Array.from({ length: count }, (_, i) =>
-        request(app.getHttpServer())
+      for (let i = 0; i < count; i++) {
+        await request(app.getHttpServer())
           .post('/users')
           .set('Authorization', `Bearer ${adminToken}`)
           .send({
             name: `User ${i}`,
             email: `pagination${Date.now()}-${i}@example.com`,
             password: 'SecurePass123!',
-          }),
-      );
-      await Promise.all(promises);
+          });
+      }
     };
 
     it('should use default page size', async () => {
@@ -361,7 +360,7 @@ describe('User E2E', () => {
         .expect(200);
 
       expect(response.body.length).toBeLessThanOrEqual(20);
-    }, 30000);
+    }, 60000);
 
     it('should return second page correctly', async () => {
       const { accessToken: adminToken } = await registerUser(
@@ -377,7 +376,7 @@ describe('User E2E', () => {
 
       expect(response.body.length).toBeGreaterThan(0);
       expect(response.body.length).toBeLessThanOrEqual(5);
-    }, 30000);
+    }, 45000);
 
     it('should respect custom limit', async () => {
       const { accessToken: adminToken } = await registerUser(
@@ -392,7 +391,7 @@ describe('User E2E', () => {
         .expect(200);
 
       expect(response.body.length).toBeLessThanOrEqual(5);
-    }, 30000);
+    }, 45000);
   });
 
   describe('Full Flow', () => {
