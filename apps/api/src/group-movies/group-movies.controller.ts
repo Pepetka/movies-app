@@ -23,7 +23,7 @@ import {
 } from '@nestjs/swagger';
 
 import { GroupMemberGuard, GroupModeratorGuard } from '$common/guards';
-import { Member, Moderator, User } from '$common/decorators';
+import { User } from '$common/decorators';
 
 import {
   AddMovieDto,
@@ -50,7 +50,6 @@ export class GroupMoviesController {
 
   @Get('search')
   @UseGuards(GroupMemberGuard)
-  @Member()
   @SerializeOptions({ type: SearchInGroupResponseDto })
   @ApiOperation({
     summary: 'Search movies in group context (Group members only)',
@@ -83,7 +82,6 @@ export class GroupMoviesController {
 
   @Get()
   @UseGuards(GroupMemberGuard)
-  @Member()
   @SerializeOptions({ type: GroupMovieResponseDto })
   @ApiOperation({
     summary: 'Get provider movies in group (Group members only)',
@@ -101,7 +99,6 @@ export class GroupMoviesController {
 
   @Post()
   @UseGuards(GroupModeratorGuard)
-  @Moderator()
   @SerializeOptions({ type: GroupMovieResponseDto })
   @ApiOperation({
     summary: 'Add provider movie to group (Group moderators only)',
@@ -134,7 +131,6 @@ export class GroupMoviesController {
 
   @Get(':movieId')
   @UseGuards(GroupMemberGuard)
-  @Member()
   @SerializeOptions({ type: GroupMovieResponseDto })
   @ApiOperation({ summary: 'Get movie details in group (Group members only)' })
   @ApiParam({ name: 'groupId', description: 'Group ID' })
@@ -155,7 +151,6 @@ export class GroupMoviesController {
 
   @Patch(':movieId')
   @UseGuards(GroupModeratorGuard)
-  @Moderator()
   @SerializeOptions({ type: GroupMovieResponseDto })
   @ApiOperation({
     summary: 'Update movie status in group (Group moderators only)',
@@ -182,7 +177,6 @@ export class GroupMoviesController {
 
   @Patch(':movieId/edit')
   @UseGuards(GroupModeratorGuard)
-  @Moderator()
   @SerializeOptions({ type: CustomMovieResponseDto })
   @ApiOperation({
     summary: 'Edit and convert movie to custom (Group moderators only)',
@@ -220,7 +214,6 @@ export class GroupMoviesController {
 
   @Delete(':movieId')
   @UseGuards(GroupModeratorGuard)
-  @Moderator()
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Remove movie from group (Group moderators only)' })
   @ApiParam({ name: 'groupId', description: 'Group ID' })

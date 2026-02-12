@@ -4,30 +4,16 @@ import {
   Injectable,
   ForbiddenException,
 } from '@nestjs/common';
-import { Reflector } from '@nestjs/core';
 import { ModuleRef } from '@nestjs/core';
 
 import type { UserRequest } from '$src/auth/types/user-request.type';
 import { GroupsService } from '$src/groups/groups.service';
-import { GROUP_MODERATOR_KEY } from '$common/decorators';
 
 @Injectable()
 export class GroupModeratorGuard implements CanActivate {
-  constructor(
-    private readonly reflector: Reflector,
-    private readonly moduleRef: ModuleRef,
-  ) {}
+  constructor(private readonly moduleRef: ModuleRef) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const isModeratorRequired = this.reflector.getAllAndOverride<boolean>(
-      GROUP_MODERATOR_KEY,
-      [context.getHandler(), context.getClass()],
-    );
-
-    if (!isModeratorRequired) {
-      return true;
-    }
-
     const request = context.switchToHttp().getRequest<UserRequest>();
     const user = request.user;
     const userId = user?.id;

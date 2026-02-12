@@ -4,7 +4,6 @@ import {
   Injectable,
   ForbiddenException,
 } from '@nestjs/common';
-import { Reflector } from '@nestjs/core';
 import { ModuleRef } from '@nestjs/core';
 
 import type { UserRequest } from '$src/auth/types/user-request.type';
@@ -12,10 +11,7 @@ import { GroupsService } from '$src/groups/groups.service';
 
 @Injectable()
 export class GroupAdminGuard implements CanActivate {
-  constructor(
-    private readonly reflector: Reflector,
-    private readonly moduleRef: ModuleRef,
-  ) {}
+  constructor(private readonly moduleRef: ModuleRef) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest<UserRequest>();

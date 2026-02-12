@@ -24,7 +24,7 @@ import {
 } from '@nestjs/swagger';
 
 import { GroupMemberGuard, GroupModeratorGuard } from '$common/guards';
-import { Member, Moderator, User } from '$common/decorators';
+import { User } from '$common/decorators';
 
 import {
   CreateCustomMovieDto,
@@ -41,7 +41,6 @@ export class CustomMoviesController {
 
   @Get()
   @UseGuards(GroupMemberGuard)
-  @Member()
   @SerializeOptions({ type: CustomMovieResponseDto })
   @ApiOperation({ summary: 'Get custom movies in group (Group members only)' })
   @ApiParam({ name: 'groupId', description: 'Group ID' })
@@ -70,7 +69,6 @@ export class CustomMoviesController {
 
   @Post()
   @UseGuards(GroupModeratorGuard)
-  @Moderator()
   @SerializeOptions({ type: CustomMovieResponseDto })
   @ApiOperation({
     summary: 'Create custom movie in group (Group moderators only)',
@@ -95,7 +93,6 @@ export class CustomMoviesController {
 
   @Get(':customMovieId')
   @UseGuards(GroupMemberGuard)
-  @Member()
   @SerializeOptions({ type: CustomMovieResponseDto })
   @ApiOperation({ summary: 'Get custom movie by id (Group members only)' })
   @ApiParam({ name: 'groupId', description: 'Group ID' })
@@ -116,7 +113,6 @@ export class CustomMoviesController {
 
   @Patch(':customMovieId')
   @UseGuards(GroupModeratorGuard)
-  @Moderator()
   @SerializeOptions({ type: CustomMovieResponseDto })
   @ApiOperation({ summary: 'Update custom movie (Group moderators only)' })
   @ApiParam({ name: 'groupId', description: 'Group ID' })
@@ -141,7 +137,6 @@ export class CustomMoviesController {
 
   @Delete(':customMovieId')
   @UseGuards(GroupModeratorGuard)
-  @Moderator()
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Delete custom movie (Group moderators only)' })
   @ApiParam({ name: 'groupId', description: 'Group ID' })
