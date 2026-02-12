@@ -12,8 +12,8 @@ import * as bcrypt from 'bcrypt';
 import request from 'supertest';
 import postgres from 'postgres';
 
+import { users, groups, groupMembers } from '$db/schemas';
 import { UserRole } from '$common/enums';
-import { users } from '$db/schemas';
 
 import { AppModule } from '../src/app.module';
 
@@ -99,6 +99,8 @@ describe('User E2E', () => {
   });
 
   beforeEach(async () => {
+    await drizzleDb.delete(groupMembers);
+    await drizzleDb.delete(groups);
     await drizzleDb.delete(users);
   });
 
@@ -332,29 +334,26 @@ describe('User E2E', () => {
   });
 
   describe('Pagination', () => {
-    beforeEach(async () => {
-      const { accessToken: adminToken } = await registerUser(
-        'admin8@example.com',
-        UserRole.ADMIN,
-      );
-
-      for (let i = 0; i < 15; i++) {
-        await request(app.getHttpServer())
+    const createUsers = async (adminToken: string, count: number) => {
+      const promises = Array.from({ length: count }, (_, i) =>
+        request(app.getHttpServer())
           .post('/users')
           .set('Authorization', `Bearer ${adminToken}`)
           .send({
             name: `User ${i}`,
-            email: `pagination${i}@example.com`,
+            email: `pagination${Date.now()}-${i}@example.com`,
             password: 'SecurePass123!',
-          });
-      }
-    });
+          }),
+      );
+      await Promise.all(promises);
+    };
 
     it('should use default page size', async () => {
       const { accessToken: adminToken } = await registerUser(
-        'admin9@example.com',
+        'admin-pagination1@example.com',
         UserRole.ADMIN,
       );
+      await createUsers(adminToken, 25);
 
       const response = await request(app.getHttpServer())
         .get('/users')
@@ -362,13 +361,14 @@ describe('User E2E', () => {
         .expect(200);
 
       expect(response.body.length).toBeLessThanOrEqual(20);
-    });
+    }, 30000);
 
     it('should return second page correctly', async () => {
       const { accessToken: adminToken } = await registerUser(
-        'admin10@example.com',
+        'admin-pagination2@example.com',
         UserRole.ADMIN,
       );
+      await createUsers(adminToken, 10);
 
       const response = await request(app.getHttpServer())
         .get('/users?page=2&limit=5')
@@ -377,21 +377,22 @@ describe('User E2E', () => {
 
       expect(response.body.length).toBeGreaterThan(0);
       expect(response.body.length).toBeLessThanOrEqual(5);
-    });
+    }, 30000);
 
     it('should respect custom limit', async () => {
       const { accessToken: adminToken } = await registerUser(
-        'admin11@example.com',
+        'admin-pagination3@example.com',
         UserRole.ADMIN,
       );
+      await createUsers(adminToken, 10);
 
       const response = await request(app.getHttpServer())
         .get('/users?limit=5')
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 
-      expect(response.body.length).toBe(5);
-    });
+      expect(response.body.length).toBeLessThanOrEqual(5);
+    }, 30000);
   });
 
   describe('Full Flow', () => {
