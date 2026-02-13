@@ -107,7 +107,7 @@ describe('UserController', () => {
     it('should return user by id', async () => {
       userService.findOne.mockResolvedValue(mockUser);
 
-      const result = await controller.findOne('1');
+      const result = await controller.findOne(1);
 
       expect(result).toEqual(mockUser);
       expect(userService.findOne).toHaveBeenCalledWith(1);
@@ -117,7 +117,7 @@ describe('UserController', () => {
       const error = new Error('User not found');
       userService.findOne.mockRejectedValue(error);
 
-      await expect(controller.findOne('999')).rejects.toThrow(error);
+      await expect(controller.findOne(999)).rejects.toThrow(error);
     });
   });
 
@@ -131,7 +131,7 @@ describe('UserController', () => {
     it('should update user', async () => {
       userService.update.mockResolvedValue(updatedUser);
 
-      const result = await controller.update('1', updateUserDto);
+      const result = await controller.update(1, updateUserDto);
 
       expect(result).toEqual(updatedUser);
       expect(userService.update).toHaveBeenCalledWith(1, updateUserDto);
@@ -141,7 +141,7 @@ describe('UserController', () => {
       const error = new Error('User not found');
       userService.update.mockRejectedValue(error);
 
-      await expect(controller.update('999', updateUserDto)).rejects.toThrow(
+      await expect(controller.update(999, updateUserDto)).rejects.toThrow(
         error,
       );
     });
@@ -151,7 +151,7 @@ describe('UserController', () => {
       userService.update.mockRejectedValue(error);
 
       await expect(
-        controller.update('1', { email: 'existing@example.com' }),
+        controller.update(1, { email: 'existing@example.com' }),
       ).rejects.toThrow(ConflictException);
     });
   });
@@ -160,7 +160,7 @@ describe('UserController', () => {
     it('should delete user', async () => {
       userService.remove.mockResolvedValue(undefined);
 
-      await expect(controller.remove('1')).resolves.toBeUndefined();
+      await expect(controller.remove(1)).resolves.toBeUndefined();
       expect(userService.remove).toHaveBeenCalledWith(1);
     });
 
@@ -168,7 +168,7 @@ describe('UserController', () => {
       const error = new Error('User not found');
       userService.remove.mockRejectedValue(error);
 
-      await expect(controller.remove('999')).rejects.toThrow(error);
+      await expect(controller.remove(999)).rejects.toThrow(error);
     });
   });
 });

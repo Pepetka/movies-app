@@ -210,6 +210,9 @@ jobs:
           JWT_ACCESS_EXPIRATION: 15m
           JWT_REFRESH_EXPIRATION: 7d
           COOKIE_SECRET: test-secret-key-not-for-production
+          BCRYPT_ROUNDS: 4
+          KINOPOISK_API_KEY: test_kinopoisk_api_key
+          KINOPOISK_BASE_URL: https://kinopoiskapi.com
 
       - name: Upload coverage
         uses: actions/upload-artifact@v4

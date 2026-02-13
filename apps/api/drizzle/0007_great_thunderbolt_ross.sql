@@ -1,0 +1,1 @@
+CREATE INDEX "group_movies_group_id_idx" ON "group_movies" USING btree ("group_id");

@@ -2,6 +2,7 @@ import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 
 import type { UserRequest } from '$src/auth/types/user-request.type';
+import { InsufficientRoleException } from '$common/exceptions';
 import { ROLES_KEY } from '$common/decorators';
 
 import { UserRole } from '../enums/user-role.enum';
@@ -21,6 +22,21 @@ export class RolesGuard implements CanActivate {
     }
 
     const request = context.switchToHttp().getRequest<UserRequest>();
-    return requiredRoles.some((role) => request.user?.role === role);
+    const hasRole = requiredRoles.some((role) => request.user?.role === role);
+
+    if (!hasRole) {
+      const roleNames = requiredRoles.map((r) => this.formatRoleName(r));
+      throw new InsufficientRoleException(roleNames.join(' or '));
+    }
+
+    return true;
+  }
+
+  private formatRoleName(role: UserRole): string {
+    const names: Record<UserRole, string> = {
+      [UserRole.USER]: 'user',
+      [UserRole.ADMIN]: 'admin',
+    };
+    return names[role] || role;
   }
 }

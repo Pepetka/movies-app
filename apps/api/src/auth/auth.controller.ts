@@ -31,7 +31,7 @@ import { AuthLoginDto, AuthRegisterDto, AuthResponseDto } from './dto';
 import { RefreshGuard } from './guards/refresh.guard';
 import { AuthService } from './auth.service';
 
-@ApiTags('auth')
+@ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
   constructor(

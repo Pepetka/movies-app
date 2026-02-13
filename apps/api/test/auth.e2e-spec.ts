@@ -13,8 +13,8 @@ import * as bcrypt from 'bcrypt';
 import request from 'supertest';
 import postgres from 'postgres';
 
+import { users, groups, groupMembers } from '$db/schemas';
 import { UserRole } from '$common/enums';
-import { users } from '$db/schemas';
 
 import { AppModule } from '../src/app.module';
 
@@ -108,6 +108,8 @@ describe('Auth E2E', () => {
   });
 
   beforeEach(async () => {
+    await drizzleDb.delete(groupMembers);
+    await drizzleDb.delete(groups);
     await drizzleDb.delete(users);
   });
 

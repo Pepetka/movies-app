@@ -1,11 +1,11 @@
 # Movies App Web
 
-SvelteKit фронтенд для Movies App с Svelte 5.
+SvelteKit фронтенд для Movies App.
 
 ## Стек технологий
 
 - **Framework:** SvelteKit
-- **UI:** Svelte 5 (runes syntax)
+- **UI:** Svelte (runes syntax)
 - **Styling:** Tailwind CSS
 - **Build Tool:** Vite
 

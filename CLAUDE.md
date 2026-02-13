@@ -8,12 +8,12 @@ Turborepo monorepo for a movies application with SvelteKit frontend and NestJS b
 
 ## Tech Stack
 
-- **Package Manager:** pnpm 9.0.0 (Node.js ≥18 required)
-- **Build System:** Turbo 2.7.5
-- **Frontend:** SvelteKit (Svelte 5) + Vite
-- **Backend:** NestJS 11 + Fastify + Drizzle ORM + Jest
+- **Package Manager:** pnpm (Node.js ≥18 required)
+- **Build System:** Turborepo
+- **Frontend:** SvelteKit + Vite
+- **Backend:** NestJS + Fastify + Drizzle ORM + Jest
 - **Database:** PostgreSQL
-- **Language:** TypeScript 5.9
+- **Language:** TypeScript
 
 ## Commands
 
@@ -83,17 +83,26 @@ apps/
         user.controller.ts # CRUD operations
         user.service.ts    # Business logic
         user.repository.ts # Database operations
+      groups/              # Groups module
+        groups.controller.ts # CRUD + member management
+        groups.service.ts  # Business logic with role checks
+        groups.repository.ts # Database operations
+      movies/              # Movies module (Kinopoisk integration)
+        movies.controller.ts # Search, CRUD
+        movies.service.ts  # Kinopoisk API integration
+        movies.repository.ts # Database operations
+        providers/         # Kinopoisk provider
       health/              # Health check endpoints
       csrf/                # CSRF protection module
       db/                  # Database configuration
-        schemas/           # Drizzle ORM schema definitions
+        schemas/           # Drizzle ORM schemas (users, movies, groups, etc.)
         migrate.ts         # Migration runner
         seed.ts            # Database seeder
         grant-admin.ts     # Admin role grant script
       common/              # Shared utilities
         configs/           # Validation, throttle, helmet configs
-        decorators/        # @Public, @Roles, @Author, @Cookies
-        guards/            # AuthGuard, RolesGuard, AuthorGuard, CsrfGuard
+        decorators/        # @Public, @Roles, @Author, @User, @Cookies
+        guards/            # AuthGuard, RolesGuard, CsrfGuard, Group*Guard
         exceptions/        # Custom exceptions
         validators/        # Custom class-validator decorators
 packages/
@@ -121,12 +130,22 @@ packages/
 2. **CsrfGuard** - CSRF protection (disabled in test)
 3. **AuthGuard** - JWT validation (use @Public() to bypass)
 4. **RolesGuard** - Role-based access (@Roles('admin'))
-5. **AuthorGuard** - Resource ownership validation (@Author())
+5. **GroupMemberGuard** - Group membership check
+6. **GroupModeratorGuard** - Moderator or admin in group
+7. **GroupAdminGuard** - Group admin only
 
 ### User Roles
 
+**Global roles (users table):**
+
 - **USER** - Default role for authenticated users
 - **ADMIN** - Administrative privileges
+
+**Group roles (group_members table):**
+
+- **member** - Regular group member
+- **moderator** - Can manage movies and members
+- **admin** - Full group control, can transfer ownership
 
 ### Rate Limiting Tiers
 
@@ -173,7 +192,11 @@ curl http://localhost:8080/api/v1/users/me \
 ### Current Schema
 
 - **users** - id, name, email, passwordHash, role, refreshTokenHash, timestamps
-- **movies** - id, externalId (TMDB), title, timestamps
+- **movies** - id, externalId (Kinopoisk), imdbId, title, posterPath, overview, releaseYear, rating, genres, runtime, timestamps
+- **groups** - id, name, description, avatarUrl, ownerId, timestamps
+- **group_members** - id, groupId, userId, role (admin/moderator/member), timestamps
+- **group_movies** - id, groupId, movieId, addedBy, status, plannedDate, watchedDate, timestamps
+- **custom_movies** - id, groupId, title, posterPath, overview, releaseYear, runtime, status, plannedDate, watchedDate, createdById, timestamps
 
 ## Environment Variables
 
@@ -188,3 +211,5 @@ Key variables (see .env.example for full list):
 - `BCRYPT_ROUNDS` - Default: 12
 - `WEB_URL` - Frontend URL for CORS
 - `PORT` - API server port (default: 8080)
+- `KINOPOISK_API_KEY` - Kinopoisk API key for movie search
+- `KINOPOISK_BASE_URL` - Kinopoisk API base URL (required)

@@ -12,6 +12,10 @@ import { DRIZZLE } from '../db/db.module';
 export class HealthService {
   constructor(@Inject(DRIZZLE) private readonly db: DrizzleDb) {}
 
+  /**
+   * Checks health status of the application and database
+   * @returns Health status including database connection state
+   */
   async health(): Promise<HealthResponseDto> {
     const timestamp = Date.now();
 

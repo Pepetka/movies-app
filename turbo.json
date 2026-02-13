@@ -28,6 +28,7 @@
     "MODE",
     "API_URL",
     "ADMIN_EMAIL",
-    "ADMIN_PASSWORD"
+    "ADMIN_PASSWORD",
+    "KINOPOISK_API_KEY"
   ]
 }
