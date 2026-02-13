@@ -3,6 +3,7 @@ import {
   IsNumber,
   IsOptional,
   IsString,
+  IsUrl,
   Max,
   Min,
   validateSync,
@@ -51,7 +52,7 @@ class EnvironmentVariables {
   @IsString()
   KINOPOISK_API_KEY: string;
 
-  @IsString()
+  @IsUrl({ require_tld: false })
   KINOPOISK_BASE_URL: string;
 
   @IsOptional()

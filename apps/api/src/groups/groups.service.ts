@@ -40,7 +40,6 @@ export class GroupsService {
       name: dto.name,
       description: dto.description ?? null,
       avatarUrl: dto.avatarUrl ?? null,
-      ownerId: userId,
     });
 
     await this.groupsRepository.addMember({
@@ -415,17 +414,6 @@ export class GroupsService {
   async isModerator(groupId: number, userId: number): Promise<boolean> {
     const member = await this.groupsRepository.findMember(groupId, userId);
     return member?.role === GroupMemberRole.MODERATOR;
-  }
-
-  /**
-   * Checks if user is the group owner
-   * @param groupId - Group ID
-   * @param userId - User ID
-   * @returns true if user is the owner
-   */
-  async isOwner(groupId: number, userId: number): Promise<boolean> {
-    const group = await this.groupsRepository.findGroupById(groupId);
-    return group?.ownerId === userId;
   }
 
   /**

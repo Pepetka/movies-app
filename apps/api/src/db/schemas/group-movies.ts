@@ -5,6 +5,7 @@ import {
   timestamp,
   unique,
   pgEnum,
+  index,
 } from 'drizzle-orm/pg-core';
 
 import { timestamps } from './timestamps';
@@ -36,5 +37,8 @@ export const groupMovies = pgTable(
     watchedDate: timestamp(),
     ...timestamps,
   },
-  (table) => [unique().on(table.groupId, table.movieId)],
+  (table) => [
+    unique().on(table.groupId, table.movieId),
+    index('group_movies_group_id_idx').on(table.groupId),
+  ],
 );

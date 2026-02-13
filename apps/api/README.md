@@ -271,8 +271,8 @@ Guards выполняются в порядке (определено в app.mod
 | `JWT_ACCESS_EXPIRATION`  | Access token TTL                    | 15m         |
 | `JWT_REFRESH_EXPIRATION` | Refresh token TTL                   | 7d          |
 | `BCRYPT_ROUNDS`          | Bcrypt rounds                       | 12          |
-| `KINOPOISK_API_URL`      | Kinopoisk API URL                   | -           |
-| `KINOPOISK_API_TOKEN`    | Kinopoisk API token                 | -           |
+| `KINOPOISK_BASE_URL`     | Kinopoisk API URL                   | -           |
+| `KINOPOISK_API_KEY`      | Kinopoisk API key                   | -           |
 
 ## Тестирование
 

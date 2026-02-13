@@ -23,7 +23,6 @@ const mockGroup = {
   name: 'Test Group',
   description: 'Test Description',
   avatarUrl: 'https://example.com/avatar.jpg',
-  ownerId: 1,
   createdAt: new Date(),
   updatedAt: new Date(),
 };
@@ -102,7 +101,6 @@ describe('GroupsService', () => {
         name: createDto.name,
         description: createDto.description,
         avatarUrl: createDto.avatarUrl,
-        ownerId: 1,
       });
       expect(groupsRepository.addMember).toHaveBeenCalledWith({
         groupId: mockGroup.id,

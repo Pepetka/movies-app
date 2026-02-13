@@ -14,9 +14,6 @@ export class GroupResponseDto {
   avatarUrl?: string;
 
   @ApiProperty()
-  ownerId: number;
-
-  @ApiProperty()
   createdAt: Date;
 
   @ApiProperty()

@@ -43,7 +43,6 @@ export class GroupsRepository {
         name: groups.name,
         description: groups.description,
         avatarUrl: groups.avatarUrl,
-        ownerId: groups.ownerId,
         createdAt: groups.createdAt,
         updatedAt: groups.updatedAt,
       })
@@ -152,7 +151,6 @@ export class GroupsRepository {
         groupName: groups.name,
         groupDescription: groups.description,
         groupAvatarUrl: groups.avatarUrl,
-        groupOwnerId: groups.ownerId,
         groupCreatedAt: groups.createdAt,
         groupUpdatedAt: groups.updatedAt,
         memberId: groupMembers.id,
@@ -200,7 +198,6 @@ export class GroupsRepository {
         name: row.groupName,
         description: row.groupDescription,
         avatarUrl: row.groupAvatarUrl,
-        ownerId: row.groupOwnerId,
         createdAt: row.groupCreatedAt,
         updatedAt: row.groupUpdatedAt,
       },

@@ -1,4 +1,4 @@
-import { eq, and, ilike, or, asc } from 'drizzle-orm';
+import { eq, and, ilike, or, asc, count } from 'drizzle-orm';
 import { Inject, Injectable } from '@nestjs/common';
 
 import {
@@ -103,10 +103,10 @@ export class CustomMoviesRepository {
   }
 
   async countByGroup(groupId: number): Promise<number> {
-    const result = await this.db
-      .select({ count: customMovies.id })
+    const [result] = await this.db
+      .select({ count: count() })
       .from(customMovies)
       .where(eq(customMovies.groupId, groupId));
-    return result.length;
+    return result.count;
   }
 }
