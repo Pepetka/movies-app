@@ -21,6 +21,19 @@ NestJS API service with Fastify adapter. Entry point `apps/api/src/main.ts`, mod
   - `user.repository.ts` - Database operations via Drizzle
   - `dto/` - UserCreate, UserUpdate, UserResponse DTOs
 
+- `groups/` - Group management with member roles
+  - `groups.controller.ts` - CRUD + member management, ownership transfer
+  - `groups.service.ts` - Business logic with role checks
+  - `groups.repository.ts` - Database operations via Drizzle
+  - `dto/` - GroupCreate, GroupUpdate, GroupMemberAdd, etc.
+
+- `movies/` - Movie management with Kinopoisk integration
+  - `movies.controller.ts` - Search (Kinopoisk), CRUD operations
+  - `movies.service.ts` - Kinopoisk API integration, deduplication logic
+  - `movies.repository.ts` - Database operations via Drizzle
+  - `providers/` - Kinopoisk provider implementation
+  - `dto/` - MovieCreate, MovieSearch, MovieResponse, etc.
+
 - `health/` - Health check endpoints
 - `csrf/` - CSRF token generation and validation
 
@@ -31,7 +44,13 @@ NestJS API service with Fastify adapter. Entry point `apps/api/src/main.ts`, mod
 
 **Database Layer:**
 
-- `db/schemas/` - Drizzle ORM schema definitions (users, movies, timestamps)
+- `db/schemas/` - Drizzle ORM schema definitions:
+  - `users.ts` - User accounts with auth
+  - `movies.ts` - Provider movies (Kinopoisk snapshot)
+  - `groups.ts` - User groups
+  - `group-members.ts` - Group membership with roles
+  - `group-movies.ts` - Movies in groups with status
+  - `custom-movies.ts` - User-created movies
 - `db/migrate.ts` - Migration runner script
 - `db/seed.ts` - Admin user seeder
 - `db/grant-admin.ts` - Admin role grant utility
@@ -39,9 +58,9 @@ NestJS API service with Fastify adapter. Entry point `apps/api/src/main.ts`, mod
 **Common Utilities:**
 
 - `common/configs/` - Validation, throttle, helmet configurations
-- `common/decorators/` - @Public, @Roles, @Author, @Cookies, @CsrfProtected
-- `common/guards/` - AuthGuard, RolesGuard, AuthorGuard, CsrfGuard
-- `common/exceptions/` - EmailAlreadyInUseException
+- `common/decorators/` - @Public, @Roles, @Author, @User, @Cookies, @CsrfProtected
+- `common/guards/` - AuthGuard, RolesGuard, CsrfGuard, GroupMemberGuard, GroupModeratorGuard, GroupAdminGuard
+- `common/exceptions/` - Custom exceptions (EmailAlreadyInUse, NotGroupMember, etc.)
 - `common/validators/` - Custom class-validator decorators
 
 ### Frontend (`apps/web`)
@@ -135,12 +154,22 @@ pnpm run db:grant-admin # Grant admin role to user by email
 2. **CsrfGuard** - CSRF protection (disabled in test)
 3. **AuthGuard** - JWT validation (bypass with @Public())
 4. **RolesGuard** - Role-based access (@Roles('admin'))
-5. **AuthorGuard** - Resource ownership (@Author())
+5. **GroupMemberGuard** - Group membership check
+6. **GroupModeratorGuard** - Moderator or admin in group
+7. **GroupAdminGuard** - Group admin only
 
 ### User Roles
 
+**Global roles (users table):**
+
 - `USER` - Default role for authenticated users
 - `ADMIN` - Full administrative privileges
+
+**Group roles (group_members table):**
+
+- `member` - Regular group member
+- `moderator` - Can manage movies and members
+- `admin` - Full group control, can transfer ownership
 
 ### Rate Limiting
 
@@ -175,4 +204,10 @@ pnpm run db:grant-admin # Grant admin role to user by email
 - PostgreSQL with Drizzle ORM
 - Migrations must be generated locally and committed
 - Migrations run automatically in CI/CD before service restart
-- Current schema: users (with auth), movies (placeholder)
+- Current schema:
+  - `users` - User accounts with auth tokens
+  - `movies` - Provider movies (Kinopoisk snapshot)
+  - `groups` - User groups
+  - `group_members` - Group membership with roles
+  - `group_movies` - Movies in groups with status
+  - `custom_movies` - User-created movies per group

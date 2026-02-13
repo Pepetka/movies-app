@@ -4,17 +4,17 @@
 
 ## Технологии
 
-- **Package Manager:** pnpm 9.0.0
-- **Build System:** Turborepo 2.7.5
-- **Frontend:** SvelteKit (Svelte 5) + Vite
-- **Backend:** NestJS 11 + Fastify + Drizzle ORM
+- **Package Manager:** pnpm
+- **Build System:** Turborepo
+- **Frontend:** SvelteKit + Vite
+- **Backend:** NestJS + Fastify + Drizzle ORM
 - **Database:** PostgreSQL
-- **Language:** TypeScript 5.9
+- **Language:** TypeScript
 
 ## Требования
 
 - Node.js ≥ 18
-- pnpm 9.0.0+
+- pnpm
 - PostgreSQL (или Docker)
 
 ## Быстрый старт
@@ -93,20 +93,23 @@ pnpm run db:grant-admin         # Назначить роль админа
 ### Реализовано
 
 - JWT аутентификация с двухтокеновой схемой (access + refresh)
-- Ролевая модель (USER, ADMIN)
+- Ролевая модель (USER, ADMIN глобально; admin/moderator/member в группах)
 - Rate limiting с различными tier-ами
 - CSRF защита
 - Swagger документация API
 - Health check endpoints
 - Управление пользователями (CRUD)
 - Миграции базы данных через Drizzle
+- Интеграция с Kinopoisk API для поиска фильмов
+- Группы пользователей (создание, управление участниками, роли)
+- Провайдерские фильмы (Kinopoisk) и кастомные фильмы
+- Статусы фильмов в группах (tracking, planned, watched)
 
 ### В разработке
 
-- Интеграция с TMDB API для поиска фильмов
-- Группы пользователей
-- Управление списками фильмов
-- Оценки и отзывы
+- Пригласительные ссылки в группы
+- Оценки и отзывы на фильмы
+- Telegram бот для уведомлений
 
 ## Release Management
 
@@ -188,17 +191,25 @@ apps/
         user.controller.ts      # CRUD endpoints
         user.service.ts         # Business logic
         user.repository.ts      # Database operations
+      groups/                   # Группы пользователей
+        groups.controller.ts    # CRUD + управление участниками
+        groups.service.ts       # Business logic
+        groups.repository.ts    # Database operations
+      movies/                   # Работа с фильмами (Kinopoisk)
+        movies.controller.ts    # Поиск, CRUD
+        movies.service.ts       # Kinopoisk интеграция
+        movies.repository.ts    # Database operations
       health/                   # Health check endpoints
       csrf/                     # CSRF защита
       db/                       # Drizzle ORM
-        schemas/                # Схемы БД
+        schemas/                # Схемы БД (users, movies, groups, etc.)
         migrate.ts              # Миграции
         seed.ts                 # Seeder
         grant-admin.ts          # Grant admin role
       common/                   # Общие утилиты
         configs/                # Validation, throttle, helmet
-        decorators/             # @Public, @Roles, @Author
-        guards/                 # AuthGuard, RolesGuard, AuthorGuard, CsrfGuard
+        decorators/             # @Public, @Roles, @Author, @User
+        guards/                 # AuthGuard, RolesGuard, CsrfGuard, GroupMemberGuard, etc.
         exceptions/             # Custom exceptions
         validators/             # Custom class-validator decorators
 packages/
@@ -209,6 +220,7 @@ docker/                         # Docker конфигурации
 docs/                           # Документация
   product-roadmap.md            # Roadmap проекта
   database-schema.md            # Схема БД
+  movies-architecture.md        # Архитектура модуля фильмов
   deployment.md                 # Руководство по деплою
 ```
 
@@ -286,6 +298,7 @@ GET /api/v1/health
 
 - [Product Roadmap](docs/product-roadmap.md) - План развития приложения
 - [Database Schema](docs/database-schema.md) - Схема базы данных
+- [Movies Architecture](docs/movies-architecture.md) - Архитектура модуля фильмов
 - [Deployment Guide](docs/deployment.md) - Руководство по развёртыванию
 
 ## Лицензия

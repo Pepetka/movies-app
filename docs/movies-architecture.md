@@ -4,19 +4,19 @@
 
 Архитектура модуля работы с фильмами разделена на два типа контента:
 
-1. **Провайдерские фильмы** — данные импортируются из внешнего провайдера (TMDB) при добавлении в группу и больше не синхронизируются (snapshot подход)
+1. **Провайдерские фильмы** — данные импортируются из Kinopoisk при добавлении в группу и больше не синхронизируются (snapshot подход)
 2. **Кастомные фильмы** — создаются пользователями вручную, принадлежат конкретной группе
 
 ## Ключевые решения
 
-| Решение                     | Значение                                             |
-| --------------------------- | ---------------------------------------------------- |
-| Обновление при дедупликации | **Никогда** - используем существующую копию как есть |
-| Дедупликация                | **imdbId приоритет**, затем `externalId`             |
-| Пользовательские правки     | **Глобально** в таблице `movies`                     |
-| Удаление провайдерских      | **Удаление связи** из `group_movies`, фильм остаётся |
-| Удаление кастомных          | **CASCADE** с группой (фильм удаляется)              |
-| Поиск                       | **Параллельный**: TMDB + local custom                |
+| Решение                      | Значение                                             |
+| ---------------------------- | ---------------------------------------------------- |
+| Обновление при дедупликации  | **Никогда** - используем существующую копию как есть |
+| Дедупликация                 | **imdbId приоритет**, затем `externalId`             |
+| Редактирование провайдерских | **Конвертация** в custom фильм с копированием данных |
+| Удаление провайдерских       | **Удаление связи** из `group_movies`, фильм остаётся |
+| Удаление кастомных           | **CASCADE** с группой (фильм удаляется)              |
+| Поиск                        | **Параллельный**: Kinopoisk + custom текущей группы  |
 
 ---
 
@@ -24,18 +24,17 @@
 
 ### movies (Провайдерские фильмы)
 
-Snapshot из TMDB, immutable после создания.
+Snapshot из Kinopoisk, immutable после создания.
 
 ```sql
 movies
   id                  serial PRIMARY KEY
   imdbId              varchar(20)              -- индекс
   externalId          varchar(255) NOT NULL, UNIQUE
-  providerId          varchar(50) DEFAULT 'tmdb'
   title               varchar(255) NOT NULL
   posterPath          varchar(512)
   overview            text
-  releaseDate         date
+  releaseYear         integer
   rating              decimal(3,1)
   genres              jsonb
   runtime             integer
@@ -59,15 +58,19 @@ custom_movies
   title               varchar(255) NOT NULL
   posterPath          varchar(512)
   overview            text
-  releaseDate         date
+  releaseYear         integer
   runtime             integer
-  createdById         integer REFERENCES users(id)
+  status              enum('tracking', 'planned', 'watched') DEFAULT 'tracking'
+  plannedDate         timestamp
+  watchedDate         timestamp
+  createdById         integer REFERENCES users(id) ON DELETE CASCADE
   createdAt           timestamp
   updatedAt           timestamp
 
 Indexes:
   - group_id_idx
   - title_idx
+  - status_idx
 ```
 
 ### groups (Группа)
@@ -125,20 +128,42 @@ UNIQUE(groupId, movieId)
 ┌────────────────────────────────────────────────────────────────────────┐
 │  SEARCH                                                                │
 │  User/Admin → GET /groups/:id/movies/search?query=matrix              │
-│  → { provider: [...], currentGroup: [], yourMovies: [] }              │
+│  → { provider: [...], currentGroup: [] }                              │
 └────────────────────────────────────────────────────────────────────────┘
                               ↓ user selects provider movie
 ┌────────────────────────────────────────────────────────────────────────┐
 │  ADD TO GROUP                                                          │
 │  POST /groups/:id/movies                                               │
-│  { externalId: "603", providerId: "tmdb" }                             │
+│  { imdbId: "tt0133093" }                                             │
 │                                                                        │
 │  1. GroupMoviesService.findOrCreateMovie():                            │
-│     ├─ findByExternalId("603")                                        │
-│     └─ если не найден → provider.getMovieDetails() → movies.create()  │
+│     ├─ findByImdbId("tt0133093")                                       │
+│     └─ если не найден → provider.findByImdbId() → movies.create()     │
 │                                                                        │
 │  2. Создание связи:                                                    │
 │     └→ group_movies.create({ groupId, movieId, status: "tracking" })   │
+└────────────────────────────────────────────────────────────────────────┘
+```
+
+### Редактирование провайдерского фильма (конвертация в custom)
+
+```
+┌────────────────────────────────────────────────────────────────────────┐
+│  EDIT & CONVERT                                                       │
+│  PATCH /groups/:id/movies/:movieId/edit                               │
+│  { title: "Матрица (режиссёрская версия)", overview: "..." }           │
+│                                                                        │
+│  1. Создаётся custom фильм на основе данных провайдерского:            │
+│     └→ custom_movies.create({                                           │
+│           groupId, title, posterPath, overview,                         │
+│           releaseYear, runtime, status, dates...                         │
+│        })                                                              │
+│                                                                        │
+│  2. Удаляется связь из group_movies:                                   │
+│     └→ group_movies.delete(groupId, movieId)                            │
+│                                                                        │
+│  Результат: провайдерский фильм остаётся в movies,                     │
+│  группе теперь принадлежит custom фильм с изменёнными данными           │
 └────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -159,22 +184,18 @@ UNIQUE(groupId, movieId)
 ## Поиск в контексте группы
 
 ```typescript
-async searchForGroup(groupId: number, userId: number, query: string) {
-  const [providerResults, currentCustom, yourCustom] = await Promise.all([
-    // 1. TMDB API
-    provider.search(query),
+async searchInGroup(groupId: number, query: string, page = 1) {
+  const [providerResults, currentCustom] = await Promise.all([
+    // 1. Kinopoisk API
+    moviesService.search({ query, page }),
 
     // 2. Custom фильмы этой группы
-    customMoviesRepo.findByGroup(groupId, query),
-
-    // 3. Custom фильмов из других групп где юзер модератор/админ
-    customMoviesRepo.findByUserGroups(userId, query),
+    customMoviesService.findByGroup(groupId, query),
   ]);
 
   return {
-    provider: providerResults,      // Результаты из TMDB
-    currentGroup: currentCustom,    // Custom этой группы
-    yourMovies: yourCustom          // "Ваши фильмы" из других групп
+    provider: providerResults,   // Результаты из Kinopoisk
+    currentGroup: currentCustom,  // Custom этой группы
   };
 }
 ```
@@ -185,15 +206,12 @@ async searchForGroup(groupId: number, userId: number, query: string) {
 Поиск в группе "Избранное": "Matrix"
 
 ┌─ Результаты ─────────────────────┐
-│ 📦 TMDB                          │
+│ 📦 Kinopoisk                     │
 │   └─ Inception                   │
 │   └─ The Matrix                  │
 │                                  │
 │ 📁 Избранное                     │
 │   └─ Семейное видео 2024         │
-│                                  │
-│ 👤 Ваши фильмы                   │
-│   └─ Праздник 2023 (Родственники)│
 └──────────────────────────────────┘
 ```
 
@@ -203,31 +221,39 @@ async searchForGroup(groupId: number, userId: number, query: string) {
 
 ```typescript
 class GroupMoviesService {
-  private async findOrCreateMovie(dto: AddMovieDto): Promise<Movie> {
+  async findOrCreateMovie(dto: AddMovieDto): Promise<Movie> {
+    const provider = this.movieProvidersService.getProvider("kinopoisk");
+
+    let movie: Movie | null = null;
+
     // Priority 1: imdbId (универсальный)
     if (dto.imdbId) {
-      const movie = await this.moviesRepo.findByImdbId(dto.imdbId);
-      if (movie) return movie;
+      movie = await this.moviesRepository.findByImdbId(dto.imdbId);
     }
 
     // Priority 2: externalId (специфичный для провайдера)
-    if (dto.externalId) {
-      const movie = await this.moviesRepo.findByExternalId(dto.externalId);
-      if (movie) return movie;
+    if (!movie && dto.externalId) {
+      movie = await this.moviesRepository.findByExternalId(dto.externalId);
+    }
+
+    if (movie) {
+      return movie; // Используем существующую копию
     }
 
     // Не найден локально - импортируем из провайдера
-    return this.importMovie(dto);
+    return this.importMovie(dto, provider);
   }
 
-  private async importMovie(dto: AddMovieDto): Promise<Movie> {
-    const provider = this.getProvider(dto.providerId || "tmdb");
-
+  private async importMovie(
+    dto: AddMovieDto,
+    provider: MovieProvider,
+  ): Promise<Movie> {
     const details = dto.imdbId
       ? await provider.findByImdbId(dto.imdbId)
-      : await provider.getMovieDetails(dto.externalId);
+      : await provider.getMovieDetails(dto.externalId ?? "");
 
-    return this.moviesRepo.create(provider.mapToNewMovie(details));
+    const newMovie = provider.mapToNewMovie(details);
+    return this.moviesRepository.create(newMovie);
   }
 }
 ```
@@ -239,21 +265,27 @@ class GroupMoviesService {
 ### Провайдерский фильм
 
 ```typescript
-async removeMovieFromGroup(groupId: number, movieId: number): Promise<void> {
+async remove(groupId: number, movieId: number): Promise<void> {
+  await this.findOne(groupId, movieId);
+
   // Удаляем только связь
-  await this.groupMoviesRepo.delete(groupId, movieId);
+  await this.groupMoviesRepository.delete(groupId, movieId);
 
   // Фильм остаётся в таблице movies (может использоваться в других группах)
+  this._logger.log(`Movie ${movieId} removed from group ${groupId}`);
 }
 ```
 
 ### Кастомный фильм
 
 ```typescript
-async removeCustomMovie(id: number): Promise<void> {
+async remove(id: number, groupId: number): Promise<void> {
+  await this.findOne(id, groupId);
+
   // Кастомный фильм удаляется CASCADE вместе с группой
   // Или явно через DELETE FROM custom_movies WHERE id = $1
-  await this.customMoviesRepo.delete(id);
+  await this.customMoviesRepository.delete(id);
+  this._logger.log(`Custom movie ${id} deleted`);
 }
 ```
 
@@ -261,44 +293,52 @@ async removeCustomMovie(id: number): Promise<void> {
 
 ## API Endpoints
 
-### Поиск фильмов (в контексте группы)
+### Глобальные фильмы (admin только)
 
-| Метод | Роут                                     | Описание                          | Guard   |
-| ----- | ---------------------------------------- | --------------------------------- | ------- |
-| GET   | `/groups/:id/movies/search?query=matrix` | Параллельный поиск: TMDB + custom | Members |
+| Метод  | Роут             | Описание                                | Guard         |
+| ------ | ---------------- | --------------------------------------- | ------------- |
+| GET    | `/movies`        | Все провайдерские фильмы (с пагинацией) | Admin         |
+| GET    | `/movies/search` | Поиск через Kinopoisk API               | Public        |
+| POST   | `/movies`        | Создать фильм по imdbId/externalId      | Admin         |
+| GET    | `/movies/:id`    | Детали провайдерского фильма            | Authenticated |
+| PATCH  | `/movies/:id`    | Редактировать данные                    | Admin         |
+| DELETE | `/movies/:id`    | Удалить фильм                           | Admin         |
 
 ### Провайдерские фильмы в группе
 
-| Метод  | Роут                      | Описание                     | Guard      |
-| ------ | ------------------------- | ---------------------------- | ---------- |
-| GET    | `/groups/:id/movies`      | Список провайдерских фильмов | Members    |
-| POST   | `/groups/:id/movies`      | Добавить провайдерский фильм | Moderators |
-| GET    | `/groups/:id/movies/:mid` | Детали фильма в группе       | Members    |
-| PATCH  | `/groups/:id/movies/:mid` | Изменить статус/дату         | Moderators |
-| DELETE | `/groups/:id/movies/:mid` | Удалить из группы            | Moderators |
+| Метод  | Роут                                    | Описание                                | Guard      |
+| ------ | --------------------------------------- | --------------------------------------- | ---------- |
+| GET    | `/groups/:groupId/movies`               | Список провайдерских фильмов группы     | Members    |
+| GET    | `/groups/:groupId/movies/search`        | Поиск в группе (Kinopoisk + custom)     | Members    |
+| POST   | `/groups/:groupId/movies`               | Добавить фильм в группу                 | Moderators |
+| GET    | `/groups/:groupId/movies/:movieId`      | Детали фильма в группе                  | Members    |
+| PATCH  | `/groups/:groupId/movies/:movieId`      | Изменить статус/дату                    | Moderators |
+| PATCH  | `/groups/:groupId/movies/:movieId/edit` | Редактировать и конвертировать в custom | Moderators |
+| DELETE | `/groups/:groupId/movies/:movieId`      | Удалить из группы                       | Moderators |
 
 ### Кастомные фильмы в группе
 
-| Метод  | Роут                             | Описание              | Guard      |
-| ------ | -------------------------------- | --------------------- | ---------- |
-| GET    | `/groups/:id/custom-movies`      | Список custom фильмов | Members    |
-| POST   | `/groups/:id/custom-movies`      | Создать custom фильм  | Moderators |
-| GET    | `/groups/:id/custom-movies/:cid` | Детали custom фильма  | Members    |
-| PATCH  | `/groups/:id/custom-movies/:cid` | Редактировать         | Moderators |
-| DELETE | `/groups/:id/custom-movies/:cid` | Удалить               | Moderators |
-
-### Глобальные фильмы (admin только)
-
-| Метод  | Роут          | Описание                     | Guard         |
-| ------ | ------------- | ---------------------------- | ------------- |
-| GET    | `/movies`     | Все провайдерские фильмы     | Admin         |
-| GET    | `/movies/:id` | Детали провайдерского фильма | Authenticated |
-| PATCH  | `/movies/:id` | Исправить ошибки данных      | Admin         |
-| DELETE | `/movies/:id` | Удалить фильм                | Admin         |
+| Метод  | Роут                                            | Описание              | Guard      |
+| ------ | ----------------------------------------------- | --------------------- | ---------- |
+| GET    | `/groups/:groupId/custom-movies`                | Список custom фильмов | Members    |
+| POST   | `/groups/:groupId/custom-movies`                | Создать custom фильм  | Moderators |
+| GET    | `/groups/:groupId/custom-movies/:customMovieId` | Детали custom фильма  | Members    |
+| PATCH  | `/groups/:groupId/custom-movies/:customMovieId` | Редактировать         | Moderators |
+| DELETE | `/groups/:groupId/custom-movies/:customMovieId` | Удалить               | Moderators |
 
 ---
 
 ## DTO
+
+### Статусы фильмов
+
+```typescript
+enum MovieStatus {
+  TRACKING = "tracking", // Отслеживается (по умолчанию)
+  PLANNED = "planned", // Запланирован к просмотру
+  WATCHED = "watched", // Просмотрен
+}
+```
 
 ### AddMovieDto (добавление провайдерского фильма в группу)
 
@@ -307,11 +347,12 @@ async removeCustomMovie(id: number): Promise<void> {
   // Либо IMDb ID (приоритет)
   imdbId?: string;  // "tt0133093"
 
-  // Либо externalId + providerId
-  externalId?: string;  // "603"
-  providerId?: string;  // "tmdb" (default)
+  // Либо externalId Kinopoisk
+  externalId?: string;  // "301"
 }
 ```
+
+**Валидация:** обязательно должно быть указано либо `imdbId`, либо `externalId`.
 
 ### CreateCustomMovieDto (создание кастомного фильма)
 
@@ -320,32 +361,45 @@ async removeCustomMovie(id: number): Promise<void> {
   title: string;
   posterPath?: string;
   overview?: string;
-  releaseDate?: string;  // ISO 8601
+  releaseYear?: number;
   runtime?: number;
-}
-```
-
-### GroupMovieUpdateDto (изменение статуса провайдерского фильма)
-
-```typescript
-{
-  status?: 'tracking' | 'planned' | 'watched';
+  status?: MovieStatus;  // default: 'tracking'
   plannedDate?: string;  // ISO 8601
   watchedDate?: string;  // ISO 8601
 }
 ```
 
-### UpdateCustomMovieDto (редактирование кастомного фильма)
+### EditGroupMovieDto (редактирование и конвертация провайдерского фильма)
 
 ```typescript
 {
+  // Данные для редактирования (опционально)
   title?: string;
   posterPath?: string;
   overview?: string;
-  releaseDate?: string;
+  releaseYear?: number;
   runtime?: number;
+
+  // Статус и даты (копируются из group_movies если не указаны)
+  status?: MovieStatus;
+  plannedDate?: string;  // ISO 8601
+  watchedDate?: string;  // ISO 8601
 }
 ```
+
+**Примечание:** При вызове `PATCH /groups/:groupId/movies/:movieId/edit` создаётся новый custom фильм, а связь с провайдерским фильмом удаляется.
+
+### GroupMovieUpdateDto (изменение статуса провайдерского фильма)
+
+```typescript
+{
+  status?: MovieStatus;
+  plannedDate?: string;  // ISO 8601
+  watchedDate?: string;  // ISO 8601
+}
+```
+
+**Валидация:** при установке `status='watched'` требуется `watchedDate`, при `status='planned'` требуется `plannedDate`.
 
 ---
 
@@ -357,37 +411,16 @@ async removeCustomMovie(id: number): Promise<void> {
 interface MovieProvider {
   readonly name: string;
 
-  search(
-    query: string,
-    page?: number,
-    language?: string,
-  ): Promise<ProviderSearchResult>;
-  getMovieDetails(
-    externalId: string,
-    language?: string,
-  ): Promise<ProviderMovieDetails>;
-  findByImdbId(
-    imdbId: string,
-    language?: string,
-  ): Promise<ProviderMovieDetails>;
+  search(query: string, page?: number): Promise<ProviderSearchResult>;
+  getMovieDetails(externalId: string): Promise<ProviderMovieDetails>;
+  findByImdbId(imdbId: string): Promise<ProviderMovieDetails>;
   mapToNewMovie(details: ProviderMovieDetails): NewMovie;
 }
 ```
 
 ### Реализации
 
-- **TmdbService** - TMDB API (default для всех)
-- **OmdbService** - OMDB API (только для admin, TODO)
-
----
-
-## Статусы фильма в группе
-
-| Статус     | Описание                              | Дата          |
-| ---------- | ------------------------------------- | ------------- |
-| `tracking` | Отслеживается (дефолт при добавлении) | -             |
-| `planned`  | Запланирован к просмотру              | `plannedDate` |
-| `watched`  | Просмотрен                            | `watchedDate` |
+- **KinopoiskService** — Kinopoisk API (default для всех)
 
 ---
 
@@ -396,7 +429,6 @@ interface MovieProvider {
 ### Custom фильмы
 
 - **Нет переноса между группами** — кастомный фильм принадлежит только одной группе
-- **Экспорт/импорт** — можно добавить позже (JSON/CSV)
 - **CASCADE удаление** — при удалении группы удаляются все её custom фильмы
 
 ### Провайдерские фильмы
@@ -404,3 +436,4 @@ interface MovieProvider {
 - **Snapshot подход** — данные не обновляются после импорта
 - **Переиспользование** — один фильм может быть в нескольких группах
 - **Безопасное удаление** — удаление из группы не удаляет фильм из БД
+- **Редактирование через конвертацию** — для редактирования провайдерский фильм конвертируется в custom

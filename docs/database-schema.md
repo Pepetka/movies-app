@@ -1,27 +1,23 @@
 # Movies App - Схема базы данных
 
-Документ описывает все таблицы, их поля и связи между ними. Разделено по этапам — какие таблицы появляются на каком этапе разработки.
+Документ описывает все таблицы, их поля и связи между ними.
 
 > Типы данных указаны приближённо к PostgreSQL. Все таблицы имеют поля `created_at` и `updated_at` (timestamp, default now()).
 
 ---
 
-## Текущая реализация (feat/auth)
-
-На текущий момент реализована базовая схема для аутентификации и управления пользователями.
-
-## Диаграмма связей (текущее состояние)
+## Диаграмма связей
 
 ```
-users ──┬── (future: group_members > groups > group_movies > movies)
+users ──┬── group_members ──> groups ──┬── group_movies ──> movies (Kinopoisk)
+        │                              │
+        │                              └── custom_movies
         │
         ├── (future: reviews)
         │
         ├── (future: oauth_accounts)
         │
         └── (future: totp_secrets)
-
-movies (placeholder)
 ```
 
 ---
@@ -57,23 +53,30 @@ movies (placeholder)
 
 ### movies
 
-Заглушка для будущей функциональности фильмов.
+Провайдерские фильмы из Kinopoisk (snapshot при импорте).
 
-| Поле        | Тип                                | Описание                        |
-| ----------- | ---------------------------------- | ------------------------------- |
-| **id**      | serial, PK                         |                                 |
-| external_id | varchar(255), NOT NULL, UNIQUE     | ID фильма во внешнем API (TMDB) |
-| title       | varchar(255), NOT NULL             | Название фильма                 |
-| created_at  | timestamp, NOT NULL, default now() |                                 |
-| updated_at  | timestamp, NOT NULL, default now() |                                 |
+| Поле         | Тип                                | Описание                |
+| ------------ | ---------------------------------- | ----------------------- |
+| **id**       | serial, PK                         |                         |
+| external_id  | varchar(255), NOT NULL, UNIQUE     | ID фильма в Kinopoisk   |
+| imdb_id      | varchar(20)                        | IMDb ID (универсальный) |
+| title        | varchar(255), NOT NULL             | Название фильма         |
+| poster_path  | varchar(512)                       | Путь к постеру          |
+| overview     | text                               | Описание                |
+| release_year | integer                            | Год выхода              |
+| rating       | decimal(3,1)                       | Рейтинг                 |
+| genres       | jsonb                              | Массив жанров           |
+| runtime      | integer                            | Длительность в минутах  |
+| created_at   | timestamp, NOT NULL, default now() |                         |
+| updated_at   | timestamp, NOT NULL, default now() |                         |
 
 **Индексы:**
 
 - `UNIQUE INDEX` на `external_id`
+- `INDEX` на `imdb_id`
+- `INDEX` на `title`
 
 ---
-
-## Планируемые таблицы (согласно product-roadmap.md)
 
 ### groups
 
@@ -89,6 +92,10 @@ movies (placeholder)
 | created_at  | timestamp, NOT NULL, default now() |                      |
 | updated_at  | timestamp, NOT NULL, default now() |                      |
 
+**Индексы:**
+
+- `INDEX` на `owner_id`
+
 ---
 
 ### group_members
@@ -98,8 +105,8 @@ movies (placeholder)
 | Поле       | Тип                                                              | Описание      |
 | ---------- | ---------------------------------------------------------------- | ------------- |
 | **id**     | serial, PK                                                       |               |
-| group_id   | int, FK → groups.id, NOT NULL                                    |               |
-| user_id    | int, FK → users.id, NOT NULL                                     |               |
+| group_id   | int, FK → groups.id, NOT NULL, ON DELETE CASCADE                 |               |
+| user_id    | int, FK → users.id, NOT NULL, ON DELETE CASCADE                  |               |
 | role       | enum('admin', 'moderator', 'member'), NOT NULL, default 'member' | Роль в группе |
 | created_at | timestamp, NOT NULL, default now()                               |               |
 | updated_at | timestamp, NOT NULL, default now()                               |               |
@@ -107,6 +114,11 @@ movies (placeholder)
 **Ограничения:**
 
 - `UNIQUE (group_id, user_id)`
+
+**Индексы:**
+
+- `INDEX` на `group_id`
+- `INDEX` на `user_id`
 
 ---
 
@@ -117,8 +129,8 @@ movies (placeholder)
 | Поле         | Тип                                                                  | Описание                        |
 | ------------ | -------------------------------------------------------------------- | ------------------------------- |
 | **id**       | serial, PK                                                           |                                 |
-| group_id     | int, FK → groups.id, NOT NULL                                        |                                 |
-| movie_id     | int, FK → movies.id, NOT NULL                                        |                                 |
+| group_id     | int, FK → groups.id, NOT NULL, ON DELETE CASCADE                     |                                 |
+| movie_id     | int, FK → movies.id, NOT NULL, ON DELETE CASCADE                     |                                 |
 | added_by     | int, FK → users.id, NOT NULL                                         | Кто добавил фильм               |
 | status       | enum('tracking', 'planned', 'watched'), NOT NULL, default 'tracking' | Статус фильма                   |
 | planned_date | timestamp                                                            | Дата запланированного просмотра |
@@ -131,6 +143,36 @@ movies (placeholder)
 - `UNIQUE (group_id, movie_id)`
 
 ---
+
+### custom_movies
+
+Кастомные фильмы, созданные пользователями в группе.
+
+| Поле         | Тип                                                                  | Описание                    |
+| ------------ | -------------------------------------------------------------------- | --------------------------- |
+| **id**       | serial, PK                                                           |                             |
+| group_id     | int, FK → groups.id, NOT NULL, ON DELETE CASCADE                     |                             |
+| title        | varchar(255), NOT NULL                                               | Название                    |
+| poster_path  | varchar(512)                                                         | Путь к постеру              |
+| overview     | text                                                                 | Описание                    |
+| release_year | integer                                                              | Год выхода                  |
+| runtime      | integer                                                              | Длительность в минутах      |
+| status       | enum('tracking', 'planned', 'watched'), NOT NULL, default 'tracking' | Статус                      |
+| planned_date | timestamp                                                            | Дата планового просмотра    |
+| watched_date | timestamp                                                            | Дата фактического просмотра |
+| created_by   | int, FK → users.id, NOT NULL, ON DELETE CASCADE                      | Кто создал                  |
+| created_at   | timestamp, NOT NULL, default now()                                   |                             |
+| updated_at   | timestamp, NOT NULL, default now()                                   |                             |
+
+**Индексы:**
+
+- `INDEX` на `group_id`
+- `INDEX` на `title`
+- `INDEX` на `status`
+
+---
+
+## Планируемые таблицы (согласно product-roadmap.md)
 
 ### invitations
 
@@ -234,21 +276,21 @@ OAuth провайдеры (Этап 6).
 
 ## Сводка по этапам
 
-| Этап             | Новые таблицы                       | Изменения в существующих                     |
-| ---------------- | ----------------------------------- | -------------------------------------------- |
-| **Реализовано**  | users, movies                       | —                                            |
-| **Этап 1 (MVP)** | groups, group_members, group_movies | —                                            |
-| **Этап 2**       | invitations                         | —                                            |
-| **Этап 3**       | —                                   | — (роли уже в group_members)                 |
-| **Этап 4**       | reviews                             | —                                            |
-| **Этап 5**       | telegram_bindings                   | —                                            |
-| **Этап 6**       | oauth_accounts, totp_secrets        | users: password_hash nullable для OAuth-only |
+| Этап            | Новые таблицы                                                     | Изменения в существующих                     |
+| --------------- | ----------------------------------------------------------------- | -------------------------------------------- |
+| **Реализовано** | users, movies, groups, group_members, group_movies, custom_movies | movies расширена для Kinopoisk               |
+| **Этап 2**      | invitations                                                       | —                                            |
+| **Этап 3**      | —                                                                 | — (роли уже в group_members)                 |
+| **Этап 4**      | reviews                                                           | —                                            |
+| **Этап 5**      | telegram_bindings                                                 | —                                            |
+| **Этап 6**      | oauth_accounts, totp_secrets                                      | users: password_hash nullable для OAuth-only |
 
 ---
 
 ## Примечания по текущей реализации
 
 1. **Refresh Tokens**: Хранятся в таблице users как refresh_token_hash, не отдельная таблица
-2. **Роли**: Глобальная роль в users (USER/ADMIN) отличается от ролей в group_members
-3. **Movies**: Текущая таблица — placeholder, будет расширена при интеграции с TMDB API
-4. **Миграции**: Генерируются через Drizzle Kit, хранятся в `apps/api/drizzle/`
+2. **Роли**: Глобальная роль в users (USER/ADMIN) отличается от ролей в group_members (admin/moderator/member)
+3. **Movies**: Провайдерские фильмы из Kinopoisk, snapshot при импорте (не обновляются)
+4. **Custom Movies**: Кастомные фильмы, созданные пользователями, принадлежат конкретной группе
+5. **Миграции**: Генерируются через Drizzle Kit, хранятся в `apps/api/drizzle/`

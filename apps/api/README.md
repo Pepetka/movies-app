@@ -4,7 +4,7 @@ NestJS backend для Movies App с Fastify адаптером, JWT аутент
 
 ## Стек технологий
 
-- **Framework:** NestJS 11
+- **Framework:** NestJS
 - **Adapter:** Fastify
 - **Database:** PostgreSQL + Drizzle ORM
 - **Authentication:** JWT (access + refresh tokens)
@@ -95,6 +95,32 @@ src/
 │   ├── user.repository.ts  # Database operations
 │   └── dto/                # User DTOs
 │
+├── groups/                 # Группы пользователей
+│   ├── groups.controller.ts    # CRUD + управление участниками
+│   ├── groups.service.ts       # Business logic
+│   ├── groups.repository.ts    # Database operations
+│   └── dto/                    # Groups DTOs
+│
+├── movies/                 # Провайдерские фильмы (Kinopoisk)
+│   ├── movies.controller.ts    # Поиск, глобальный CRUD
+│   ├── movies.service.ts       # Business logic
+│   ├── movies.repository.ts    # Database operations
+│   ├── kinopoisk.service.ts    # Kinopoisk API интеграция
+│   ├── movie-providers.service.ts  # Провайдеры фильмов
+│   └── dto/                    # Movies DTOs
+│
+├── group-movies/           # Фильмы в группах
+│   ├── group-movies.controller.ts  # Статусы, связь группа-фильм
+│   ├── group-movies.service.ts     # Business logic
+│   ├── group-movies.repository.ts  # Database operations
+│   └── dto/                        # GroupMovies DTOs
+│
+├── custom-movies/          # Кастомные фильмы
+│   ├── custom-movies.controller.ts # CRUD в группах
+│   ├── custom-movies.service.ts    # Business logic
+│   ├── custom-movies.repository.ts # Database operations
+│   └── dto/                        # CustomMovies DTOs
+│
 ├── health/                 # Health check
 │   ├── health.controller.ts
 │   ├── health.service.ts
@@ -113,8 +139,9 @@ src/
 │
 └── common/                 # Общие утилиты
     ├── configs/            # Validation, throttle, helmet
-    ├── decorators/         # @Public, @Roles, @Author, @Cookies
-    ├── guards/             # AuthGuard, RolesGuard, AuthorGuard, CsrfGuard
+    ├── decorators/         # @Public, @Roles, @Author, @Cookies, @User
+    ├── guards/             # AuthGuard, RolesGuard, AuthorGuard, CsrfGuard,
+    │                       # GroupMemberGuard, GroupModeratorGuard, GroupAdminGuard
     ├── exceptions/         # Custom exceptions
     └── validators/         # Custom validators
 ```
@@ -140,6 +167,53 @@ PATCH  /api/v1/users/:id     # Обновить (owner or admin)
 DELETE /api/v1/users/:id     # Удалить (owner or admin)
 ```
 
+### Groups
+
+```bash
+GET    /api/v1/groups                    # Список групп пользователя (authenticated)
+POST   /api/v1/groups                    # Создать группу (authenticated)
+GET    /api/v1/groups/:id                # Детали группы (members)
+PATCH  /api/v1/groups/:id                # Обновить группу (group admin)
+DELETE /api/v1/groups/:id                # Удалить группу (group admin)
+
+# Участники группы
+GET    /api/v1/groups/:id/members        # Список участников (members)
+POST   /api/v1/groups/:id/members        # Добавить участника (moderator)
+PATCH  /api/v1/groups/:id/members/:uid   # Изменить роль (group admin)
+DELETE /api/v1/groups/:id/members/:uid   # Удалить участника (group admin)
+```
+
+### Movies (глобальные)
+
+```bash
+GET    /api/v1/movies                    # Список провайдерских фильмов (admin)
+GET    /api/v1/movies/search             # Поиск через Kinopoisk (authenticated)
+GET    /api/v1/movies/:id                # Детали фильма (authenticated)
+PATCH  /api/v1/movies/:id                # Обновить фильм (admin)
+DELETE /api/v1/movies/:id                # Удалить фильм (admin)
+```
+
+### Group Movies (фильмы в группах)
+
+```bash
+GET    /api/v1/groups/:id/movies         # Список фильмов группы (members)
+POST   /api/v1/groups/:id/movies         # Добавить фильм из Kinopoisk (moderator)
+GET    /api/v1/groups/:id/movies/search  # Поиск: Kinopoisk + local (members)
+GET    /api/v1/groups/:id/movies/:mid    # Детали фильма в группе (members)
+PATCH  /api/v1/groups/:id/movies/:mid    # Изменить статус/дату (moderator)
+DELETE /api/v1/groups/:id/movies/:mid    # Удалить из группы (moderator)
+```
+
+### Custom Movies (кастомные фильмы)
+
+```bash
+GET    /api/v1/groups/:id/custom-movies      # Список кастомных фильмов (members)
+POST   /api/v1/groups/:id/custom-movies      # Создать кастомный фильм (moderator)
+GET    /api/v1/groups/:id/custom-movies/:cid # Детали (members)
+PATCH  /api/v1/groups/:id/custom-movies/:cid # Редактировать (moderator)
+DELETE /api/v1/groups/:id/custom-movies/:cid # Удалить (moderator)
+```
+
 ### Health
 
 ```bash
@@ -154,13 +228,27 @@ GET /api/v1/csrf/token       # CSRF токен (public)
 
 ## Guards
 
-Guuards выполняются в порядке (определено в app.module.ts):
+Guards выполняются в порядке (определено в app.module.ts):
 
 1. **ThrottlerGuard** - Rate limiting (disabled in test)
 2. **CsrfGuard** - CSRF protection (disabled in test)
 3. **AuthGuard** - JWT validation (bypass with @Public())
 4. **RolesGuard** - Role-based access (@Roles('admin'))
 5. **AuthorGuard** - Resource ownership (@Author())
+
+### Guards для групп
+
+- **GroupMemberGuard** - Проверяет членство пользователя в группе
+- **GroupModeratorGuard** - Требует роль moderator или admin в группе
+- **GroupAdminGuard** - Требует роль admin в группе (владелец или назначенный админ)
+
+### Статусы фильмов в группах
+
+| Статус     | Описание                              | Дата          |
+| ---------- | ------------------------------------- | ------------- |
+| `tracking` | Отслеживается (дефолт при добавлении) | -             |
+| `planned`  | Запланирован к просмотру              | `plannedDate` |
+| `watched`  | Просмотрен                            | `watchedDate` |
 
 ### Rate Limiting
 
@@ -183,6 +271,8 @@ Guuards выполняются в порядке (определено в app.mo
 | `JWT_ACCESS_EXPIRATION`  | Access token TTL                    | 15m         |
 | `JWT_REFRESH_EXPIRATION` | Refresh token TTL                   | 7d          |
 | `BCRYPT_ROUNDS`          | Bcrypt rounds                       | 12          |
+| `KINOPOISK_API_URL`      | Kinopoisk API URL                   | -           |
+| `KINOPOISK_API_TOKEN`    | Kinopoisk API token                 | -           |
 
 ## Тестирование
 
