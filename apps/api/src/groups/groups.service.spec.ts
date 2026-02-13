@@ -51,7 +51,9 @@ const createMockGroupsRepository = () => ({
   addMember: jest.fn(),
   findMember: jest.fn(),
   findMembersByGroupWithUsers: jest.fn(),
+  findMemberWithUser: jest.fn(),
   updateMemberRole: jest.fn(),
+  setAdminRoleInTransaction: jest.fn(),
   removeMember: jest.fn(),
   countAdmins: jest.fn(),
   transferOwnership: jest.fn(),
@@ -448,8 +450,9 @@ describe('GroupsService', () => {
         ...mockGroupMember,
         role: GroupMemberRole.ADMIN,
       });
-      groupsRepository.countAdmins.mockResolvedValue(1);
-      groupsRepository.updateMemberRole.mockResolvedValue(mockGroupMember);
+      groupsRepository.setAdminRoleInTransaction.mockResolvedValue({
+        success: true,
+      });
 
       await service.updateMemberRole(
         1,
@@ -458,7 +461,7 @@ describe('GroupsService', () => {
         1,
       );
 
-      expect(groupsRepository.updateMemberRole).toHaveBeenCalledWith(
+      expect(groupsRepository.setAdminRoleInTransaction).toHaveBeenCalledWith(
         1,
         2,
         GroupMemberRole.MODERATOR,
@@ -491,7 +494,9 @@ describe('GroupsService', () => {
         ...mockGroupMember,
         role: GroupMemberRole.ADMIN,
       });
-      groupsRepository.countAdmins.mockResolvedValue(1);
+      groupsRepository.setAdminRoleInTransaction.mockResolvedValue({
+        success: false,
+      });
 
       await expect(
         service.updateMemberRole(1, 2, { role: GroupMemberRole.ADMIN }, 1),
@@ -597,19 +602,13 @@ describe('GroupsService', () => {
 
   describe('getMemberMe', () => {
     it('should return member info for group member', async () => {
-      const mockMembers = [
-        mockGroupMember,
-        { ...mockGroupMember, userId: 999 },
-      ];
       groupsRepository.findGroupById.mockResolvedValue(mockGroup);
-      groupsRepository.findMember.mockResolvedValue(mockGroupMember);
-      groupsRepository.findMembersByGroupWithUsers.mockResolvedValue(
-        mockMembers,
-      );
+      groupsRepository.findMemberWithUser.mockResolvedValue(mockGroupMember);
 
       const result = await service.getMemberMe(1, 2);
 
       expect(result).toEqual(mockGroupMember);
+      expect(groupsRepository.findMemberWithUser).toHaveBeenCalledWith(1, 2);
     });
 
     it('should throw GroupNotFoundException for non-existent group', async () => {
@@ -622,7 +621,7 @@ describe('GroupsService', () => {
 
     it('should throw NotGroupMemberException for non-member', async () => {
       groupsRepository.findGroupById.mockResolvedValue(mockGroup);
-      groupsRepository.findMember.mockResolvedValue(null);
+      groupsRepository.findMemberWithUser.mockResolvedValue(null);
 
       await expect(service.getMemberMe(1, 2)).rejects.toThrow(
         NotGroupMemberException,

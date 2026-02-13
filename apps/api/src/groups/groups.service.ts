@@ -276,19 +276,16 @@ export class GroupsService {
       throw new NotGroupAdminException();
     }
 
-    if (dto.role === GroupMemberRole.ADMIN) {
-      const adminCount = await this.groupsRepository.countAdmins(groupId);
-
-      if (adminCount > 0) {
-        throw new OnlyOneAdminException();
-      }
-    }
-
-    await this.groupsRepository.updateMemberRole(
+    const result = await this.groupsRepository.setAdminRoleInTransaction(
       groupId,
       memberUserId,
       dto.role,
     );
+
+    if (!result.success) {
+      throw new OnlyOneAdminException();
+    }
+
     this._logger.log(
       `User ${memberUserId} role updated to ${dto.role} in group ${groupId} by user ${requesterId}`,
     );
@@ -372,15 +369,16 @@ export class GroupsService {
       throw new GroupNotFoundException(groupId);
     }
 
-    const member = await this.groupsRepository.findMember(groupId, userId);
+    const member = await this.groupsRepository.findMemberWithUser(
+      groupId,
+      userId,
+    );
 
     if (!member) {
       throw new NotGroupMemberException();
     }
 
-    return this.groupsRepository
-      .findMembersByGroupWithUsers(groupId)
-      .then((members) => members.find((m) => m.userId === userId));
+    return member;
   }
 
   /**

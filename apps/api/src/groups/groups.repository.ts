@@ -118,6 +118,42 @@ export class GroupsRepository {
       .orderBy(groupMembers.createdAt);
   }
 
+  async findMemberWithUser(
+    groupId: number,
+    userId: number,
+  ): Promise<{
+    id: number;
+    groupId: number;
+    userId: number;
+    role: string;
+    createdAt: Date;
+    updatedAt: Date;
+    user: { id: number; name: string; email: string };
+  } | null> {
+    const [result] = await this.db
+      .select({
+        id: groupMembers.id,
+        groupId: groupMembers.groupId,
+        userId: groupMembers.userId,
+        role: groupMembers.role,
+        createdAt: groupMembers.createdAt,
+        updatedAt: groupMembers.updatedAt,
+        user: {
+          id: users.id,
+          name: users.name,
+          email: users.email,
+        },
+      })
+      .from(groupMembers)
+      .innerJoin(users, eq(groupMembers.userId, users.id))
+      .where(
+        and(eq(groupMembers.groupId, groupId), eq(groupMembers.userId, userId)),
+      )
+      .limit(1);
+
+    return result ?? null;
+  }
+
   async updateMemberRole(
     groupId: number,
     userId: number,
@@ -213,6 +249,42 @@ export class GroupsRepository {
         and(eq(groupMembers.groupId, groupId), eq(groupMembers.role, 'admin')),
       );
     return result.count;
+  }
+
+  async setAdminRoleInTransaction(
+    groupId: number,
+    userId: number,
+    role: GroupMemberRole,
+  ): Promise<{ success: boolean }> {
+    return this.db.transaction(async (tx) => {
+      if (role === GroupMemberRole.ADMIN) {
+        const [result] = await tx
+          .select({ count: count() })
+          .from(groupMembers)
+          .where(
+            and(
+              eq(groupMembers.groupId, groupId),
+              eq(groupMembers.role, 'admin'),
+            ),
+          );
+
+        if (result.count > 0) {
+          return { success: false };
+        }
+      }
+
+      await tx
+        .update(groupMembers)
+        .set({ role, updatedAt: new Date() })
+        .where(
+          and(
+            eq(groupMembers.groupId, groupId),
+            eq(groupMembers.userId, userId),
+          ),
+        );
+
+      return { success: true };
+    });
   }
 
   async findAdminByGroup(groupId: number): Promise<GroupMember | null> {

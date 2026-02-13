@@ -14,6 +14,8 @@ import { KINOPOISK_DEFAULTS } from './kinopoisk-defaults.constants';
 import { KinopoiskApiException } from './kinopoisk.exception';
 import type { NewMovie } from '../../../db/schemas';
 
+const REQUEST_TIMEOUT_MS = 15_000;
+
 @Injectable()
 export class KinopoiskService implements MovieProvider {
   readonly name = 'kinopoisk';
@@ -22,6 +24,19 @@ export class KinopoiskService implements MovieProvider {
 
   constructor(@Inject(KINOPOISK_API_OPTIONS) options: KinopoiskApiOptions) {
     this._options = options;
+  }
+
+  private _createAbortController(): AbortController {
+    const controller = new AbortController();
+    setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+    return controller;
+  }
+
+  private _getHeaders(): Record<string, string> {
+    return {
+      'X-API-KEY': this._options.apiKey,
+      'Content-Type': 'application/json',
+    };
   }
 
   private async _searchMovies(
@@ -41,10 +56,8 @@ export class KinopoiskService implements MovieProvider {
 
     try {
       const response = await fetch(url.toString(), {
-        headers: {
-          'X-API-KEY': this._options.apiKey,
-          'Content-Type': 'application/json',
-        },
+        headers: this._getHeaders(),
+        signal: this._createAbortController().signal,
       });
       if (!response.ok) {
         throw new KinopoiskApiException(
@@ -54,6 +67,10 @@ export class KinopoiskService implements MovieProvider {
       return (await response.json()) as KinopoiskSearchResponseDto;
     } catch (error) {
       if (error instanceof KinopoiskApiException) throw error;
+      if (error instanceof Error && error.name === 'AbortError') {
+        this._logger.error(`Kinopoisk API request timed out`);
+        throw new KinopoiskApiException(`Kinopoisk API request timed out`);
+      }
       this._logger.error(`Failed to search movies: ${error}`);
       throw new KinopoiskApiException(`Failed to search movies`);
     }
@@ -97,10 +114,8 @@ export class KinopoiskService implements MovieProvider {
 
     try {
       const response = await fetch(url.toString(), {
-        headers: {
-          'X-API-KEY': this._options.apiKey,
-          'Content-Type': 'application/json',
-        },
+        headers: this._getHeaders(),
+        signal: this._createAbortController().signal,
       });
       if (!response.ok) {
         throw new KinopoiskApiException(
@@ -111,6 +126,10 @@ export class KinopoiskService implements MovieProvider {
       return this._mapToProviderMovieDetails(movie);
     } catch (error) {
       if (error instanceof KinopoiskApiException) throw error;
+      if (error instanceof Error && error.name === 'AbortError') {
+        this._logger.error(`Kinopoisk API request timed out`);
+        throw new KinopoiskApiException(`Kinopoisk API request timed out`);
+      }
       this._logger.error(`Failed to get movie details: ${error}`);
       throw new KinopoiskApiException(`Failed to get movie details`);
     }
