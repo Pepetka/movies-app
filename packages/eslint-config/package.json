@@ -19,6 +19,6 @@
     "eslint-plugin-turbo": "^2.8.6",
     "eslint-plugin-unused-imports": "^4.3.0",
     "globals": "^17.3.0",
-    "typescript-eslint": "^8.50.0"
+    "typescript-eslint": "^8.55.0"
   }
 }
