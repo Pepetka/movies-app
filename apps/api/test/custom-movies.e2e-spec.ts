@@ -45,9 +45,7 @@ describe('Custom Movies E2E', () => {
 
     const secret = configService.getOrThrow<string>('COOKIE_SECRET');
 
-    // @ts-expect-error Fastify plugin types are incompatible
     await app.register(cookie, { secret });
-    // @ts-expect-error Fastify plugin types are incompatible
     await app.register(csrf, {
       cookieOpts: {
         httpOnly: true,

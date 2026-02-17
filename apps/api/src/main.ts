@@ -52,12 +52,8 @@ async function bootstrap() {
   const secret = configService.getOrThrow<string>('COOKIE_SECRET');
   const env = configService.getOrThrow<Environment>('NODE_ENV');
 
-  // @ts-expect-error Fastify plugin types are incompatible with NestFastifyApplication.register()
   await app.register(helmet, getHelmetConfig(env === Environment.Production));
-  // @ts-expect-error Fastify plugin types are incompatible with NestFastifyApplication.register()
   await app.register(fastifyCookie, { secret });
-
-  // @ts-expect-error Fastify plugin types are incompatible with NestFastifyApplication.register()
   await app.register(csrf, {
     cookieOpts: {
       httpOnly: true,

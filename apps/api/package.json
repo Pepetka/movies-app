@@ -71,7 +71,7 @@
     "drizzle-kit": "^0.31.8",
     "eslint": "catalog:",
     "@eslint/compat": "catalog:",
-    "fastify": "^5.7.1",
+    "fastify": "^5.7.4",
     "prettier": "catalog:",
     "jest": "^29.7.0",
     "source-map-support": "^0.5.21",
