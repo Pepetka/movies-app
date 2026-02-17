@@ -1,6 +1,6 @@
 version: 2
 updates:
-  # Root dependencies - monorepo tooling updated weekly
+  # Root - updates pnpm-workspace.yaml (catalogs) + monorepo tooling
   - package-ecosystem: "npm"
     directory: "/"
     schedule:
@@ -8,8 +8,33 @@ updates:
       day: "monday"
       time: "09:00"
       timezone: "Europe/Moscow"
-    open-pull-requests-limit: 5
+    open-pull-requests-limit: 10
     groups:
+      catalog-typescript:
+        patterns:
+          - "typescript"
+          - "@types/node"
+        update-types:
+          - "minor"
+          - "patch"
+      catalog-linting:
+        patterns:
+          - "eslint"
+          - "prettier"
+          - "globals"
+        update-types:
+          - "minor"
+          - "patch"
+      catalog-svelte:
+        patterns:
+          - "svelte"
+          - "@sveltejs/*"
+          - "prettier-plugin-svelte"
+          - "svelte-check"
+          - "vite"
+        update-types:
+          - "minor"
+          - "patch"
       root-tools:
         patterns:
           - "turbo"
@@ -22,13 +47,12 @@ updates:
           - "patch"
     labels:
       - "dependencies: javascript"
-      - "monorepo: root"
       - "scope: infra"
     commit-message:
       prefix: "chore"
       include: "scope"
 
-  # API dependencies - updated weekly (production + dev)
+  # API - only non-catalog dependencies
   - package-ecosystem: "npm"
     directory: "/apps/api"
     schedule:
@@ -44,6 +68,12 @@ updates:
         update-types: ["version-update:semver-major"]
       - dependency-name: "bcrypt"
         update-types: ["version-update:semver-major"]
+      # Catalog dependencies - updated via root
+      - dependency-name: "typescript"
+      - dependency-name: "@types/node"
+      - dependency-name: "eslint"
+      - dependency-name: "prettier"
+      - dependency-name: "globals"
     groups:
       nestjs-core:
         patterns:
@@ -51,11 +81,6 @@ updates:
         update-types:
           - "minor"
           - "patch"
-      nestjs-dev:
-        patterns:
-          - "@nestjs/cli"
-          - "@nestjs/schematics"
-          - "@nestjs/testing"
       fastify-stack:
         patterns:
           - "fastify"
@@ -75,7 +100,6 @@ updates:
       testing:
         patterns:
           - "jest*"
-          - "@types/*"
           - "ts-jest"
           - "supertest"
       build-tools:
@@ -85,26 +109,15 @@ updates:
           - "ts-loader"
           - "tsconfig-paths"
           - "drizzle-kit"
-      typescript:
-        patterns:
-          - "typescript"
-        update-types:
-          - "minor"
-          - "patch"
-      tooling:
-        patterns:
-          - "prettier"
-          - "eslint"
     labels:
       - "dependencies: javascript"
-      - "monorepo: api"
       - "scope: api"
     commit-message:
       prefix: "chore"
       include: "scope"
     versioning-strategy: increase
 
-  # Web app (SvelteKit) - updated weekly
+  # Web - only non-catalog dependencies
   - package-ecosystem: "npm"
     directory: "/apps/web"
     schedule:
@@ -113,37 +126,30 @@ updates:
       time: "09:00"
       timezone: "Europe/Moscow"
     open-pull-requests-limit: 5
+    ignore:
+      # Catalog dependencies - updated via root
+      - dependency-name: "typescript"
+      - dependency-name: "@types/node"
+      - dependency-name: "eslint"
+      - dependency-name: "prettier"
+      - dependency-name: "prettier-plugin-svelte"
+      - dependency-name: "svelte"
+      - dependency-name: "svelte-check"
+      - dependency-name: "@sveltejs/kit"
+      - dependency-name: "@sveltejs/vite-plugin-svelte"
+      - dependency-name: "vite"
     groups:
-      svelte-stack:
+      svelte-adapter:
         patterns:
-          - "svelte"
-          - "@sveltejs/*"
-        update-types:
-          - "minor"
-          - "patch"
-      vite:
-        patterns:
-          - "vite"
-          - "@sveltejs/vite-plugin-svelte"
-      typescript:
-        patterns:
-          - "typescript"
-        update-types:
-          - "minor"
-          - "patch"
-      tooling:
-        patterns:
-          - "prettier*"
-          - "eslint"
+          - "@sveltejs/adapter-*"
     labels:
       - "dependencies: javascript"
-      - "monorepo: web"
       - "scope: web"
     commit-message:
       prefix: "chore"
       include: "scope"
 
-  # UI package - updated weekly
+  # UI package - only non-catalog dependencies
   - package-ecosystem: "npm"
     directory: "/packages/ui"
     schedule:
@@ -152,33 +158,32 @@ updates:
       time: "09:00"
       timezone: "Europe/Moscow"
     open-pull-requests-limit: 5
+    ignore:
+      # Catalog dependencies - updated via root
+      - dependency-name: "typescript"
+      - dependency-name: "@types/node"
+      - dependency-name: "eslint"
+      - dependency-name: "prettier"
+      - dependency-name: "prettier-plugin-svelte"
+      - dependency-name: "globals"
+      - dependency-name: "svelte"
+      - dependency-name: "svelte-check"
+      - dependency-name: "@sveltejs/kit"
+      - dependency-name: "@sveltejs/vite-plugin-svelte"
+      - dependency-name: "vite"
     groups:
-      svelte-stack:
+      svelte-tools:
         patterns:
-          - "svelte"
-          - "@sveltejs/*"
-        update-types:
-          - "minor"
-          - "patch"
-      typescript:
-        patterns:
-          - "typescript"
-        update-types:
-          - "minor"
-          - "patch"
-      tooling:
-        patterns:
-          - "prettier*"
-          - "eslint"
+          - "@sveltejs/package"
+          - "publint"
     labels:
       - "dependencies: javascript"
-      - "monorepo: packages"
       - "scope: web"
     commit-message:
       prefix: "chore"
       include: "scope"
 
-  # ESLint config package - updated weekly
+  # ESLint config package - only non-catalog dependencies
   - package-ecosystem: "npm"
     directory: "/packages/eslint-config"
     schedule:
@@ -187,6 +192,9 @@ updates:
       time: "09:00"
       timezone: "Europe/Moscow"
     open-pull-requests-limit: 5
+    ignore:
+      # Catalog dependencies - updated via root
+      - dependency-name: "globals"
     groups:
       eslint-core:
         patterns:
@@ -210,13 +218,12 @@ updates:
           - "patch"
     labels:
       - "dependencies: javascript"
-      - "monorepo: packages"
       - "scope: infra"
     commit-message:
       prefix: "chore"
       include: "scope"
 
-  # GitHub Actions - updated weekly
+  # GitHub Actions
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
@@ -242,7 +249,7 @@ updates:
       prefix: "ci"
       include: "scope"
 
-  # Docker images - updated weekly
+  # Docker images
   - package-ecosystem: "docker"
     directory: "/"
     schedule:
