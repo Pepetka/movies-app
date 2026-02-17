@@ -43,6 +43,7 @@
 		"@sveltejs/vite-plugin-svelte": "catalog:",
 		"@types/node": "catalog:",
 		"eslint": "catalog:",
+		"@eslint/compat": "catalog:",
 		"globals": "catalog:",
 		"prettier": "catalog:",
 		"prettier-plugin-svelte": "catalog:",

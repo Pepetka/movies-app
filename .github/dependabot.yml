@@ -72,6 +72,7 @@ updates:
       - dependency-name: "typescript"
       - dependency-name: "@types/node"
       - dependency-name: "eslint"
+      - dependency-name: "@eslint/compat"
       - dependency-name: "prettier"
       - dependency-name: "globals"
     groups:
@@ -131,6 +132,7 @@ updates:
       - dependency-name: "typescript"
       - dependency-name: "@types/node"
       - dependency-name: "eslint"
+      - dependency-name: "@eslint/compat"
       - dependency-name: "prettier"
       - dependency-name: "prettier-plugin-svelte"
       - dependency-name: "svelte"
@@ -163,6 +165,7 @@ updates:
       - dependency-name: "typescript"
       - dependency-name: "@types/node"
       - dependency-name: "eslint"
+      - dependency-name: "@eslint/compat"
       - dependency-name: "prettier"
       - dependency-name: "prettier-plugin-svelte"
       - dependency-name: "globals"

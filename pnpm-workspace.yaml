@@ -9,6 +9,7 @@ catalog:
 
   # Linting & Formatting
   eslint: "^9.39.0"
+  "@eslint/compat": "^1.4.0"
   prettier: "^3.8.0"
   globals: "^17.3.0"
 

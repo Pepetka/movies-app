@@ -6,6 +6,9 @@ settings:
 
 catalogs:
   default:
+    '@eslint/compat':
+      specifier: ^1.4.0
+      version: 1.4.1
     '@sveltejs/kit':
       specifier: ^2.50.2
       version: 2.50.2
@@ -129,6 +132,9 @@ importers:
         specifier: ^7.8.1
         version: 7.8.2
     devDependencies:
+      '@eslint/compat':
+        specifier: 'catalog:'
+        version: 1.4.1(eslint@9.39.2)
       '@nestjs/cli':
         specifier: ^11.0.0
         version: 11.0.16(@swc/cli@0.8.0(@swc/core@1.15.8)(chokidar@4.0.3))(@swc/core@1.15.8)(@types/node@22.19.7)(esbuild@0.25.12)
@@ -208,6 +214,9 @@ importers:
         specifier: workspace:*
         version: link:../../packages/ui
     devDependencies:
+      '@eslint/compat':
+        specifier: 'catalog:'
+        version: 1.4.1(eslint@9.39.2)
       '@repo/eslint-config':
         specifier: workspace:*
         version: link:../../packages/eslint-config
@@ -288,6 +297,9 @@ importers:
 
   packages/ui:
     devDependencies:
+      '@eslint/compat':
+        specifier: 'catalog:'
+        version: 1.4.1(eslint@9.39.2)
       '@repo/eslint-config':
         specifier: workspace:*
         version: link:../eslint-config
