@@ -77,9 +77,7 @@ describe('User E2E', () => {
 
     const secret = configService.getOrThrow<string>('COOKIE_SECRET');
 
-    // @ts-expect-error Fastify plugin types are incompatible with NestFastifyApplication.register()
     await app.register(cookie, { secret });
-    // @ts-expect-error Fastify plugin types are incompatible with NestFastifyApplication.register()
     await app.register(csrf, {
       cookieOpts: {
         httpOnly: true,
