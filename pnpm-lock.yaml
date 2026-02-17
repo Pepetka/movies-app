@@ -272,8 +272,8 @@ importers:
         specifier: ^3.14.0
         version: 3.14.0(eslint@9.39.2)(svelte@5.47.1)(ts-node@10.9.2(@swc/core@1.15.8)(@types/node@25.0.9)(typescript@5.9.3))
       eslint-plugin-turbo:
-        specifier: ^2.8.6
-        version: 2.8.6(eslint@9.39.2)(turbo@2.8.9)
+        specifier: ^2.8.9
+        version: 2.8.9(eslint@9.39.2)(turbo@2.8.9)
       eslint-plugin-unused-imports:
         specifier: ^4.3.0
         version: 4.3.0(@typescript-eslint/eslint-plugin@8.56.0(@typescript-eslint/parser@8.56.0(eslint@9.39.2)(typescript@5.9.3))(eslint@9.39.2)(typescript@5.9.3))(eslint@9.39.2)
@@ -3158,12 +3158,6 @@ packages:
     peerDependenciesMeta:
       svelte:
         optional: true
-
-  eslint-plugin-turbo@2.8.6:
-    resolution: {integrity: sha512-ApMp9vaw5BbqK76fYnWqaGRwlqWKLU11GTF8YuZsDKpJJ+fLwMwfvmapy70y6Bm+fQx7opuoJTlyhlNgcgjV0A==}
-    peerDependencies:
-      eslint: '>6.6.0'
-      turbo: '>2.0.0'
 
   eslint-plugin-turbo@2.8.9:
     resolution: {integrity: sha512-gmhdR1SNrPxdXu00xxdhnt32SayUBjHbnhw3YpB939D9ZQjsK9Mthw7mPBrafifwb06kx0VqaFzxaP1JLCbh3g==}
@@ -8251,12 +8245,6 @@ snapshots:
       svelte: 5.47.1
     transitivePeerDependencies:
       - ts-node
-
-  eslint-plugin-turbo@2.8.6(eslint@9.39.2)(turbo@2.8.9):
-    dependencies:
-      dotenv: 16.0.3
-      eslint: 9.39.2
-      turbo: 2.8.9
 
   eslint-plugin-turbo@2.8.9(eslint@9.39.2)(turbo@2.8.9):
     dependencies:
