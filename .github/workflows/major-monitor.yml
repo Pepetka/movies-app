@@ -1,0 +1,45 @@
+name: Major Version Monitor
+
+on:
+  schedule:
+    - cron: '0 6 * * 1'  # Every Monday 09:00 Moscow
+  workflow_dispatch:
+
+permissions:
+  issues: write
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.29.3
+
+      - name: Check critical packages
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          for pkg in drizzle-orm passport passport-jwt bcrypt; do
+            current=$(syncpack list --dependencies $pkg 2>/dev/null | head -1 | awk '{print $2}' | tr -d '^~')
+            latest=$(pnpm view $pkg version 2>/dev/null)
+
+            current_major=$(echo $current | cut -d. -f1)
+            latest_major=$(echo $latest | cut -d. -f1)
+
+            echo "$pkg: $current -> $latest (major: $current_major -> $latest_major)"
+
+            if [ "$latest_major" -gt "$current_major" ]; then
+              gh issue create --repo "${{ github.repository }}" \
+                --title "🚨 Major update: $pkg $current → $latest" \
+                --body "Major version update available for **$pkg**.
+
+            Current: \`$current\`
+            Latest: \`$latest\`
+
+            Review breaking changes and update manually in catalog." \
+                --label "deps: major-update" || echo "Issue may already exist"
+            fi
+          done
