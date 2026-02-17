@@ -275,14 +275,14 @@ importers:
         specifier: ^5.5.0
         version: 5.5.0(eslint@9.39.2)(typescript@5.9.3)
       eslint-plugin-svelte:
-        specifier: ^3.14.0
-        version: 3.14.0(eslint@9.39.2)(svelte@5.47.1)(ts-node@10.9.2(@swc/core@1.15.8)(@types/node@25.0.9)(typescript@5.9.3))
+        specifier: ^3.15.0
+        version: 3.15.0(eslint@9.39.2)(svelte@5.47.1)(ts-node@10.9.2(@swc/core@1.15.8)(@types/node@25.0.9)(typescript@5.9.3))
       eslint-plugin-turbo:
-        specifier: ^2.8.6
-        version: 2.8.6(eslint@9.39.2)(turbo@2.8.9)
+        specifier: ^2.8.9
+        version: 2.8.9(eslint@9.39.2)(turbo@2.8.9)
       eslint-plugin-unused-imports:
-        specifier: ^4.3.0
-        version: 4.3.0(@typescript-eslint/eslint-plugin@8.56.0(@typescript-eslint/parser@8.56.0(eslint@9.39.2)(typescript@5.9.3))(eslint@9.39.2)(typescript@5.9.3))(eslint@9.39.2)
+        specifier: ^4.4.1
+        version: 4.4.1(@typescript-eslint/eslint-plugin@8.56.0(@typescript-eslint/parser@8.56.0(eslint@9.39.2)(typescript@5.9.3))(eslint@9.39.2)(typescript@5.9.3))(eslint@9.39.2)
       globals:
         specifier: ^17.3.0
         version: 17.3.0
@@ -3155,21 +3155,15 @@ packages:
     peerDependencies:
       eslint: '>=8.45.0'
 
-  eslint-plugin-svelte@3.14.0:
-    resolution: {integrity: sha512-Isw0GvaMm0yHxAj71edAdGFh28ufYs+6rk2KlbbZphnqZAzrH3Se3t12IFh2H9+1F/jlDhBBL4oiOJmLqmYX0g==}
+  eslint-plugin-svelte@3.15.0:
+    resolution: {integrity: sha512-QKB7zqfuB8aChOfBTComgDptMf2yxiJx7FE04nneCmtQzgTHvY8UJkuh8J2Rz7KB9FFV9aTHX6r7rdYGvG8T9Q==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
     peerDependencies:
-      eslint: ^8.57.1 || ^9.0.0
+      eslint: ^8.57.1 || ^9.0.0 || ^10.0.0
       svelte: ^3.37.0 || ^4.0.0 || ^5.0.0
     peerDependenciesMeta:
       svelte:
         optional: true
-
-  eslint-plugin-turbo@2.8.6:
-    resolution: {integrity: sha512-ApMp9vaw5BbqK76fYnWqaGRwlqWKLU11GTF8YuZsDKpJJ+fLwMwfvmapy70y6Bm+fQx7opuoJTlyhlNgcgjV0A==}
-    peerDependencies:
-      eslint: '>6.6.0'
-      turbo: '>2.0.0'
 
   eslint-plugin-turbo@2.8.9:
     resolution: {integrity: sha512-gmhdR1SNrPxdXu00xxdhnt32SayUBjHbnhw3YpB939D9ZQjsK9Mthw7mPBrafifwb06kx0VqaFzxaP1JLCbh3g==}
@@ -3177,11 +3171,11 @@ packages:
       eslint: '>6.6.0'
       turbo: '>2.0.0'
 
-  eslint-plugin-unused-imports@4.3.0:
-    resolution: {integrity: sha512-ZFBmXMGBYfHttdRtOG9nFFpmUvMtbHSjsKrS20vdWdbfiVYsO3yA2SGYy9i9XmZJDfMGBflZGBCm70SEnFQtOA==}
+  eslint-plugin-unused-imports@4.4.1:
+    resolution: {integrity: sha512-oZGYUz1X3sRMGUB+0cZyK2VcvRX5lm/vB56PgNNcU+7ficUCKm66oZWKUubXWnOuPjQ8PvmXtCViXBMONPe7tQ==}
     peerDependencies:
       '@typescript-eslint/eslint-plugin': ^8.0.0-0 || ^7.0.0 || ^6.0.0 || ^5.0.0
-      eslint: ^9.0.0 || ^8.0.0
+      eslint: ^10.0.0 || ^9.0.0 || ^8.0.0
     peerDependenciesMeta:
       '@typescript-eslint/eslint-plugin':
         optional: true
@@ -8240,7 +8234,7 @@ snapshots:
       - supports-color
       - typescript
 
-  eslint-plugin-svelte@3.14.0(eslint@9.39.2)(svelte@5.47.1)(ts-node@10.9.2(@swc/core@1.15.8)(@types/node@25.0.9)(typescript@5.9.3)):
+  eslint-plugin-svelte@3.15.0(eslint@9.39.2)(svelte@5.47.1)(ts-node@10.9.2(@swc/core@1.15.8)(@types/node@25.0.9)(typescript@5.9.3)):
     dependencies:
       '@eslint-community/eslint-utils': 4.9.1(eslint@9.39.2)
       '@jridgewell/sourcemap-codec': 1.5.5
@@ -8251,18 +8245,12 @@ snapshots:
       postcss: 8.5.6
       postcss-load-config: 3.1.4(postcss@8.5.6)(ts-node@10.9.2(@swc/core@1.15.8)(@types/node@25.0.9)(typescript@5.9.3))
       postcss-safe-parser: 7.0.1(postcss@8.5.6)
-      semver: 7.7.3
+      semver: 7.7.4
       svelte-eslint-parser: 1.4.1(svelte@5.47.1)
     optionalDependencies:
       svelte: 5.47.1
     transitivePeerDependencies:
       - ts-node
-
-  eslint-plugin-turbo@2.8.6(eslint@9.39.2)(turbo@2.8.9):
-    dependencies:
-      dotenv: 16.0.3
-      eslint: 9.39.2
-      turbo: 2.8.9
 
   eslint-plugin-turbo@2.8.9(eslint@9.39.2)(turbo@2.8.9):
     dependencies:
@@ -8270,7 +8258,7 @@ snapshots:
       eslint: 9.39.2
       turbo: 2.8.9
 
-  eslint-plugin-unused-imports@4.3.0(@typescript-eslint/eslint-plugin@8.56.0(@typescript-eslint/parser@8.56.0(eslint@9.39.2)(typescript@5.9.3))(eslint@9.39.2)(typescript@5.9.3))(eslint@9.39.2):
+  eslint-plugin-unused-imports@4.4.1(@typescript-eslint/eslint-plugin@8.56.0(@typescript-eslint/parser@8.56.0(eslint@9.39.2)(typescript@5.9.3))(eslint@9.39.2)(typescript@5.9.3))(eslint@9.39.2):
     dependencies:
       eslint: 9.39.2
     optionalDependencies:
