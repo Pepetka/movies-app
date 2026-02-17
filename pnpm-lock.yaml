@@ -136,8 +136,8 @@ importers:
         specifier: ^9.39.0
         version: 9.39.2
       fastify:
-        specifier: ^5.7.1
-        version: 5.7.1
+        specifier: ^5.7.4
+        version: 5.7.4
       jest:
         specifier: ^29.7.0
         version: 29.7.0(@types/node@22.19.7)(ts-node@10.9.2(@swc/core@1.15.8)(@types/node@22.19.7)(typescript@5.9.3))
@@ -3263,8 +3263,8 @@ packages:
   fastify@5.6.2:
     resolution: {integrity: sha512-dPugdGnsvYkBlENLhCgX8yhyGCsCPrpA8lFWbTNU428l+YOnLgYHR69hzV8HWPC79n536EqzqQtvhtdaCE0dKg==}
 
-  fastify@5.7.1:
-    resolution: {integrity: sha512-ZW7S4fxlZhE+tYWVokFzjh+i56R+buYKNGhrVl6DtN8sxkyMEzpJnzvO8A/ZZrsg5w6X37u6I4EOQikYS5DXpA==}
+  fastify@5.7.4:
+    resolution: {integrity: sha512-e6l5NsRdaEP8rdD8VR0ErJASeyaRbzXYpmkrpr2SuvuMq6Si3lvsaVy5C+7gLanEkvjpMDzBXWE5HPeb/hgTxA==}
 
   fastq@1.20.1:
     resolution: {integrity: sha512-GGToxJ/w1x32s/D2EKND7kTil4n8OVk/9mycTc4VDza13lOvpUZTGX3mFSCtV9ksdGBVzvsyAVLM6mHFThxXxw==}
@@ -8421,7 +8421,7 @@ snapshots:
       semver: 7.7.4
       toad-cache: 3.7.0
 
-  fastify@5.7.1:
+  fastify@5.7.4:
     dependencies:
       '@fastify/ajv-compiler': 4.0.5
       '@fastify/error': 4.2.0
@@ -8436,7 +8436,7 @@ snapshots:
       process-warning: 5.0.0
       rfdc: 1.4.1
       secure-json-parse: 4.1.0
-      semver: 7.7.3
+      semver: 7.7.4
       toad-cache: 3.7.0
 
   fastq@1.20.1:
