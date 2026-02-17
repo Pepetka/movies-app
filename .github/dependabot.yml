@@ -21,7 +21,6 @@ updates:
         patterns:
           - "eslint"
           - "prettier"
-          - "globals"
         update-types:
           - "minor"
           - "patch"
@@ -195,9 +194,6 @@ updates:
       time: "09:00"
       timezone: "Europe/Moscow"
     open-pull-requests-limit: 5
-    ignore:
-      # Catalog dependencies - updated via root
-      - dependency-name: "globals"
     groups:
       eslint-core:
         patterns:

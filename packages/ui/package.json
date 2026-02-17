@@ -44,7 +44,6 @@
 		"@types/node": "catalog:",
 		"eslint": "catalog:",
 		"@eslint/compat": "catalog:",
-		"globals": "catalog:",
 		"prettier": "catalog:",
 		"prettier-plugin-svelte": "catalog:",
 		"publint": "^0.3.15",
