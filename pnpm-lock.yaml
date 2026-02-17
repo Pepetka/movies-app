@@ -260,7 +260,7 @@ importers:
   packages/eslint-config:
     dependencies:
       '@eslint/compat':
-        specifier: ^1.4.0
+        specifier: 'catalog:'
         version: 1.4.1(eslint@9.39.2)
       '@eslint/eslintrc':
         specifier: ^3.3.3

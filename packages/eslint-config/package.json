@@ -9,7 +9,7 @@
     "./svelte": "./svelte.js"
   },
   "dependencies": {
-    "@eslint/compat": "^1.4.0",
+    "@eslint/compat": "catalog:",
     "@eslint/eslintrc": "^3.3.3",
     "@eslint/js": "^10.0.1",
     "eslint-config-prettier": "^10.1.1",
