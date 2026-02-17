@@ -1,6 +1,7 @@
 version: 2
+
 updates:
-  # Root - updates pnpm-workspace.yaml (catalogs) + monorepo tooling
+  # Monorepo (pnpm + catalogs + all packages)
   - package-ecosystem: "npm"
     directory: "/"
     schedule:
@@ -8,79 +9,47 @@ updates:
       day: "monday"
       time: "09:00"
       timezone: "Europe/Moscow"
-    open-pull-requests-limit: 10
+    open-pull-requests-limit: 15
+
+    # Grouping reduces number of PRs
     groups:
-      catalog-typescript:
+      typescript-stack:
         patterns:
           - "typescript"
-          - "@types/node"
+          - "@types/*"
+          - "ts-*"
         update-types:
           - "minor"
           - "patch"
-      catalog-linting:
+
+      linting:
         patterns:
-          - "eslint"
-          - "prettier"
+          - "eslint*"
+          - "@eslint/*"
+          - "prettier*"
+          - "globals"
         update-types:
           - "minor"
           - "patch"
-      catalog-svelte:
+
+      svelte-stack:
         patterns:
           - "svelte"
           - "@sveltejs/*"
+          - "vite"
           - "prettier-plugin-svelte"
           - "svelte-check"
-          - "vite"
         update-types:
           - "minor"
           - "patch"
-      root-tools:
-        patterns:
-          - "turbo"
-          - "husky"
-          - "lint-staged"
-          - "@changesets/cli"
-          - "syncpack"
-        update-types:
-          - "minor"
-          - "patch"
-    labels:
-      - "dependencies: javascript"
-      - "scope: infra"
-    commit-message:
-      prefix: "chore"
-      include: "scope"
 
-  # API - only non-catalog dependencies
-  - package-ecosystem: "npm"
-    directory: "/apps/api"
-    schedule:
-      interval: "weekly"
-      day: "monday"
-      time: "09:00"
-      timezone: "Europe/Moscow"
-    open-pull-requests-limit: 10
-    ignore:
-      - dependency-name: "drizzle-orm"
-        update-types: ["version-update:semver-major"]
-      - dependency-name: "passport*"
-        update-types: ["version-update:semver-major"]
-      - dependency-name: "bcrypt"
-        update-types: ["version-update:semver-major"]
-      # Catalog dependencies - updated via root
-      - dependency-name: "typescript"
-      - dependency-name: "@types/node"
-      - dependency-name: "eslint"
-      - dependency-name: "@eslint/compat"
-      - dependency-name: "prettier"
-      - dependency-name: "globals"
-    groups:
-      nestjs-core:
+      nestjs-stack:
         patterns:
           - "@nestjs/*"
         update-types:
           - "minor"
           - "patch"
+
       fastify-stack:
         patterns:
           - "fastify"
@@ -88,136 +57,46 @@ updates:
         update-types:
           - "minor"
           - "patch"
-      database:
-        patterns:
-          - "drizzle-orm"
-          - "postgres"
-      security-packages:
-        patterns:
-          - "bcrypt"
-          - "passport*"
-          - "@nestjs/jwt"
+
       testing:
         patterns:
           - "jest*"
           - "ts-jest"
           - "supertest"
+          - "vitest"
+          - "@testing-library/*"
+        update-types:
+          - "minor"
+          - "patch"
+
       build-tools:
         patterns:
+          - "turbo"
           - "@swc/*"
           - "ts-node"
           - "ts-loader"
           - "tsconfig-paths"
           - "drizzle-kit"
-    labels:
-      - "dependencies: javascript"
-      - "scope: api"
-    commit-message:
-      prefix: "chore"
-      include: "scope"
-    versioning-strategy: increase
+          - "@changesets/*"
+          - "husky"
+          - "lint-staged"
+          - "syncpack"
+        update-types:
+          - "minor"
+          - "patch"
 
-  # Web - only non-catalog dependencies
-  - package-ecosystem: "npm"
-    directory: "/apps/web"
-    schedule:
-      interval: "weekly"
-      day: "monday"
-      time: "09:00"
-      timezone: "Europe/Moscow"
-    open-pull-requests-limit: 5
+    # Major version control for sensitive packages
     ignore:
-      # Catalog dependencies - updated via root
-      - dependency-name: "typescript"
-      - dependency-name: "@types/node"
-      - dependency-name: "eslint"
-      - dependency-name: "@eslint/compat"
-      - dependency-name: "prettier"
-      - dependency-name: "prettier-plugin-svelte"
-      - dependency-name: "svelte"
-      - dependency-name: "svelte-check"
-      - dependency-name: "@sveltejs/kit"
-      - dependency-name: "@sveltejs/vite-plugin-svelte"
-      - dependency-name: "vite"
-    groups:
-      svelte-adapter:
-        patterns:
-          - "@sveltejs/adapter-*"
-    labels:
-      - "dependencies: javascript"
-      - "scope: web"
-    commit-message:
-      prefix: "chore"
-      include: "scope"
+      - dependency-name: "drizzle-orm"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "passport*"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "bcrypt"
+        update-types: ["version-update:semver-major"]
 
-  # UI package - only non-catalog dependencies
-  - package-ecosystem: "npm"
-    directory: "/packages/ui"
-    schedule:
-      interval: "weekly"
-      day: "monday"
-      time: "09:00"
-      timezone: "Europe/Moscow"
-    open-pull-requests-limit: 5
-    ignore:
-      # Catalog dependencies - updated via root
-      - dependency-name: "typescript"
-      - dependency-name: "@types/node"
-      - dependency-name: "eslint"
-      - dependency-name: "@eslint/compat"
-      - dependency-name: "prettier"
-      - dependency-name: "prettier-plugin-svelte"
-      - dependency-name: "globals"
-      - dependency-name: "svelte"
-      - dependency-name: "svelte-check"
-      - dependency-name: "@sveltejs/kit"
-      - dependency-name: "@sveltejs/vite-plugin-svelte"
-      - dependency-name: "vite"
-    groups:
-      svelte-tools:
-        patterns:
-          - "@sveltejs/package"
-          - "publint"
     labels:
       - "dependencies: javascript"
-      - "scope: web"
-    commit-message:
-      prefix: "chore"
-      include: "scope"
 
-  # ESLint config package - only non-catalog dependencies
-  - package-ecosystem: "npm"
-    directory: "/packages/eslint-config"
-    schedule:
-      interval: "weekly"
-      day: "monday"
-      time: "09:00"
-      timezone: "Europe/Moscow"
-    open-pull-requests-limit: 5
-    groups:
-      eslint-core:
-        patterns:
-          - "@eslint/*"
-          - "eslint*"
-        update-types:
-          - "minor"
-          - "patch"
-      eslint-plugins:
-        patterns:
-          - "eslint-plugin-*"
-          - "eslint-config-*"
-        update-types:
-          - "minor"
-          - "patch"
-      typescript-eslint:
-        patterns:
-          - "typescript-eslint"
-        update-types:
-          - "minor"
-          - "patch"
-    labels:
-      - "dependencies: javascript"
-      - "scope: infra"
     commit-message:
       prefix: "chore"
       include: "scope"
@@ -231,11 +110,6 @@ updates:
       time: "09:00"
       timezone: "Europe/Moscow"
     open-pull-requests-limit: 5
-    ignore:
-      - dependency-name: "actions/*"
-        update-types: ["version-update:semver-major"]
-      - dependency-name: "pnpm/*"
-        update-types: ["version-update:semver-major"]
     groups:
       github-actions:
         patterns:
@@ -243,7 +117,6 @@ updates:
           - "pnpm/*"
     labels:
       - "dependencies: github-actions"
-      - "scope: infra"
     commit-message:
       prefix: "ci"
       include: "scope"
