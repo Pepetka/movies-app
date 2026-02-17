@@ -10,7 +10,7 @@ importers:
     devDependencies:
       '@changesets/cli':
         specifier: ^2.27.0
-        version: 2.29.8(@types/node@25.0.9)
+        version: 2.29.8(@types/node@22.19.7)
       husky:
         specifier: ^9.1.7
         version: 9.1.7
@@ -239,8 +239,8 @@ importers:
         specifier: ^10.1.1
         version: 10.1.8(eslint@9.39.2)
       eslint-config-turbo:
-        specifier: ^2.8.6
-        version: 2.8.6(eslint@9.39.2)(turbo@2.8.9)
+        specifier: ^2.8.9
+        version: 2.8.9(eslint@9.39.2)(turbo@2.8.9)
       eslint-plugin-perfectionist:
         specifier: ^5.4.0
         version: 5.4.0(eslint@9.39.2)(typescript@5.9.3)
@@ -3124,8 +3124,8 @@ packages:
     peerDependencies:
       eslint: '>=7.0.0'
 
-  eslint-config-turbo@2.8.6:
-    resolution: {integrity: sha512-oT6tqLqN5rjGiZMzox67wnFXNLRfJPuN5HSYSP27ZXKIoh18dbCp6uJ9OEv3kxw1QDBTU4CFl8rLyL8eiGk81Q==}
+  eslint-config-turbo@2.8.9:
+    resolution: {integrity: sha512-U+R5hYzLH5A393R4u6AGMftSLXEs0Gj7ys1ae2ha39YWi+Ei8K2ctOB5y+NQ7TOngvOVIK5uFhxMWQimKAglGw==}
     peerDependencies:
       eslint: '>6.6.0'
       turbo: '>2.0.0'
@@ -3148,6 +3148,12 @@ packages:
 
   eslint-plugin-turbo@2.8.6:
     resolution: {integrity: sha512-ApMp9vaw5BbqK76fYnWqaGRwlqWKLU11GTF8YuZsDKpJJ+fLwMwfvmapy70y6Bm+fQx7opuoJTlyhlNgcgjV0A==}
+    peerDependencies:
+      eslint: '>6.6.0'
+      turbo: '>2.0.0'
+
+  eslint-plugin-turbo@2.8.9:
+    resolution: {integrity: sha512-gmhdR1SNrPxdXu00xxdhnt32SayUBjHbnhw3YpB939D9ZQjsK9Mthw7mPBrafifwb06kx0VqaFzxaP1JLCbh3g==}
     peerDependencies:
       eslint: '>6.6.0'
       turbo: '>2.0.0'
@@ -5636,7 +5642,7 @@ snapshots:
     dependencies:
       '@changesets/types': 6.1.0
 
-  '@changesets/cli@2.29.8(@types/node@25.0.9)':
+  '@changesets/cli@2.29.8(@types/node@22.19.7)':
     dependencies:
       '@changesets/apply-release-plan': 7.0.14
       '@changesets/assemble-release-plan': 6.0.9
@@ -5652,7 +5658,7 @@ snapshots:
       '@changesets/should-skip-package': 0.1.2
       '@changesets/types': 6.1.0
       '@changesets/write': 0.4.0
-      '@inquirer/external-editor': 1.0.3(@types/node@25.0.9)
+      '@inquirer/external-editor': 1.0.3(@types/node@22.19.7)
       '@manypkg/get-packages': 1.1.3
       ansi-colors: 4.1.3
       ci-info: 3.9.0
@@ -6179,13 +6185,6 @@ snapshots:
       iconv-lite: 0.7.2
     optionalDependencies:
       '@types/node': 22.19.7
-
-  '@inquirer/external-editor@1.0.3(@types/node@25.0.9)':
-    dependencies:
-      chardet: 2.1.1
-      iconv-lite: 0.7.2
-    optionalDependencies:
-      '@types/node': 25.0.9
 
   '@inquirer/figures@1.0.15': {}
 
@@ -8216,10 +8215,10 @@ snapshots:
     dependencies:
       eslint: 9.39.2
 
-  eslint-config-turbo@2.8.6(eslint@9.39.2)(turbo@2.8.9):
+  eslint-config-turbo@2.8.9(eslint@9.39.2)(turbo@2.8.9):
     dependencies:
       eslint: 9.39.2
-      eslint-plugin-turbo: 2.8.6(eslint@9.39.2)(turbo@2.8.9)
+      eslint-plugin-turbo: 2.8.9(eslint@9.39.2)(turbo@2.8.9)
       turbo: 2.8.9
 
   eslint-plugin-perfectionist@5.4.0(eslint@9.39.2)(typescript@5.9.3):
@@ -8250,6 +8249,12 @@ snapshots:
       - ts-node
 
   eslint-plugin-turbo@2.8.6(eslint@9.39.2)(turbo@2.8.9):
+    dependencies:
+      dotenv: 16.0.3
+      eslint: 9.39.2
+      turbo: 2.8.9
+
+  eslint-plugin-turbo@2.8.9(eslint@9.39.2)(turbo@2.8.9):
     dependencies:
       dotenv: 16.0.3
       eslint: 9.39.2
