@@ -249,9 +249,9 @@ updates:
       prefix: "ci"
       include: "scope"
 
-  # Docker images
+  # Docker - API
   - package-ecosystem: "docker"
-    directory: "/"
+    directory: "/docker/api"
     schedule:
       interval: "weekly"
       day: "monday"
@@ -259,19 +259,30 @@ updates:
       timezone: "Europe/Moscow"
     open-pull-requests-limit: 3
     ignore:
-      - dependency-name: "postgres"
+      - dependency-name: "node"
         update-types: ["version-update:semver-major"]
-      - dependency-name: "nginx"
-        update-types: ["version-update:semver-major"]
-    groups:
-      docker-images:
-        patterns:
-          - "postgres"
-          - "nginx"
-          - "certbot"
     labels:
       - "dependencies: docker"
-      - "scope: infra"
+      - "scope: api"
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+
+  # Docker - Web
+  - package-ecosystem: "docker"
+    directory: "/docker/web"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Europe/Moscow"
+    open-pull-requests-limit: 3
+    ignore:
+      - dependency-name: "node"
+        update-types: ["version-update:semver-major"]
+    labels:
+      - "dependencies: docker"
+      - "scope: web"
     commit-message:
       prefix: "chore"
       include: "scope"
