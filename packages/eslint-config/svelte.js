@@ -1,3 +1,4 @@
+import storybook from "eslint-plugin-storybook";
 import svelte from "eslint-plugin-svelte";
 import globals from "globals";
 import ts from "typescript-eslint";
@@ -7,6 +8,7 @@ export const config = [
   ...baseConfig,
   ...svelte.configs.recommended,
   ...svelte.configs.prettier,
+  ...storybook.configs["flat/recommended"],
   {
     languageOptions: {
       globals: {
@@ -31,6 +33,7 @@ export const config = [
       "@typescript-eslint/no-unsafe-argument": "warn",
       "@typescript-eslint/no-unused-vars": "off",
       "@typescript-eslint/no-unsafe-assignment": "off",
+      "svelte/no-navigation-without-resolve": "off",
     },
   },
 ];
