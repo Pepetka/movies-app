@@ -8,7 +8,7 @@ catalog:
   "@types/node": "^25.3.0"
 
   # Linting & Formatting
-  eslint: "^9.39.0"
+  eslint: "^10.0.2"
   "@eslint/compat": "^1.4.0"
   prettier: "^3.8.0"
 
