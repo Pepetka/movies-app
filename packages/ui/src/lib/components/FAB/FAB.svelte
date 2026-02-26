@@ -17,7 +17,13 @@
 	const iconContent = $derived(icon || children);
 </script>
 
-<button {type} class={['ui-fab', size, position, className]} {disabled} {...restProps}>
+<button
+	{type}
+	class={['ui-fab', size, position, className]}
+	{disabled}
+	aria-label={label || 'Action'}
+	{...restProps}
+>
 	{#if iconContent}
 		<span class="ui-fab-icon">{@render iconContent()}</span>
 	{/if}

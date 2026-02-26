@@ -21,7 +21,10 @@
 	let selectedRole = $state('moderator');
 </script>
 
-<Story name="Playground" args={{ label: 'Choose option', size: 'md' }}>
+<Story
+	name="Playground"
+	args={{ label: 'Choose option', size: 'md', placeholder: 'Choose option' }}
+>
 	{#snippet template(args)}
 		<div style="max-width: 400px;">
 			<Select
@@ -38,14 +41,15 @@
 
 <Story name="All Sizes">
 	{#snippet template()}
-		<div style="display: flex; flex-direction: column; gap: 16px;">
-			<div style="display: flex; align-items: center; gap: 12px;">
+		<div style="display: flex; flex-direction: column; gap: var(--space-4);">
+			<div style="display: flex; align-items: center; gap: var(--space-3);">
 				<span style="font-size: var(--text-sm); color: var(--text-tertiary); min-width: 40px;"
 					>sm</span
 				>
 				<Select
 					size="sm"
 					label="Size"
+					placeholder="Choose size"
 					options={[
 						{ value: 'sm', label: 'Small' },
 						{ value: 'md', label: 'Medium' },
@@ -54,13 +58,14 @@
 					bind:value={selectedSize}
 				/>
 			</div>
-			<div style="display: flex; align-items: center; gap: 12px;">
+			<div style="display: flex; align-items: center; gap: var(--space-3);">
 				<span style="font-size: var(--text-sm); color: var(--text-tertiary); min-width: 40px;"
 					>md</span
 				>
 				<Select
 					size="md"
 					label="Size"
+					placeholder="Choose size"
 					options={[
 						{ value: 'sm', label: 'Small' },
 						{ value: 'md', label: 'Medium' },
@@ -69,13 +74,14 @@
 					bind:value={selectedSize}
 				/>
 			</div>
-			<div style="display: flex; align-items: center; gap: 12px;">
+			<div style="display: flex; align-items: center; gap: var(--space-3);">
 				<span style="font-size: var(--text-sm); color: var(--text-tertiary); min-width: 40px;"
 					>lg</span
 				>
 				<Select
 					size="lg"
 					label="Size"
+					placeholder="Choose size"
 					options={[
 						{ value: 'sm', label: 'Small' },
 						{ value: 'md', label: 'Medium' },
@@ -93,6 +99,7 @@
 		<div style="max-width: 400px;">
 			<Select
 				label="Country"
+				placeholder="Select a country"
 				options={[
 					{ value: 'us', label: 'United States' },
 					{ value: 'uk', label: 'United Kingdom' },
@@ -128,6 +135,7 @@
 		<div style="max-width: 400px;">
 			<Select
 				label="Language"
+				placeholder="Select language"
 				helper="Choose your preferred language for the interface"
 				options={[
 					{ value: 'en', label: 'English' },
@@ -143,14 +151,15 @@
 
 <Story name="Error State">
 	{#snippet template()}
-		<div style="display: flex; flex-direction: column; gap: 24px; max-width: 400px;">
+		<div style="display: flex; flex-direction: column; gap: var(--space-6); max-width: 400px;">
 			<div>
 				<span
-					style="font-size: var(--text-sm); color: var(--text-tertiary); margin-bottom: 8px; display: block;"
+					style="font-size: var(--text-sm); color: var(--text-tertiary); margin-bottom: var(--space-2); display: block;"
 					>Empty with error</span
 				>
 				<Select
 					label="Status"
+					placeholder="Select status"
 					error="This field is required"
 					options={[
 						{ value: 'active', label: 'Active' },
@@ -162,7 +171,7 @@
 			</div>
 			<div>
 				<span
-					style="font-size: var(--text-sm); color: var(--text-tertiary); margin-bottom: 8px; display: block;"
+					style="font-size: var(--text-sm); color: var(--text-tertiary); margin-bottom: var(--space-2); display: block;"
 					>Filled with error</span
 				>
 				<Select
@@ -182,14 +191,15 @@
 
 <Story name="Disabled">
 	{#snippet template()}
-		<div style="display: flex; flex-direction: column; gap: 24px; max-width: 400px;">
+		<div style="display: flex; flex-direction: column; gap: var(--space-6); max-width: 400px;">
 			<div>
 				<span
-					style="font-size: var(--text-sm); color: var(--text-tertiary); margin-bottom: 8px; display: block;"
+					style="font-size: var(--text-sm); color: var(--text-tertiary); margin-bottom: var(--space-2); display: block;"
 					>Empty disabled</span
 				>
 				<Select
 					label="Category"
+					placeholder="Select category"
 					disabled
 					options={[
 						{ value: 'movies', label: 'Movies' },
@@ -200,7 +210,7 @@
 			</div>
 			<div>
 				<span
-					style="font-size: var(--text-sm); color: var(--text-tertiary); margin-bottom: 8px; display: block;"
+					style="font-size: var(--text-sm); color: var(--text-tertiary); margin-bottom: var(--space-2); display: block;"
 					>Filled disabled</span
 				>
 				<Select
@@ -223,6 +233,7 @@
 		<div style="max-width: 400px;">
 			<Select
 				label="Movie Genre"
+				placeholder="Select a genre"
 				helper="Scroll to see all available genres"
 				options={[
 					{ value: 'action', label: 'Action' },
@@ -254,6 +265,7 @@
 		<div style="max-width: 400px;">
 			<Select
 				label="Subscription Plan"
+				placeholder="Choose a plan"
 				helper="Premium plans are currently unavailable"
 				options={[
 					{ value: 'free', label: 'Free Plan' },
@@ -269,16 +281,17 @@
 <Story name="In Context">
 	{#snippet template()}
 		<div
-			style="max-width: 400px; padding: 24px; background: var(--bg-secondary); border-radius: var(--radius-xl);"
+			style="max-width: 400px; padding: var(--space-6); background: var(--bg-secondary); border-radius: var(--radius-xl);"
 		>
-			<h2 style="margin-bottom: 24px; color: var(--text-primary);">Add Movie</h2>
+			<h2 style="margin-bottom: var(--space-6); color: var(--text-primary);">Add Movie</h2>
 			<form
 				onsubmit={(e) => e.preventDefault()}
-				style="display: flex; flex-direction: column; gap: 16px;"
+				style="display: flex; flex-direction: column; gap: var(--space-4);"
 			>
 				<Input label="Movie Title" placeholder="Enter movie title" />
 				<Select
 					label="Genre"
+					placeholder="Select genre"
 					options={[
 						{ value: 'action', label: 'Action' },
 						{ value: 'comedy', label: 'Comedy' },
@@ -288,6 +301,7 @@
 				/>
 				<Select
 					label="Watch Status"
+					placeholder="Select status"
 					helper="Mark if you've already watched this movie"
 					options={[
 						{ value: 'plan-to-watch', label: 'Plan to Watch' },
@@ -296,8 +310,74 @@
 						{ value: 'dropped', label: 'Dropped' }
 					]}
 				/>
-				<Button type="submit" variant="primary" style="margin-top: 8px;">Add Movie</Button>
+				<Button type="submit" variant="primary" style="margin-top: var(--space-2);"
+					>Add Movie</Button
+				>
 			</form>
+		</div>
+	{/snippet}
+</Story>
+
+<Story name="Accessibility">
+	{#snippet template()}
+		<div style="max-width: 400px;">
+			<h3 style="margin-bottom: 16px; color: var(--text-secondary);">Клавиатурная навигация</h3>
+
+			<div style="display: flex; flex-direction: column; gap: 16px; margin-bottom: 24px;">
+				<Select
+					label="Страна"
+					placeholder="Выберите страну"
+					helper="Нажмите Tab для фокуса, стрелки для навигации"
+					options={[
+						{ value: 'ru', label: 'Россия' },
+						{ value: 'us', label: 'США' },
+						{ value: 'uk', label: 'Великобритания' }
+					]}
+				/>
+				<Select
+					label="Язык"
+					options={[
+						{ value: 'ru', label: 'Русский' },
+						{ value: 'en', label: 'Английский' }
+					]}
+				/>
+			</div>
+
+			<div style="padding: 16px; background: var(--bg-secondary); border-radius: var(--radius-lg);">
+				<h4 style="margin: 0 0 12px; font-size: var(--text-sm); color: var(--text-secondary);">
+					Доступные клавиши:
+				</h4>
+				<div style="display: flex; flex-direction: column; gap: 8px; font-size: var(--text-sm);">
+					<div style="display: flex; gap: 12px;">
+						<kbd
+							style="padding: 2px 8px; background: var(--bg-tertiary); border-radius: var(--radius-sm); font-family: monospace;"
+							>Tab</kbd
+						>
+						<span style="color: var(--text-secondary);">Перемещение между списками</span>
+					</div>
+					<div style="display: flex; gap: 12px;">
+						<kbd
+							style="padding: 2px 8px; background: var(--bg-tertiary); border-radius: var(--radius-sm); font-family: monospace;"
+							>Space / Enter</kbd
+						>
+						<span style="color: var(--text-secondary);">Открытие списка</span>
+					</div>
+					<div style="display: flex; gap: 12px;">
+						<kbd
+							style="padding: 2px 8px; background: var(--bg-tertiary); border-radius: var(--radius-sm); font-family: monospace;"
+							>↑ / ↓</kbd
+						>
+						<span style="color: var(--text-secondary);">Навигация по опциям</span>
+					</div>
+					<div style="display: flex; gap: 12px;">
+						<kbd
+							style="padding: 2px 8px; background: var(--bg-tertiary); border-radius: var(--radius-sm); font-family: monospace;"
+							>Esc</kbd
+						>
+						<span style="color: var(--text-secondary);">Закрытие списка</span>
+					</div>
+				</div>
+			</div>
 		</div>
 	{/snippet}
 </Story>

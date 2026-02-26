@@ -7,12 +7,20 @@
 		disabled = false,
 		size = 'md',
 		helper,
+		onChange,
 		class: className,
 		...restProps
 	}: IProps = $props();
 
 	const switchId = crypto.randomUUID();
 	const labelId = crypto.randomUUID();
+	const helperId = crypto.randomUUID();
+
+	const toggle = () => {
+		if (disabled) return;
+		checked = !checked;
+		onChange?.(checked);
+	};
 </script>
 
 <div class={['ui-switch-wrapper', size, { disabled }, className]}>
@@ -22,8 +30,9 @@
 		id={switchId}
 		aria-checked={checked}
 		aria-labelledby={labelId}
+		aria-describedby={helper ? helperId : undefined}
 		{disabled}
-		onclick={() => !disabled && (checked = !checked)}
+		onclick={toggle}
 		class={['ui-switch', { checked }]}
 		{...restProps}
 	>
@@ -32,7 +41,7 @@
 	<div class="ui-switch-label-container">
 		<span id={labelId} class="ui-switch-label">{label}</span>
 		{#if helper}
-			<span class="ui-switch-helper">{helper}</span>
+			<span id={helperId} class="ui-switch-helper">{helper}</span>
 		{/if}
 	</div>
 </div>

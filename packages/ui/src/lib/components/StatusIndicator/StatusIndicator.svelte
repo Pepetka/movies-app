@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { IProps } from './StatusIndicator.types.svelte';
 
-	const { status, size = 'md', title, onclick, ...restProps }: IProps = $props();
+	const { status, size = 'md', title, onclick, class: className, ...restProps }: IProps = $props();
 
 	const colors = {
 		loading: 'var(--color-warning)',
@@ -23,7 +23,7 @@
 {#if onclick}
 	<button
 		type="button"
-		class={['ui-status-indicator']}
+		class={['ui-status-indicator', className]}
 		class:loading={status === 'loading'}
 		style:background-color={backgroundColor}
 		style:width={dotSize}
@@ -35,7 +35,7 @@
 	></button>
 {:else}
 	<div
-		class={['ui-status-indicator']}
+		class={['ui-status-indicator', className]}
 		class:loading={status === 'loading'}
 		style:background-color={backgroundColor}
 		style:width={dotSize}

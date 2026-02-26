@@ -12,4 +12,5 @@ export interface ThemeLabels {
 export interface IProps extends HTMLAttributes<HTMLDivElement> {
 	size?: ThemeToggleSize;
 	labels?: Partial<ThemeLabels>;
+	class?: string;
 }

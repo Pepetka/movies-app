@@ -187,3 +187,64 @@
 		</div>
 	{/snippet}
 </Story>
+
+<Story name="Accessibility">
+	{#snippet template()}
+		<div style="max-width: 500px;">
+			<h3 style="margin-bottom: 16px; color: var(--text-secondary);">Клавиатурная навигация</h3>
+
+			<Tabs
+				tabs={[
+					{ id: 'all', label: 'Все', count: 142 },
+					{ id: 'favorites', label: 'Избранное', count: 23 },
+					{ id: 'watched', label: 'Смотрели', count: 111 }
+				]}
+			/>
+
+			<div
+				style="margin-top: 24px; padding: 16px; background: var(--bg-secondary); border-radius: var(--radius-lg);"
+			>
+				<h4 style="margin: 0 0 12px; font-size: var(--text-sm); color: var(--text-secondary);">
+					Доступные клавиши:
+				</h4>
+				<div style="display: flex; flex-direction: column; gap: 8px; font-size: var(--text-sm);">
+					<div style="display: flex; gap: 12px;">
+						<kbd
+							style="padding: 2px 8px; background: var(--bg-tertiary); border-radius: var(--radius-sm); font-family: monospace;"
+							>Tab</kbd
+						>
+						<span style="color: var(--text-secondary);">Фокус на активный таб</span>
+					</div>
+					<div style="display: flex; gap: 12px;">
+						<kbd
+							style="padding: 2px 8px; background: var(--bg-tertiary); border-radius: var(--radius-sm); font-family: monospace;"
+							>← / →</kbd
+						>
+						<span style="color: var(--text-secondary);">Перемещение между табами</span>
+					</div>
+					<div style="display: flex; gap: 12px;">
+						<kbd
+							style="padding: 2px 8px; background: var(--bg-tertiary); border-radius: var(--radius-sm); font-family: monospace;"
+							>Home</kbd
+						>
+						<span style="color: var(--text-secondary);">Первый таб</span>
+					</div>
+					<div style="display: flex; gap: 12px;">
+						<kbd
+							style="padding: 2px 8px; background: var(--bg-tertiary); border-radius: var(--radius-sm); font-family: monospace;"
+							>End</kbd
+						>
+						<span style="color: var(--text-secondary);">Последний таб</span>
+					</div>
+					<div style="display: flex; gap: 12px;">
+						<kbd
+							style="padding: 2px 8px; background: var(--bg-tertiary); border-radius: var(--radius-sm); font-family: monospace;"
+							>Enter / Space</kbd
+						>
+						<span style="color: var(--text-secondary);">Выбор таба</span>
+					</div>
+				</div>
+			</div>
+		</div>
+	{/snippet}
+</Story>

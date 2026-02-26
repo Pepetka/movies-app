@@ -16,6 +16,10 @@
 
 	/* Layout */
 	--container-max-width: 1200px;
+	--container-sm-max-width: 640px;
+	--container-md-max-width: 768px;
+	--container-lg-max-width: 1024px;
+	--container-xl-max-width: 1200px;
 	--container-padding: var(--space-4);
 
 	/* Border Radius */
@@ -62,6 +66,7 @@
 	--z-modal: 1050;
 	--z-popover: 1060;
 	--z-tooltip: 1070;
+	--z-toast: 1080;
 
 	/* Transitions */
 	--transition-fast: 150ms;
@@ -174,6 +179,11 @@
 	--switch-lg-thumb-size: 30px;
 	--switch-lg-thumb-offset: 24px;
 
+	/* Checkbox Sizes */
+	--checkbox-sm-size: 18px;
+	--checkbox-md-size: 24px;
+	--checkbox-lg-size: 30px;
+
 	/* Badge Sizes */
 	--badge-sm-padding: 2px 6px;
 	--badge-sm-font: 10px;
@@ -182,4 +192,76 @@
 
 	/* Textarea */
 	--textarea-padding: var(--space-3);
+
+	/* Card Sizes */
+	--card-sm-padding: var(--space-3);
+	--card-md-padding: var(--space-4);
+	--card-lg-padding: var(--space-6);
+
+	/* Toast */
+	--toast-min-width: 288px;
+	--toast-max-width: 480px;
+	--toast-padding: var(--space-3) var(--space-4);
+	--toast-border-radius: var(--radius-lg);
+	--toast-gap: var(--space-2);
+	--toast-margin: var(--space-4);
+	--toast-icon-size: 20px;
+	--toast-action-padding: var(--space-1) var(--space-2);
+
+	/* DatePicker */
+	--datepicker-width: 320px;
+	--datepicker-day-size: 40px;
+	--datepicker-day-gap: 4px;
+
+	/* Spinner Sizes */
+	--spinner-sm-size: 16px;
+	--spinner-md-size: 24px;
+	--spinner-lg-size: 32px;
+
+	/* Skeleton Text Heights */
+	--skeleton-text-sm: 12px;
+	--skeleton-text-md: 16px;
+	--skeleton-text-lg: 20px;
+
+	/* Skeleton Circular Sizes */
+	--skeleton-circular-sm: 32px;
+	--skeleton-circular-md: 48px;
+	--skeleton-circular-lg: 64px;
+
+	/* Skeleton Rectangular Heights */
+	--skeleton-rect-sm: 100px;
+	--skeleton-rect-md: 150px;
+	--skeleton-rect-lg: 200px;
+
+	/* Image Aspect Ratios */
+	--image-ratio-1-1: 1 / 1;
+	--image-ratio-4-3: 4 / 3;
+	--image-ratio-16-9: 16 / 9;
+	--image-ratio-2-3: 2 / 3;
+	--image-ratio-3-4: 3 / 4;
+
+	/* Chip Sizes */
+	--chip-sm-padding: 6px 12px;
+	--chip-sm-font: var(--text-sm);
+	--chip-sm-height: 32px;
+	--chip-sm-icon-size: 14px;
+	--chip-sm-gap: 6px;
+
+	--chip-md-padding: 8px 16px;
+	--chip-md-font: var(--text-base);
+	--chip-md-height: 40px;
+	--chip-md-icon-size: 16px;
+	--chip-md-gap: 8px;
+
+	--chip-lg-padding: 10px 20px;
+	--chip-lg-font: var(--text-lg);
+	--chip-lg-height: 48px;
+	--chip-lg-icon-size: 18px;
+	--chip-lg-gap: 10px;
+
+	/* Grid Gaps */
+	--grid-sm-gap: var(--space-2);
+	--grid-md-gap: var(--space-3);
+	--grid-lg-gap: var(--space-4);
+	--grid-none-gap: 0;
 }

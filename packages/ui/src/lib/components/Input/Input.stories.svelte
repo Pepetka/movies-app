@@ -338,3 +338,45 @@
 		</div>
 	{/snippet}
 </Story>
+
+<Story name="Accessibility">
+	{#snippet template()}
+		<div style="max-width: 400px;">
+			<h3 style="margin-bottom: 16px; color: var(--text-secondary);">Клавиатурная навигация</h3>
+
+			<div style="display: flex; flex-direction: column; gap: 16px; margin-bottom: 24px;">
+				<Input label="Имя пользователя" placeholder="Введите имя" helper="Нажмите Tab для фокуса" />
+				<Input type="email" label="Email" placeholder="example@mail.com" />
+			</div>
+
+			<div style="padding: 16px; background: var(--bg-secondary); border-radius: var(--radius-lg);">
+				<h4 style="margin: 0 0 12px; font-size: var(--text-sm); color: var(--text-secondary);">
+					Доступные клавиши:
+				</h4>
+				<div style="display: flex; flex-direction: column; gap: 8px; font-size: var(--text-sm);">
+					<div style="display: flex; gap: 12px;">
+						<kbd
+							style="padding: 2px 8px; background: var(--bg-tertiary); border-radius: var(--radius-sm); font-family: monospace;"
+							>Tab</kbd
+						>
+						<span style="color: var(--text-secondary);">Перемещение между полями ввода</span>
+					</div>
+					<div style="display: flex; gap: 12px;">
+						<kbd
+							style="padding: 2px 8px; background: var(--bg-tertiary); border-radius: var(--radius-sm); font-family: monospace;"
+							>Shift+Tab</kbd
+						>
+						<span style="color: var(--text-secondary);">Перемещение назад</span>
+					</div>
+					<div style="display: flex; gap: 12px;">
+						<kbd
+							style="padding: 2px 8px; background: var(--bg-tertiary); border-radius: var(--radius-sm); font-family: monospace;"
+							>Enter</kbd
+						>
+						<span style="color: var(--text-secondary);">Отправка формы (если в форме)</span>
+					</div>
+				</div>
+			</div>
+		</div>
+	{/snippet}
+</Story>

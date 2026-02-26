@@ -2,160 +2,109 @@
 	import { House, User, Settings, Bell, Mail } from '@lucide/svelte';
 	import { defineMeta } from '@storybook/addon-svelte-csf';
 
+	import type { NavItem } from './BottomNav.types.svelte';
 	import BottomNav from './BottomNav.svelte';
 
 	const { Story } = defineMeta({
 		title: 'Components/BottomNav',
 		component: BottomNav,
-		tags: ['autodocs']
+		tags: ['autodocs'],
+		argTypes: {
+			value: { control: 'text' },
+			defaultValue: { control: 'text' }
+		}
 	});
+
+	const defaultItems: NavItem[] = [
+		{ id: 'home', label: 'Home', Icon: House, href: '/home' },
+		{ id: 'profile', label: 'Profile', Icon: User, href: '/profile' },
+		{ id: 'settings', label: 'Settings', Icon: Settings, href: '/settings' }
+	];
+
+	let active = $state('home');
 </script>
 
-<Story name="Playground">
-	{#snippet template()}
-		<BottomNav
-			items={[
-				{ id: 'home', label: 'Группы', Icon: House, href: '/groups' },
-				{ id: 'profile', label: 'Профиль', Icon: User, href: '/profile' },
-				{ id: 'settings', label: 'Настройки', Icon: Settings, href: '/settings' }
-			]}
-		/>
-	{/snippet}
-</Story>
+<Story name="Playground" args={{ items: defaultItems }} />
 
 <Story name="Basic">
 	{#snippet template()}
-		<div>
-			<BottomNav
-				items={[
-					{ id: 'home', label: 'Группы', Icon: House, href: '/groups' },
-					{ id: 'profile', label: 'Профиль', Icon: User, href: '/profile' },
-					{ id: 'settings', label: 'Настройки', Icon: Settings, href: '/settings' }
-				]}
-			/>
-		</div>
+		<BottomNav items={defaultItems} />
 	{/snippet}
 </Story>
 
 <Story name="With Badges">
 	{#snippet template()}
-		<div>
-			<BottomNav
-				items={[
-					{
-						id: 'home',
-						label: 'Группы',
-						Icon: House,
-						href: '/groups'
-					},
-					{
-						id: 'notifications',
-						label: 'Уведомления',
-						Icon: Bell,
-						href: '/notifications',
-						badge: 5
-					},
-					{
-						id: 'messages',
-						label: 'Сообщения',
-						Icon: Mail,
-						href: '/messages',
-						badge: 99
-					},
-					{
-						id: 'profile',
-						label: 'Профиль',
-						Icon: User,
-						href: '/profile'
-					}
-				]}
-				defaultValue="notifications"
-			/>
-		</div>
+		<BottomNav
+			items={[
+				{ id: 'home', label: 'Home', Icon: House, href: '/home' },
+				{
+					id: 'notifications',
+					label: 'Notifications',
+					Icon: Bell,
+					href: '/notifications',
+					badge: 5
+				},
+				{ id: 'messages', label: 'Messages', Icon: Mail, href: '/messages', badge: 99 },
+				{ id: 'profile', label: 'Profile', Icon: User, href: '/profile' }
+			]}
+			defaultValue="notifications"
+		/>
 	{/snippet}
 </Story>
 
 <Story name="Controlled">
 	{#snippet template()}
-		<div>
-			<div style="padding: 16px; margin-bottom: 300px;">
-				<p style="color: var(--text-secondary); margin-bottom: 8px;">
-					Active tab: <strong id="active-tab">home</strong>
-				</p>
-				<BottomNav
-					items={[
-						{ id: 'home', label: 'Группы', Icon: House, href: '/groups' },
-						{ id: 'profile', label: 'Профиль', Icon: User, href: '/profile' },
-						{ id: 'settings', label: 'Настройки', Icon: Settings, href: '/settings' }
-					]}
-					value="home"
-					onChange={(id) => {
-						document.getElementById('active-tab')!.textContent = id;
-					}}
-				/>
-			</div>
+		<div style="padding: 16px; margin-bottom: 80px;">
+			<p style="color: var(--text-secondary); margin-bottom: 8px;">
+				Active tab: <strong>{active}</strong>
+			</p>
+			<BottomNav items={defaultItems} bind:value={active} />
 		</div>
 	{/snippet}
 </Story>
 
 <Story name="Hidden Items">
 	{#snippet template()}
-		<div>
-			<p style="padding: 16px; color: var(--text-secondary);">
-				Admin item is hidden (simulated admin-only access)
-			</p>
-			<BottomNav
-				items={[
-					{ id: 'home', label: 'Группы', Icon: House, href: '/groups' },
-					{ id: 'profile', label: 'Профиль', Icon: User, href: '/profile' },
-					{
-						id: 'admin',
-						label: 'Админ',
-						Icon: Settings,
-						href: '/admin',
-						hidden: true
-					}
-				]}
-			/>
-		</div>
+		<BottomNav
+			items={[
+				{ id: 'home', label: 'Home', Icon: House, href: '/home' },
+				{ id: 'profile', label: 'Profile', Icon: User, href: '/profile' },
+				{ id: 'admin', label: 'Admin', Icon: Settings, href: '/admin', hidden: true }
+			]}
+		/>
+	{/snippet}
+</Story>
+
+<Story name="Disabled Items">
+	{#snippet template()}
+		<BottomNav
+			items={[
+				{ id: 'home', label: 'Home', Icon: House, href: '/home' },
+				{ id: 'search', label: 'Search', Icon: Bell, href: '/search', disabled: true },
+				{ id: 'profile', label: 'Profile', Icon: User, href: '/profile' }
+			]}
+			defaultValue="home"
+		/>
 	{/snippet}
 </Story>
 
 <Story name="In Context">
 	{#snippet template()}
 		<div>
-			<div
-				style="max-width: 400px; margin: 0 auto; padding-bottom: 80px; padding-left: 16px; padding-right: 16px;"
-			>
-				<h2 style="margin-bottom: 16px;">Мои группы</h2>
+			<div style="max-width: 400px; margin: 0 auto; padding: 16px; padding-bottom: 80px;">
+				<h2 style="margin-bottom: 16px;">My Groups</h2>
 				<div
 					style="background: var(--bg-secondary); border-radius: var(--radius-lg); padding: 16px; margin-bottom: 16px;"
 				>
-					<h3 style="margin-bottom: 8px;">Киноклуб 🎬</h3>
-					<p style="color: var(--text-secondary); font-size: var(--text-sm);">
-						12 участников • 5 активных
-					</p>
-				</div>
-				<div
-					style="background: var(--bg-secondary); border-radius: var(--radius-lg); padding: 16px; margin-bottom: 16px;"
-				>
-					<h3 style="margin-bottom: 8px;">Друзья</h3>
-					<p style="color: var(--text-secondary); font-size: var(--text-sm);">
-						4 участника • 2 активных
-					</p>
+					<h3 style="margin-bottom: 8px;">Movie Club</h3>
+					<p style="color: var(--text-secondary); font-size: var(--text-sm);">12 members</p>
 				</div>
 			</div>
 			<BottomNav
 				items={[
-					{
-						id: 'home',
-						label: 'Группы',
-						Icon: House,
-						href: '/groups',
-						badge: 2
-					},
-					{ id: 'profile', label: 'Профиль', Icon: User, href: '/profile' },
-					{ id: 'settings', label: 'Настройки', Icon: Settings, href: '/settings' }
+					{ id: 'home', label: 'Home', Icon: House, href: '/home', badge: 2 },
+					{ id: 'profile', label: 'Profile', Icon: User, href: '/profile' },
+					{ id: 'settings', label: 'Settings', Icon: Settings, href: '/settings' }
 				]}
 				defaultValue="home"
 			/>
@@ -165,89 +114,31 @@
 
 <Story name="Two Items">
 	{#snippet template()}
-		<div>
-			<BottomNav
-				items={[
-					{ id: 'home', label: 'Группы', Icon: House, href: '/groups' },
-					{ id: 'profile', label: 'Профиль', Icon: User, href: '/profile' }
-				]}
-			/>
-		</div>
+		<BottomNav
+			items={[
+				{ id: 'home', label: 'Home', Icon: House, href: '/home' },
+				{ id: 'profile', label: 'Profile', Icon: User, href: '/profile' }
+			]}
+		/>
 	{/snippet}
 </Story>
 
 <Story name="Five Items">
 	{#snippet template()}
-		<div>
-			<BottomNav
-				items={[
-					{ id: 'home', label: 'Группы', Icon: House, href: '/groups', badge: 3 },
-					{ id: 'search', label: 'Поиск', Icon: Settings, href: '/search' },
-					{
-						id: 'notifications',
-						label: 'Уведомления',
-						Icon: Bell,
-						href: '/notifications',
-						badge: 12
-					},
-					{ id: 'messages', label: 'Сообщения', Icon: Mail, href: '/messages' },
-					{ id: 'profile', label: 'Профиль', Icon: User, href: '/profile' }
-				]}
-			/>
-		</div>
-	{/snippet}
-</Story>
-
-<Story name="All States">
-	{#snippet template()}
-		<div>
-			<div style="margin-bottom: 300px;">
-				<p style="margin-bottom: 16px; color: var(--text-tertiary); font-size: var(--text-sm);">
-					Normal state
-				</p>
-				<BottomNav
-					items={[
-						{ id: 'home', label: 'Группы', Icon: House, href: '/groups' },
-						{ id: 'profile', label: 'Профиль', Icon: User, href: '/profile' },
-						{ id: 'settings', label: 'Настройки', Icon: Settings, href: '/settings' }
-					]}
-					defaultValue="home"
-				/>
-			</div>
-
-			<div style="margin-bottom: 300px;">
-				<p style="margin-bottom: 16px; color: var(--text-tertiary); font-size: var(--text-sm);">
-					With badges
-				</p>
-				<BottomNav
-					items={[
-						{ id: 'home', label: 'Группы', Icon: House, href: '/groups', badge: 2 },
-						{
-							id: 'notifications',
-							label: 'Уведомления',
-							Icon: Bell,
-							href: '/notifications',
-							badge: 99
-						},
-						{ id: 'profile', label: 'Профиль', Icon: User, href: '/profile' }
-					]}
-					defaultValue="home"
-				/>
-			</div>
-
-			<div>
-				<p style="margin-bottom: 16px; color: var(--text-tertiary); font-size: var(--text-sm);">
-					With hidden items
-				</p>
-				<BottomNav
-					items={[
-						{ id: 'home', label: 'Группы', Icon: House, href: '/groups' },
-						{ id: 'admin', label: 'Админ', Icon: Settings, href: '/admin', hidden: true },
-						{ id: 'profile', label: 'Профиль', Icon: User, href: '/profile' }
-					]}
-					defaultValue="home"
-				/>
-			</div>
-		</div>
+		<BottomNav
+			items={[
+				{ id: 'home', label: 'Home', Icon: House, href: '/home', badge: 3 },
+				{ id: 'search', label: 'Search', Icon: Settings, href: '/search' },
+				{
+					id: 'notifications',
+					label: 'Alerts',
+					Icon: Bell,
+					href: '/notifications',
+					badge: 12
+				},
+				{ id: 'messages', label: 'Messages', Icon: Mail, href: '/messages' },
+				{ id: 'profile', label: 'Profile', Icon: User, href: '/profile' }
+			]}
+		/>
 	{/snippet}
 </Story>

@@ -1,12 +1,14 @@
 <script lang="ts">
 	import type { IProps } from './IconButton.types.svelte';
 	import { getIconSize } from '../../utils/size';
+	import { Spinner } from '../Spinner';
 
 	const {
 		Icon,
 		label,
 		size = 'md',
 		variant = 'ghost',
+		loading = false,
 		type = 'button',
 		disabled,
 		pressed,
@@ -14,17 +16,26 @@
 		children,
 		...restProps
 	}: IProps = $props();
+
+	const isDisabled = $derived(disabled || loading);
+	const spinnerVariant = $derived(variant === 'primary' ? 'light' : 'default');
+	const spinnerSize = $derived(size === 'sm' ? 'sm' : size === 'lg' ? 'md' : 'sm');
 </script>
 
 <button
 	{type}
-	class={['ui-icon-btn', variant, size, className]}
-	{disabled}
+	class={['ui-icon-btn', variant, size, loading && 'loading', className]}
+	disabled={isDisabled}
 	aria-label={label}
 	aria-pressed={pressed}
+	aria-busy={loading}
 	{...restProps}
 >
-	<Icon size={getIconSize(size)} absoluteStrokeWidth />
+	{#if loading}
+		<Spinner size={spinnerSize} variant={spinnerVariant} />
+	{:else}
+		<Icon size={getIconSize(size)} absoluteStrokeWidth />
+	{/if}
 	{#if children}
 		{@render children()}
 	{/if}

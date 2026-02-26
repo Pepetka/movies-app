@@ -13,6 +13,7 @@
 		Icon,
 		iconAction,
 		iconLabel,
+		onChange,
 		class: className,
 		...restProps
 	}: IProps = $props();
@@ -24,6 +25,12 @@
 	let isFocused = $state(false);
 	let hasValue = $derived((value?.length ?? 0) > 0);
 	let isLabelFloating = $derived(isFocused || hasValue);
+
+	const handleInput = (e: Event) => {
+		const target = e.target as HTMLInputElement;
+		value = target.value;
+		onChange?.(value);
+	};
 </script>
 
 <div class={['ui-input-wrapper', size, { error, disabled }, className]}>
@@ -31,11 +38,12 @@
 		<input
 			id={inputId}
 			{type}
-			bind:value
+			{value}
+			oninput={handleInput}
 			{disabled}
 			aria-invalid={!!error}
-			aria-errormessage={errorId}
-			aria-describedby={helperId}
+			aria-errormessage={error ? errorId : undefined}
+			aria-describedby={helper ? helperId : undefined}
 			onfocus={() => (isFocused = true)}
 			onblur={() => (isFocused = false)}
 			class:with-icon={Icon}
@@ -119,8 +127,14 @@
 		transition: background-color 5000s ease-in-out 0s;
 	}
 
+	/* Hide placeholder */
 	.ui-input-container input::placeholder {
 		color: transparent;
+		pointer-events: none;
+		-webkit-user-select: none;
+		-moz-user-select: none;
+		-ms-user-select: none;
+		user-select: none;
 	}
 
 	/* Show actual placeholder when label is floating */

@@ -1,10 +1,9 @@
 <script lang="ts">
 	import type { IProps } from './Tabs.types.svelte';
 
-	const {
+	let {
 		tabs,
-		value: controlledValue,
-		defaultValue,
+		value = $bindable(),
 		onChange,
 		scrollable = true,
 		ariaLabel = 'Tabs',
@@ -12,17 +11,14 @@
 		...restProps
 	}: IProps = $props();
 
-	let internalValue = $state(defaultValue ?? tabs[0]?.id);
-	const activeTab = $derived(controlledValue ?? internalValue);
+	const activeTab = $derived(value ?? tabs[0]?.id);
 
 	const selectTab = (tabId: string) => {
-		if (controlledValue === undefined) {
-			internalValue = tabId;
-		}
+		value = tabId;
 		onChange?.(tabId);
 	};
 
-	const tabButtons = $state<(HTMLButtonElement | null)[]>([]);
+	const tabButtons = $state.raw<(HTMLButtonElement | null)[]>([]);
 
 	const handleKeydown = (event: KeyboardEvent, currentIndex: number) => {
 		const enabledIndices = tabs.map((t, i) => (!t.disabled ? i : -1)).filter((i) => i !== -1);

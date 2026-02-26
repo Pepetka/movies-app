@@ -128,6 +128,56 @@
 	{/snippet}
 </Story>
 
+<Story name="Loading">
+	{#snippet template()}
+		<div>
+			<div style="margin-bottom: 16px;">
+				<span style="font-size: var(--text-sm); color: var(--text-tertiary); margin-right: 12px;"
+					>ghost</span
+				>
+				<IconButton Icon={House} label="Loading" size="md" variant="ghost" loading />
+			</div>
+			<div style="margin-bottom: 16px;">
+				<span style="font-size: var(--text-sm); color: var(--text-tertiary); margin-right: 12px;"
+					>secondary</span
+				>
+				<IconButton Icon={User} label="Loading" size="md" variant="secondary" loading />
+			</div>
+			<div>
+				<span style="font-size: var(--text-sm); color: var(--text-tertiary); margin-right: 12px;"
+					>primary</span
+				>
+				<IconButton Icon={Plus} label="Loading" size="md" variant="primary" loading />
+			</div>
+		</div>
+	{/snippet}
+</Story>
+
+<Story name="Loading All Sizes">
+	{#snippet template()}
+		<div>
+			<div style="margin-bottom: 16px;">
+				<span style="font-size: var(--text-sm); color: var(--text-tertiary); margin-right: 12px;"
+					>sm</span
+				>
+				<IconButton Icon={Plus} label="Loading" size="sm" variant="primary" loading />
+			</div>
+			<div style="margin-bottom: 16px;">
+				<span style="font-size: var(--text-sm); color: var(--text-tertiary); margin-right: 12px;"
+					>md</span
+				>
+				<IconButton Icon={Plus} label="Loading" size="md" variant="primary" loading />
+			</div>
+			<div>
+				<span style="font-size: var(--text-sm); color: var(--text-tertiary); margin-right: 12px;"
+					>lg</span
+				>
+				<IconButton Icon={Plus} label="Loading" size="lg" variant="primary" loading />
+			</div>
+		</div>
+	{/snippet}
+</Story>
+
 <Story name="In Context">
 	{#snippet template()}
 		<div>
@@ -169,6 +219,17 @@
 					variant="primary"
 					style="position: absolute; bottom: 0; right: 0;"
 				/>
+			</div>
+
+			<h3 style="margin: 24px 0 16px 0; color: var(--text-secondary);">Loading State</h3>
+			<div
+				style="display: flex; justify-content: space-between; align-items: center; padding: 16px; background: var(--bg-secondary); border-radius: var(--radius-lg);"
+			>
+				<span style="font-weight: var(--font-medium);">Saving changes...</span>
+				<div style="display: flex; gap: 8px;">
+					<IconButton Icon={Heart} label="Saving" variant="ghost" loading />
+					<IconButton Icon={Plus} label="Adding" variant="primary" loading />
+				</div>
 			</div>
 		</div>
 	{/snippet}

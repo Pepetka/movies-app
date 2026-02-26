@@ -19,7 +19,7 @@
 	/* Background Colors */
 	--bg-primary: #ffffff;
 	--bg-secondary: #f9fafb;
-	--bg-tertiary: #f3f4f6;
+	--bg-tertiary: #e5e7eb;
 	--bg-inverse: #111827;
 	--bg-overlay: rgba(0, 0, 0, 0.5);
 
@@ -72,6 +72,35 @@
 	--avatar-color-6: #ec4899;
 	--avatar-color-7: #06b6d4;
 	--avatar-color-8: #84cc16;
+
+	/* Toast Colors */
+	--toast-success-bg: #dcfce7;
+	--toast-success-text: #16a34a;
+	--toast-success-icon: #22c55e;
+	--toast-error-bg: #fee2e2;
+	--toast-error-text: #dc2626;
+	--toast-error-icon: #ef4444;
+	--toast-info-bg: #dbeafe;
+	--toast-info-text: #1d4ed8;
+	--toast-info-icon: #3b82f6;
+	--toast-warning-bg: #fef3c7;
+	--toast-warning-text: #d97706;
+	--toast-warning-icon: #f59e0b;
+
+	/* Skeleton */
+	--skeleton-bg: var(--bg-tertiary);
+	--skeleton-shimmer: var(--bg-primary);
+
+	/* Chip Colors */
+	--chip-default-bg: #f3f4f6;
+	--chip-default-text: #374151;
+	--chip-default-border: #e5e7eb;
+	--chip-default-hover-bg: #e5e7eb;
+
+	--chip-selected-bg: #dbeafe;
+	--chip-selected-text: #1d4ed8;
+	--chip-selected-border: #3b82f6;
+	--chip-selected-hover-bg: #bfdbfe;
 }
 
 /* ===========================================
@@ -158,4 +187,33 @@
 	--shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -2px rgba(0, 0, 0, 0.3);
 	--shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -4px rgba(0, 0, 0, 0.3);
 	--shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.4);
+
+	/* Toast Colors override for dark theme */
+	--toast-success-bg: #14532d;
+	--toast-success-text: #4ade80;
+	--toast-success-icon: #22c55e;
+	--toast-error-bg: #7f1d1d;
+	--toast-error-text: #f87171;
+	--toast-error-icon: #ef4444;
+	--toast-info-bg: #1e3a5f;
+	--toast-info-text: #60a5fa;
+	--toast-info-icon: #3b82f6;
+	--toast-warning-bg: #78350f;
+	--toast-warning-text: #fbbf24;
+	--toast-warning-icon: #f59e0b;
+
+	/* Skeleton */
+	--skeleton-bg: var(--bg-tertiary);
+	--skeleton-shimmer: var(--bg-primary);
+
+	/* Chip Colors */
+	--chip-default-bg: #374151;
+	--chip-default-text: #e5e7eb;
+	--chip-default-border: #4b5563;
+	--chip-default-hover-bg: #4b5563;
+
+	--chip-selected-bg: #1e3a5f;
+	--chip-selected-text: #60a5fa;
+	--chip-selected-border: #3b82f6;
+	--chip-selected-hover-bg: #2563eb;
 }

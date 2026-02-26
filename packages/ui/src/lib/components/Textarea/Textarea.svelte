@@ -9,8 +9,9 @@
 		disabled,
 		rows = 3,
 		maxRows,
-		maxLength,
+		maxlength,
 		autoGrow = true,
+		onChange,
 		class: className,
 		...restProps
 	}: IProps = $props();
@@ -22,7 +23,7 @@
 	let isFocused = $state(false);
 	let hasValue = $derived((value?.length ?? 0) > 0);
 	let isLabelFloating = $derived(isFocused || hasValue);
-	let textareaElement = $state<HTMLTextAreaElement>();
+	let textareaElement = $state.raw<HTMLTextAreaElement | null>(null);
 
 	const calculateHeight = () => {
 		if (!textareaElement) return { minHeight: 0, maxHeight: Infinity };
@@ -56,7 +57,10 @@
 		}
 	};
 
-	const handleInput = () => {
+	const handleInput = (e: Event) => {
+		const target = e.target as HTMLTextAreaElement;
+		value = target.value;
+		onChange?.(value);
 		autoResize();
 	};
 
@@ -67,7 +71,7 @@
 	});
 
 	let charCount = $derived(value?.length ?? 0);
-	let isExceeded = $derived(maxLength !== undefined && charCount > maxLength);
+	let isExceeded = $derived(maxlength && charCount > maxlength);
 </script>
 
 <div class={['ui-textarea-wrapper', { error, disabled }, className]}>
@@ -75,11 +79,11 @@
 		<textarea
 			bind:this={textareaElement}
 			id={textareaId}
-			bind:value
-			maxlength={maxLength}
+			{value}
+			{maxlength}
 			aria-invalid={!!error}
-			aria-errormessage={errorId}
-			aria-describedby={helperId}
+			aria-errormessage={error ? errorId : undefined}
+			aria-describedby={helper ? helperId : undefined}
 			onfocus={() => (isFocused = true)}
 			onblur={() => (isFocused = false)}
 			oninput={handleInput}
@@ -105,9 +109,9 @@
 				{helper}
 			</div>
 		{/if}
-		{#if maxLength}
+		{#if maxlength}
 			<div class={['ui-textarea-counter', { exceeded: isExceeded }]}>
-				{charCount}/{maxLength}
+				{charCount}/{maxlength}
 			</div>
 		{/if}
 	</div>
@@ -158,8 +162,14 @@
 	/* Hide placeholder */
 	.ui-textarea-container textarea::placeholder {
 		color: transparent;
+		pointer-events: none;
+		-webkit-user-select: none;
+		-moz-user-select: none;
+		-ms-user-select: none;
+		user-select: none;
 	}
 
+	/* Show actual placeholder when label is floating */
 	.ui-textarea-container textarea:focus::placeholder {
 		color: var(--text-tertiary);
 	}

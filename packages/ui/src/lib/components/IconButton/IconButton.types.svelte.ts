@@ -6,11 +6,12 @@ import type { IconSize } from '../../utils/size';
 
 export type IconButtonVariant = 'ghost' | 'secondary' | 'primary';
 
-export interface IProps extends Omit<HTMLButtonAttributes, 'size' | 'variant'> {
+export interface IProps extends Omit<HTMLButtonAttributes, 'size'> {
 	Icon: typeof Icon;
 	label: string;
 	size?: IconSize;
 	variant?: IconButtonVariant;
+	loading?: boolean;
 	pressed?: boolean;
 	class?: string;
 	children?: Snippet;

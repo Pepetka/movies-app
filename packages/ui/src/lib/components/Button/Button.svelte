@@ -1,7 +1,6 @@
 <script lang="ts">
-	import { Loader2 } from '@lucide/svelte';
-
 	import type { IProps } from './Button.types.svelte';
+	import { Skeleton } from '../Skeleton';
 
 	const {
 		variant = 'primary',
@@ -16,21 +15,22 @@
 	}: IProps = $props();
 
 	const isDisabled = $derived(disabled || loading);
-
-	const spinnerSizes = { sm: 16, md: 20, lg: 24 };
-	const spinnerSize = $derived(spinnerSizes[size]);
 </script>
 
 <button
 	{type}
-	class={['ui-btn', variant, size, fullWidth && 'full-width', className]}
+	class={['ui-btn', variant, size, fullWidth && 'full-width', loading && 'loading', className]}
 	disabled={isDisabled}
+	aria-busy={loading}
 	{...restProps}
 >
+	{#if children}
+		<span class="ui-btn-content">
+			{@render children()}
+		</span>
+	{/if}
 	{#if loading}
-		<Loader2 class="ui-btn-spinner" size={spinnerSize} absoluteStrokeWidth />
-	{:else if children}
-		{@render children()}
+		<Skeleton variant="text" full class="ui-btn-skeleton" />
 	{/if}
 </button>
 
@@ -47,6 +47,8 @@
 		line-height: var(--leading-tight);
 		white-space: nowrap;
 		cursor: pointer;
+		position: relative;
+		overflow: hidden;
 		transition:
 			background-color var(--transition-fast) var(--ease-out),
 			border-color var(--transition-fast) var(--ease-out),
@@ -64,18 +66,17 @@
 		width: 100%;
 	}
 
-	/* Spinner */
-	.ui-btn-spinner {
-		animation: spin 1s linear infinite;
+	.ui-btn-content {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		gap: inherit;
 	}
 
-	@keyframes spin {
-		from {
-			transform: rotate(0deg);
-		}
-		to {
-			transform: rotate(360deg);
-		}
+	.ui-btn :global(.ui-btn-skeleton) {
+		position: absolute;
+		inset: 0;
+		opacity: 0.7;
 	}
 
 	/* Sizes */

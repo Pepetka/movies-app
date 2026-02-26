@@ -12,6 +12,7 @@
 		helper,
 		disabled,
 		size = 'md',
+		onChange,
 		class: className,
 		placeholder,
 		...restProps
@@ -25,17 +26,24 @@
 	let hasValue = $derived(value !== '' && value !== undefined);
 	let isLabelFloating = $derived(isFocused || hasValue);
 	let showPlaceholder = $derived(placeholder && !hasValue && isLabelFloating);
+
+	const handleChange = (e: Event) => {
+		const target = e.target as HTMLSelectElement;
+		value = target.value;
+		onChange?.(value);
+	};
 </script>
 
 <div class={['ui-select-wrapper', size, { error, disabled }, className]}>
 	<div class="ui-select-container">
 		<select
 			id={selectId}
-			bind:value
+			{value}
+			onchange={handleChange}
 			{disabled}
 			aria-invalid={!!error}
-			aria-errormessage={errorId}
-			aria-describedby={helperId}
+			aria-errormessage={error ? errorId : undefined}
+			aria-describedby={helper ? helperId : undefined}
 			onfocus={() => (isFocused = true)}
 			onblur={() => (isFocused = false)}
 			{...restProps}
@@ -177,6 +185,10 @@
 	.ui-select-placeholder.hidden {
 		opacity: 0;
 		pointer-events: none;
+		-webkit-user-select: none;
+		-moz-user-select: none;
+		-ms-user-select: none;
+		user-select: none;
 	}
 
 	/* Dropdown icon */

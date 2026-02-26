@@ -3,4 +3,4 @@ export type {
 	IProps as IThemeToggleProps,
 	ThemeToggleSize,
 	ThemeLabels
-} from './ThemeToggle.types.svelte.ts';
+} from './ThemeToggle.types.svelte';

@@ -79,18 +79,6 @@
 	{/snippet}
 </Story>
 
-<Story name="Long Title">
-	{#snippet template()}
-		<TopBar
-			title="This is a very long page title that should be truncated with an ellipsis when it overflows"
-		>
-			{#snippet trailing()}
-				<IconButton Icon={Settings} label="Settings" variant="ghost" size="md" />
-			{/snippet}
-		</TopBar>
-	{/snippet}
-</Story>
-
 <Story name="In Context">
 	{#snippet template()}
 		<div style="height: 400px; overflow-y: auto;">

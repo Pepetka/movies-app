@@ -1,22 +1,16 @@
 <script lang="ts">
-	import { StatusIndicator, ThemeToggle, themeStore } from '@repo/ui';
+	import { StatusIndicator, ThemeToggle, UIProvider } from '@repo/ui';
 	import type { Snippet } from 'svelte';
 
 	import { healthStore } from '$lib/stores/health.svelte';
 	import favicon from '$lib/assets/favicon.svg';
 	import { browser } from '$app/environment';
 
-	import '@repo/ui/styles';
-
 	interface IProps {
 		children: Snippet;
 	}
 
 	const { children }: IProps = $props();
-
-	$effect(() => {
-		void themeStore.persisted;
-	});
 
 	$effect(() => {
 		if (browser) {
@@ -49,6 +43,8 @@
 			</div>
 		</header>
 	{/if}
+
+	<UIProvider />
 
 	<main>
 		{@render children()}

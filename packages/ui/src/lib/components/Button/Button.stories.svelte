@@ -101,6 +101,24 @@
 	{/snippet}
 </Story>
 
+<Story name="Loading">
+	{#snippet template()}
+		<div>
+			<div style="margin-bottom: 16px;">
+				<Button variant="primary" loading>Loading</Button>
+				<Button variant="secondary" loading>Loading</Button>
+				<Button variant="ghost" loading>Loading</Button>
+				<Button variant="danger" loading>Loading</Button>
+			</div>
+			<div>
+				<Button variant="primary" size="sm" loading>Saving...</Button>
+				<Button variant="secondary" size="md" loading>Processing</Button>
+				<Button variant="ghost" size="lg" loading>Please wait...</Button>
+			</div>
+		</div>
+	{/snippet}
+</Story>
+
 <Story name="In Context">
 	{#snippet template()}
 		<div>
@@ -108,6 +126,12 @@
 			<div style="display: flex; gap: 12px; margin-bottom: 24px;">
 				<Button variant="primary">Save Changes</Button>
 				<Button variant="ghost">Cancel</Button>
+			</div>
+
+			<h3 style="margin-bottom: 16px; color: var(--text-secondary);">Loading State</h3>
+			<div style="display: flex; gap: 12px; margin-bottom: 24px;">
+				<Button variant="primary" loading>Saving...</Button>
+				<Button variant="secondary" loading>Loading data...</Button>
 			</div>
 
 			<h3 style="margin-bottom: 16px; color: var(--text-secondary);">Delete Confirmation</h3>

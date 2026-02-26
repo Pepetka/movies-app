@@ -2,9 +2,7 @@ import type { Preview } from '@storybook/sveltekit';
 
 import { SideBySideDecorator, ThemeDecorator } from '$lib/storybook/decorators';
 
-import '$lib/styles/global.css';
-import '$lib/styles/tokens.css';
-import '$lib/styles/theme.css';
+import '$lib/styles';
 
 const preview: Preview = {
 	globalTypes: {

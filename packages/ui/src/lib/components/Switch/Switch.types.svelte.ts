@@ -8,4 +8,6 @@ export interface IProps extends Omit<HTMLButtonAttributes, 'size'> {
 	disabled?: boolean;
 	size?: SwitchSize;
 	helper?: string;
+	onChange?: (checked: boolean) => void;
+	class?: string;
 }

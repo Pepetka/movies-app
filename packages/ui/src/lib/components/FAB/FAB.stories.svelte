@@ -219,3 +219,99 @@
 		</div>
 	{/snippet}
 </Story>
+
+<Story name="Disabled">
+	{#snippet template()}
+		<div
+			style="position: relative; min-height: 200px; padding: 24px; background: var(--bg-secondary); border-radius: var(--radius-lg);"
+		>
+			<p style="color: var(--text-secondary); margin-bottom: 16px;">Disabled FAB states</p>
+			<div style="display: flex; gap: 16px; flex-wrap: wrap;">
+				<div>
+					<span style="font-size: var(--text-sm); color: var(--text-tertiary);">SM Disabled</span>
+					<FAB size="sm" position="bottom-right" disabled>
+						{#snippet icon()}
+							<Plus />
+						{/snippet}
+					</FAB>
+				</div>
+				<div>
+					<span style="font-size: var(--text-sm); color: var(--text-tertiary);">MD Disabled</span>
+					<FAB size="md" position="bottom-right" disabled>
+						{#snippet icon()}
+							<Plus />
+						{/snippet}
+					</FAB>
+				</div>
+				<div>
+					<span style="font-size: var(--text-sm); color: var(--text-tertiary);">LG Disabled</span>
+					<FAB size="lg" label="Create" position="bottom-right" disabled>
+						{#snippet icon()}
+							<Plus />
+						{/snippet}
+					</FAB>
+				</div>
+			</div>
+		</div>
+	{/snippet}
+</Story>
+
+<Story name="Accessibility">
+	{#snippet template()}
+		<div style="position: relative; min-height: 300px;">
+			<h3 style="margin-bottom: 16px; color: var(--text-secondary);">Клавиатурная навигация</h3>
+
+			<div style="margin-bottom: 24px;">
+				<p style="color: var(--text-secondary); margin-bottom: 16px;">
+					FAB — это кнопка, доступная через Tab и активируемая через Enter или Space.
+				</p>
+				<FAB size="lg" label="Добавить фильм" position="bottom-right">
+					{#snippet icon()}
+						<Plus />
+					{/snippet}
+				</FAB>
+			</div>
+
+			<div style="padding: 16px; background: var(--bg-secondary); border-radius: var(--radius-lg);">
+				<h4 style="margin: 0 0 12px; font-size: var(--text-sm); color: var(--text-secondary);">
+					Доступные клавиши:
+				</h4>
+				<div style="display: flex; flex-direction: column; gap: 8px; font-size: var(--text-sm);">
+					<div style="display: flex; gap: 12px;">
+						<kbd
+							style="padding: 2px 8px; background: var(--bg-tertiary); border-radius: var(--radius-sm); font-family: monospace;"
+							>Tab</kbd
+						>
+						<span style="color: var(--text-secondary);">Фокус на FAB</span>
+					</div>
+					<div style="display: flex; gap: 12px;">
+						<kbd
+							style="padding: 2px 8px; background: var(--bg-tertiary); border-radius: var(--radius-sm); font-family: monospace;"
+							>Enter / Space</kbd
+						>
+						<span style="color: var(--text-secondary);">Активация кнопки</span>
+					</div>
+				</div>
+			</div>
+
+			<div
+				style="margin-top: 16px; padding: 16px; background: var(--bg-secondary); border-radius: var(--radius-lg);"
+			>
+				<h4 style="margin: 0 0 12px; font-size: var(--text-sm); color: var(--text-secondary);">
+					ARIA атрибуты:
+				</h4>
+				<div style="display: flex; flex-direction: column; gap: 8px; font-size: var(--text-sm);">
+					<div style="display: flex; gap: 12px;">
+						<code style="color: var(--color-primary);">aria-label</code>
+						<span style="color: var(--text-secondary);">Описание действия (label или 'Action')</span
+						>
+					</div>
+					<div style="display: flex; gap: 12px;">
+						<code style="color: var(--color-primary);">type="button"</code>
+						<span style="color: var(--text-secondary);">Тип кнопки по умолчанию</span>
+					</div>
+				</div>
+			</div>
+		</div>
+	{/snippet}
+</Story>

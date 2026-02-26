@@ -12,7 +12,7 @@
 		argTypes: {
 			rows: { control: 'number', min: 1, max: 10 },
 			maxRows: { control: 'number', min: 1, max: 20 },
-			maxLength: { control: 'number' },
+			maxlength: { control: 'number' },
 			autoGrow: { control: 'boolean' }
 		}
 	});
@@ -120,7 +120,7 @@
 				bind:value={valueWithMaxLength}
 				label="Tweet"
 				placeholder="What's happening?"
-				maxLength={280}
+				maxlength={280}
 				helper="Write your message (280 characters max)"
 			/>
 		</div>
@@ -215,15 +215,17 @@
 <Story name="In Context">
 	{#snippet template()}
 		<div
-			style="max-width: 450px; padding: 24px; background: var(--bg-secondary); border-radius: var(--radius-xl);"
+			style="max-width: 450px; padding: var(--space-6); background: var(--bg-secondary); border-radius: var(--radius-xl);"
 		>
-			<h2 style="margin-bottom: 8px; color: var(--text-primary);">Create Group</h2>
-			<p style="margin-bottom: 24px; color: var(--text-tertiary); font-size: var(--text-sm);">
+			<h2 style="margin-bottom: var(--space-2); color: var(--text-primary);">Create Group</h2>
+			<p
+				style="margin-bottom: var(--space-6); color: var(--text-tertiary); font-size: var(--text-sm);"
+			>
 				Start by creating a new group for your movie collection
 			</p>
 			<form
 				onsubmit={(e) => e.preventDefault()}
-				style="display: flex; flex-direction: column; gap: 16px;"
+				style="display: flex; flex-direction: column; gap: var(--space-4);"
 			>
 				<Input bind:value={groupName} label="Group Name" placeholder="My Movie Collection" />
 				<Textarea
@@ -233,7 +235,9 @@
 					rows={3}
 					helper="Optional: add a description for your group members"
 				/>
-				<Button type="submit" variant="primary" style="margin-top: 8px;">Create Group</Button>
+				<Button type="submit" variant="primary" style="margin-top: var(--space-2);"
+					>Create Group</Button
+				>
 			</form>
 		</div>
 	{/snippet}
@@ -242,9 +246,9 @@
 <Story name="Validation States">
 	{#snippet template()}
 		<div style="max-width: 500px;">
-			<div style="margin-bottom: 24px;">
+			<div style="margin-bottom: var(--space-6);">
 				<span
-					style="font-size: var(--text-sm); color: var(--text-tertiary); margin-bottom: 8px; display: block;"
+					style="font-size: var(--text-sm); color: var(--text-tertiary); margin-bottom: var(--space-2); display: block;"
 				>
 					Before submission
 				</span>
@@ -252,12 +256,12 @@
 					label="Feedback"
 					placeholder="Share your thoughts with us"
 					helper="Your feedback helps us improve"
-					maxLength={500}
+					maxlength={500}
 				/>
 			</div>
 			<div>
 				<span
-					style="font-size: var(--text-sm); color: var(--text-tertiary); margin-bottom: 8px; display: block;"
+					style="font-size: var(--text-sm); color: var(--text-tertiary); margin-bottom: var(--space-2); display: block;"
 				>
 					With validation error
 				</span>
@@ -265,7 +269,7 @@
 					label="Feedback"
 					value="Too short"
 					error="Feedback must be at least 20 characters"
-					maxLength={500}
+					maxlength={500}
 				/>
 			</div>
 		</div>
@@ -275,15 +279,17 @@
 <Story name="Contact Form">
 	{#snippet template()}
 		<div
-			style="max-width: 450px; padding: 24px; background: var(--bg-secondary); border-radius: var(--radius-xl);"
+			style="max-width: 450px; padding: var(--space-6); background: var(--bg-secondary); border-radius: var(--radius-xl);"
 		>
-			<h2 style="margin-bottom: 8px; color: var(--text-primary);">Contact Us</h2>
-			<p style="margin-bottom: 24px; color: var(--text-tertiary); font-size: var(--text-sm);">
+			<h2 style="margin-bottom: var(--space-2); color: var(--text-primary);">Contact Us</h2>
+			<p
+				style="margin-bottom: var(--space-6); color: var(--text-tertiary); font-size: var(--text-sm);"
+			>
 				Have a question or feedback? We'd love to hear from you.
 			</p>
 			<form
 				onsubmit={(e) => e.preventDefault()}
-				style="display: flex; flex-direction: column; gap: 16px;"
+				style="display: flex; flex-direction: column; gap: var(--space-4);"
 			>
 				<Input label="Name" type="text" placeholder="Your name" />
 				<Input label="Email" type="email" placeholder="your@email.com" />
@@ -291,11 +297,60 @@
 					label="Message"
 					placeholder="How can we help you?"
 					rows={5}
-					maxLength={1000}
+					maxlength={1000}
 					helper="Be as detailed as possible"
 				/>
-				<Button type="submit" variant="primary" style="margin-top: 8px;">Send Message</Button>
+				<Button type="submit" variant="primary" style="margin-top: var(--space-2);"
+					>Send Message</Button
+				>
 			</form>
+		</div>
+	{/snippet}
+</Story>
+
+<Story name="Accessibility">
+	{#snippet template()}
+		<div style="max-width: 500px;">
+			<h3 style="margin-bottom: 16px; color: var(--text-secondary);">Клавиатурная навигация</h3>
+
+			<div style="display: flex; flex-direction: column; gap: 16px; margin-bottom: 24px;">
+				<Textarea
+					label="Комментарий"
+					placeholder="Введите ваш комментарий"
+					helper="Нажмите Tab для фокуса"
+					rows={3}
+				/>
+				<Textarea label="Отзыв" placeholder="Поделитесь вашим мнением" rows={2} />
+			</div>
+
+			<div style="padding: 16px; background: var(--bg-secondary); border-radius: var(--radius-lg);">
+				<h4 style="margin: 0 0 12px; font-size: var(--text-sm); color: var(--text-secondary);">
+					Доступные клавиши:
+				</h4>
+				<div style="display: flex; flex-direction: column; gap: 8px; font-size: var(--text-sm);">
+					<div style="display: flex; gap: 12px;">
+						<kbd
+							style="padding: 2px 8px; background: var(--bg-tertiary); border-radius: var(--radius-sm); font-family: monospace;"
+							>Tab</kbd
+						>
+						<span style="color: var(--text-secondary);">Перемещение между текстовыми полями</span>
+					</div>
+					<div style="display: flex; gap: 12px;">
+						<kbd
+							style="padding: 2px 8px; background: var(--bg-tertiary); border-radius: var(--radius-sm); font-family: monospace;"
+							>Shift+Tab</kbd
+						>
+						<span style="color: var(--text-secondary);">Перемещение назад</span>
+					</div>
+					<div style="display: flex; gap: 12px;">
+						<kbd
+							style="padding: 2px 8px; background: var(--bg-tertiary); border-radius: var(--radius-sm); font-family: monospace;"
+							>Arrow Keys</kbd
+						>
+						<span style="color: var(--text-secondary);">Навигация внутри текста</span>
+					</div>
+				</div>
+			</div>
 		</div>
 	{/snippet}
 </Story>

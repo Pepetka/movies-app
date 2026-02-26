@@ -1,40 +1,34 @@
 <script lang="ts">
 	import { User } from '@lucide/svelte';
 
-	import { getAvatarIconSize } from '../../utils/avatar-size';
+	import {
+		getAvatarIconSize,
+		getAvatarColor,
+		getAvatarInitials,
+		type AvatarSize
+	} from '../../utils/avatar-size';
 	import type { IProps } from './Avatar.types.svelte';
+	import { Skeleton } from '../Skeleton';
 
-	const { src, name, size = 'md', alt, class: className, ...restProps }: IProps = $props();
+	let {
+		src,
+		name,
+		size = 'md' as AvatarSize,
+		alt,
+		skeleton = false,
+		loading = 'lazy',
+		class: className,
+		...restProps
+	}: IProps = $props();
 
 	let imageLoaded = $state(false);
 	let imageError = $state(false);
 
-	const AVATAR_COLORS = [
-		'var(--avatar-color-1)',
-		'var(--avatar-color-2)',
-		'var(--avatar-color-3)',
-		'var(--avatar-color-4)',
-		'var(--avatar-color-5)',
-		'var(--avatar-color-6)',
-		'var(--avatar-color-7)',
-		'var(--avatar-color-8)'
-	] as const;
-
-	const getColorForName = (nameToHash: string): string => {
-		let hash = 0;
-		for (let i = 0; i < nameToHash.length; i++) {
-			hash = nameToHash.charCodeAt(i) + ((hash << 5) - hash);
-		}
-		return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
-	};
-
-	const getInitials = (nameToInitials: string): string => {
-		const parts = nameToInitials.trim().split(/\s+/);
-		if (parts.length >= 2) {
-			return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
-		}
-		return nameToInitials.slice(0, 2).toUpperCase();
-	};
+	$effect(() => {
+		const _src = src;
+		imageLoaded = false;
+		imageError = false;
+	});
 
 	const handleImageLoad = () => {
 		imageLoaded = true;
@@ -46,18 +40,14 @@
 		imageError = true;
 	};
 
-	$effect(() => {
-		imageError = false;
-		imageLoaded = !!src;
-	});
+	const showImage = $derived(!skeleton && src && imageLoaded && !imageError);
+	const showSkeleton = $derived(skeleton || (src && !imageLoaded && !imageError));
+	const showInitials = $derived(!skeleton && name && (!src || imageError));
+	const showIcon = $derived(!skeleton && !name && (!src || imageError));
 
-	const showImage = $derived(src && imageLoaded && !imageError);
-	const showInitials = $derived(name && (!src || imageError));
-	const showIcon = $derived(!name && (!src || imageError));
-	const initials = $derived(name ? getInitials(name) : '');
-	const backgroundColor = $derived(name ? getColorForName(name) : undefined);
-	const iconColor = $derived(name ? 'var(--text-inverse)' : 'var(--text-tertiary)');
-
+	const initials = $derived(name ? getAvatarInitials(name) : '');
+	const backgroundColor = $derived(name && (!src || imageError) ? getAvatarColor(name) : undefined);
+	const iconSize = $derived(getAvatarIconSize(size));
 	const ariaLabel = $derived(alt || name || 'Avatar');
 </script>
 
@@ -66,15 +56,30 @@
 	role="img"
 	aria-label={ariaLabel}
 	style:background-color={backgroundColor}
-	style:color={showIcon ? iconColor : undefined}
 	{...restProps}
 >
-	{#if showImage}
-		<img {src} alt={alt || ''} onerror={handleImageError} onload={handleImageLoad} />
-	{:else if showInitials}
+	{#if src}
+		<img
+			{src}
+			{alt}
+			class={['ui-avatar-img', imageLoaded && 'loaded', imageError && 'error']}
+			{loading}
+			onload={handleImageLoad}
+			onerror={handleImageError}
+			style:opacity={showImage ? 1 : 0}
+		/>
+	{/if}
+
+	{#if showSkeleton}
+		<Skeleton variant="circular" full class="ui-avatar-skeleton" />
+	{/if}
+
+	{#if showInitials}
 		<span class="ui-avatar-initials">{initials}</span>
-	{:else if showIcon}
-		<User size={getAvatarIconSize(size)} absoluteStrokeWidth />
+	{/if}
+
+	{#if showIcon}
+		<User size={iconSize} absoluteStrokeWidth class="ui-avatar-icon" />
 	{/if}
 </span>
 
@@ -90,13 +95,21 @@
 		font-weight: var(--font-medium);
 		user-select: none;
 		flex-shrink: 0;
+		position: relative;
 	}
 
 	.ui-avatar img {
+		position: absolute;
+		inset: 0;
 		width: 100%;
 		height: 100%;
 		object-fit: cover;
 		display: block;
+		transition: opacity 0.2s ease;
+	}
+
+	.ui-avatar-icon {
+		color: var(--text-tertiary);
 	}
 
 	.ui-avatar-initials {

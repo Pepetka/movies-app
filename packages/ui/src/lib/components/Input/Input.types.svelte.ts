@@ -12,4 +12,6 @@ export interface IProps extends Omit<HTMLInputAttributes, 'size'> {
 	Icon?: typeof Icon;
 	iconAction?: () => void;
 	iconLabel?: string;
+	onChange?: (value: string) => void;
+	class?: string;
 }

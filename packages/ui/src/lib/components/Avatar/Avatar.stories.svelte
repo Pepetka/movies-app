@@ -76,6 +76,43 @@
 	{/snippet}
 </Story>
 
+<Story name="Loading State (Skeleton)">
+	{#snippet template()}
+		<div style="display: flex; gap: 16px; align-items: center;">
+			<Avatar name="Alex" size="xs" skeleton />
+			<Avatar name="Alex" size="sm" skeleton />
+			<Avatar name="Alex" size="md" skeleton />
+			<Avatar name="Alex" size="lg" skeleton />
+			<Avatar name="Alex" size="xl" skeleton />
+		</div>
+	{/snippet}
+</Story>
+
+<Story name="Loading State with Image">
+	{#snippet template()}
+		<div style="display: flex; gap: 16px; align-items: center;">
+			<Avatar
+				src="https://api.dicebear.com/7.x/avataaars/svg?seed=Alex"
+				name="Alex Smith"
+				size="sm"
+				skeleton
+			/>
+			<Avatar
+				src="https://api.dicebear.com/7.x/avataaars/svg?seed=Maria"
+				name="Maria Johnson"
+				size="md"
+				skeleton
+			/>
+			<Avatar
+				src="https://api.dicebear.com/7.x/avataaars/svg?seed=John"
+				name="John Williams"
+				size="lg"
+				skeleton
+			/>
+		</div>
+	{/snippet}
+</Story>
+
 <Story name="Image Error Fallback">
 	{#snippet template()}
 		<div style="display: flex; gap: 16px; align-items: center;">

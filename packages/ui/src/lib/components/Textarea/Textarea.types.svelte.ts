@@ -1,6 +1,6 @@
-import type { HTMLAttributes } from 'svelte/elements';
+import type { HTMLTextareaAttributes } from 'svelte/elements';
 
-export interface IProps extends Omit<HTMLAttributes<HTMLTextAreaElement>, 'value' | 'maxlength'> {
+export interface IProps extends Omit<HTMLTextareaAttributes, 'value'> {
 	label: string;
 	value?: string;
 	error?: string;
@@ -8,6 +8,7 @@ export interface IProps extends Omit<HTMLAttributes<HTMLTextAreaElement>, 'value
 	disabled?: boolean;
 	rows?: number;
 	maxRows?: number;
-	maxLength?: number;
 	autoGrow?: boolean;
+	onChange?: (value: string) => void;
+	class?: string;
 }

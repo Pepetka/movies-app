@@ -3,4 +3,4 @@ export type {
 	IProps as IStatusIndicatorProps,
 	Status,
 	StatusIndicatorSize
-} from './StatusIndicator.types.svelte.ts';
+} from './StatusIndicator.types.svelte';

@@ -10,7 +10,6 @@ export interface Tab {
 export interface IProps extends Omit<HTMLAttributes<HTMLDivElement>, 'onChange'> {
 	tabs: Tab[];
 	value?: string;
-	defaultValue?: string;
 	onChange?: (tabId: string) => void;
 	scrollable?: boolean;
 	ariaLabel?: string;

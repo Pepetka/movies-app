@@ -8,4 +8,5 @@ export interface IProps extends HTMLButtonAttributes {
 	labelEnableDark?: string;
 	titleLight?: string;
 	titleDark?: string;
+	class?: string;
 }

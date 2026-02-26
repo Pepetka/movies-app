@@ -8,4 +8,5 @@ export interface IProps extends Omit<HTMLAttributes<HTMLElement>, 'title'> {
 	leading?: Snippet;
 	trailing?: Snippet;
 	children?: Snippet;
+	class?: string;
 }

@@ -109,3 +109,49 @@
 		</div>
 	{/snippet}
 </Story>
+
+<!-- Accessibility -->
+<Story name="Accessibility">
+	{#snippet template()}
+		<div style="max-width: 400px;">
+			<h3 style="margin-bottom: 16px; color: var(--text-secondary);">Клавиатурная навигация</h3>
+
+			<div style="display: flex; flex-direction: column; gap: 16px; margin-bottom: 24px;">
+				<Switch
+					label="Тёмная тема"
+					helper="Нажмите Tab для фокуса, Space или Enter для переключения"
+				/>
+				<Switch label="Уведомления" checked={true} />
+			</div>
+
+			<div style="padding: 16px; background: var(--bg-secondary); border-radius: var(--radius-lg);">
+				<h4 style="margin: 0 0 12px; font-size: var(--text-sm); color: var(--text-secondary);">
+					Доступные клавиши:
+				</h4>
+				<div style="display: flex; flex-direction: column; gap: 8px; font-size: var(--text-sm);">
+					<div style="display: flex; gap: 12px;">
+						<kbd
+							style="padding: 2px 8px; background: var(--bg-tertiary); border-radius: var(--radius-sm); font-family: monospace;"
+							>Tab</kbd
+						>
+						<span style="color: var(--text-secondary);">Перемещение между переключателями</span>
+					</div>
+					<div style="display: flex; gap: 12px;">
+						<kbd
+							style="padding: 2px 8px; background: var(--bg-tertiary); border-radius: var(--radius-sm); font-family: monospace;"
+							>Space</kbd
+						>
+						<span style="color: var(--text-secondary);">Переключение состояния</span>
+					</div>
+					<div style="display: flex; gap: 12px;">
+						<kbd
+							style="padding: 2px 8px; background: var(--bg-tertiary); border-radius: var(--radius-sm); font-family: monospace;"
+							>Enter</kbd
+						>
+						<span style="color: var(--text-secondary);">Переключение состояния</span>
+					</div>
+				</div>
+			</div>
+		</div>
+	{/snippet}
+</Story>

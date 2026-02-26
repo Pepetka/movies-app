@@ -92,3 +92,18 @@ export const getThemeToggleButtonPadding = (size: ThemeSize): number => {
 			return 8;
 	}
 };
+
+export type EmptyStateSize = 'sm' | 'md' | 'lg';
+
+export const getEmptyStateIconSize = (size: EmptyStateSize): number => {
+	switch (size) {
+		case 'sm':
+			return 32;
+		case 'md':
+			return 48;
+		case 'lg':
+			return 64;
+		default:
+			return 48;
+	}
+};

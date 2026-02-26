@@ -1,45 +1,58 @@
 <script lang="ts">
-	import { getIconSize } from '$lib/utils/size';
-
 	import type { IProps } from './BottomNav.types.svelte';
+	import { getIconSize } from '../../utils/size';
 
-	const {
+	let {
 		items,
-		value: controlledValue,
+		value = $bindable(),
 		defaultValue,
 		onChange,
 		class: className,
 		...restProps
 	}: IProps = $props();
 
-	let internalValue = $state(defaultValue ?? items[0]?.id ?? '');
-	const activeItem = $derived(controlledValue ?? internalValue);
+	const iconSize = getIconSize('md');
 
+	let internalValue = $state<string | undefined>(undefined);
+	let navLinks: Record<string, HTMLAnchorElement | null> = $state.raw({});
+
+	const activeItem = $derived(value ?? internalValue ?? defaultValue ?? items[0]?.id ?? '');
 	const visibleItems = $derived(items.filter((item) => !item.hidden));
 
-	const navLinks = $state<(HTMLAnchorElement | null)[]>([]);
-
-	const onChangeActiveItem = (id: string) => {
-		internalValue = id;
+	const setActiveItem = (id: string) => {
+		if (value === undefined) {
+			internalValue = id;
+		} else {
+			value = id;
+		}
 		onChange?.(id);
 	};
 
-	const handleKeydown = (event: KeyboardEvent, currentIndex: number) => {
-		const enabledIndices = visibleItems.map((_, i) => i);
+	const handleClick = (event: MouseEvent, item: { id: string; disabled?: boolean }) => {
+		if (item.disabled) {
+			event.preventDefault();
+			return;
+		}
+		setActiveItem(item.id);
+	};
 
-		// eslint-disable-next-line no-useless-assignment -- assigned in switch
-		let nextIndex = currentIndex;
+	const handleKeydown = (event: KeyboardEvent, item: { id: string; disabled?: boolean }) => {
+		if (item.disabled) return;
+
+		const visibleCount = visibleItems.length;
+		if (visibleCount === 0) return;
+
+		const currentIndex = visibleItems.findIndex((i) => i.id === item.id);
+		let nextIndex: number;
 
 		switch (event.key) {
 			case 'ArrowLeft':
 				event.preventDefault();
-				nextIndex =
-					(enabledIndices.indexOf(currentIndex) - 1 + enabledIndices.length) %
-					enabledIndices.length;
+				nextIndex = (currentIndex - 1 + visibleCount) % visibleCount;
 				break;
 			case 'ArrowRight':
 				event.preventDefault();
-				nextIndex = (currentIndex + 1) % enabledIndices.length;
+				nextIndex = (currentIndex + 1) % visibleCount;
 				break;
 			case 'Home':
 				event.preventDefault();
@@ -47,29 +60,34 @@
 				break;
 			case 'End':
 				event.preventDefault();
-				nextIndex = enabledIndices.length - 1;
+				nextIndex = visibleCount - 1;
 				break;
 			default:
 				return;
 		}
 
-		navLinks[nextIndex]?.focus();
+		const nextItem = visibleItems[nextIndex];
+		if (nextItem && !nextItem.disabled) {
+			navLinks[nextItem.id]?.focus();
+		}
 	};
 </script>
 
 <nav class={['ui-bottom-nav', className]} aria-label="Main navigation" {...restProps}>
-	{#each visibleItems as item, index (item.id)}
+	{#each visibleItems as item (item.id)}
 		{@const Icon = item.Icon}
+		{@const isActive = item.id === activeItem}
 		<a
-			bind:this={navLinks[index]}
-			class={['ui-bottom-nav-item', item.id === activeItem && 'active']}
-			href={item.href}
-			aria-current={item.id === activeItem ? 'page' : undefined}
-			onclick={() => onChangeActiveItem(item.id)}
-			onkeydown={(e) => handleKeydown(e, index)}
+			bind:this={navLinks[item.id]}
+			class={['ui-bottom-nav-item', { active: isActive, disabled: item.disabled }]}
+			href={item.disabled ? undefined : item.href}
+			aria-current={isActive ? 'page' : undefined}
+			aria-disabled={item.disabled}
+			onclick={(e) => handleClick(e, item)}
+			onkeydown={(e) => handleKeydown(e, item)}
 		>
 			<span class="ui-bottom-nav-icon">
-				<Icon size={getIconSize('md')} />
+				<Icon size={iconSize} />
 				{#if item.badge !== undefined && item.badge > 0}
 					<span
 						class="ui-bottom-nav-badge"
@@ -116,14 +134,25 @@
 		cursor: pointer;
 		position: relative;
 		transition: color var(--transition-fast) var(--ease-out);
+		-webkit-tap-highlight-color: transparent;
 	}
 
-	.ui-bottom-nav-item:hover:not(.active) {
+	.ui-bottom-nav-item:hover:not(.active):not(.disabled) {
 		color: var(--text-primary);
+	}
+
+	.ui-bottom-nav-item:active:not(.disabled) {
+		transform: scale(0.95);
 	}
 
 	.ui-bottom-nav-item.active {
 		color: var(--color-primary);
+	}
+
+	.ui-bottom-nav-item.disabled {
+		color: var(--text-tertiary);
+		cursor: not-allowed;
+		opacity: 0.5;
 	}
 
 	.ui-bottom-nav-item:focus-visible {
