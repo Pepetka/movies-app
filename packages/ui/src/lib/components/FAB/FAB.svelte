@@ -115,18 +115,20 @@
 	}
 
 	/* Hover & Active */
-	.ui-fab:not(:disabled):hover {
-		background-color: var(--color-primary-hover);
-		box-shadow: var(--shadow-xl);
+	@media (hover: hover) {
+		.ui-fab:not(:disabled):hover {
+			background-color: var(--color-primary-hover);
+			box-shadow: var(--shadow-xl);
+		}
 	}
 
 	.ui-fab:not(:disabled):active {
 		background-color: var(--color-primary-active);
-		transform: scale(0.95) var(--fab-bottom-center-transform, translateX(-50%));
+		transform: scale(0.95);
 	}
 
 	.ui-fab.bottom-center:not(:disabled):active {
-		--fab-bottom-center-transform: translateX(-50%);
+		transform: scale(0.95) translateX(-50%);
 	}
 
 	/* Focus */

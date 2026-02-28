@@ -85,6 +85,7 @@
 	.ui-checkbox-container {
 		position: relative;
 		flex-shrink: 0;
+		width: fit-content;
 	}
 
 	.ui-checkbox-input {
@@ -121,8 +122,14 @@
 		outline-offset: 2px;
 	}
 
-	.ui-checkbox-input:hover:not(:disabled):not(:focus-visible) + .ui-checkbox-box {
-		border-color: var(--text-tertiary);
+	@media (hover: hover) {
+		.ui-checkbox-input:hover:not(:disabled):not(:focus-visible) + .ui-checkbox-box {
+			border-color: var(--text-tertiary);
+		}
+	}
+
+	.ui-checkbox-input:active:not(:disabled) + .ui-checkbox-box {
+		transform: scale(0.9);
 	}
 
 	.ui-checkbox-input:checked + .ui-checkbox-box,
@@ -131,10 +138,12 @@
 		border-color: var(--color-primary);
 	}
 
-	.ui-checkbox-input:checked:hover:not(:disabled):not(:focus-visible) + .ui-checkbox-box,
-	.ui-checkbox-box.indeterminate:hover:not(:disabled):not(:focus-visible) {
-		background-color: var(--color-primary-hover);
-		border-color: var(--color-primary-hover);
+	@media (hover: hover) {
+		.ui-checkbox-input:checked:hover:not(:disabled):not(:focus-visible) + .ui-checkbox-box,
+		.ui-checkbox-box.indeterminate:hover:not(:disabled):not(:focus-visible) {
+			background-color: var(--color-primary-hover);
+			border-color: var(--color-primary-hover);
+		}
 	}
 
 	.ui-checkbox-label-container {
@@ -171,10 +180,12 @@
 		border-color: var(--color-error);
 	}
 
-	.ui-checkbox-wrapper.error
-		.ui-checkbox-input:hover:not(:disabled):not(:focus-visible)
-		+ .ui-checkbox-box {
-		border-color: var(--color-error-hover);
+	@media (hover: hover) {
+		.ui-checkbox-wrapper.error
+			.ui-checkbox-input:hover:not(:disabled):not(:focus-visible)
+			+ .ui-checkbox-box {
+			border-color: var(--color-error-hover);
+		}
 	}
 
 	.ui-checkbox-wrapper.error .ui-checkbox-input:checked + .ui-checkbox-box {
@@ -182,11 +193,13 @@
 		border-color: var(--color-error);
 	}
 
-	.ui-checkbox-wrapper.error
-		.ui-checkbox-input:checked:hover:not(:disabled):not(:focus-visible)
-		+ .ui-checkbox-box {
-		background-color: var(--color-error-hover);
-		border-color: var(--color-error-hover);
+	@media (hover: hover) {
+		.ui-checkbox-wrapper.error
+			.ui-checkbox-input:checked:hover:not(:disabled):not(:focus-visible)
+			+ .ui-checkbox-box {
+			background-color: var(--color-error-hover);
+			border-color: var(--color-error-hover);
+		}
 	}
 
 	/* Small */

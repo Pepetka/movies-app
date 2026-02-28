@@ -107,9 +107,11 @@
 		border-color: var(--color-primary);
 	}
 
-	.ui-btn.primary:hover:not(:disabled) {
-		background-color: var(--color-primary-hover);
-		border-color: var(--color-primary-hover);
+	@media (hover: hover) {
+		.ui-btn.primary:hover:not(:disabled) {
+			background-color: var(--color-primary-hover);
+			border-color: var(--color-primary-hover);
+		}
 	}
 
 	.ui-btn.primary:active:not(:disabled) {
@@ -125,9 +127,11 @@
 		border-color: var(--border-primary);
 	}
 
-	.ui-btn.secondary:hover:not(:disabled) {
-		background-color: var(--bg-tertiary);
-		border-color: var(--border-secondary);
+	@media (hover: hover) {
+		.ui-btn.secondary:hover:not(:disabled) {
+			background-color: var(--bg-tertiary);
+			border-color: var(--border-secondary);
+		}
 	}
 
 	.ui-btn.secondary:active:not(:disabled) {
@@ -141,8 +145,10 @@
 		border-color: transparent;
 	}
 
-	.ui-btn.ghost:hover:not(:disabled) {
-		background-color: var(--bg-secondary);
+	@media (hover: hover) {
+		.ui-btn.ghost:hover:not(:disabled) {
+			background-color: var(--bg-secondary);
+		}
 	}
 
 	.ui-btn.ghost:active:not(:disabled) {
@@ -157,9 +163,11 @@
 		border-color: var(--color-error);
 	}
 
-	.ui-btn.danger:hover:not(:disabled) {
-		background-color: var(--color-error-hover);
-		border-color: var(--color-error-hover);
+	@media (hover: hover) {
+		.ui-btn.danger:hover:not(:disabled) {
+			background-color: var(--color-error-hover);
+			border-color: var(--color-error-hover);
+		}
 	}
 
 	.ui-btn.danger:active:not(:disabled) {

@@ -330,21 +330,21 @@
 				<div style="display: flex; flex-direction: column; gap: 8px; font-size: var(--text-sm);">
 					<div style="display: flex; gap: 12px;">
 						<kbd
-							style="padding: 2px 8px; background: var(--bg-tertiary); border-radius: var(--radius-sm); font-family: monospace;"
+							style="padding: 2px 8px; background: var(--bg-tertiary); border-radius: var(--radius-sm); font-family: monospace; height: fit-content;"
 							>Tab</kbd
 						>
 						<span style="color: var(--text-secondary);">Перемещение между текстовыми полями</span>
 					</div>
 					<div style="display: flex; gap: 12px;">
 						<kbd
-							style="padding: 2px 8px; background: var(--bg-tertiary); border-radius: var(--radius-sm); font-family: monospace;"
+							style="padding: 2px 8px; background: var(--bg-tertiary); border-radius: var(--radius-sm); font-family: monospace; height: fit-content;"
 							>Shift+Tab</kbd
 						>
 						<span style="color: var(--text-secondary);">Перемещение назад</span>
 					</div>
 					<div style="display: flex; gap: 12px;">
 						<kbd
-							style="padding: 2px 8px; background: var(--bg-tertiary); border-radius: var(--radius-sm); font-family: monospace;"
+							style="padding: 2px 8px; background: var(--bg-tertiary); border-radius: var(--radius-sm); font-family: monospace; height: fit-content;"
 							>Arrow Keys</kbd
 						>
 						<span style="color: var(--text-secondary);">Навигация внутри текста</span>

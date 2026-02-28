@@ -62,9 +62,15 @@
 			color 0.15s ease;
 	}
 
-	.ui-datepicker-nav button:hover {
-		background-color: var(--bg-tertiary);
-		color: var(--text-primary);
+	@media (hover: hover) {
+		.ui-datepicker-nav button:hover {
+			background-color: var(--bg-tertiary);
+			color: var(--text-primary);
+		}
+	}
+
+	.ui-datepicker-nav button:active {
+		transform: scale(0.9);
 	}
 
 	.ui-datepicker-nav button:focus-visible {

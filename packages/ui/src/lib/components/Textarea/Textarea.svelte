@@ -188,13 +188,17 @@
 		border-radius: 3px;
 	}
 
-	.ui-textarea-container textarea::-webkit-scrollbar-thumb:hover {
-		background: var(--text-secondary);
+	@media (hover: hover) {
+		.ui-textarea-container textarea::-webkit-scrollbar-thumb:hover {
+			background: var(--text-secondary);
+		}
 	}
 
 	/* Hover state */
-	.ui-textarea-container textarea:hover:not(:disabled):not(:focus) {
-		border-color: var(--text-tertiary);
+	@media (hover: hover) {
+		.ui-textarea-container textarea:hover:not(:disabled):not(:focus) {
+			border-color: var(--text-tertiary);
+		}
 	}
 
 	/* Focus state */

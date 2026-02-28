@@ -100,8 +100,10 @@
 		height: auto;
 	}
 
-	.ui-theme-toggle-btn:hover {
-		background-color: var(--bg-tertiary);
+	@media (hover: hover) {
+		.ui-theme-toggle-btn:hover {
+			background-color: var(--bg-tertiary);
+		}
 	}
 
 	.ui-theme-toggle-btn.active {

@@ -14,7 +14,7 @@
 	const iconSize = getIconSize('md');
 
 	let internalValue = $state<string | undefined>(undefined);
-	let navLinks: Record<string, HTMLAnchorElement | null> = $state.raw({});
+	let navLinks = $state<Record<string, HTMLAnchorElement | null>>({});
 
 	const activeItem = $derived(value ?? internalValue ?? defaultValue ?? items[0]?.id ?? '');
 	const visibleItems = $derived(items.filter((item) => !item.hidden));
@@ -137,8 +137,10 @@
 		-webkit-tap-highlight-color: transparent;
 	}
 
-	.ui-bottom-nav-item:hover:not(.active):not(.disabled) {
-		color: var(--text-primary);
+	@media (hover: hover) {
+		.ui-bottom-nav-item:hover:not(.active):not(.disabled) {
+			color: var(--text-primary);
+		}
 	}
 
 	.ui-bottom-nav-item:active:not(.disabled) {

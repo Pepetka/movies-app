@@ -1,6 +1,7 @@
 export interface DateFormatterOptions {
 	locale?: () => string;
 	firstDayOfWeek?: () => number;
+	weekendDays?: () => number[];
 }
 
 export const useDateFormatter = (options: DateFormatterOptions) => {
@@ -20,16 +21,23 @@ export const useDateFormatter = (options: DateFormatterOptions) => {
 		return date.toLocaleDateString(locale, { month: 'long', year: 'numeric' });
 	};
 
-	const getWeekdays = (): { short: string; full: string }[] => {
+	const getWeekdays = (): { short: string; full: string; isWeekend: boolean }[] => {
 		const locale = options.locale?.() ?? 'ru-RU';
 		const firstDayOfWeek = options.firstDayOfWeek?.() ?? 1;
-		const weekdays: { short: string; full: string }[] = [];
+		const weekendDays = options.weekendDays?.() ?? [0, 6];
+		const weekdays: { short: string; full: string; isWeekend: boolean }[] = [];
+
+		// January 7, 2024 was a Sunday (getDay() = 0)
+		const sundayDate = 7;
+
 		for (let i = 0; i < 7; i++) {
 			const dayIndex = (firstDayOfWeek + i) % 7;
-			const date = new Date(2024, 0, dayIndex + 1);
+			// Calculate date for dayIndex: Sunday = 7, Monday = 8, ..., Saturday = 13
+			const date = new Date(2024, 0, sundayDate + dayIndex);
 			weekdays.push({
 				short: date.toLocaleDateString(locale, { weekday: 'short' }),
-				full: date.toLocaleDateString(locale, { weekday: 'long' })
+				full: date.toLocaleDateString(locale, { weekday: 'long' }),
+				isWeekend: weekendDays.includes(dayIndex)
 			});
 		}
 		return weekdays;

@@ -118,8 +118,9 @@
 		bind:this={overlayElement}
 		class={['ui-modal-overlay', className]}
 		class:entering={open}
+		role="presentation"
 		onclick={handleOverlayClick}
-		aria-hidden="true"
+		onkeydown={() => {}}
 	>
 		<div
 			bind:this={modalElement}
@@ -275,8 +276,10 @@
 		border-radius: var(--radius-full);
 	}
 
-	.ui-modal-body::-webkit-scrollbar-thumb:hover {
-		background-color: var(--text-tertiary);
+	@media (hover: hover) {
+		.ui-modal-body::-webkit-scrollbar-thumb:hover {
+			background-color: var(--text-tertiary);
+		}
 	}
 
 	/* Footer */
@@ -292,33 +295,20 @@
 	/* Mobile */
 	@media (max-width: 640px) {
 		.ui-modal-overlay {
-			align-items: flex-end;
 			padding: 0;
 		}
 
-		.ui-modal {
-			width: 100vw;
-			max-width: 100vw;
-			max-height: 85vh;
-			border-radius: var(--radius-2xl) var(--radius-2xl) 0 0;
-			animation: modal-slide-up var(--transition-base) var(--ease-out);
-		}
-
-		@keyframes modal-slide-up {
-			from {
-				transform: translateY(100%);
-			}
-			to {
-				transform: translateY(0);
-			}
-		}
-
+		.ui-modal,
 		.ui-modal.sm,
 		.ui-modal.md,
 		.ui-modal.lg,
 		.ui-modal.xl,
 		.ui-modal.full {
+			width: 100vw;
 			max-width: 100vw;
+			height: 100vh;
+			max-height: 100vh;
+			border-radius: 0;
 		}
 
 		.ui-modal-header,

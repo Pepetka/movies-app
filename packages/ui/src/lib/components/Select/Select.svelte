@@ -115,8 +115,10 @@
 	}
 
 	/* Hover state */
-	.ui-select-container select:hover:not(:disabled):not(:focus) {
-		border-color: var(--text-tertiary);
+	@media (hover: hover) {
+		.ui-select-container select:hover:not(:disabled):not(:focus) {
+			border-color: var(--text-tertiary);
+		}
 	}
 
 	/* Focus state */
@@ -129,6 +131,7 @@
 		background-color: var(--bg-tertiary);
 		color: var(--text-tertiary);
 		cursor: not-allowed;
+		opacity: 1;
 	}
 
 	.ui-select-container select:disabled ~ .ui-select-label {

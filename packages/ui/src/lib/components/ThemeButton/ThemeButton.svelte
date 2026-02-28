@@ -73,9 +73,11 @@
 		height: auto;
 	}
 
-	.ui-theme-btn:hover {
-		background-color: var(--bg-tertiary);
-		color: var(--text-primary);
+	@media (hover: hover) {
+		.ui-theme-btn:hover {
+			background-color: var(--bg-tertiary);
+			color: var(--text-primary);
+		}
 	}
 
 	.ui-theme-btn:active {

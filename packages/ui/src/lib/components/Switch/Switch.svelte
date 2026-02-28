@@ -80,12 +80,20 @@
 		background-color: var(--color-primary);
 	}
 
-	.ui-switch:hover:not(:disabled):not(:focus-visible) {
-		background-color: var(--border-secondary);
+	@media (hover: hover) {
+		.ui-switch:hover:not(:disabled):not(:focus-visible) {
+			background-color: var(--border-secondary);
+		}
 	}
 
-	.ui-switch.checked:hover:not(:disabled):not(:focus-visible) {
-		background-color: var(--color-primary-hover);
+	@media (hover: hover) {
+		.ui-switch.checked:hover:not(:disabled):not(:focus-visible) {
+			background-color: var(--color-primary-hover);
+		}
+	}
+
+	.ui-switch:active:not(:disabled) {
+		transform: scale(0.95);
 	}
 
 	.ui-switch:disabled {

@@ -18,7 +18,7 @@
 		onChange?.(tabId);
 	};
 
-	const tabButtons = $state.raw<(HTMLButtonElement | null)[]>([]);
+	const tabButtons = $state<(HTMLButtonElement | null)[]>([]);
 
 	const handleKeydown = (event: KeyboardEvent, currentIndex: number) => {
 		const enabledIndices = tabs.map((t, i) => (!t.disabled ? i : -1)).filter((i) => i !== -1);
@@ -129,8 +129,14 @@
 		gap: var(--space-2);
 	}
 
-	.ui-tabs-tab:hover:not(:disabled) {
-		color: var(--text-primary);
+	@media (hover: hover) {
+		.ui-tabs-tab:hover:not(:disabled) {
+			color: var(--text-primary);
+		}
+	}
+
+	.ui-tabs-tab:active:not(:disabled) {
+		transform: scale(0.97);
 	}
 
 	.ui-tabs-tab[aria-selected='true'] {

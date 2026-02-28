@@ -148,6 +148,72 @@
 	{/snippet}
 </Story>
 
+<Story name="Custom Responsive">
+	{#snippet template()}
+		<div style="display: flex; flex-direction: column; gap: var(--space-6);">
+			<div>
+				<h3
+					style="margin: 0 0 var(--space-2) 0; font-size: var(--text-sm); color: var(--text-secondary);"
+				>
+					{`cols={[1, 2, 4]} — 1 → 2 → 4`}
+				</h3>
+				<Grid cols={[1, 2, 4] as [number, number, number]} gap="md">
+					<Card size="sm" variant="outlined">1</Card>
+					<Card size="sm" variant="outlined">2</Card>
+					<Card size="sm" variant="outlined">3</Card>
+					<Card size="sm" variant="outlined">4</Card>
+					<Card size="sm" variant="outlined">5</Card>
+					<Card size="sm" variant="outlined">6</Card>
+				</Grid>
+			</div>
+
+			<div>
+				<h3
+					style="margin: 0 0 var(--space-2) 0; font-size: var(--text-sm); color: var(--text-secondary);"
+				>
+					{`cols={[2, 3, 4]} — 2 → 3 → 4`}
+				</h3>
+				<Grid cols={[2, 3, 4] as [number, number, number]} gap="md">
+					<Card size="sm" variant="outlined">1</Card>
+					<Card size="sm" variant="outlined">2</Card>
+					<Card size="sm" variant="outlined">3</Card>
+					<Card size="sm" variant="outlined">4</Card>
+					<Card size="sm" variant="outlined">5</Card>
+					<Card size="sm" variant="outlined">6</Card>
+				</Grid>
+			</div>
+
+			<div>
+				<h3
+					style="margin: 0 0 var(--space-2) 0; font-size: var(--text-sm); color: var(--text-secondary);"
+				>
+					{`cols={[1, 2, 3]} — 1 → 2 → 3`}
+				</h3>
+				<Grid cols={[1, 2, 3] as [number, number, number]} gap="md">
+					<Card size="sm" variant="outlined">1</Card>
+					<Card size="sm" variant="outlined">2</Card>
+					<Card size="sm" variant="outlined">3</Card>
+					<Card size="sm" variant="outlined">4</Card>
+					<Card size="sm" variant="outlined">5</Card>
+					<Card size="sm" variant="outlined">6</Card>
+				</Grid>
+			</div>
+
+			<div>
+				<h3
+					style="margin: 0 0 var(--space-2) 0; font-size: var(--text-sm); color: var(--text-secondary);"
+				>
+					{`cols={[1, 1, 2]} — 1 → 1 → 2`}
+				</h3>
+				<Grid cols={[1, 1, 2] as [number, number, number]} gap="md">
+					<Card size="md" variant="outlined">Card 1</Card>
+					<Card size="md" variant="outlined">Card 2</Card>
+				</Grid>
+			</div>
+		</div>
+	{/snippet}
+</Story>
+
 <Story name="Gap Sizes">
 	{#snippet template()}
 		<div style="display: flex; flex-direction: column; gap: var(--space-6);">

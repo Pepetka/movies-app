@@ -16,6 +16,7 @@ export interface IProps extends Omit<HTMLInputAttributes, 'size' | 'value' | 'ty
 	disabledDaysOfWeek?: number[];
 	locale?: string;
 	firstDayOfWeek?: number;
+	weekendDays?: number[];
 	clearable?: boolean;
 	placeholder?: string;
 	onChange?: (value: Date | null) => void;

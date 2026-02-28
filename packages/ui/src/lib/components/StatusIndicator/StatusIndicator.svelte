@@ -60,8 +60,10 @@
 		border: none;
 	}
 
-	.ui-status-indicator:where(button):hover {
-		transform: scale(1.2);
+	@media (hover: hover) {
+		.ui-status-indicator:where(button):hover {
+			transform: scale(1.2);
+		}
 	}
 
 	.ui-status-indicator.loading {

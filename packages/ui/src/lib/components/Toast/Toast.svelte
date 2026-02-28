@@ -38,12 +38,13 @@
 	};
 
 	const handleTouchStart = (e: TouchEvent) => {
+		const target = e.target as HTMLElement;
+		if (target.closest('.ui-toast-actions')) return;
 		handleDragStart(e.touches[0].clientX);
 	};
 
 	const handleTouchMove = (e: TouchEvent) => {
 		if (!isDragging) return;
-		e.preventDefault();
 		handleDragMove(e.touches[0].clientX);
 	};
 
@@ -52,6 +53,8 @@
 	};
 
 	const handleMouseDown = (e: MouseEvent) => {
+		const target = e.target as HTMLElement;
+		if (target.closest('.ui-toast-actions')) return;
 		handleDragStart(e.clientX);
 	};
 
@@ -245,6 +248,7 @@
 		padding: var(--toast-action-padding);
 		font-size: var(--text-sm);
 		font-weight: var(--font-medium);
+		color: inherit;
 		background: transparent;
 		border: none;
 		cursor: pointer;
@@ -262,6 +266,7 @@
 		align-items: center;
 		justify-content: center;
 		padding: var(--space-1);
+		color: inherit;
 		background: transparent;
 		border: none;
 		cursor: pointer;
@@ -269,8 +274,15 @@
 		transition: opacity var(--transition-fast) var(--ease-out);
 	}
 
-	.ui-toast-close:hover {
+	@media (hover: hover) {
+		.ui-toast-close:hover {
+			opacity: 1;
+		}
+	}
+
+	.ui-toast-close:active {
 		opacity: 1;
+		transform: scale(0.9);
 	}
 
 	.ui-toast-close:focus-visible {

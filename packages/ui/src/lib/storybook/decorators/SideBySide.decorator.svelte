@@ -31,6 +31,5 @@
 		padding: 20px;
 		flex: 1;
 		max-width: 50%;
-		transform: scale(1);
 	}
 </style>

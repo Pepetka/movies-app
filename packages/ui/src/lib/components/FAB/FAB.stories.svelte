@@ -229,7 +229,7 @@
 			<div style="display: flex; gap: 16px; flex-wrap: wrap;">
 				<div>
 					<span style="font-size: var(--text-sm); color: var(--text-tertiary);">SM Disabled</span>
-					<FAB size="sm" position="bottom-right" disabled>
+					<FAB size="sm" position="bottom-left" disabled>
 						{#snippet icon()}
 							<Plus />
 						{/snippet}
@@ -245,7 +245,7 @@
 				</div>
 				<div>
 					<span style="font-size: var(--text-sm); color: var(--text-tertiary);">LG Disabled</span>
-					<FAB size="lg" label="Create" position="bottom-right" disabled>
+					<FAB size="lg" label="Create" position="bottom-center" disabled>
 						{#snippet icon()}
 							<Plus />
 						{/snippet}
@@ -279,14 +279,14 @@
 				<div style="display: flex; flex-direction: column; gap: 8px; font-size: var(--text-sm);">
 					<div style="display: flex; gap: 12px;">
 						<kbd
-							style="padding: 2px 8px; background: var(--bg-tertiary); border-radius: var(--radius-sm); font-family: monospace;"
+							style="padding: 2px 8px; background: var(--bg-tertiary); border-radius: var(--radius-sm); font-family: monospace; height: fit-content;"
 							>Tab</kbd
 						>
 						<span style="color: var(--text-secondary);">Фокус на FAB</span>
 					</div>
 					<div style="display: flex; gap: 12px;">
 						<kbd
-							style="padding: 2px 8px; background: var(--bg-tertiary); border-radius: var(--radius-sm); font-family: monospace;"
+							style="padding: 2px 8px; background: var(--bg-tertiary); border-radius: var(--radius-sm); font-family: monospace; height: fit-content;"
 							>Enter / Space</kbd
 						>
 						<span style="color: var(--text-secondary);">Активация кнопки</span>

@@ -19,10 +19,7 @@
 	let checkOutDate = $state<Date | null>(null);
 </script>
 
-<Story
-	name="Playground"
-	args={{ label: 'Дата', placeholder: 'Выберите дату', size: 'md', clearable: true }}
-/>
+<Story name="Playground" args={{ label: 'Дата', placeholder: 'Выберите дату', size: 'md' }} />
 
 <Story name="All Sizes">
 	{#snippet template()}
@@ -92,6 +89,27 @@
 					>With helper</span
 				>
 				<DatePicker label="Дата доставки" helper="Выберите удобную дату доставки" />
+			</div>
+		</div>
+	{/snippet}
+</Story>
+
+<Story name="Clearable">
+	{#snippet template()}
+		<div style="display: flex; flex-direction: column; gap: 24px; max-width: 300px;">
+			<div>
+				<span
+					style="font-size: var(--text-sm); color: var(--text-tertiary); margin-bottom: 8px; display: block;"
+					>С возможностью очистки (hover или открытое состояние)</span
+				>
+				<DatePicker label="Дата" clearable value={new Date()} />
+			</div>
+			<div>
+				<span
+					style="font-size: var(--text-sm); color: var(--text-tertiary); margin-bottom: 8px; display: block;"
+					>Без очистки (по умолчанию)</span
+				>
+				<DatePicker label="Дата" value={new Date()} />
 			</div>
 		</div>
 	{/snippet}
@@ -241,7 +259,7 @@
 				<div style="display: flex; flex-direction: column; gap: 8px; font-size: var(--text-sm);">
 					<div style="display: flex; gap: 12px;">
 						<kbd
-							style="padding: 2px 8px; background: var(--bg-tertiary); border-radius: var(--radius-sm); font-family: monospace;"
+							style="padding: 2px 8px; background: var(--bg-tertiary); border-radius: var(--radius-sm); font-family: monospace; height: fit-content;"
 							>Enter / Space</kbd
 						>
 						<span style="color: var(--text-secondary);"
@@ -250,42 +268,42 @@
 					</div>
 					<div style="display: flex; gap: 12px;">
 						<kbd
-							style="padding: 2px 8px; background: var(--bg-tertiary); border-radius: var(--radius-sm); font-family: monospace;"
+							style="padding: 2px 8px; background: var(--bg-tertiary); border-radius: var(--radius-sm); font-family: monospace; height: fit-content;"
 							>Escape</kbd
 						>
 						<span style="color: var(--text-secondary);">Закрыть календарь</span>
 					</div>
 					<div style="display: flex; gap: 12px;">
 						<kbd
-							style="padding: 2px 8px; background: var(--bg-tertiary); border-radius: var(--radius-sm); font-family: monospace;"
+							style="padding: 2px 8px; background: var(--bg-tertiary); border-radius: var(--radius-sm); font-family: monospace; height: fit-content;"
 							>ArrowLeft / ArrowRight</kbd
 						>
 						<span style="color: var(--text-secondary);">Предыдущий/следующий день</span>
 					</div>
 					<div style="display: flex; gap: 12px;">
 						<kbd
-							style="padding: 2px 8px; background: var(--bg-tertiary); border-radius: var(--radius-sm); font-family: monospace;"
+							style="padding: 2px 8px; background: var(--bg-tertiary); border-radius: var(--radius-sm); font-family: monospace; height: fit-content;"
 							>ArrowUp / ArrowDown</kbd
 						>
 						<span style="color: var(--text-secondary);">Предыдущая/следующая неделя</span>
 					</div>
 					<div style="display: flex; gap: 12px;">
 						<kbd
-							style="padding: 2px 8px; background: var(--bg-tertiary); border-radius: var(--radius-sm); font-family: monospace;"
+							style="padding: 2px 8px; background: var(--bg-tertiary); border-radius: var(--radius-sm); font-family: monospace; height: fit-content;"
 							>PageUp / PageDown</kbd
 						>
 						<span style="color: var(--text-secondary);">Предыдущий/следующий месяц</span>
 					</div>
 					<div style="display: flex; gap: 12px;">
 						<kbd
-							style="padding: 2px 8px; background: var(--bg-tertiary); border-radius: var(--radius-sm); font-family: monospace;"
+							style="padding: 2px 8px; background: var(--bg-tertiary); border-radius: var(--radius-sm); font-family: monospace; height: fit-content;"
 							>Home</kbd
 						>
 						<span style="color: var(--text-secondary);">Первый день месяца</span>
 					</div>
 					<div style="display: flex; gap: 12px;">
 						<kbd
-							style="padding: 2px 8px; background: var(--bg-tertiary); border-radius: var(--radius-sm); font-family: monospace;"
+							style="padding: 2px 8px; background: var(--bg-tertiary); border-radius: var(--radius-sm); font-family: monospace; height: fit-content;"
 							>End</kbd
 						>
 						<span style="color: var(--text-secondary);">Последний день месяца</span>

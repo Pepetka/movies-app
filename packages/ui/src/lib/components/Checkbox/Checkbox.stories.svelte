@@ -151,21 +151,21 @@
 				<div style="display: flex; flex-direction: column; gap: 8px; font-size: var(--text-sm);">
 					<div style="display: flex; gap: 12px;">
 						<kbd
-							style="padding: 2px 8px; background: var(--bg-tertiary); border-radius: var(--radius-sm); font-family: monospace;"
+							style="padding: 2px 8px; background: var(--bg-tertiary); border-radius: var(--radius-sm); font-family: monospace; height: fit-content;"
 							>Tab</kbd
 						>
 						<span style="color: var(--text-secondary);">Перемещение между чекбоксами</span>
 					</div>
 					<div style="display: flex; gap: 12px;">
 						<kbd
-							style="padding: 2px 8px; background: var(--bg-tertiary); border-radius: var(--radius-sm); font-family: monospace;"
+							style="padding: 2px 8px; background: var(--bg-tertiary); border-radius: var(--radius-sm); font-family: monospace; height: fit-content;"
 							>Space</kbd
 						>
 						<span style="color: var(--text-secondary);">Переключение состояния</span>
 					</div>
 					<div style="display: flex; gap: 12px;">
 						<kbd
-							style="padding: 2px 8px; background: var(--bg-tertiary); border-radius: var(--radius-sm); font-family: monospace;"
+							style="padding: 2px 8px; background: var(--bg-tertiary); border-radius: var(--radius-sm); font-family: monospace; height: fit-content;"
 							>Enter</kbd
 						>
 						<span style="color: var(--text-secondary);">Переключение состояния (альтернатива)</span>

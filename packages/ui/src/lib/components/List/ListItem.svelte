@@ -158,8 +158,10 @@
 		min-height: 56px;
 	}
 
-	.ui-list-item-button:hover:not(:disabled) {
-		background-color: var(--bg-secondary);
+	@media (hover: hover) {
+		.ui-list-item-button:hover:not(:disabled) {
+			background-color: var(--bg-secondary);
+		}
 	}
 
 	.ui-list-item-button:active:not(:disabled) {

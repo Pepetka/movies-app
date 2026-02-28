@@ -4,6 +4,7 @@
 	interface WeekdayInfo {
 		short: string;
 		full: string;
+		isWeekend: boolean;
 	}
 
 	interface Props {
@@ -14,6 +15,7 @@
 		today: Date;
 		focusedDate: Date;
 		locale: string;
+		weekendDays: number[];
 		onSelectDate: (date: Date) => void;
 		isDateDisabled: (date: Date) => boolean;
 		isSameDay: (a: Date | null, b: Date | null) => boolean;
@@ -28,6 +30,7 @@
 		today,
 		focusedDate,
 		locale,
+		weekendDays,
 		onSelectDate,
 		isDateDisabled,
 		isSameDay,
@@ -47,7 +50,9 @@
 <div class="ui-datepicker-calendar" role="grid" aria-label="Календарь">
 	<div class="ui-datepicker-weekdays" role="row">
 		{#each weekdays as day (day.full)}
-			<span role="columnheader" aria-label={day.full}>{day.short}</span>
+			<span role="columnheader" aria-label={day.full} class:weekend={day.isWeekend}
+				>{day.short}</span
+			>
 		{/each}
 	</div>
 	<div class="ui-datepicker-grid">
@@ -59,6 +64,7 @@
 					{@const isToday = isSameDay(day, today)}
 					{@const isDisabled = isDateDisabled(day)}
 					{@const isFocusedDay = isSameDay(day, focusedDate)}
+					{@const isWeekend = weekendDays.includes(day.getDay())}
 					<DatePickerDay
 						{day}
 						selected={isSelected}
@@ -66,6 +72,7 @@
 						disabled={isDisabled}
 						focused={isFocusedDay}
 						otherMonth={isOther}
+						weekend={isWeekend}
 						ariaLabel={formatDayAriaLabel(day)}
 						onclick={() => onSelectDate(day)}
 					/>
@@ -80,6 +87,12 @@
 		display: flex;
 		flex-direction: column;
 		gap: var(--space-1);
+	}
+
+	.ui-datepicker-grid {
+		display: flex;
+		flex-direction: column;
+		gap: var(--datepicker-day-gap);
 	}
 
 	.ui-datepicker-week {
@@ -104,5 +117,9 @@
 		font-weight: var(--font-medium);
 		color: var(--text-tertiary);
 		text-transform: capitalize;
+	}
+
+	.ui-datepicker-weekdays span.weekend {
+		color: var(--color-warning);
 	}
 </style>

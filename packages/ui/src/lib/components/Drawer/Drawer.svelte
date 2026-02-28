@@ -2,7 +2,7 @@
 	import type { IProps, DrawerPosition } from './Drawer.types.svelte';
 
 	let {
-		open = $bindable(),
+		open = $bindable(false),
 		position = 'left',
 		size,
 		closeOnOverlay = true,
@@ -17,6 +17,7 @@
 
 	let overlayElement = $state.raw<HTMLDivElement | null>(null);
 	let drawerElement = $state.raw<HTMLDivElement | null>(null);
+	let handleElement = $state.raw<HTMLButtonElement | null>(null);
 
 	let isDragging = $state(false);
 	let dragOffset = $state(0);
@@ -33,6 +34,8 @@
 	};
 
 	const DRAG_THRESHOLD = 100;
+	const OVERSCROLL_LIMIT = 80;
+	const OVERSCROLL_RESISTANCE = 0.4;
 
 	const getFocusableElements = (container: HTMLElement): HTMLElement[] => {
 		const focusableSelectors = [
@@ -96,7 +99,14 @@
 	const updateDrag = (clientY: number) => {
 		if (!isDragging || position !== 'bottom') return;
 		const diff = clientY - dragStartY;
-		dragOffset = Math.max(0, Math.min(diff, drawerHeight));
+
+		if (diff >= 0) {
+			dragOffset = Math.min(diff, drawerHeight);
+		} else {
+			const absDiff = Math.abs(diff);
+			const elasticOffset = absDiff * OVERSCROLL_RESISTANCE;
+			dragOffset = -Math.min(elasticOffset, OVERSCROLL_LIMIT);
+		}
 	};
 
 	const endDrag = () => {
@@ -182,66 +192,93 @@
 		}
 	});
 
+	$effect(() => {
+		const element = handleElement;
+		if (position !== 'bottom' || !element) return;
+
+		element.addEventListener('touchstart', handleTouchStart, { passive: true });
+		element.addEventListener('touchmove', handleTouchMove, { passive: false });
+		element.addEventListener('touchend', handleTouchEnd, { passive: true });
+
+		return () => {
+			element.removeEventListener('touchstart', handleTouchStart);
+			element.removeEventListener('touchmove', handleTouchMove);
+			element.removeEventListener('touchend', handleTouchEnd);
+		};
+	});
+
 	const drawerSize = $derived(size ?? defaultSizes[position]);
-	const dragTransform = $derived(isDragging || dragOffset > 0 ? `translateY(${dragOffset}px)` : '');
+	const dragTransform = $derived(
+		isDragging || dragOffset !== 0 ? `translateY(${OVERSCROLL_LIMIT + dragOffset}px)` : ''
+	);
+	const overlayOpacity = $derived.by(() => {
+		if (!isDragging || drawerHeight === 0) return 1;
+		const progress = Math.max(0, Math.min(1, 1 - dragOffset / drawerHeight));
+		return progress;
+	});
 </script>
 
 <svelte:window onkeydown={handleKeydown} />
 
-{#if open}
+<div
+	bind:this={overlayElement}
+	class={[
+		'ui-drawer-overlay',
+		open ? 'open' : '',
+		isDragging && position === 'bottom' ? 'dragging' : ''
+	]}
+	style:opacity={isDragging && position === 'bottom' ? overlayOpacity : undefined}
+	onclick={handleOverlayClick}
+	aria-hidden={!open}
+>
 	<div
-		bind:this={overlayElement}
-		class="ui-drawer-overlay"
-		class:dragging={isDragging && position === 'bottom'}
-		onclick={handleOverlayClick}
-		aria-hidden="true"
+		bind:this={drawerElement}
+		class={[
+			'ui-drawer',
+			position,
+			open ? 'open' : '',
+			isDragging && position === 'bottom' ? 'dragging' : '',
+			className
+		]}
+		style="--drawer-size: {drawerSize}; --drag-transform: {dragTransform}"
+		role="dialog"
+		aria-modal="true"
+		aria-labelledby={header ? headerId : undefined}
+		tabindex="-1"
+		{...restProps}
 	>
-		<div
-			bind:this={drawerElement}
-			class={['ui-drawer', position, open ? 'open' : '', className]}
-			class:dragging={isDragging && position === 'bottom'}
-			style="--drawer-size: {drawerSize}; --drag-transform: {dragTransform}"
-			role="dialog"
-			aria-modal="true"
-			aria-labelledby={header ? headerId : undefined}
-			tabindex="-1"
-			{...restProps}
-		>
-			{#if position === 'bottom'}
-				<button
-					type="button"
-					class="ui-drawer-handle-area"
-					tabindex="-1"
-					aria-label="Перетащите вниз, чтобы закрыть"
-					ontouchstart={handleTouchStart}
-					ontouchmove={handleTouchMove}
-					ontouchend={handleTouchEnd}
-					onmousedown={handleMouseDown}
-				>
-					<div class="ui-drawer-handle"></div>
-				</button>
-			{/if}
+		{#if position === 'bottom'}
+			<button
+				bind:this={handleElement}
+				type="button"
+				class="ui-drawer-handle-area"
+				tabindex="-1"
+				aria-label="Перетащите вниз, чтобы закрыть"
+				onmousedown={handleMouseDown}
+			>
+				<div class="ui-drawer-handle"></div>
+			</button>
+		{/if}
 
-			{#if header}
-				<div class="ui-drawer-header" id={headerId}>
-					{@render header(close)}
-				</div>
-			{/if}
+		{#if header}
+			<div class="ui-drawer-header" id={headerId}>
+				{@render header(close)}
+			</div>
+		{/if}
 
-			{#if children}
-				<div class="ui-drawer-body">
-					{@render children()}
-				</div>
-			{/if}
+		{#if children}
+			<div class="ui-drawer-body">
+				{@render children()}
+			</div>
+		{/if}
 
-			{#if footer}
-				<div class="ui-drawer-footer">
-					{@render footer(close)}
-				</div>
-			{/if}
-		</div>
+		{#if footer}
+			<div class="ui-drawer-footer">
+				{@render footer(close)}
+			</div>
+		{/if}
 	</div>
-{/if}
+</div>
 
 <style>
 	.ui-drawer-overlay {
@@ -249,20 +286,21 @@
 		inset: 0;
 		z-index: var(--z-modal-backdrop);
 		background-color: var(--bg-overlay);
-		animation: overlay-fade-in var(--transition-fast) var(--ease-out);
+		visibility: hidden;
+		opacity: 0;
+		transition:
+			opacity var(--transition-base) var(--ease-out),
+			visibility var(--transition-base) var(--ease-out);
+	}
+
+	.ui-drawer-overlay.open {
+		visibility: visible;
+		opacity: 1;
 	}
 
 	.ui-drawer-overlay.dragging {
 		touch-action: none;
-	}
-
-	@keyframes overlay-fade-in {
-		from {
-			opacity: 0;
-		}
-		to {
-			opacity: 1;
-		}
+		transition: none;
 	}
 
 	.ui-drawer {
@@ -310,17 +348,17 @@
 		right: 0;
 		bottom: 0;
 		max-height: 85vh;
+		padding-bottom: 80px;
 		border-radius: var(--radius-2xl) var(--radius-2xl) 0 0;
 		transform: translateY(100%);
-		--drag-transform: '';
 	}
 
 	.ui-drawer.bottom.open {
-		transform: translateY(0);
+		transform: translateY(80px);
 	}
 
 	.ui-drawer.bottom.open.dragging {
-		transform: var(--drag-transform, translateY(0));
+		transform: var(--drag-transform, translateY(80px));
 	}
 
 	.ui-drawer-handle-area {
@@ -394,8 +432,10 @@
 		border-radius: var(--radius-full);
 	}
 
-	.ui-drawer-body::-webkit-scrollbar-thumb:hover {
-		background-color: var(--text-tertiary);
+	@media (hover: hover) {
+		.ui-drawer-body::-webkit-scrollbar-thumb:hover {
+			background-color: var(--text-tertiary);
+		}
 	}
 
 	.ui-drawer-footer {

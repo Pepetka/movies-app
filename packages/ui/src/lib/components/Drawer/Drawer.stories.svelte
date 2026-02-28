@@ -41,6 +41,7 @@
 	let taskTitle = $state('');
 	let taskDesc = $state('');
 	let priority = $state('medium');
+	let sorting = $state('date-asc');
 	let notificationsEnabled = $state(true);
 	let emailNotificationsEnabled = $state(false);
 	let soundNotificationsEnabled = $state(true);
@@ -129,7 +130,7 @@
 				<Select
 					label="Сортировка"
 					placeholder="Выберите сортировку"
-					bind:value={priority}
+					bind:value={sorting}
 					options={[
 						{ value: 'date-desc', label: 'По дате (новые)' },
 						{ value: 'date-asc', label: 'По дате (старые)' },
@@ -143,8 +144,6 @@
 				<Button variant="ghost" onclick={close}>Сбросить</Button>
 				<Button
 					onclick={() => {
-						// eslint-disable-next-line no-console
-						console.log('Apply filters');
 						close();
 					}}>Применить</Button
 				>
@@ -159,47 +158,35 @@
 
 		<Drawer bind:open={bottomOpen} position="bottom">
 			<List>
-				<ListItem
-					onclick={() => {
-						// eslint-disable-next-line no-console
-						console.log('Create');
-					}}
-				>
-					<Plus style="width: 20px;" />
-					<span>Создать новый</span>
+				<ListItem>
+					<div style="display: flex; align-items: center; gap: var(--space-2);">
+						<Plus style="width: 20px;" />
+						<span>Создать новый</span>
+					</div>
 				</ListItem>
-				<ListItem
-					onclick={() => {
-						// eslint-disable-next-line no-console
-						console.log('Edit');
-					}}
-				>
-					<div
-						style="width: 20px; height: 20px; background: var(--bg-secondary); border-radius: var(--radius-sm);"
-					></div>
-					<span>Редактировать</span>
+				<ListItem>
+					<div style="display: flex; align-items: center; gap: var(--space-2);">
+						<div
+							style="width: 20px; height: 20px; background: var(--bg-secondary); border-radius: var(--radius-sm);"
+						></div>
+						<span>Редактировать</span>
+					</div>
 				</ListItem>
-				<ListItem
-					onclick={() => {
-						// eslint-disable-next-line no-console
-						console.log('Share');
-					}}
-				>
-					<div
-						style="width: 20px; height: 20px; background: var(--bg-secondary); border-radius: var(--radius-sm);"
-					></div>
-					<span>Поделиться</span>
+				<ListItem>
+					<div style="display: flex; align-items: center; gap: var(--space-2);">
+						<div
+							style="width: 20px; height: 20px; background: var(--bg-secondary); border-radius: var(--radius-sm);"
+						></div>
+						<span>Поделиться</span>
+					</div>
 				</ListItem>
-				<ListItem
-					onclick={() => {
-						// eslint-disable-next-line no-console
-						console.log('Duplicate');
-					}}
-				>
-					<div
-						style="width: 20px; height: 20px; background: var(--bg-secondary); border-radius: var(--radius-sm);"
-					></div>
-					<span>Дублировать</span>
+				<ListItem>
+					<div style="display: flex; align-items: center; gap: var(--space-2);">
+						<div
+							style="width: 20px; height: 20px; background: var(--bg-secondary); border-radius: var(--radius-sm);"
+						></div>
+						<span>Дублировать</span>
+					</div>
 				</ListItem>
 			</List>
 		</Drawer>
@@ -237,8 +224,6 @@
 				<Button variant="ghost" onclick={close}>Отмена</Button>
 				<Button
 					onclick={() => {
-						// eslint-disable-next-line no-console
-						console.log('Task created');
 						close();
 					}}>Создать</Button
 				>
@@ -379,8 +364,6 @@
 			{#snippet footer(_close)}
 				<Button
 					onclick={() => {
-						// eslint-disable-next-line no-console
-						console.log('Confirmed');
 						strictOpen = false;
 					}}>Подтвердить</Button
 				>
@@ -425,7 +408,7 @@
 				<div style="display: flex; flex-direction: column; gap: 8px; font-size: var(--text-sm);">
 					<div style="display: flex; gap: 12px;">
 						<kbd
-							style="padding: 2px 8px; background: var(--bg-tertiary); border-radius: var(--radius-sm); font-family: monospace;"
+							style="padding: 2px 8px; background: var(--bg-tertiary); border-radius: var(--radius-sm); font-family: monospace; height: fit-content;"
 							>Tab</kbd
 						>
 						<span style="color: var(--text-secondary);"
@@ -434,14 +417,14 @@
 					</div>
 					<div style="display: flex; gap: 12px;">
 						<kbd
-							style="padding: 2px 8px; background: var(--bg-tertiary); border-radius: var(--radius-sm); font-family: monospace;"
+							style="padding: 2px 8px; background: var(--bg-tertiary); border-radius: var(--radius-sm); font-family: monospace; height: fit-content;"
 							>Shift + Tab</kbd
 						>
 						<span style="color: var(--text-secondary);">Навигация назад</span>
 					</div>
 					<div style="display: flex; gap: 12px;">
 						<kbd
-							style="padding: 2px 8px; background: var(--bg-tertiary); border-radius: var(--radius-sm); font-family: monospace;"
+							style="padding: 2px 8px; background: var(--bg-tertiary); border-radius: var(--radius-sm); font-family: monospace; height: fit-content;"
 							>Escape</kbd
 						>
 						<span style="color: var(--text-secondary);">Закрыть drawer</span>

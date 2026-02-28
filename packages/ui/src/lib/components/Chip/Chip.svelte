@@ -77,8 +77,14 @@
 			color var(--transition-fast) var(--ease-out);
 	}
 
-	.ui-chip:hover:not(:disabled) {
-		background-color: var(--chip-default-hover-bg);
+	@media (hover: hover) {
+		.ui-chip:hover:not(:disabled) {
+			background-color: var(--chip-default-hover-bg);
+		}
+	}
+
+	.ui-chip:active:not(:disabled) {
+		transform: scale(0.97);
 	}
 
 	.ui-chip:disabled {
@@ -92,8 +98,10 @@
 		border-color: var(--chip-selected-border);
 	}
 
-	.ui-chip.selected:hover:not(:disabled) {
-		background-color: var(--chip-selected-hover-bg);
+	@media (hover: hover) {
+		.ui-chip.selected:hover:not(:disabled) {
+			background-color: var(--chip-selected-hover-bg);
+		}
 	}
 
 	.ui-chip.sm {

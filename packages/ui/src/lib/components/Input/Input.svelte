@@ -143,8 +143,10 @@
 	}
 
 	/* Hover state */
-	.ui-input-container input:hover:not(:disabled):not(:focus) {
-		border-color: var(--text-tertiary);
+	@media (hover: hover) {
+		.ui-input-container input:hover:not(:disabled):not(:focus) {
+			border-color: var(--text-tertiary);
+		}
 	}
 
 	/* Focus state */
@@ -231,9 +233,11 @@
 			color 0.15s ease;
 	}
 
-	.ui-input-icon-btn:hover:not(:disabled) {
-		background-color: var(--bg-tertiary);
-		color: var(--text-secondary);
+	@media (hover: hover) {
+		.ui-input-icon-btn:hover:not(:disabled) {
+			background-color: var(--bg-tertiary);
+			color: var(--text-secondary);
+		}
 	}
 
 	.ui-input-icon-btn:active:not(:disabled) {

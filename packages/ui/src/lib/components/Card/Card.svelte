@@ -81,8 +81,10 @@
 		box-shadow: var(--shadow-md);
 	}
 
-	.ui-card.elevated.interactive:hover {
-		box-shadow: var(--shadow-lg);
+	@media (hover: hover) {
+		.ui-card.elevated.interactive:hover {
+			box-shadow: var(--shadow-lg);
+		}
 	}
 
 	.ui-card.elevated.interactive:active {
@@ -95,9 +97,11 @@
 		box-shadow: none;
 	}
 
-	.ui-card.outlined.interactive:hover {
-		border-color: var(--border-secondary);
-		background-color: var(--bg-secondary);
+	@media (hover: hover) {
+		.ui-card.outlined.interactive:hover {
+			border-color: var(--border-secondary);
+			background-color: var(--bg-secondary);
+		}
 	}
 
 	.ui-card.outlined.interactive:active {
@@ -110,8 +114,10 @@
 		background-color: var(--bg-secondary);
 	}
 
-	.ui-card.filled.interactive:hover {
-		background-color: var(--bg-tertiary);
+	@media (hover: hover) {
+		.ui-card.filled.interactive:hover {
+			background-color: var(--bg-tertiary);
+		}
 	}
 
 	.ui-card.filled.interactive:active {

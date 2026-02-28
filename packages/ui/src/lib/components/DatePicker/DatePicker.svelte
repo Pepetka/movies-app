@@ -21,7 +21,8 @@
 		disabledDaysOfWeek = [],
 		locale = 'ru-RU',
 		firstDayOfWeek = 1,
-		clearable = true,
+		weekendDays = [0, 6],
+		clearable = false,
 		placeholder = 'dd.mm.yyyy',
 		onChange,
 		class: className,
@@ -55,11 +56,12 @@
 
 	let hasValue = $derived(value !== null && value !== undefined);
 	let isLabelFloating = $derived(isFocused || isOpen || hasValue);
-	let showClearIcon = $derived(clearable && hasValue && isHovered && !disabled);
+	let showClearIcon = $derived(clearable && hasValue && (isHovered || isOpen) && !disabled);
 
 	const dateFormatter = useDateFormatter({
 		locale: () => locale,
-		firstDayOfWeek: () => firstDayOfWeek
+		firstDayOfWeek: () => firstDayOfWeek,
+		weekendDays: () => weekendDays
 	});
 	const calendarLogic = useCalendarLogic({
 		minDate: () => minDate,
@@ -257,6 +259,7 @@
 				{today}
 				{focusedDate}
 				{locale}
+				{weekendDays}
 				onSelectDate={selectDate}
 				isDateDisabled={calendarLogic.isDateDisabled}
 				isSameDay={calendarLogic.isSameDay}
@@ -318,10 +321,12 @@
 	}
 
 	/* Hover state */
-	.ui-datepicker-wrapper:not(.open)
-		.ui-datepicker-container
-		input:hover:not(:disabled):not(:focus) {
-		border-color: var(--text-tertiary);
+	@media (hover: hover) {
+		.ui-datepicker-wrapper:not(.open)
+			.ui-datepicker-container
+			input:hover:not(:disabled):not(:focus) {
+			border-color: var(--text-tertiary);
+		}
 	}
 
 	/* Focus state */
@@ -398,9 +403,15 @@
 			color 0.15s ease;
 	}
 
-	.ui-datepicker-icon.clearable:hover:not(:disabled) {
-		background-color: var(--bg-tertiary);
-		color: var(--text-secondary);
+	@media (hover: hover) {
+		.ui-datepicker-icon.clearable:hover:not(:disabled) {
+			background-color: var(--bg-tertiary);
+			color: var(--text-secondary);
+		}
+	}
+
+	.ui-datepicker-icon:active:not(:disabled) {
+		transform: scale(0.92);
 	}
 
 	.ui-datepicker-icon:focus-visible {
@@ -446,13 +457,14 @@
 	.ui-datepicker-popover {
 		position: absolute;
 		top: calc(100% + 8px);
-		left: 0;
+		left: 50%;
+		transform: translateX(-50%);
 		width: var(--datepicker-width);
 		background-color: var(--bg-primary);
 		border: var(--border-width-thin) solid var(--border-primary);
 		border-radius: var(--radius-xl);
 		box-shadow: var(--shadow-lg);
-		padding: var(--space-3);
+		padding: calc(var(--space-2) - 1px);
 		z-index: var(--z-popover);
 	}
 

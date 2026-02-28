@@ -8,6 +8,7 @@
 		disabled?: boolean;
 		focused?: boolean;
 		otherMonth?: boolean;
+		weekend?: boolean;
 		ariaLabel: string;
 		onclick?: () => void;
 		children?: Snippet<[number]>;
@@ -20,6 +21,7 @@
 		disabled = false,
 		focused = false,
 		otherMonth = false,
+		weekend = false,
 		ariaLabel,
 		onclick,
 		children
@@ -35,7 +37,8 @@
 			today,
 			disabled,
 			focused,
-			'other-month': otherMonth
+			'other-month': otherMonth,
+			weekend
 		}
 	]}
 	role="gridcell"
@@ -72,13 +75,27 @@
 			box-shadow 0.15s ease;
 	}
 
-	.ui-datepicker-day:hover:not(.disabled):not(.selected) {
-		background-color: var(--bg-tertiary);
+	@media (hover: hover) {
+		.ui-datepicker-day:hover:not(.disabled):not(.selected) {
+			background-color: var(--bg-tertiary);
+		}
+	}
+
+	.ui-datepicker-day:active:not(.disabled) {
+		transform: scale(0.92);
 	}
 
 	.ui-datepicker-day.other-month {
 		color: var(--text-tertiary);
 		opacity: 0.6;
+	}
+
+	.ui-datepicker-day.weekend:not(.selected) {
+		color: var(--color-warning);
+	}
+
+	.ui-datepicker-day.weekend.other-month:not(.selected) {
+		color: color-mix(in srgb, var(--color-warning) 60%, var(--text-tertiary));
 	}
 
 	.ui-datepicker-day.today:not(.selected) {
@@ -93,7 +110,6 @@
 	}
 
 	.ui-datepicker-day.disabled {
-		color: var(--text-tertiary);
 		background-color: var(--bg-secondary);
 		opacity: 0.5;
 		cursor: not-allowed;

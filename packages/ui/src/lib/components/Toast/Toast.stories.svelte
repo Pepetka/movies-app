@@ -1,6 +1,6 @@
 <script module lang="ts">
-	/* eslint-disable no-console */
 	import { defineMeta } from '@storybook/addon-svelte-csf';
+	import { fn } from 'storybook/test';
 
 	import { ToastContainer, toast } from './';
 	import { Button } from '../Button';
@@ -133,7 +133,7 @@
 			<Button
 				onclick={() =>
 					toast.error('Ошибка сохранения', {
-						action: { label: 'Повторить', onClick: () => console.log('Retry clicked') }
+						action: { label: 'Повторить', onClick: () => fn() }
 					})}
 			>
 				Error with Retry
@@ -141,7 +141,7 @@
 			<Button
 				onclick={() =>
 					toast.info('Доступно обновление', {
-						action: { label: 'Обновить', onClick: () => console.log('Update clicked') }
+						action: { label: 'Обновить', onClick: () => fn() }
 					})}
 			>
 				Info with Action
@@ -149,7 +149,7 @@
 			<Button
 				onclick={() =>
 					toast.success('Файл загружен', {
-						action: { label: 'Открыть', onClick: () => console.log('Open clicked') }
+						action: { label: 'Открыть', onClick: () => fn() }
 					})}
 			>
 				Success with Open
@@ -178,7 +178,7 @@
 					onclick={() =>
 						toast.warning('Долгая операция', {
 							duration: 0,
-							action: { label: 'Отмена', onClick: () => console.log('Cancel clicked') }
+							action: { label: 'Отмена', onClick: () => fn() }
 						})}
 				>
 					Persistent with Action
@@ -317,7 +317,7 @@
 					<Button
 						onclick={() => {
 							toast.success('Сообщение отправлено!');
-							console.log('Form submitted');
+							fn();
 						}}
 					>
 						Отправить
@@ -326,7 +326,7 @@
 						variant="ghost"
 						onclick={() => {
 							toast.error('Ошибка валидации', {
-								action: { label: 'Исправить', onClick: () => console.log('Fix clicked') }
+								action: { label: 'Исправить', onClick: () => fn() }
 							});
 						}}
 					>
@@ -348,7 +348,7 @@
 						onclick={() =>
 							toast.info('Загрузка файла...', {
 								duration: 0,
-								action: { label: 'Отмена', onClick: () => console.log('Cancel upload') }
+								action: { label: 'Отмена', onClick: () => fn() }
 							})}
 					>
 						Загрузить
@@ -357,7 +357,7 @@
 						variant="secondary"
 						onclick={() =>
 							toast.error('Ошибка загрузки', {
-								action: { label: 'Повторить', onClick: () => console.log('Retry upload') }
+								action: { label: 'Повторить', onClick: () => fn() }
 							})}
 					>
 						Ошибка
