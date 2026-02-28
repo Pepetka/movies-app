@@ -154,7 +154,7 @@
 	}
 
 	.ui-checkbox-label {
-		font-size: 16px;
+		font-size: var(--text-base);
 		font-weight: 400;
 		color: var(--text-primary);
 		cursor: pointer;

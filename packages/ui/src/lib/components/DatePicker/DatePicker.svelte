@@ -154,12 +154,11 @@
 
 	$effect(() => {
 		if (isOpen) {
-			document.addEventListener('click', handleClickOutside);
+			const controller = new AbortController();
+			document.addEventListener('click', handleClickOutside, { signal: controller.signal });
 			popoverRef?.focus();
+			return () => controller.abort();
 		}
-		return () => {
-			document.removeEventListener('click', handleClickOutside);
-		};
 	});
 
 	const weekdays = $derived(dateFormatter.getWeekdays());
@@ -211,7 +210,7 @@
 			class="ui-datepicker-icon"
 			class:clearable={showClearIcon}
 			onclick={showClearIcon ? clear : toggle}
-			aria-label={showClearIcon ? 'Очистить дату' : 'Открыть календарь'}
+			aria-label={showClearIcon ? 'Clear date' : 'Open calendar'}
 			{disabled}
 			tabindex="-1"
 		>
@@ -240,7 +239,7 @@
 			class="ui-datepicker-popover"
 			role="dialog"
 			aria-modal="true"
-			aria-label="Выбор даты"
+			aria-label="Date picker"
 			tabindex="-1"
 		>
 			<DatePickerNavigation
@@ -291,8 +290,8 @@
 		padding: var(--input-md-padding);
 		padding-right: 44px;
 		font-family: inherit;
-		font-size: 16px;
-		line-height: 1.5;
+		font-size: var(--text-base);
+		line-height: var(--leading-normal);
 		color: var(--text-primary);
 		background-color: var(--input-bg);
 		border: var(--border-width-thin) solid var(--input-border);

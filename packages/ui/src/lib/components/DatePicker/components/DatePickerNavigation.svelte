@@ -14,19 +14,19 @@
 
 <div class="ui-datepicker-nav">
 	<div class="ui-datepicker-nav-group">
-		<button type="button" onclick={onPrevYear} aria-label="Предыдущий год">
+		<button type="button" onclick={onPrevYear} aria-label="Previous year">
 			<ChevronsLeft size={18} />
 		</button>
-		<button type="button" onclick={onPrevMonth} aria-label="Предыдущий месяц">
+		<button type="button" onclick={onPrevMonth} aria-label="Previous month">
 			<ChevronLeft size={18} />
 		</button>
 	</div>
 	<span class="ui-datepicker-month-title">{monthTitle}</span>
 	<div class="ui-datepicker-nav-group">
-		<button type="button" onclick={onNextMonth} aria-label="Следующий месяц">
+		<button type="button" onclick={onNextMonth} aria-label="Next month">
 			<ChevronRight size={18} />
 		</button>
-		<button type="button" onclick={onNextYear} aria-label="Следующий год">
+		<button type="button" onclick={onNextYear} aria-label="Next year">
 			<ChevronsRight size={18} />
 		</button>
 	</div>

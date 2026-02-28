@@ -104,8 +104,8 @@
 		height: var(--input-md-height);
 		padding: var(--input-md-padding);
 		font-family: inherit;
-		font-size: 16px;
-		line-height: 1.5;
+		font-size: var(--text-base);
+		line-height: var(--leading-normal);
 		color: var(--text-primary);
 		background-color: var(--input-bg);
 		border: var(--border-width-thin) solid var(--input-border);

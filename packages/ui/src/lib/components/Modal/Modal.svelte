@@ -117,7 +117,6 @@
 	<div
 		bind:this={overlayElement}
 		class={['ui-modal-overlay', className]}
-		class:entering={open}
 		role="presentation"
 		onclick={handleOverlayClick}
 		onkeydown={() => {}}
@@ -162,10 +161,6 @@
 		justify-content: center;
 		padding: var(--space-4);
 		background-color: var(--bg-overlay);
-		animation: overlay-fade-in var(--transition-fast) var(--ease-out);
-	}
-
-	.ui-modal-overlay.entering {
 		animation: overlay-fade-in var(--transition-fast) var(--ease-out);
 	}
 

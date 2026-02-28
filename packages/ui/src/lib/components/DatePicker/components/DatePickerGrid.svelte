@@ -47,7 +47,7 @@
 	};
 </script>
 
-<div class="ui-datepicker-calendar" role="grid" aria-label="Календарь">
+<div class="ui-datepicker-calendar" role="grid" aria-label="Calendar">
 	<div class="ui-datepicker-weekdays" role="row">
 		{#each weekdays as day (day.full)}
 			<span role="columnheader" aria-label={day.full} class:weekend={day.isWeekend}

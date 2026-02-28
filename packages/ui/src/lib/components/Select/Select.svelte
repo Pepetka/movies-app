@@ -25,7 +25,6 @@
 	let isFocused = $state(false);
 	let hasValue = $derived(value !== '' && value !== undefined);
 	let isLabelFloating = $derived(isFocused || hasValue);
-	let showPlaceholder = $derived(placeholder && !hasValue && isLabelFloating);
 
 	const handleChange = (e: Event) => {
 		const target = e.target as HTMLSelectElement;
@@ -34,7 +33,7 @@
 	};
 </script>
 
-<div class={['ui-select-wrapper', size, { error, disabled }, className]}>
+<div class={['ui-select-wrapper', size, { error, disabled, 'has-value': hasValue }, className]}>
 	<div class="ui-select-container">
 		<select
 			id={selectId}
@@ -48,6 +47,11 @@
 			onblur={() => (isFocused = false)}
 			{...restProps}
 		>
+			{#if placeholder}
+				<option value="" disabled selected={!hasValue}>
+					{placeholder}
+				</option>
+			{/if}
 			{#each options as option (option.value)}
 				<option value={option.value} disabled={option.disabled}>
 					{option.label}
@@ -60,11 +64,6 @@
 		>
 			{label}
 		</label>
-		{#if placeholder}
-			<span class="ui-select-placeholder" class:hidden={!showPlaceholder}>
-				{placeholder}
-			</span>
-		{/if}
 		<span class="ui-select-icon">
 			<ChevronDown size={getIconSize(size)} />
 		</span>
@@ -100,8 +99,8 @@
 		height: var(--input-md-height);
 		padding: 0 36px 0 var(--input-md-padding-x);
 		font-family: inherit;
-		font-size: 16px;
-		line-height: 1.5;
+		font-size: var(--text-base);
+		line-height: var(--leading-normal);
 		color: var(--text-primary);
 		background-color: var(--input-bg);
 		border: var(--border-width-thin) solid var(--input-border);
@@ -112,6 +111,16 @@
 		transition:
 			border-color 0.2s ease,
 			box-shadow 0.2s ease;
+	}
+
+	/* Hide text when label is not floating (label in placeholder position) */
+	.ui-select-wrapper:not(.has-value):not(:focus-within) .ui-select-container select {
+		color: transparent;
+	}
+
+	/* Placeholder color when label is floating but no value selected */
+	.ui-select-wrapper:not(.has-value):focus-within .ui-select-container select {
+		color: var(--text-tertiary);
 	}
 
 	/* Hover state */
@@ -170,28 +179,6 @@
 
 	.ui-select-label.focused {
 		color: var(--color-primary);
-	}
-
-	/* Floating placeholder */
-	.ui-select-placeholder {
-		position: absolute;
-		left: var(--input-md-padding-x);
-		top: 50%;
-		transform: translateY(-50%);
-		font-size: 16px;
-		font-weight: 400;
-		color: var(--text-tertiary);
-		pointer-events: none;
-		transition: opacity 0.2s ease;
-	}
-
-	.ui-select-placeholder.hidden {
-		opacity: 0;
-		pointer-events: none;
-		-webkit-user-select: none;
-		-moz-user-select: none;
-		-ms-user-select: none;
-		user-select: none;
 	}
 
 	/* Dropdown icon */
@@ -260,11 +247,6 @@
 		font-size: 12px;
 	}
 
-	.ui-select-wrapper.sm .ui-select-placeholder {
-		left: var(--input-sm-padding-x);
-		font-size: 14px;
-	}
-
 	.ui-select-wrapper.sm .ui-select-icon {
 		right: 8px;
 	}
@@ -283,11 +265,6 @@
 
 	.ui-select-wrapper.lg .ui-select-label.floating {
 		font-size: 14px;
-	}
-
-	.ui-select-wrapper.lg .ui-select-placeholder {
-		left: var(--input-lg-padding-x);
-		font-size: 18px;
 	}
 
 	.ui-select-wrapper.lg .ui-select-icon {

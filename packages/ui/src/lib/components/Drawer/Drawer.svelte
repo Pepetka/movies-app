@@ -253,7 +253,7 @@
 				type="button"
 				class="ui-drawer-handle-area"
 				tabindex="-1"
-				aria-label="Перетащите вниз, чтобы закрыть"
+				aria-label="Drag down to close"
 				onmousedown={handleMouseDown}
 			>
 				<div class="ui-drawer-handle"></div>
