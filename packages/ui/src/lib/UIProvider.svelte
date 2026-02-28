@@ -2,7 +2,6 @@
 	import { themeStore } from './stores/theme.store.svelte';
 	import type { ToastPosition } from './components/Toast';
 	import { ToastContainer } from './components/Toast';
-	import './styles';
 
 	interface UIProviderProps {
 		toastPosition?: ToastPosition;

@@ -6,6 +6,8 @@
 	import favicon from '$lib/assets/favicon.svg';
 	import { browser } from '$app/environment';
 
+	import '@repo/ui/styles/bundle.css';
+
 	interface IProps {
 		children: Snippet;
 	}
