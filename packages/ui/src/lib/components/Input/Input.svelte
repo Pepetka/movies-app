@@ -293,7 +293,7 @@
 
 	.ui-input-wrapper.sm .ui-input-label {
 		left: var(--input-sm-padding-x);
-		font-size: 16px;
+		font-size: var(--text-base);
 	}
 
 	.ui-input-wrapper.sm .ui-input-label.floating {

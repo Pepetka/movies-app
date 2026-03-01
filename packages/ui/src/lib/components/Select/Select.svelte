@@ -240,7 +240,7 @@
 
 	.ui-select-wrapper.sm .ui-select-label {
 		left: var(--input-sm-padding-x);
-		font-size: 16px;
+		font-size: var(--text-base);
 	}
 
 	.ui-select-wrapper.sm .ui-select-label.floating {

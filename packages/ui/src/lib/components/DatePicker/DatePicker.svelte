@@ -484,7 +484,7 @@
 
 	.ui-datepicker-wrapper.sm .ui-datepicker-label {
 		left: var(--input-sm-padding-x);
-		font-size: 16px;
+		font-size: var(--text-base);
 	}
 
 	.ui-datepicker-wrapper.sm .ui-datepicker-label.floating {
