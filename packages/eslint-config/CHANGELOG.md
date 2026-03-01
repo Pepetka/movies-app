@@ -1,5 +1,13 @@
 # @repo/eslint-config
 
+## 0.2.0
+
+### Minor Changes
+
+- d904192: Added Storybook support and improved configuration
+  - Added eslint-plugin-storybook with recommended rules
+  - Disabled svelte/no-navigation-without-resolve rule
+
 ## 0.1.0
 
 ### Minor Changes
