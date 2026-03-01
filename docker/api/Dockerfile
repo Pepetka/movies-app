@@ -30,7 +30,7 @@ COPY packages/eslint-config ./packages/eslint-config
 
 RUN pnpm run build --filter=api
 
-RUN pnpm deploy --filter=api --prod /app/deploy
+RUN pnpm deploy --filter=api --prod --legacy /app/deploy
 
 # Stage 3: Runner
 FROM node:22-alpine AS runner

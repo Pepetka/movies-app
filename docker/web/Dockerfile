@@ -35,7 +35,7 @@ ENV API_URL=${API_URL}
 
 RUN pnpm run build --filter=@repo/ui && pnpm run build --filter=web
 
-RUN pnpm deploy --filter=web --prod /app/deploy
+RUN pnpm deploy --filter=web --prod --legacy /app/deploy
 
 # Stage 3: Runner
 FROM node:22-alpine AS runner
