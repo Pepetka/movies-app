@@ -5,8 +5,45 @@
 		<link rel="icon" href="%sveltekit.assets%/favicon.svg" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		%sveltekit.head%
+		<script>
+			(function () {
+				'use strict';
+
+				const STORAGE_KEY = 'theme';
+				const MEDIA = '(prefers-color-scheme: dark)';
+				const PERSISTED_MODES = ['system', 'dark', 'light'];
+				const ROOT_QS = '.root';
+
+				const getSystemTheme = () => {
+					return window.matchMedia(MEDIA).matches ? 'dark' : 'light';
+				};
+
+				const getPersistedTheme = () => {
+					try {
+						const stored = localStorage.getItem(STORAGE_KEY);
+						if (PERSISTED_MODES.includes(stored)) {
+							return stored;
+						}
+					} catch (e) {
+						console.error(e);
+					}
+					return null;
+				};
+
+				const applyTheme = (theme) => {
+					const root = document.querySelector(ROOT_QS) ?? document.documentElement;
+					root.dataset.theme = theme;
+					root.style.colorScheme = theme;
+				};
+
+				const persisted = getPersistedTheme();
+				const theme = persisted === 'system' || !persisted ? getSystemTheme() : persisted;
+
+				applyTheme(theme);
+			})();
+		</script>
 	</head>
-	<body data-sveltekit-preload-data="hover">
+	<body data-sveltekit-preload-data="hover" class="root">
 		<div style="display: contents">%sveltekit.body%</div>
 	</body>
 </html>
