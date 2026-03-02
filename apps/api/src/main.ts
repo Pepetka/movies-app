@@ -68,7 +68,12 @@ async function bootstrap() {
   if (env !== Environment.Production) {
     const config = new DocumentBuilder()
       .setTitle('Movies App API')
-      .setDescription('REST API for Movies application')
+      .setDescription(
+        'REST API for Movies application\n\n' +
+          '**Links:**\n' +
+          '- [OpenAPI JSON](/api/docs/json)\n' +
+          '- [OpenAPI YAML](/api/docs/yaml)',
+      )
       .addBearerAuth(
         {
           type: 'http',
@@ -83,6 +88,7 @@ async function bootstrap() {
     const documentFactory = () => SwaggerModule.createDocument(app, config);
     SwaggerModule.setup('api/docs', app, documentFactory, {
       jsonDocumentUrl: 'api/docs/json',
+      yamlDocumentUrl: 'api/docs/yaml',
       swaggerOptions: {
         persistAuthorization: true,
       },

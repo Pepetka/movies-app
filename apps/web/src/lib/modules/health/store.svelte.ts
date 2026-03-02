@@ -1,7 +1,8 @@
-import type { HealthStatus, HealthCheckResult } from '$lib/types/health';
-import { healthConfig } from '$lib/config/health.config';
-import { checkHealth } from '$lib/api/health';
 import { logger } from '$lib/utils/logger';
+
+import type { HealthCheckResult, HealthStatus } from './types';
+import { healthConfig } from './config';
+import { checkHealth } from './api';
 
 class HealthStore {
 	status = $state<HealthStatus>('loading');
@@ -203,10 +204,8 @@ class HealthStore {
 	destroy(): void {
 		this.log('debug', 'Starting HealthStore cleanup');
 
-		// 1. Остановить polling
 		this._clearScheduledCheck();
 
-		// 2. Отменить текущий запрос
 		if (this._abortController) {
 			try {
 				this._abortController.abort();
@@ -216,7 +215,6 @@ class HealthStore {
 			this._abortController = null;
 		}
 
-		// 3. Удалить обработчик видимости
 		if (this._visibilityHandler && typeof document !== 'undefined') {
 			try {
 				document.removeEventListener('visibilitychange', this._visibilityHandler);
@@ -226,7 +224,6 @@ class HealthStore {
 			this._visibilityHandler = null;
 		}
 
-		// 4. Сбросить состояние
 		this._consecutiveFailures = 0;
 		this._currentInterval = healthConfig.defaultPollingInterval;
 

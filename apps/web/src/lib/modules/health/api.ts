@@ -1,16 +1,14 @@
-import type { HealthCheckResponse, HealthCheckResult } from '$lib/types/health';
+import { healthControllerHealthV1 } from '$lib/api/generated/api';
+import { HttpError, NetworkError, RetryError } from '$lib/api';
 import { logger } from '$lib/utils/logger';
 
-import { apiFetch } from './client';
+import type { HealthCheckResult } from './types';
 
 export async function checkHealth(): Promise<HealthCheckResult> {
 	const startTime = Date.now();
 
 	try {
-		const response = await apiFetch<HealthCheckResponse>('/v1/health', {
-			timeout: 10000,
-			retries: 3
-		});
+		const response = await healthControllerHealthV1();
 
 		const latency = Date.now() - startTime;
 
@@ -46,7 +44,17 @@ export async function checkHealth(): Promise<HealthCheckResult> {
 		throw new Error('Invalid health response');
 	} catch (error) {
 		const latency = Date.now() - startTime;
-		const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+		let errorMessage = 'Unknown error';
+
+		if (error instanceof HttpError) {
+			errorMessage = `HTTP ${error.status}: ${error.statusText}`;
+		} else if (error instanceof NetworkError) {
+			errorMessage = 'Network error';
+		} else if (error instanceof RetryError) {
+			errorMessage = `Request failed after ${error.attempts} attempts`;
+		} else if (error instanceof Error) {
+			errorMessage = error.message;
+		}
 
 		logger.error('HealthCheck', `Health check failed: ${errorMessage}`, { error });
 

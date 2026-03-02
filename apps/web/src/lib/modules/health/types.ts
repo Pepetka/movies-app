@@ -7,13 +7,6 @@ export interface HealthCheckState {
 	error?: string;
 }
 
-export interface HealthCheckResponse {
-	status: 'ok' | 'degraded';
-	timestamp: number;
-	database: 'connected' | 'disconnected';
-	error?: string;
-}
-
 export type HealthCheckResult =
 	| {
 			type: 'success';
@@ -42,10 +35,3 @@ export type HealthCheckResult =
 			database: 'disconnected';
 			error: string;
 	  };
-
-export interface FetchOptions {
-	timeout?: number;
-	retries?: number;
-	retryDelay?: number;
-	signal?: AbortSignal;
-}

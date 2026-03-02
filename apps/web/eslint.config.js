@@ -4,4 +4,10 @@ import { fileURLToPath } from 'node:url';
 
 const gitignorePath = fileURLToPath(new URL('./.gitignore', import.meta.url));
 
-export default [includeIgnoreFile(gitignorePath), ...svelteConfig];
+export default [
+	includeIgnoreFile(gitignorePath),
+	{
+		ignores: ['src/lib/api/generated/**']
+	},
+	...svelteConfig
+];
