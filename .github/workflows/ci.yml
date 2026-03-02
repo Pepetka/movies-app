@@ -224,7 +224,7 @@ jobs:
           KINOPOISK_BASE_URL: https://kinopoiskapi.com
 
       - name: Upload coverage
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: coverage
           path: apps/api/coverage
