@@ -1,7 +1,8 @@
-import { logger } from '$lib/utils/logger';
-
 import type { QueryOptions, QueryResult, QueryState } from './types';
 import { queryRegistry } from './registry.svelte';
+
+const toError = (e: unknown): Error => (e instanceof Error ? e : new Error(String(e)));
+const isAbortError = (e: unknown): boolean => e instanceof Error && e.name === 'AbortError';
 
 export const createQuery = <T>(options: QueryOptions<T>): QueryResult<T> => {
 	const { key, fetcher, tags = [], enabled = true, debug = false } = options;
@@ -9,50 +10,46 @@ export const createQuery = <T>(options: QueryOptions<T>): QueryResult<T> => {
 	const state = $state<QueryState<T>>({
 		data: null,
 		error: null,
-		isFetching: false,
-		isError: false
+		isFetching: false
 	});
 
-	const log = (message: string, meta?: Record<string, unknown>): void => {
-		if (debug) {
-			logger.debug('Query', message, { key, ...meta });
-		}
-	};
+	let controller: AbortController | null = null;
 
 	const refetch = async (): Promise<void> => {
-		log('Fetch started');
+		controller?.abort();
+		controller = new AbortController();
+
 		state.isFetching = true;
-		state.isError = false;
 		state.error = null;
 
 		try {
-			const data = await fetcher();
+			const data = await fetcher(controller.signal);
 			state.data = data;
-			log('Fetch success');
 		} catch (e) {
-			state.isError = true;
-			state.error = e instanceof Error ? e : new Error(String(e));
-			log('Fetch error', { error: state.error.message });
+			if (isAbortError(e)) return;
+			state.error = toError(e);
 		} finally {
 			state.isFetching = false;
 		}
 	};
 
 	const reset = (): void => {
-		log('Reset');
+		controller?.abort();
 		state.data = null;
 		state.error = null;
 		state.isFetching = false;
-		state.isError = false;
 	};
 
-	const unregister = queryRegistry.register(key, tags, { refetch, reset });
+	const unregister = queryRegistry.register(key, tags, { refetch, reset }, debug);
 
 	$effect(() => {
 		if (enabled) {
 			void refetch();
 		}
-		return unregister;
+		return () => {
+			controller?.abort();
+			unregister();
+		};
 	});
 
 	return {
@@ -66,7 +63,7 @@ export const createQuery = <T>(options: QueryOptions<T>): QueryResult<T> => {
 			return state.isFetching;
 		},
 		get isError() {
-			return state.isError;
+			return state.error !== null;
 		},
 		refetch,
 		reset

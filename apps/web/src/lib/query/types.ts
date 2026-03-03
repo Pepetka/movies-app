@@ -2,12 +2,11 @@ export interface QueryState<T> {
 	data: T | null;
 	error: Error | null;
 	isFetching: boolean;
-	isError: boolean;
 }
 
 export interface QueryOptions<T> {
 	key: unknown[];
-	fetcher: () => Promise<T>;
+	fetcher: (signal: AbortSignal) => Promise<T>;
 	tags?: string[];
 	enabled?: boolean;
 	debug?: boolean;
@@ -19,6 +18,7 @@ export interface QueryActions {
 }
 
 export interface QueryResult<T> extends QueryState<T> {
+	readonly isError: boolean;
 	refetch: () => Promise<void>;
 	reset: () => void;
 }
