@@ -1,4 +1,5 @@
 {
+	"$schema": "https://www.schemastore.org/package.json",
 	"name": "web",
 	"private": true,
 	"version": "0.4.0",
@@ -14,12 +15,15 @@
 		"check": "eslint . && svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"fix": "eslint . --fix && prettier --write .",
 		"check:types": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
-		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch"
+		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
+		"types:generate": "rm -rf src/lib/api/generated && orval",
+		"types:fetch": "curl -s http://localhost:8080/api/docs/json -o openapi.json && pnpm run types:generate"
 	},
 	"dependencies": {
 		"@repo/ui": "workspace:*"
 	},
 	"devDependencies": {
+		"@eslint/compat": "catalog:",
 		"@repo/eslint-config": "workspace:*",
 		"@repo/typescript-config": "workspace:*",
 		"@sveltejs/adapter-node": "^5.5.3",
@@ -27,7 +31,7 @@
 		"@sveltejs/vite-plugin-svelte": "catalog:",
 		"@types/node": "catalog:",
 		"eslint": "catalog:",
-		"@eslint/compat": "catalog:",
+		"orval": "^8.5.1",
 		"prettier": "catalog:",
 		"prettier-plugin-svelte": "catalog:",
 		"svelte": "catalog:",

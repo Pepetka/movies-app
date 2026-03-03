@@ -1,5 +1,8 @@
 docs/plans
 
+# Generated types
+openapi.json
+
 node_modules
 
 # Output

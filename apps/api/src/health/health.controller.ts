@@ -1,4 +1,4 @@
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Controller, Get } from '@nestjs/common';
 
 import { Public } from '$common/decorators';
@@ -16,6 +16,11 @@ export class HealthController {
   @ApiOperation({
     summary: 'Health check',
     description: 'Check API service health status',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Health status',
+    type: HealthResponseDto,
   })
   async health(): Promise<HealthResponseDto> {
     return await this.healthService.health();

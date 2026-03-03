@@ -2,7 +2,7 @@
 	import { StatusIndicator, ThemeToggle, UIProvider } from '@repo/ui';
 	import type { Snippet } from 'svelte';
 
-	import { healthStore } from '$lib/stores/health.svelte';
+	import { healthStore } from '$lib/modules/health';
 	import favicon from '$lib/assets/favicon.svg';
 	import { browser } from '$app/environment';
 
@@ -55,7 +55,7 @@
 
 <style>
 	.layout {
-		min-height: 100vh;
+		min-height: 100dvh;
 		display: flex;
 		flex-direction: column;
 		background-color: var(--bg-primary);
