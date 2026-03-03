@@ -1,7 +1,7 @@
 import { logger } from '$lib/utils/logger';
 
-import { HttpError, AuthError, NetworkError, RetryError } from './errors';
-import type { HttpClientConfig, RequestOptions } from './types';
+import type { HttpClientConfig, HttpMethod, RequestOptions } from './types';
+import { AuthError, HttpError, NetworkError, RetryError } from './errors';
 import { DEFAULT_RETRY_STATUSES } from './types';
 
 /** Default request timeout in milliseconds */
@@ -34,6 +34,7 @@ export class HttpClient {
 	private _accessToken: string | null = null;
 	private _csrfToken: string | null = null;
 	private _refreshPromise: Promise<string> | null = null;
+	private _csrfPromise: Promise<string> | null = null;
 
 	constructor(config: HttpClientConfig) {
 		this._config = {
@@ -80,7 +81,7 @@ export class HttpClient {
 	 */
 	async request<T>(
 		url: string,
-		options?: RequestOptions & { method?: string; body?: unknown }
+		options?: RequestOptions & { method?: HttpMethod; body?: unknown }
 	): Promise<T> {
 		const { method = 'GET', body, signal, headers, params } = options ?? {};
 
@@ -173,7 +174,6 @@ export class HttpClient {
 		const controller = new AbortController();
 		const timeoutId = setTimeout(() => controller.abort(), this._config.timeout);
 
-		// Merge external signal with timeout
 		let abortHandler: (() => void) | undefined;
 		if (signal) {
 			abortHandler = () => controller.abort();
@@ -193,8 +193,6 @@ export class HttpClient {
 				credentials: 'include'
 			});
 
-			clearTimeout(timeoutId);
-
 			if (response.status === 401) {
 				return await this._handle401<T>(url, method, body, headers, signal);
 			}
@@ -206,8 +204,6 @@ export class HttpClient {
 
 			return await this._parseBody<T>(response);
 		} catch (error) {
-			clearTimeout(timeoutId);
-
 			if (error instanceof DOMException && error.name === 'AbortError') {
 				throw new NetworkError('Request aborted');
 			}
@@ -218,6 +214,7 @@ export class HttpClient {
 
 			throw error;
 		} finally {
+			clearTimeout(timeoutId);
 			if (abortHandler && signal) {
 				signal.removeEventListener('abort', abortHandler);
 			}
@@ -231,19 +228,18 @@ export class HttpClient {
 		headers: Record<string, string> | undefined,
 		signal: AbortSignal | undefined
 	): Promise<T> {
-		// Wait for in-flight refresh or start new one
 		if (!this._refreshPromise) {
 			this._refreshPromise = this._doRefresh();
 		}
 
 		try {
 			await this._refreshPromise;
+			this._refreshPromise = null;
 		} catch {
 			this._refreshPromise = null;
 			throw new AuthError();
 		}
 
-		// Retry original request with new token
 		return await this._executeRequest<T>(url, method, body, headers, signal);
 	}
 
@@ -255,7 +251,9 @@ export class HttpClient {
 			throw new AuthError();
 		}
 
-		// Call refresh endpoint
+		this._csrfToken = null;
+		this._csrfPromise = null;
+
 		const response = await fetch(`${this._config.baseURL}${this._config.auth.refreshEndpoint}`, {
 			method: 'POST',
 			headers: {
@@ -265,7 +263,6 @@ export class HttpClient {
 		});
 
 		if (!response.ok) {
-			this._csrfToken = null;
 			throw new AuthError();
 		}
 
@@ -283,6 +280,19 @@ export class HttpClient {
 			return this._csrfToken;
 		}
 
+		if (!this._csrfPromise) {
+			this._csrfPromise = this._fetchCsrfToken();
+		}
+
+		try {
+			return await this._csrfPromise;
+		} catch (error) {
+			this._csrfPromise = null;
+			throw error;
+		}
+	}
+
+	private async _fetchCsrfToken(): Promise<string> {
 		const response = await fetch(`${this._config.baseURL}${this._config.auth.csrfEndpoint}`, {
 			credentials: 'include'
 		});

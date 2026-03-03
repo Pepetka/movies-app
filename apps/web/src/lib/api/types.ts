@@ -4,6 +4,9 @@ export interface RequestOptions {
 	params?: Record<string, unknown>;
 }
 
+export const HTTP_METHODS = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'] as const;
+export type HttpMethod = (typeof HTTP_METHODS)[number];
+
 export interface HttpClientConfig {
 	baseURL: string;
 	timeout?: number;
