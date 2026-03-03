@@ -26,7 +26,7 @@
 		"@eslint/compat": "catalog:",
 		"@repo/eslint-config": "workspace:*",
 		"@repo/typescript-config": "workspace:*",
-		"@sveltejs/adapter-node": "^5.5.3",
+		"@sveltejs/adapter-node": "^5.5.4",
 		"@sveltejs/kit": "catalog:",
 		"@sveltejs/vite-plugin-svelte": "catalog:",
 		"@types/node": "catalog:",
