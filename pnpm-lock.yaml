@@ -9,6 +9,15 @@ catalogs:
     '@eslint/compat':
       specifier: ^1.4.0
       version: 1.4.1
+    '@lucide/svelte':
+      specifier: ^0.575.0
+      version: 0.575.0
+    '@storybook/addon-svelte-csf':
+      specifier: ^5.0.11
+      version: 5.0.11
+    '@storybook/sveltekit':
+      specifier: ^10.2.8
+      version: 10.2.13
     '@sveltejs/kit':
       specifier: ^2.53.4
       version: 2.53.4
@@ -27,6 +36,9 @@ catalogs:
     prettier-plugin-svelte:
       specifier: ^3.5.0
       version: 3.5.0
+    storybook:
+      specifier: ^10.2.8
+      version: 10.2.13
     svelte:
       specifier: ^5.53.6
       version: 5.53.6
@@ -39,6 +51,9 @@ catalogs:
     vite:
       specifier: ^7.2.6
       version: 7.3.1
+    zod:
+      specifier: ^4.3.6
+      version: 4.3.6
 
 importers:
 
@@ -211,13 +226,13 @@ importers:
   apps/web:
     dependencies:
       '@lucide/svelte':
-        specifier: ^0.575.0
+        specifier: 'catalog:'
         version: 0.575.0(svelte@5.53.6)
       '@repo/ui':
         specifier: workspace:*
         version: link:../../packages/ui
       zod:
-        specifier: ^4.3.6
+        specifier: 'catalog:'
         version: 4.3.6
     devDependencies:
       '@eslint/compat':
@@ -308,14 +323,13 @@ importers:
   packages/typescript-config: {}
 
   packages/ui:
-    dependencies:
-      '@lucide/svelte':
-        specifier: ^0.575.0
-        version: 0.575.0(svelte@5.53.6)
     devDependencies:
       '@eslint/compat':
         specifier: 'catalog:'
         version: 1.4.1(eslint@10.0.2(jiti@2.6.1))
+      '@lucide/svelte':
+        specifier: 'catalog:'
+        version: 0.575.0(svelte@5.53.6)
       '@repo/eslint-config':
         specifier: workspace:*
         version: link:../eslint-config
@@ -323,10 +337,10 @@ importers:
         specifier: workspace:*
         version: link:../typescript-config
       '@storybook/addon-svelte-csf':
-        specifier: ^5.0.11
+        specifier: 'catalog:'
         version: 5.0.11(@storybook/svelte@10.2.13(storybook@10.2.13(@testing-library/dom@10.4.1)(prettier@3.8.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(svelte@5.53.6))(@sveltejs/vite-plugin-svelte@6.2.4(svelte@5.53.6)(vite@7.3.1(@types/node@25.3.3)(jiti@2.6.1)(terser@5.46.0)(yaml@2.8.2)))(storybook@10.2.13(@testing-library/dom@10.4.1)(prettier@3.8.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(svelte@5.53.6)(vite@7.3.1(@types/node@25.3.3)(jiti@2.6.1)(terser@5.46.0)(yaml@2.8.2))
       '@storybook/sveltekit':
-        specifier: ^10.2.8
+        specifier: 'catalog:'
         version: 10.2.13(@sveltejs/vite-plugin-svelte@6.2.4(svelte@5.53.6)(vite@7.3.1(@types/node@25.3.3)(jiti@2.6.1)(terser@5.46.0)(yaml@2.8.2)))(esbuild@0.27.3)(rollup@4.59.0)(storybook@10.2.13(@testing-library/dom@10.4.1)(prettier@3.8.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(svelte@5.53.6)(vite@7.3.1(@types/node@25.3.3)(jiti@2.6.1)(terser@5.46.0)(yaml@2.8.2))(webpack@5.104.1(esbuild@0.27.3))
       '@sveltejs/kit':
         specifier: 'catalog:'
@@ -353,7 +367,7 @@ importers:
         specifier: ^0.3.18
         version: 0.3.18
       storybook:
-        specifier: ^10.2.8
+        specifier: 'catalog:'
         version: 10.2.13(@testing-library/dom@10.4.1)(prettier@3.8.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       svelte:
         specifier: 'catalog:'
@@ -12028,7 +12042,7 @@ snapshots:
       '@testing-library/user-event': 14.6.1(@testing-library/dom@10.4.1)
       '@vitest/expect': 3.2.4
       '@vitest/spy': 3.2.4
-      esbuild: 0.27.2
+      esbuild: 0.27.3
       open: 10.2.0
       recast: 0.23.11
       semver: 7.7.4
