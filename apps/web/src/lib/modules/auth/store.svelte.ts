@@ -136,6 +136,7 @@ class AuthStore {
 
 	destroy(): void {
 		this._userQuery?.reset();
+		this._userQuery = null;
 		this._checkAuthPromise = null;
 		this.status = 'loading';
 		this.error = null;

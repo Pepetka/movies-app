@@ -39,7 +39,7 @@
 		}
 	]);
 
-	const currentPath = $derived(page.url.pathname);
+	const activeNavId = $derived(navItems.find((item) => page.url.pathname === item.href)?.id ?? '');
 
 	$effect(() => {
 		if (browser && !authStore.isLoading && authStore.status === 'unauthenticated') {
@@ -58,7 +58,7 @@
 			{@render children()}
 		{/if}
 	</main>
-	<BottomNav items={navItems} value={currentPath} />
+	<BottomNav items={navItems} value={activeNavId} />
 </div>
 
 <style>

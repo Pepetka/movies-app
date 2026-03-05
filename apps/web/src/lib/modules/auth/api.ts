@@ -7,13 +7,13 @@ import {
 import type { AuthLoginDto, AuthRegisterDto, UserResponseDto } from '$lib/api/generated/types';
 import { httpClient } from '$lib/api/client';
 
-export const login = async (data: AuthLoginDto): Promise<void> => {
-	const response = await authControllerLoginV1(data);
+export const login = async (data: AuthLoginDto, signal?: AbortSignal): Promise<void> => {
+	const response = await authControllerLoginV1(data, { signal });
 	httpClient.setAccessToken(response.accessToken);
 };
 
-export const register = async (data: AuthRegisterDto): Promise<void> => {
-	const response = await authControllerRegisterV1(data);
+export const register = async (data: AuthRegisterDto, signal?: AbortSignal): Promise<void> => {
+	const response = await authControllerRegisterV1(data, { signal });
 	httpClient.setAccessToken(response.accessToken);
 };
 
