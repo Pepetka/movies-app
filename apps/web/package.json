@@ -16,8 +16,8 @@
 		"fix": "eslint . --fix && prettier --write .",
 		"check:types": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
-		"types:generate": "rm -rf src/lib/api/generated && orval",
-		"types:fetch": "curl -s http://localhost:8080/api/docs/json -o openapi.json && pnpm run types:generate"
+		"types:generate": "orval",
+		"types:fetch": "../../scripts/generate-types.sh"
 	},
 	"dependencies": {
 		"@lucide/svelte": "catalog:",
