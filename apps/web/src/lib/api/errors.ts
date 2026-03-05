@@ -1,3 +1,8 @@
+interface ErrorBody {
+	message?: string | string[];
+	error?: string;
+}
+
 export class HttpError extends Error {
 	constructor(
 		public status: number,
@@ -6,6 +11,21 @@ export class HttpError extends Error {
 	) {
 		super(`HTTP ${status}: ${statusText}`);
 		this.name = 'HttpError';
+	}
+
+	getErrorMessage(): string {
+		const body = this.body as ErrorBody | undefined;
+		if (!body) return this.message;
+
+		if (Array.isArray(body.message) && body.message.length > 0) {
+			return body.message.join(', ');
+		}
+
+		if (typeof body.message === 'string') {
+			return body.message;
+		}
+
+		return this.message;
 	}
 }
 

@@ -5,7 +5,7 @@
 	"version": "0.4.0",
 	"type": "module",
 	"scripts": {
-		"dev": "vite dev",
+		"dev": "vite dev --host",
 		"build": "vite build",
 		"preview": "vite preview",
 		"prepare": "svelte-kit sync || echo ''",
@@ -20,7 +20,9 @@
 		"types:fetch": "curl -s http://localhost:8080/api/docs/json -o openapi.json && pnpm run types:generate"
 	},
 	"dependencies": {
-		"@repo/ui": "workspace:*"
+		"@lucide/svelte": "^0.575.0",
+		"@repo/ui": "workspace:*",
+		"zod": "^4.3.6"
 	},
 	"devDependencies": {
 		"@eslint/compat": "catalog:",

@@ -29,6 +29,27 @@ cd apps/api && pnpm run db:generate / db:migrate / db:seed
 - API base: `/api/v1/...`
 - Swagger: `/api/docs` (non-prod)
 
+## ast-index Skill
+
+Использовать `/ast-index` для быстрого поиска по AST в TypeScript/JavaScript коде:
+
+**Когда использовать:**
+- Найти класс, интерфейс, функцию, переменную
+- Найти использования (usages) символа
+- Найти реализации интерфейса/класса
+- Иерархия классов, наследование
+- Найти callers (кто вызывает функцию)
+- Зависимости модулей, неиспользуемые зависимости
+- Структура проекта, conventions
+- Найти React/Svelte компонент
+
+**Примеры запросов:**
+- "find class UserService"
+- "find usages of getUserById"
+- "find implementations of AuthGuard"
+- "who calls createGroup"
+- "find TypeScript interface User"
+
 ## Documentation Map
 
 | Topic | File |

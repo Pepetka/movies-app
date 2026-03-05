@@ -11,4 +11,6 @@ export interface IProps extends Omit<HTMLAttributes<HTMLElement>, 'size'> {
 	fullWidth?: boolean;
 	class?: string;
 	children?: Snippet;
+	header?: Snippet;
+	footer?: Snippet;
 }

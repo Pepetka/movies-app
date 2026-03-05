@@ -7,6 +7,9 @@ import { DEFAULT_RETRY_STATUSES } from './types';
 /** Default request timeout in milliseconds */
 const DEFAULT_TIMEOUT_MS = 30000;
 
+/** Paths that should not trigger token refresh on 401 */
+const SKIP_REFRESH_PATHS = ['/api/v1/auth/login', '/api/v1/auth/register'];
+
 /** Default number of retry attempts */
 const DEFAULT_RETRY_COUNT = 3;
 
@@ -180,7 +183,7 @@ export class HttpClient {
 			signal.addEventListener('abort', abortHandler);
 		}
 
-		const requestHeaders = this._buildHeaders(headers);
+		const requestHeaders = this._buildHeaders(headers, !!body);
 
 		try {
 			this._log('[%s] %s %s', attempt, method, url);
@@ -194,6 +197,10 @@ export class HttpClient {
 			});
 
 			if (response.status === 401) {
+				if (SKIP_REFRESH_PATHS.some((path) => url.includes(path))) {
+					const errorBody = await this._parseBody(response);
+					throw new HttpError(response.status, response.statusText, errorBody);
+				}
 				return await this._handle401<T>(url, method, body, headers, signal);
 			}
 
@@ -326,11 +333,17 @@ export class HttpClient {
 		return searchParams.toString() ? `${fullUrl}${separator}${searchParams}` : fullUrl;
 	}
 
-	private _buildHeaders(customHeaders?: Record<string, string>): Record<string, string> {
+	private _buildHeaders(
+		customHeaders?: Record<string, string>,
+		hasBody: boolean = false
+	): Record<string, string> {
 		const headers: Record<string, string> = {
-			'Content-Type': 'application/json',
 			...customHeaders
 		};
+
+		if (hasBody) {
+			headers['Content-Type'] = 'application/json';
+		}
 
 		if (this._accessToken) {
 			headers['Authorization'] = `Bearer ${this._accessToken}`;
