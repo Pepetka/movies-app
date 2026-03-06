@@ -14,7 +14,7 @@
 		tags: ['autodocs'],
 		argTypes: {
 			variant: { control: 'select', options: ['elevated', 'outlined', 'filled'] },
-			size: { control: 'select', options: ['sm', 'md', 'lg'] },
+			size: { control: 'select', options: ['sm', 'md', 'lg', 'responsive'] },
 			interactive: { control: 'boolean' },
 			fullWidth: { control: 'boolean' }
 		}
@@ -46,6 +46,45 @@
 			<Card variant="elevated" size="lg">
 				<h4 style="margin: 0 0 var(--space-3);">Large</h4>
 				<p style="margin: 0; color: var(--text-secondary);">Spacious padding</p>
+			</Card>
+		</div>
+	{/snippet}
+</Story>
+
+<Story name="Responsive Size">
+	{#snippet template()}
+		<div style="display: flex; flex-direction: column; gap: var(--space-4); max-width: 400px;">
+			<Card variant="outlined" size="responsive">
+				{#snippet header()}
+					<div style="text-align: center;">
+						<h4 style="margin: 0 0 var(--space-1);">Responsive Card</h4>
+						<p style="margin: 0; font-size: var(--text-sm); color: var(--text-tertiary);">
+							Измените ширину окна для просмотра
+						</p>
+					</div>
+				{/snippet}
+
+				<p style="margin: 0; color: var(--text-secondary);">
+					<code>size="responsive"</code> — sm на экранах &lt; 480px, md на больших экранах. Идеально для
+					auth-форм.
+				</p>
+
+				{#snippet footer()}
+					<p style="margin: 0; font-size: var(--text-sm); color: var(--text-tertiary);">
+						Footer адаптируется вместе с карточкой
+					</p>
+				{/snippet}
+			</Card>
+
+			<Card variant="elevated" size="responsive">
+				<div style="display: flex; flex-direction: column; gap: var(--space-2);">
+					<p style="margin: 0; color: var(--text-secondary);">
+						Простая карточка без секций — только body.
+					</p>
+					<p style="margin: 0; font-size: var(--text-sm); color: var(--text-tertiary);">
+						Padding автоматически уменьшается на мобильных устройствах.
+					</p>
+				</div>
 			</Card>
 		</div>
 	{/snippet}

@@ -2,7 +2,7 @@ import type { HTMLAttributes } from 'svelte/elements';
 import type { Snippet } from 'svelte';
 
 export type CardVariant = 'elevated' | 'outlined' | 'filled';
-export type CardSize = 'sm' | 'md' | 'lg';
+export type CardSize = 'sm' | 'md' | 'lg' | 'responsive';
 
 export interface IProps extends Omit<HTMLAttributes<HTMLElement>, 'size'> {
 	variant?: CardVariant;

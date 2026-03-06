@@ -104,6 +104,24 @@
 		padding: var(--space-6) var(--space-8);
 	}
 
+	/* Responsive - sm on mobile, md on desktop */
+	.ui-card.responsive .ui-card-header,
+	.ui-card.responsive .ui-card-body,
+	.ui-card.responsive .ui-card-footer {
+		padding: var(--space-3) var(--space-4);
+	}
+
+	@media (min-width: 480px) {
+		.ui-card.responsive .ui-card-header,
+		.ui-card.responsive .ui-card-footer {
+			padding: var(--space-4) var(--space-6);
+		}
+
+		.ui-card.responsive .ui-card-body {
+			padding: var(--space-5) var(--space-6);
+		}
+	}
+
 	/* Sections */
 	.ui-card-header {
 		text-align: center;
