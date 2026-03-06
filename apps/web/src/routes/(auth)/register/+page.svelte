@@ -2,7 +2,6 @@
 	import { Eye, EyeOff, Film, Mail, User, Users } from '@lucide/svelte';
 	import { Button, Card, Input } from '@repo/ui';
 	import { fade } from 'svelte/transition';
-	import { onMount } from 'svelte';
 
 	import {
 		authStore,
@@ -31,8 +30,10 @@
 	const fieldValidator = createFormFieldValidator(validateRegisterForm);
 	const passwordChecks = $derived(checkPasswordStrength(form.password));
 
-	onMount(() => {
-		return () => fieldValidator.cancel();
+	$effect(() => {
+		return () => {
+			fieldValidator.cancel();
+		};
 	});
 
 	const handleSubmit = async (e: Event) => {

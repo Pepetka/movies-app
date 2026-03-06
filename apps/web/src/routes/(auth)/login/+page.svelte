@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { Eye, EyeOff, Film, Mail } from '@lucide/svelte';
 	import { Button, Card, Input } from '@repo/ui';
-	import { onMount } from 'svelte';
 
 	import {
 		authStore,
@@ -25,8 +24,10 @@
 
 	const fieldValidator = createFormFieldValidator(validateLoginForm);
 
-	onMount(() => {
-		return () => fieldValidator.cancel();
+	$effect(() => {
+		return () => {
+			fieldValidator.cancel();
+		};
 	});
 
 	const handleSubmit = async (e: Event) => {

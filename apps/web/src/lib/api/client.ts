@@ -7,8 +7,6 @@ import { DEFAULT_RETRY_STATUSES } from './types';
 /** Default request timeout in milliseconds */
 const DEFAULT_TIMEOUT_MS = 30000;
 
-/** Default paths that should not trigger token refresh on 401 */
-
 /** Default number of retry attempts */
 const DEFAULT_RETRY_COUNT = 3;
 

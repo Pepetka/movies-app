@@ -125,7 +125,7 @@ class AuthStore {
 		try {
 			await apiLogout();
 		} catch (error) {
-			this.log('error', 'Logout failed', { error });
+			this._log('error', 'Logout failed', { error });
 			toast.error(this._extractErrorMessage(error, 'Ошибка выхода'));
 			throw error;
 		} finally {
@@ -159,7 +159,7 @@ class AuthStore {
 		return fallback;
 	}
 
-	private log(
+	private _log(
 		level: 'debug' | 'info' | 'warn' | 'error',
 		message: string,
 		meta?: Record<string, unknown>
