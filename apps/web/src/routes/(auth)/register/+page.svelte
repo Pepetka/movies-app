@@ -12,6 +12,7 @@
 		createFormFieldValidator
 	} from '$lib/modules/auth';
 	import { goto } from '$app/navigation';
+	import { resolve } from '$app/paths';
 	import { ROUTES } from '$lib/utils';
 
 	import '$lib/styles/auth.css';
@@ -45,7 +46,7 @@
 			fieldValidator.setErrors(result.errors);
 
 			if (result.isValid) {
-				await goto(ROUTES.GROUPS, { replaceState: true });
+				await goto(resolve(ROUTES.GROUPS), { replaceState: true });
 			}
 		} finally {
 			isLoading = false;
@@ -103,6 +104,7 @@
 					error={fieldValidator.errors.email}
 					placeholder="anaconda@mail.ru"
 					Icon={Mail}
+					autocomplete="email"
 					disabled={isLoading}
 					onChange={() => fieldValidator.handleFieldChange(form, 'email')}
 				/>
@@ -117,6 +119,7 @@
 						Icon={showPassword ? EyeOff : Eye}
 						iconAction={() => (showPassword = !showPassword)}
 						iconLabel={showPassword ? 'Скрыть пароль' : 'Показать пароль'}
+						autocomplete="new-password"
 						disabled={isLoading}
 						onChange={() => fieldValidator.handleFieldChange(form, 'password')}
 					/>
@@ -141,6 +144,7 @@
 					Icon={showConfirmPassword ? EyeOff : Eye}
 					iconAction={() => (showConfirmPassword = !showConfirmPassword)}
 					iconLabel={showConfirmPassword ? 'Скрыть пароль' : 'Показать пароль'}
+					autocomplete="new-password"
 					disabled={isLoading}
 					onChange={() => fieldValidator.handleFieldChange(form, 'confirmPassword')}
 				/>

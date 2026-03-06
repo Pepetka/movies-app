@@ -3,9 +3,7 @@
 	import { BottomNav, Spinner } from '@repo/ui';
 	import type { Snippet } from 'svelte';
 
-	import { authStore } from '$lib/modules/auth';
-	import { browser } from '$app/environment';
-	import { goto } from '$app/navigation';
+	import { authStore, handleAuthRedirect } from '$lib/modules/auth';
 	import { ROUTES } from '$lib/utils';
 	import { page } from '$app/state';
 
@@ -42,20 +40,22 @@
 	const activeNavId = $derived(navItems.find((item) => page.url.pathname === item.href)?.id ?? '');
 
 	$effect(() => {
-		if (browser && !authStore.isLoading && authStore.status === 'unauthenticated') {
-			void goto(ROUTES.LOGIN, { replaceState: true });
-		}
+		handleAuthRedirect();
 	});
 </script>
 
 <div class="app-layout">
 	<main>
-		{#if authStore.isLoading}
+		{#if !authStore.isInitialized || authStore.isLoading}
 			<div class="loading">
 				<Spinner size="lg" />
 			</div>
 		{:else if authStore.isAuthenticated}
 			{@render children()}
+		{:else}
+			<div class="loading">
+				<Spinner size="lg" />
+			</div>
 		{/if}
 	</main>
 	<BottomNav items={navItems} value={activeNavId} />

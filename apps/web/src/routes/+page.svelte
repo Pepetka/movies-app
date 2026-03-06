@@ -4,11 +4,12 @@
 	import { authStore } from '$lib/modules/auth';
 	import { browser } from '$app/environment';
 	import { goto } from '$app/navigation';
+	import { resolve } from '$app/paths';
 	import { ROUTES } from '$lib/utils';
 
 	$effect(() => {
 		if (browser && !authStore.isLoading && authStore.isAuthenticated) {
-			void goto(ROUTES.GROUPS, { replaceState: true });
+			void goto(resolve(ROUTES.GROUPS), { replaceState: true });
 		}
 	});
 </script>

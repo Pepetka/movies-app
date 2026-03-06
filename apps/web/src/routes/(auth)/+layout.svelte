@@ -1,10 +1,8 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
+	import { Spinner } from '@repo/ui';
 
-	import { authStore } from '$lib/modules/auth';
-	import { browser } from '$app/environment';
-	import { goto } from '$app/navigation';
-	import { ROUTES } from '$lib/utils';
+	import { authStore, handleAuthRedirect } from '$lib/modules/auth';
 
 	interface IProps {
 		children: Snippet;
@@ -13,14 +11,18 @@
 	const { children }: IProps = $props();
 
 	$effect(() => {
-		if (browser && !authStore.isLoading && authStore.isAuthenticated) {
-			void goto(ROUTES.GROUPS, { replaceState: true });
-		}
+		handleAuthRedirect();
 	});
 </script>
 
 <div class="auth-layout">
-	{@render children()}
+	{#if !authStore.isInitialized}
+		<div class="loading">
+			<Spinner size="lg" />
+		</div>
+	{:else if !authStore.isAuthenticated}
+		{@render children()}
+	{/if}
 </div>
 
 <style>
@@ -30,5 +32,12 @@
 		align-items: center;
 		justify-content: center;
 		padding: var(--space-4);
+	}
+
+	.loading {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		min-height: 200px;
 	}
 </style>

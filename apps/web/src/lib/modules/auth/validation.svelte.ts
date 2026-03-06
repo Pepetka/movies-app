@@ -100,6 +100,11 @@ export const createFormFieldValidator = <T extends Record<string, unknown>>(
 		if (!touched[field]) {
 			touched = { ...touched, [field]: true };
 		}
+		if (errors[field]) {
+			const currentErrors = { ...errors };
+			delete currentErrors[field];
+			errors = currentErrors;
+		}
 		scheduleValidate(form, field);
 	};
 

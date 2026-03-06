@@ -1,8 +1,8 @@
 import { toast } from '@repo/ui';
 
 import type { AuthLoginDto, AuthRegisterDto, UserResponseDto } from '$lib/api/generated/types';
+import { HttpError, NetworkError, RetryError } from '$lib/api/errors';
 import { createQuery, type QueryResult } from '$lib/query';
-import { HttpError } from '$lib/api/errors';
 import { logger } from '$lib/utils/logger';
 
 import {
@@ -17,6 +17,7 @@ import type { AuthStatus, ValidationResult } from './types';
 class AuthStore {
 	status = $state<AuthStatus>('loading');
 	error = $state<string | null>(null);
+	isInitialized = $state(false);
 
 	private _userQuery: QueryResult<UserResponseDto> | null = null;
 	private _checkAuthPromise: Promise<void> | null = null;
@@ -74,6 +75,7 @@ class AuthStore {
 		const query = this._getQuery();
 		await query.refetch();
 		this._updateStatusFromQuery();
+		this.isInitialized = true;
 	}
 
 	async login(data: unknown): Promise<ValidationResult<AuthLoginDto>> {
@@ -89,7 +91,7 @@ class AuthStore {
 			toast.success('Добро пожаловать!');
 		} catch (error) {
 			this.status = 'unauthenticated';
-			this.error = error instanceof HttpError ? error.getErrorMessage() : 'Ошибка входа';
+			this.error = this._extractErrorMessage(error, 'Ошибка входа');
 			toast.error(this.error);
 			throw error;
 		}
@@ -111,7 +113,7 @@ class AuthStore {
 			toast.success('Регистрация успешна!');
 		} catch (error) {
 			this.status = 'unauthenticated';
-			this.error = error instanceof HttpError ? error.getErrorMessage() : 'Ошибка регистрации';
+			this.error = this._extractErrorMessage(error, 'Ошибка регистрации');
 			toast.error(this.error);
 			throw error;
 		}
@@ -122,11 +124,14 @@ class AuthStore {
 	async logout(): Promise<void> {
 		try {
 			await apiLogout();
+		} catch (error) {
+			this.log('error', 'Logout failed', { error });
+			toast.error(this._extractErrorMessage(error, 'Ошибка выхода'));
+			throw error;
+		} finally {
 			this._userQuery?.reset();
 			this.status = 'unauthenticated';
 			this.error = null;
-		} catch (error) {
-			this.log('error', 'Logout failed', { error });
 		}
 	}
 
@@ -140,6 +145,18 @@ class AuthStore {
 		this._checkAuthPromise = null;
 		this.status = 'loading';
 		this.error = null;
+		this.isInitialized = false;
+	}
+
+	private _extractErrorMessage(error: unknown, fallback: string): string {
+		if (
+			error instanceof HttpError ||
+			error instanceof NetworkError ||
+			error instanceof RetryError
+		) {
+			return error.getErrorMessage();
+		}
+		return fallback;
 	}
 
 	private log(

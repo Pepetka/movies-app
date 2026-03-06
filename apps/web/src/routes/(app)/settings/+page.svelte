@@ -3,11 +3,16 @@
 
 	import { authStore } from '$lib/modules/auth';
 	import { goto } from '$app/navigation';
+	import { resolve } from '$app/paths';
 	import { ROUTES } from '$lib/utils';
 
 	const handleLogout = async () => {
-		await authStore.logout();
-		await goto(ROUTES.HOME, { replaceState: true });
+		try {
+			await authStore.logout();
+		} catch {
+			// already handled in store
+		}
+		await goto(resolve(ROUTES.HOME), { replaceState: true });
 	};
 </script>
 
