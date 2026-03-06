@@ -1,5 +1,12 @@
 # api
 
+## 0.4.1
+
+### Patch Changes
+
+- 3a1af9d: Remove password validator from login DTO
+  - Remove `@IsPassword()` decorator from AuthLoginDto (password validation not needed for login)
+
 ## 0.4.0
 
 ### Minor Changes
