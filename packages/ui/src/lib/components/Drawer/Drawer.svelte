@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { IProps, DrawerPosition } from './Drawer.types.svelte';
+	import { generateId } from '../../utils/id';
 
 	let {
 		open = $bindable(false),
@@ -24,7 +25,7 @@
 	let dragStartY = 0;
 	let drawerHeight = 0;
 
-	const drawerId = crypto.randomUUID();
+	const drawerId = generateId();
 	const headerId = `${drawerId}-header`;
 
 	const defaultSizes: Record<DrawerPosition, string> = {

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { IProps } from './Input.types.svelte';
 	import { getIconSize } from '../../utils/size';
+	import { generateId } from '../../utils/id';
 
 	let {
 		type = 'text',
@@ -18,9 +19,9 @@
 		...restProps
 	}: IProps = $props();
 
-	const inputId = crypto.randomUUID();
-	const errorId = crypto.randomUUID();
-	const helperId = crypto.randomUUID();
+	const inputId = generateId();
+	const errorId = generateId();
+	const helperId = generateId();
 
 	let isFocused = $state(false);
 	let hasValue = $derived((value?.length ?? 0) > 0);
@@ -77,8 +78,8 @@
 		<div id={errorId} class="ui-input-message error">
 			{error}
 		</div>
-	{:else if helper}
-		<div id={helperId} class="ui-input-message">
+	{:else}
+		<div id={helperId} class="ui-input-message" aria-hidden={!helper}>
 			{helper}
 		</div>
 	{/if}
@@ -88,7 +89,6 @@
 	.ui-input-wrapper {
 		display: flex;
 		flex-direction: column;
-		gap: 6px;
 		width: 100%;
 	}
 
@@ -113,8 +113,7 @@
 		outline: none;
 		transition:
 			border-color 0.2s ease,
-			box-shadow 0.2s ease,
-			background-color 5000s ease-in-out 0s;
+			box-shadow 0.2s ease;
 	}
 
 	/* Remove browser autofill styling */
@@ -125,6 +124,12 @@
 		-webkit-text-fill-color: var(--text-primary) !important;
 		-webkit-box-shadow: 0 0 0 1000px var(--input-bg) inset !important;
 		transition: background-color 5000s ease-in-out 0s;
+	}
+
+	.ui-input-container input:-webkit-autofill:disabled {
+		-webkit-text-fill-color: var(--text-tertiary) !important;
+		-webkit-box-shadow: 0 0 0 1000px var(--bg-tertiary) inset !important;
+		transition: none !important;
 	}
 
 	/* Hide placeholder */
@@ -259,17 +264,36 @@
 	.ui-input-message {
 		font-size: 13px;
 		line-height: 1.4;
+		min-height: 18px;
 		color: var(--text-tertiary);
 		padding-left: 4px;
 	}
 
 	.ui-input-message.error {
 		color: var(--color-error);
+		animation: errorFadeIn 0.2s ease-out;
+	}
+
+	@keyframes errorFadeIn {
+		from {
+			opacity: 0;
+			transform: translateY(-4px);
+		}
+		to {
+			opacity: 1;
+			transform: translateY(0);
+		}
 	}
 
 	/* Error state */
 	.ui-input-wrapper.error .ui-input-container input {
 		border-color: var(--color-error);
+	}
+
+	@media (hover: hover) {
+		.ui-input-wrapper.error .ui-input-container input:hover:not(:disabled):not(:focus) {
+			border-color: var(--color-error-hover);
+		}
 	}
 
 	.ui-input-wrapper.error .ui-input-container input:focus {

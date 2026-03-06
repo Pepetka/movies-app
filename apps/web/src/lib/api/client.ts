@@ -46,7 +46,11 @@ export class HttpClient {
 				retryOn: config.retry?.retryOn ?? [...DEFAULT_RETRY_STATUSES]
 			},
 			baseURL: config.baseURL,
-			auth: config.auth
+			auth: {
+				refreshEndpoint: config.auth.refreshEndpoint,
+				csrfEndpoint: config.auth.csrfEndpoint,
+				skipRefreshPaths: config.auth.skipRefreshPaths ?? []
+			}
 		};
 	}
 
@@ -180,7 +184,7 @@ export class HttpClient {
 			signal.addEventListener('abort', abortHandler);
 		}
 
-		const requestHeaders = this._buildHeaders(headers);
+		const requestHeaders = this._buildHeaders(headers, !!body);
 
 		try {
 			this._log('[%s] %s %s', attempt, method, url);
@@ -194,6 +198,11 @@ export class HttpClient {
 			});
 
 			if (response.status === 401) {
+				const skipPaths = this._config.auth.skipRefreshPaths ?? [];
+				if (skipPaths.some((path) => url.includes(path))) {
+					const errorBody = await this._parseBody(response);
+					throw new HttpError(response.status, response.statusText, errorBody);
+				}
 				return await this._handle401<T>(url, method, body, headers, signal);
 			}
 
@@ -254,25 +263,38 @@ export class HttpClient {
 		this._csrfToken = null;
 		this._csrfPromise = null;
 
-		const response = await fetch(`${this._config.baseURL}${this._config.auth.refreshEndpoint}`, {
-			method: 'POST',
-			headers: {
-				'X-CSRF-Token': csrfToken
-			},
-			credentials: 'include'
-		});
+		const controller = new AbortController();
+		const timeoutId = setTimeout(() => controller.abort(), this._config.timeout);
 
-		if (!response.ok) {
-			throw new AuthError();
+		try {
+			const response = await fetch(`${this._config.baseURL}${this._config.auth.refreshEndpoint}`, {
+				method: 'POST',
+				headers: {
+					'X-CSRF-Token': csrfToken
+				},
+				credentials: 'include',
+				signal: controller.signal
+			});
+
+			if (!response.ok) {
+				throw new AuthError();
+			}
+
+			const data = await response.json();
+			if (!data?.accessToken) {
+				throw new AuthError();
+			}
+			this._accessToken = data.accessToken;
+
+			return data.accessToken;
+		} catch (error) {
+			if (error instanceof DOMException && error.name === 'AbortError') {
+				throw new NetworkError('Token refresh timed out');
+			}
+			throw error;
+		} finally {
+			clearTimeout(timeoutId);
 		}
-
-		const data = await response.json();
-		if (!data?.accessToken) {
-			throw new AuthError();
-		}
-		this._accessToken = data.accessToken;
-
-		return data.accessToken;
 	}
 
 	private async _getCsrfToken(): Promise<string> {
@@ -293,21 +315,34 @@ export class HttpClient {
 	}
 
 	private async _fetchCsrfToken(): Promise<string> {
-		const response = await fetch(`${this._config.baseURL}${this._config.auth.csrfEndpoint}`, {
-			credentials: 'include'
-		});
+		const controller = new AbortController();
+		const timeoutId = setTimeout(() => controller.abort(), this._config.timeout);
 
-		if (!response.ok) {
-			throw new NetworkError('Failed to fetch CSRF token');
+		try {
+			const response = await fetch(`${this._config.baseURL}${this._config.auth.csrfEndpoint}`, {
+				credentials: 'include',
+				signal: controller.signal
+			});
+
+			if (!response.ok) {
+				throw new NetworkError('Failed to fetch CSRF token');
+			}
+
+			const data = await response.json();
+			if (!data?.token) {
+				throw new NetworkError('Invalid CSRF token response');
+			}
+
+			this._csrfToken = data.token;
+			return data.token;
+		} catch (error) {
+			if (error instanceof DOMException && error.name === 'AbortError') {
+				throw new NetworkError('CSRF token fetch timed out');
+			}
+			throw error;
+		} finally {
+			clearTimeout(timeoutId);
 		}
-
-		const data = await response.json();
-		if (!data?.token) {
-			throw new NetworkError('Invalid CSRF token response');
-		}
-
-		this._csrfToken = data.token;
-		return data.token;
 	}
 
 	private _buildUrl(url: string, params?: Record<string, unknown>): string {
@@ -326,11 +361,17 @@ export class HttpClient {
 		return searchParams.toString() ? `${fullUrl}${separator}${searchParams}` : fullUrl;
 	}
 
-	private _buildHeaders(customHeaders?: Record<string, string>): Record<string, string> {
+	private _buildHeaders(
+		customHeaders?: Record<string, string>,
+		hasBody: boolean = false
+	): Record<string, string> {
 		const headers: Record<string, string> = {
-			'Content-Type': 'application/json',
 			...customHeaders
 		};
+
+		if (hasBody) {
+			headers['Content-Type'] = 'application/json';
+		}
 
 		if (this._accessToken) {
 			headers['Authorization'] = `Bearer ${this._accessToken}`;
@@ -378,6 +419,7 @@ export const httpClient = new HttpClient({
 	baseURL: __API_URL__,
 	auth: {
 		refreshEndpoint: '/api/v1/auth/refresh',
-		csrfEndpoint: '/api/v1/csrf/token'
+		csrfEndpoint: '/api/v1/csrf/token',
+		skipRefreshPaths: ['/api/v1/auth/login', '/api/v1/auth/register']
 	}
 });

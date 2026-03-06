@@ -29,9 +29,12 @@ async function bootstrap() {
 
   const configService = app.get(ConfigService);
 
-  const frontUrl = configService.getOrThrow<string>('WEB_URL');
+  const webUrls = configService
+    .getOrThrow<string>('WEB_URL')
+    .split(',')
+    .map((url) => url.trim());
   app.enableCors({
-    origin: [frontUrl],
+    origin: webUrls,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
     credentials: true,
     allowedHeaders: ['Content-Type', 'Authorization', 'x-csrf-token'],
@@ -57,7 +60,7 @@ async function bootstrap() {
   await app.register(csrf, {
     cookieOpts: {
       httpOnly: true,
-      secure: configService.get('NODE_ENV') === Environment.Production,
+      secure: env === Environment.Production,
       sameSite: 'strict',
       path: '/',
     },
@@ -66,6 +69,7 @@ async function bootstrap() {
   app.enableShutdownHooks();
 
   if (env !== Environment.Production) {
+    const apiUrl = configService.getOrThrow<string>('API_URL');
     const config = new DocumentBuilder()
       .setTitle('Movies App API')
       .setDescription(
@@ -74,6 +78,7 @@ async function bootstrap() {
           '- [OpenAPI JSON](/api/docs/json)\n' +
           '- [OpenAPI YAML](/api/docs/yaml)',
       )
+      .addServer(apiUrl)
       .addBearerAuth(
         {
           type: 'http',

@@ -9,6 +9,7 @@ export default defineConfig({
 			mode: 'split',
 			target: './src/lib/api/generated/api.ts',
 			schemas: './src/lib/api/generated/types/',
+			clean: true,
 			prettier: true,
 			override: {
 				mutator: {

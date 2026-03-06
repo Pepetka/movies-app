@@ -3,6 +3,7 @@
 
 	import type { IProps } from './Select.types.svelte';
 	import { getIconSize } from '../../utils/size';
+	import { generateId } from '../../utils/id';
 
 	let {
 		label,
@@ -18,9 +19,9 @@
 		...restProps
 	}: IProps = $props();
 
-	const selectId = crypto.randomUUID();
-	const errorId = crypto.randomUUID();
-	const helperId = crypto.randomUUID();
+	const selectId = generateId();
+	const errorId = generateId();
+	const helperId = generateId();
 
 	let isFocused = $state(false);
 	let hasValue = $derived(value !== '' && value !== undefined);
@@ -72,8 +73,8 @@
 		<div id={errorId} class="ui-select-message error">
 			{error}
 		</div>
-	{:else if helper}
-		<div id={helperId} class="ui-select-message">
+	{:else}
+		<div id={helperId} class="ui-select-message" aria-hidden={!helper}>
 			{helper}
 		</div>
 	{/if}
@@ -83,7 +84,6 @@
 	.ui-select-wrapper {
 		display: flex;
 		flex-direction: column;
-		gap: 6px;
 		width: 100%;
 	}
 
@@ -206,17 +206,36 @@
 	.ui-select-message {
 		font-size: 13px;
 		line-height: 1.4;
+		min-height: 18px;
 		color: var(--text-tertiary);
 		padding-left: 4px;
 	}
 
 	.ui-select-message.error {
 		color: var(--color-error);
+		animation: errorFadeIn 0.2s ease-out;
+	}
+
+	@keyframes errorFadeIn {
+		from {
+			opacity: 0;
+			transform: translateY(-4px);
+		}
+		to {
+			opacity: 1;
+			transform: translateY(0);
+		}
 	}
 
 	/* Error state */
 	.ui-select-wrapper.error .ui-select-container select {
 		border-color: var(--color-error);
+	}
+
+	@media (hover: hover) {
+		.ui-select-wrapper.error .ui-select-container select:hover:not(:disabled):not(:focus) {
+			border-color: var(--color-error-hover);
+		}
 	}
 
 	.ui-select-wrapper.error .ui-select-container select:focus {

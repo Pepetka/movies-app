@@ -6,6 +6,7 @@
 	import { DatePickerNavigation, DatePickerGrid } from './components';
 	import type { IProps } from './DatePicker.types.svelte';
 	import { getIconSize } from '../../utils/size';
+	import { generateId } from '../../utils/id';
 
 	let {
 		label,
@@ -29,10 +30,10 @@
 		...restProps
 	}: IProps = $props();
 
-	const inputId = crypto.randomUUID();
-	const errorId = crypto.randomUUID();
-	const helperId = crypto.randomUUID();
-	const popoverId = crypto.randomUUID();
+	const inputId = generateId();
+	const errorId = generateId();
+	const helperId = generateId();
+	const popoverId = generateId();
 
 	let isOpen = $state(false);
 	let isFocused = $state(false);

@@ -1,38 +1,95 @@
 <script lang="ts">
-	import type { IProps } from './Button.types.svelte';
+	import type { ButtonProps, LinkProps } from './Button.types.svelte';
 	import { Skeleton } from '../Skeleton';
 
-	const {
-		variant = 'primary',
-		size = 'md',
-		loading = false,
-		fullWidth = false,
-		type = 'button',
-		disabled,
-		class: className,
-		children,
-		...restProps
-	}: IProps = $props();
+	// Union types require extracting props separately due to TypeScript limitations
+	// with destructuring properties that exist only in one variant
+	const props = $props<ButtonProps | LinkProps>();
+
+	// Common props (exist in both variants)
+	const variant = $derived(props.variant ?? 'primary');
+	const size = $derived(props.size ?? 'md');
+	const loading = $derived(props.loading ?? false);
+	const fullWidth = $derived(props.fullWidth ?? false);
+	const className = $derived(props.class);
+	const children = $derived(props.children);
+
+	// Variant-specific props
+	const href = $derived('href' in props ? props.href : undefined);
+	const disabled = $derived('disabled' in props ? props.disabled : undefined);
+	const type = $derived('type' in props ? (props.type ?? 'button') : undefined);
 
 	const isDisabled = $derived(disabled || loading);
+	const isLink = $derived(!!href);
+
+	const buttonClasses = $derived(
+		['ui-btn', variant, size, fullWidth && 'full-width', loading && 'loading', className]
+			.filter(Boolean)
+			.join(' ')
+	);
+
+	// Extract rest props for each element type to avoid passing invalid attributes
+	const buttonRest = $derived(() => {
+		if (isLink) return {};
+		const {
+			variant: _,
+			size: _s,
+			loading: _l,
+			fullWidth: _f,
+			class: _c,
+			children: _ch,
+			type: _t,
+			disabled: _d,
+			...rest
+		} = props as ButtonProps;
+		return rest;
+	});
+
+	const linkRest = $derived(() => {
+		if (!isLink) return {};
+		const {
+			variant: _,
+			size: _s,
+			loading: _l,
+			fullWidth: _f,
+			class: _c,
+			children: _ch,
+			href: _h,
+			...rest
+		} = props as LinkProps;
+		return rest;
+	});
 </script>
 
-<button
-	{type}
-	class={['ui-btn', variant, size, fullWidth && 'full-width', loading && 'loading', className]}
-	disabled={isDisabled}
-	aria-busy={loading}
-	{...restProps}
->
-	{#if children}
-		<span class="ui-btn-content">
-			{@render children()}
-		</span>
-	{/if}
-	{#if loading}
-		<Skeleton variant="text" full class="ui-btn-skeleton" />
-	{/if}
-</button>
+{#if isLink}
+	<a
+		{href}
+		class={buttonClasses}
+		aria-busy={loading}
+		aria-disabled={isDisabled || undefined}
+		{...linkRest()}
+	>
+		{#if children}
+			<span class="ui-btn-content">
+				{@render children()}
+			</span>
+		{/if}
+		{#if loading}
+			<Skeleton variant="text" full class="ui-btn-skeleton" />
+		{/if}
+	</a>
+{:else}
+	<button {type} class={buttonClasses} disabled={isDisabled} aria-busy={loading} {...buttonRest()}>
+		{#if children}
+			<span class="ui-btn-content">
+				{@render children()}
+			</span>
+		{/if}
+		{#if loading}
+			<Skeleton variant="text" full class="ui-btn-skeleton" />
+		{/if}
+	</button>
+{/if}
 
 <style>
 	.ui-btn {
@@ -49,6 +106,7 @@
 		cursor: pointer;
 		position: relative;
 		overflow: hidden;
+		text-decoration: none;
 		transition:
 			background-color var(--transition-fast) var(--ease-out),
 			border-color var(--transition-fast) var(--ease-out),
@@ -57,9 +115,11 @@
 			transform var(--transition-fast) var(--ease-out);
 	}
 
-	.ui-btn:disabled {
+	.ui-btn:disabled,
+	.ui-btn[aria-disabled='true'] {
 		opacity: 0.5;
 		cursor: not-allowed;
+		pointer-events: none;
 	}
 
 	.ui-btn.full-width {

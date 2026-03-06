@@ -38,7 +38,8 @@
 		"./styles/bundle.css": "./dist/styles/bundle.css"
 	},
 	"peerDependencies": {
-		"svelte": "catalog:"
+		"svelte": "catalog:",
+		"@lucide/svelte": "catalog:"
 	},
 	"devDependencies": {
 		"@repo/eslint-config": "workspace:*",
@@ -56,14 +57,12 @@
 		"svelte-check": "catalog:",
 		"typescript": "catalog:",
 		"vite": "catalog:",
-		"storybook": "^10.2.8",
-		"@storybook/sveltekit": "^10.2.8",
-		"@storybook/addon-svelte-csf": "^5.0.11"
+		"storybook": "catalog:",
+		"@storybook/sveltekit": "catalog:",
+		"@storybook/addon-svelte-csf": "catalog:",
+		"@lucide/svelte": "catalog:"
 	},
 	"keywords": [
 		"svelte"
-	],
-	"dependencies": {
-		"@lucide/svelte": "^0.575.0"
-	}
+	]
 }

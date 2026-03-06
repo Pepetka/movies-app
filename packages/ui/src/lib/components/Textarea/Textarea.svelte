@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { IProps } from './Textarea.types.svelte';
+	import { generateId } from '../../utils/id';
 
 	let {
 		label,
@@ -16,9 +17,9 @@
 		...restProps
 	}: IProps = $props();
 
-	const textareaId = crypto.randomUUID();
-	const errorId = crypto.randomUUID();
-	const helperId = crypto.randomUUID();
+	const textareaId = generateId();
+	const errorId = generateId();
+	const helperId = generateId();
 
 	let isFocused = $state(false);
 	let hasValue = $derived((value?.length ?? 0) > 0);
@@ -104,8 +105,8 @@
 			<div id={errorId} class="ui-textarea-message error">
 				{error}
 			</div>
-		{:else if helper}
-			<div id={helperId} class="ui-textarea-message">
+		{:else}
+			<div id={helperId} class="ui-textarea-message" aria-hidden={!helper}>
 				{helper}
 			</div>
 		{/if}
@@ -121,7 +122,6 @@
 	.ui-textarea-wrapper {
 		display: flex;
 		flex-direction: column;
-		gap: 6px;
 		width: 100%;
 	}
 
@@ -146,8 +146,7 @@
 		outline: none;
 		transition:
 			border-color 0.2s ease,
-			box-shadow 0.2s ease,
-			background-color 5000s ease-in-out 0s;
+			box-shadow 0.2s ease;
 		resize: vertical;
 		overflow-y: auto;
 	}
@@ -212,6 +211,7 @@
 		color: var(--text-tertiary);
 		cursor: not-allowed;
 		resize: none;
+		transition: none;
 	}
 
 	.ui-textarea-container textarea:disabled + .ui-textarea-label {
@@ -271,6 +271,18 @@
 
 	.ui-textarea-message.error {
 		color: var(--color-error);
+		animation: errorFadeIn 0.2s ease-out;
+	}
+
+	@keyframes errorFadeIn {
+		from {
+			opacity: 0;
+			transform: translateY(-4px);
+		}
+		to {
+			opacity: 1;
+			transform: translateY(0);
+		}
 	}
 
 	/* Counter */
@@ -288,6 +300,12 @@
 	/* Error state */
 	.ui-textarea-wrapper.error .ui-textarea-container textarea {
 		border-color: var(--color-error);
+	}
+
+	@media (hover: hover) {
+		.ui-textarea-wrapper.error .ui-textarea-container textarea:hover:not(:disabled):not(:focus) {
+			border-color: var(--color-error-hover);
+		}
 	}
 
 	.ui-textarea-wrapper.error .ui-textarea-container textarea:focus {

@@ -39,6 +39,15 @@ updates:
           - "vite"
           - "prettier-plugin-svelte"
           - "svelte-check"
+          - "@lucide/svelte"
+        update-types:
+          - "minor"
+          - "patch"
+
+      storybook:
+        patterns:
+          - "storybook"
+          - "@storybook/*"
         update-types:
           - "minor"
           - "patch"
@@ -63,8 +72,13 @@ updates:
           - "jest*"
           - "ts-jest"
           - "supertest"
-          - "vitest"
-          - "@testing-library/*"
+        update-types:
+          - "minor"
+          - "patch"
+
+      validation:
+        patterns:
+          - "zod"
         update-types:
           - "minor"
           - "patch"

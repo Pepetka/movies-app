@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { IProps } from './Switch.types.svelte';
+	import { generateId } from '../../utils/id';
 
 	let {
 		label,
@@ -12,9 +13,9 @@
 		...restProps
 	}: IProps = $props();
 
-	const switchId = crypto.randomUUID();
-	const labelId = crypto.randomUUID();
-	const helperId = crypto.randomUUID();
+	const switchId = generateId();
+	const labelId = generateId();
+	const helperId = generateId();
 
 	const toggle = () => {
 		if (disabled) return;

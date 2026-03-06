@@ -16,27 +16,31 @@ class HealthStore {
 	private _consecutiveFailures: number = 0;
 	private _isTabVisible: boolean = $state(true);
 	private _visibilityHandler: (() => void) | null = null;
+	private _listenerAdded: boolean = false;
 
 	constructor() {
-		if (typeof window !== 'undefined' && typeof document !== 'undefined') {
-			this._visibilityHandler = () => {
-				this._isTabVisible = !document.hidden;
-
-				if (this._isTabVisible && !this._intervalId) {
-					void this._executeHealthCheck();
-					this._scheduleNextCheck();
-				} else if (!this._isTabVisible && this._intervalId) {
-					this._clearScheduledCheck();
-				}
-			};
-
-			document.addEventListener('visibilitychange', this._visibilityHandler);
-		}
-
 		this.log('info', 'HealthStore initialized', {
 			pollingInterval: this._currentInterval,
 			maxFailures: healthConfig.maxConsecutiveFailures
 		});
+	}
+
+	private _setupVisibilityListener(): void {
+		if (this._listenerAdded || typeof document === 'undefined') return;
+
+		this._visibilityHandler = () => {
+			this._isTabVisible = !document.hidden;
+
+			if (this._isTabVisible && !this._intervalId) {
+				void this._executeHealthCheck();
+				this._scheduleNextCheck();
+			} else if (!this._isTabVisible && this._intervalId) {
+				this._clearScheduledCheck();
+			}
+		};
+
+		document.addEventListener('visibilitychange', this._visibilityHandler);
+		this._listenerAdded = true;
 	}
 
 	async check() {
@@ -177,6 +181,8 @@ class HealthStore {
 	}
 
 	startPolling() {
+		this._setupVisibilityListener();
+
 		if (!this._isTabVisible) {
 			this.log('debug', 'Tab not visible, skipping polling start');
 			return;
@@ -222,6 +228,7 @@ class HealthStore {
 				this.log('warn', 'Error removing visibility listener', { error: String(error) });
 			}
 			this._visibilityHandler = null;
+			this._listenerAdded = false;
 		}
 
 		this._consecutiveFailures = 0;

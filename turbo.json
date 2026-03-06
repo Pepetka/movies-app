@@ -24,6 +24,7 @@
   "globalDependencies": ["**/.env.*local"],
   "globalEnv": [
     "NODE_ENV",
+    "DEV",
     "DATABASE_URL",
     "MODE",
     "API_URL",

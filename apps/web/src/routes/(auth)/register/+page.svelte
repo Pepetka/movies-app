@@ -1,0 +1,167 @@
+<script lang="ts">
+	import { Eye, EyeOff, Film, Mail, User, Users } from '@lucide/svelte';
+	import { Button, Card, Input } from '@repo/ui';
+	import { fade } from 'svelte/transition';
+
+	import {
+		authStore,
+		type RegisterFormData,
+		validateRegisterForm,
+		checkPasswordStrength,
+		createFormFieldValidator
+	} from '$lib/modules/auth';
+	import { goto } from '$app/navigation';
+	import { resolve } from '$app/paths';
+	import { ROUTES } from '$lib/utils';
+
+	import '$lib/styles/auth.css';
+
+	let form = $state<RegisterFormData>({
+		name: '',
+		email: '',
+		password: '',
+		confirmPassword: ''
+	});
+
+	let showPassword = $state(false);
+	let showConfirmPassword = $state(false);
+	let isLoading = $state(false);
+
+	const fieldValidator = createFormFieldValidator(validateRegisterForm);
+	const passwordChecks = $derived(checkPasswordStrength(form.password));
+
+	$effect(() => {
+		return () => {
+			fieldValidator.cancel();
+		};
+	});
+
+	const handleSubmit = async (e: Event) => {
+		e.preventDefault();
+
+		if (isLoading) return;
+		isLoading = true;
+
+		try {
+			const result = await authStore.register(form);
+			fieldValidator.setErrors(result.errors);
+
+			if (result.isValid) {
+				await goto(resolve(ROUTES.GROUPS), { replaceState: true });
+			}
+		} finally {
+			isLoading = false;
+		}
+	};
+</script>
+
+<div class="auth-page">
+	<div class="auth-branding">
+		<a href={ROUTES.HOME} class="auth-logo-link">
+			<div class="auth-logo">
+				<Film />
+			</div>
+			<h1 class="auth-app-name">Movies App</h1>
+		</a>
+		<p class="auth-tagline">Смотрите фильмы вместе с друзьями</p>
+	</div>
+
+	<Card variant="outlined" size="responsive" class="auth-card">
+		{#snippet header()}
+			<div class="auth-card-header">
+				<h2 class="auth-card-title">Создать аккаунт</h2>
+				<p class="auth-card-subtitle">Присоединяйтесь к просмотрам фильмов</p>
+			</div>
+		{/snippet}
+
+		<div class="auth-card-body">
+			<div class="auth-benefits">
+				<div class="auth-benefit">
+					<Users />
+					<span>Создавайте группы</span>
+				</div>
+				<div class="auth-benefit">
+					<Film />
+					<span>Выбирайте фильмы вместе</span>
+				</div>
+			</div>
+
+			<form class="auth-form" onsubmit={handleSubmit}>
+				<Input
+					type="text"
+					label="Имя"
+					bind:value={form.name}
+					error={fieldValidator.errors.name}
+					placeholder="Маргарита Александровна"
+					Icon={User}
+					disabled={isLoading}
+					onChange={() => fieldValidator.handleFieldChange(form, 'name')}
+				/>
+
+				<Input
+					type="email"
+					label="Email"
+					bind:value={form.email}
+					error={fieldValidator.errors.email}
+					placeholder="anaconda@mail.ru"
+					Icon={Mail}
+					autocomplete="email"
+					disabled={isLoading}
+					onChange={() => fieldValidator.handleFieldChange(form, 'email')}
+				/>
+
+				<div class="password-field">
+					<Input
+						type={showPassword ? 'text' : 'password'}
+						label="Пароль"
+						bind:value={form.password}
+						error={fieldValidator.errors.password}
+						placeholder="Str0ng!Pass"
+						Icon={showPassword ? EyeOff : Eye}
+						iconAction={() => (showPassword = !showPassword)}
+						iconLabel={showPassword ? 'Скрыть пароль' : 'Показать пароль'}
+						autocomplete="new-password"
+						disabled={isLoading}
+						onChange={() => fieldValidator.handleFieldChange(form, 'password')}
+					/>
+
+					{#if form.password}
+						<div class="password-requirements" transition:fade={{ duration: 200 }}>
+							<span class:passed={passwordChecks.length}>8+</span>
+							<span class:passed={passwordChecks.lowercase}>a-z</span>
+							<span class:passed={passwordChecks.uppercase}>A-Z</span>
+							<span class:passed={passwordChecks.number}>0-9</span>
+							<span class:passed={passwordChecks.special}>!@#</span>
+						</div>
+					{/if}
+				</div>
+
+				<Input
+					type={showConfirmPassword ? 'text' : 'password'}
+					label="Подтверждение пароля"
+					bind:value={form.confirmPassword}
+					error={fieldValidator.errors.confirmPassword}
+					placeholder="Повторите пароль"
+					Icon={showConfirmPassword ? EyeOff : Eye}
+					iconAction={() => (showConfirmPassword = !showConfirmPassword)}
+					iconLabel={showConfirmPassword ? 'Скрыть пароль' : 'Показать пароль'}
+					autocomplete="new-password"
+					disabled={isLoading}
+					onChange={() => fieldValidator.handleFieldChange(form, 'confirmPassword')}
+				/>
+
+				<Button type="submit" variant="primary" fullWidth loading={isLoading}>
+					Зарегистрироваться
+				</Button>
+			</form>
+		</div>
+
+		{#snippet footer()}
+			<div class="auth-card-footer">
+				<p>
+					Уже есть аккаунт? <a href={ROUTES.LOGIN}>Войти</a>
+				</p>
+			</div>
+		{/snippet}
+	</Card>
+</div>

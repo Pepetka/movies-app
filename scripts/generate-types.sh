@@ -10,7 +10,7 @@ if ! curl -s -o /dev/null -w "%{http_code}" "$API_URL/api/v1/health" | grep -q "
 	echo ""
 	echo "Error: API is not running at $API_URL"
 	echo ""
-	echo "Please start the API server before pushing:"
+	echo "Please start the API server first:"
 	echo "  pnpm run dev --filter=api"
 	echo ""
 	exit 1
@@ -18,7 +18,10 @@ fi
 
 echo "API is running. Fetching OpenAPI spec and generating types..."
 
-cd "$(dirname "$0")/../apps/web"
-pnpm run types:fetch
+SCRIPT_DIR="$(dirname "$0")"
+cd "$SCRIPT_DIR/../apps/web"
+
+curl -s "$API_URL/api/docs/json" -o openapi.json
+pnpm run types:generate
 
 echo "Types generated successfully!"

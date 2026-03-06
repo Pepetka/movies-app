@@ -25,10 +25,11 @@ class EnvironmentVariables {
   @Max(65535)
   PORT: number;
 
+  // Comma-separated list of allowed CORS origins
   @IsString()
   WEB_URL: string;
 
-  @IsString()
+  @IsUrl({ require_tld: false })
   API_URL: string;
 
   @IsString()

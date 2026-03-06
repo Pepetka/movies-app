@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { IProps } from './Modal.types.svelte';
+	import { generateId } from '../../utils/id';
 
 	let {
 		open = $bindable(false),
@@ -17,7 +18,7 @@
 	let overlayElement = $state.raw<HTMLDivElement | null>(null);
 	let modalElement = $state.raw<HTMLDivElement | null>(null);
 
-	const modalId = crypto.randomUUID();
+	const modalId = generateId();
 	const headerId = `${modalId}-header`;
 
 	const getFocusableElements = (container: HTMLElement): HTMLElement[] => {

@@ -8,6 +8,8 @@
 		fullWidth = false,
 		class: className,
 		children,
+		header,
+		footer,
 		...restProps
 	}: IProps = $props();
 
@@ -40,8 +42,22 @@
 	onkeydown={interactive ? handleKeydown : undefined}
 	{...restProps}
 >
+	{#if header}
+		<div class="ui-card-header">
+			{@render header()}
+		</div>
+	{/if}
+
 	{#if children}
-		{@render children()}
+		<div class="ui-card-body">
+			{@render children()}
+		</div>
+	{/if}
+
+	{#if footer}
+		<div class="ui-card-footer">
+			{@render footer()}
+		</div>
 	{/if}
 </svelte:element>
 
@@ -51,6 +67,7 @@
 		flex-direction: column;
 		border-radius: var(--radius-xl);
 		background-color: var(--bg-primary);
+		overflow: hidden;
 		transition:
 			background-color var(--transition-fast) var(--ease-out),
 			border-color var(--transition-fast) var(--ease-out),
@@ -62,17 +79,59 @@
 		width: 100%;
 	}
 
-	/* Sizes */
-	.ui-card.sm {
-		padding: var(--card-sm-padding);
+	/* Sizes - affect section padding */
+	.ui-card.sm .ui-card-header,
+	.ui-card.sm .ui-card-body,
+	.ui-card.sm .ui-card-footer {
+		padding: var(--space-3) var(--space-4);
 	}
 
-	.ui-card.md {
-		padding: var(--card-md-padding);
+	.ui-card.md .ui-card-header,
+	.ui-card.md .ui-card-footer {
+		padding: var(--space-4) var(--space-6);
 	}
 
-	.ui-card.lg {
-		padding: var(--card-lg-padding);
+	.ui-card.md .ui-card-body {
+		padding: var(--space-5) var(--space-6);
+	}
+
+	.ui-card.lg .ui-card-header,
+	.ui-card.lg .ui-card-footer {
+		padding: var(--space-5) var(--space-8);
+	}
+
+	.ui-card.lg .ui-card-body {
+		padding: var(--space-6) var(--space-8);
+	}
+
+	/* Responsive - sm on mobile, md on desktop */
+	.ui-card.responsive .ui-card-header,
+	.ui-card.responsive .ui-card-body,
+	.ui-card.responsive .ui-card-footer {
+		padding: var(--space-3) var(--space-4);
+	}
+
+	@media (min-width: 480px) {
+		.ui-card.responsive .ui-card-header,
+		.ui-card.responsive .ui-card-footer {
+			padding: var(--space-4) var(--space-6);
+		}
+
+		.ui-card.responsive .ui-card-body {
+			padding: var(--space-5) var(--space-6);
+		}
+	}
+
+	/* Sections */
+	.ui-card-header {
+		text-align: center;
+		border-bottom: 1px solid var(--border-primary);
+	}
+
+	.ui-card-footer {
+		background: var(--bg-secondary);
+		border-top: 1px solid var(--border-primary);
+		text-align: center;
 	}
 
 	/* Variants */
