@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { IProps } from './Input.types.svelte';
 	import { getIconSize } from '../../utils/size';
+	import { generateId } from '../../utils/id';
 
 	let {
 		type = 'text',
@@ -18,9 +19,9 @@
 		...restProps
 	}: IProps = $props();
 
-	const inputId = crypto.randomUUID();
-	const errorId = crypto.randomUUID();
-	const helperId = crypto.randomUUID();
+	const inputId = generateId();
+	const errorId = generateId();
+	const helperId = generateId();
 
 	let isFocused = $state(false);
 	let hasValue = $derived((value?.length ?? 0) > 0);

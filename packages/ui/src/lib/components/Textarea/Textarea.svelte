@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { IProps } from './Textarea.types.svelte';
+	import { generateId } from '../../utils/id';
 
 	let {
 		label,
@@ -16,9 +17,9 @@
 		...restProps
 	}: IProps = $props();
 
-	const textareaId = crypto.randomUUID();
-	const errorId = crypto.randomUUID();
-	const helperId = crypto.randomUUID();
+	const textareaId = generateId();
+	const errorId = generateId();
+	const helperId = generateId();
 
 	let isFocused = $state(false);
 	let hasValue = $derived((value?.length ?? 0) > 0);

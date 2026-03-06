@@ -2,6 +2,7 @@
 	import { Check, Minus } from '@lucide/svelte';
 
 	import type { IProps, CheckboxSize } from './Checkbox.types.svelte';
+	import { generateId } from '../../utils/id';
 
 	const ICON_SIZE_MAP: Record<CheckboxSize, number> = {
 		sm: 14,
@@ -22,9 +23,9 @@
 		...restProps
 	}: IProps = $props();
 
-	const inputId = crypto.randomUUID();
-	const helperId = crypto.randomUUID();
-	const errorId = crypto.randomUUID();
+	const inputId = generateId();
+	const helperId = generateId();
+	const errorId = generateId();
 
 	const handleChange = (e: Event) => {
 		const target = e.target as HTMLInputElement;

@@ -3,6 +3,7 @@
 
 	import type { IProps } from './Select.types.svelte';
 	import { getIconSize } from '../../utils/size';
+	import { generateId } from '../../utils/id';
 
 	let {
 		label,
@@ -18,9 +19,9 @@
 		...restProps
 	}: IProps = $props();
 
-	const selectId = crypto.randomUUID();
-	const errorId = crypto.randomUUID();
-	const helperId = crypto.randomUUID();
+	const selectId = generateId();
+	const errorId = generateId();
+	const helperId = generateId();
 
 	let isFocused = $state(false);
 	let hasValue = $derived(value !== '' && value !== undefined);
