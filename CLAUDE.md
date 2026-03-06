@@ -64,6 +64,8 @@ cd apps/api && pnpm run db:generate / db:migrate / db:seed
 | **Roadmap** | [docs/product-roadmap.md](docs/product-roadmap.md) — status, plans |
 | **Future** | [docs/future-improvements.md](docs/future-improvements.md) — TODOs, ideas |
 
+Читай связанные файлы из Documentation Map по мере необходимости для получения контекста.
+
 ## Architecture Overview
 
 ```
