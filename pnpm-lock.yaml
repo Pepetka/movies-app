@@ -296,20 +296,20 @@ importers:
         specifier: ^10.1.1
         version: 10.1.8(eslint@10.0.2(jiti@2.6.1))
       eslint-config-turbo:
-        specifier: ^2.8.12
-        version: 2.8.12(eslint@10.0.2(jiti@2.6.1))(turbo@2.8.14)
+        specifier: ^2.8.14
+        version: 2.8.14(eslint@10.0.2(jiti@2.6.1))(turbo@2.8.14)
       eslint-plugin-perfectionist:
         specifier: ^5.6.0
         version: 5.6.0(eslint@10.0.2(jiti@2.6.1))(typescript@5.9.3)
       eslint-plugin-storybook:
-        specifier: ^10.2.14
-        version: 10.2.14(eslint@10.0.2(jiti@2.6.1))(storybook@10.2.16(@testing-library/dom@10.4.1)(prettier@3.8.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(typescript@5.9.3)
+        specifier: ^10.2.16
+        version: 10.2.16(eslint@10.0.2(jiti@2.6.1))(storybook@10.2.16(@testing-library/dom@10.4.1)(prettier@3.8.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(typescript@5.9.3)
       eslint-plugin-svelte:
         specifier: ^3.15.0
         version: 3.15.0(eslint@10.0.2(jiti@2.6.1))(svelte@5.53.6)(ts-node@10.9.2(@swc/core@1.15.18)(@types/node@25.3.5)(typescript@5.9.3))
       eslint-plugin-turbo:
-        specifier: ^2.8.12
-        version: 2.8.12(eslint@10.0.2(jiti@2.6.1))(turbo@2.8.14)
+        specifier: ^2.8.14
+        version: 2.8.14(eslint@10.0.2(jiti@2.6.1))(turbo@2.8.14)
       eslint-plugin-unused-imports:
         specifier: ^4.4.1
         version: 4.4.1(@typescript-eslint/eslint-plugin@8.56.1(@typescript-eslint/parser@8.56.1(eslint@10.0.2(jiti@2.6.1))(typescript@5.9.3))(eslint@10.0.2(jiti@2.6.1))(typescript@5.9.3))(eslint@10.0.2(jiti@2.6.1))
@@ -3825,8 +3825,8 @@ packages:
     peerDependencies:
       eslint: '>=7.0.0'
 
-  eslint-config-turbo@2.8.12:
-    resolution: {integrity: sha512-0MP/CzngIMalr0R8Q74VfGImVSFmDu7iL+v+1v16NdLG3xlHGE/mjtXDMYchEk6wWNlmaib3EjGifbQ2Jr5kxw==}
+  eslint-config-turbo@2.8.14:
+    resolution: {integrity: sha512-WYB0jwiITLpiWx42J7p1XNSAzRxAwmX9qpRBCIH4+R/9mgp72o8GtUKLX8vgxK4c8Vwqiedv4MqPwDxJurrVWQ==}
     peerDependencies:
       eslint: '>6.6.0'
       turbo: '>2.0.0'
@@ -3837,11 +3837,11 @@ packages:
     peerDependencies:
       eslint: ^8.45.0 || ^9.0.0 || ^10.0.0
 
-  eslint-plugin-storybook@10.2.14:
-    resolution: {integrity: sha512-iFHN+hs2DQsY0KZssb9Dse5MVFT22E/f6BK9bShGq21TXv/z2+ix72NfIFTWg3sLFoEXr18uGWZiM5e3jt1EqQ==}
+  eslint-plugin-storybook@10.2.16:
+    resolution: {integrity: sha512-0rFBcezaFmc0NB2Xxn2VyyH61L7OyM7ub5bJr1D9QF8kIpe0FTUCABgyiZNfamf8tHXyK5PIFkX88pxhaPGiBg==}
     peerDependencies:
       eslint: '>=8'
-      storybook: ^10.2.14
+      storybook: ^10.2.16
 
   eslint-plugin-svelte@3.15.0:
     resolution: {integrity: sha512-QKB7zqfuB8aChOfBTComgDptMf2yxiJx7FE04nneCmtQzgTHvY8UJkuh8J2Rz7KB9FFV9aTHX6r7rdYGvG8T9Q==}
@@ -3853,8 +3853,8 @@ packages:
       svelte:
         optional: true
 
-  eslint-plugin-turbo@2.8.12:
-    resolution: {integrity: sha512-Q0LcIS2bRivRDZbtHOrtNFUSclnvfL8Qn1yM8I7+1LRerPmdcLF++SYOOCsF9COCEvoP6O66+bnupDqpC/W59w==}
+  eslint-plugin-turbo@2.8.14:
+    resolution: {integrity: sha512-AU3H0trwN9AoDZHHIx+TWSLc/AXIqk0iB93dy5zF5EmhAS3KTVPlFRJHWXc4BdKo8gy/Z11DKrZZQTpqIZ8k4A==}
     peerDependencies:
       eslint: '>6.6.0'
       turbo: '>2.0.0'
@@ -9874,10 +9874,10 @@ snapshots:
     dependencies:
       eslint: 10.0.2(jiti@2.6.1)
 
-  eslint-config-turbo@2.8.12(eslint@10.0.2(jiti@2.6.1))(turbo@2.8.14):
+  eslint-config-turbo@2.8.14(eslint@10.0.2(jiti@2.6.1))(turbo@2.8.14):
     dependencies:
       eslint: 10.0.2(jiti@2.6.1)
-      eslint-plugin-turbo: 2.8.12(eslint@10.0.2(jiti@2.6.1))(turbo@2.8.14)
+      eslint-plugin-turbo: 2.8.14(eslint@10.0.2(jiti@2.6.1))(turbo@2.8.14)
       turbo: 2.8.14
 
   eslint-plugin-perfectionist@5.6.0(eslint@10.0.2(jiti@2.6.1))(typescript@5.9.3):
@@ -9889,7 +9889,7 @@ snapshots:
       - supports-color
       - typescript
 
-  eslint-plugin-storybook@10.2.14(eslint@10.0.2(jiti@2.6.1))(storybook@10.2.16(@testing-library/dom@10.4.1)(prettier@3.8.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(typescript@5.9.3):
+  eslint-plugin-storybook@10.2.16(eslint@10.0.2(jiti@2.6.1))(storybook@10.2.16(@testing-library/dom@10.4.1)(prettier@3.8.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(typescript@5.9.3):
     dependencies:
       '@typescript-eslint/utils': 8.56.1(eslint@10.0.2(jiti@2.6.1))(typescript@5.9.3)
       eslint: 10.0.2(jiti@2.6.1)
@@ -9916,7 +9916,7 @@ snapshots:
     transitivePeerDependencies:
       - ts-node
 
-  eslint-plugin-turbo@2.8.12(eslint@10.0.2(jiti@2.6.1))(turbo@2.8.14):
+  eslint-plugin-turbo@2.8.14(eslint@10.0.2(jiti@2.6.1))(turbo@2.8.14):
     dependencies:
       dotenv: 16.0.3
       eslint: 10.0.2(jiti@2.6.1)
