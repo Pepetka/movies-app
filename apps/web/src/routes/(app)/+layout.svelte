@@ -3,7 +3,7 @@
 	import { BottomNav, Spinner } from '@repo/ui';
 	import type { Snippet } from 'svelte';
 
-	import { authStore, handleAuthRedirect } from '$lib/modules/auth';
+	import { authStore, requireAuth } from '$lib/modules/auth';
 	import { ROUTES } from '$lib/utils';
 	import { page } from '$app/state';
 
@@ -40,7 +40,7 @@
 	const activeNavId = $derived(navItems.find((item) => page.url.pathname === item.href)?.id ?? '');
 
 	$effect(() => {
-		handleAuthRedirect();
+		requireAuth();
 	});
 </script>
 

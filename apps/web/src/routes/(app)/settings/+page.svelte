@@ -35,7 +35,6 @@
 
 <style>
 	.settings-page {
-		padding: var(--space-4);
 		text-align: center;
 		display: flex;
 		flex-direction: column;

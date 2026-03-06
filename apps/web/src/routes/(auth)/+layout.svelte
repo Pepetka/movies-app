@@ -2,7 +2,7 @@
 	import type { Snippet } from 'svelte';
 	import { Spinner } from '@repo/ui';
 
-	import { authStore, handleAuthRedirect } from '$lib/modules/auth';
+	import { authStore, redirectIfAuthenticated } from '$lib/modules/auth';
 
 	interface IProps {
 		children: Snippet;
@@ -11,7 +11,7 @@
 	const { children }: IProps = $props();
 
 	$effect(() => {
-		handleAuthRedirect();
+		redirectIfAuthenticated();
 	});
 </script>
 
@@ -31,7 +31,6 @@
 		flex-direction: column;
 		align-items: center;
 		justify-content: center;
-		padding: var(--space-4);
 	}
 
 	.loading {

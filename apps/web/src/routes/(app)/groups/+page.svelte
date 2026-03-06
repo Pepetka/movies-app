@@ -14,7 +14,6 @@
 
 <style>
 	.groups-page {
-		padding: var(--space-4);
 		text-align: center;
 	}
 

@@ -65,7 +65,7 @@
 		<p class="auth-tagline">Смотрите фильмы вместе с друзьями</p>
 	</div>
 
-	<Card variant="outlined" class="auth-card">
+	<Card variant="outlined" size="responsive" class="auth-card">
 		{#snippet header()}
 			<div class="auth-card-header">
 				<h2 class="auth-card-title">Создать аккаунт</h2>
@@ -77,7 +77,7 @@
 			<div class="auth-benefits">
 				<div class="auth-benefit">
 					<Users />
-					<span>Создавайте группы для просмотров</span>
+					<span>Создавайте группы</span>
 				</div>
 				<div class="auth-benefit">
 					<Film />
