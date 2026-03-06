@@ -80,7 +80,9 @@ describe('Group Movies E2E', () => {
 
     const secret = configService.getOrThrow<string>('COOKIE_SECRET');
 
+    // @ts-expect-error Fastify v5.8 types incompatibility
     await app.register(cookie, { secret });
+    // @ts-expect-error Fastify v5.8 types incompatibility
     await app.register(csrf, {
       cookieOpts: {
         httpOnly: true,
