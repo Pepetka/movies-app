@@ -30,7 +30,7 @@ cp .env.example .env
 | `NODE_ENV`          | Окружение                                 | `production`                            |
 | `PORT`              | Порт API сервера                          | `8080`                                  |
 | `WEB_URL`           | URL фронтенда                             | `https://yourdomain.com`                |
-| `API_URL`           | URL API                                   | `https://yourdomain.com/api`            |
+| `API_URL`           | URL API (без `/api`)                      | `https://yourdomain.com`                |
 | `COOKIE_SECRET`     | Секрет для cookies (мин. 32 символа)      | см. ниже                                |
 | `DATABASE_URL`      | Строка подключения PostgreSQL             | `postgresql://user:pass@db:5432/movies` |
 | `POSTGRES_USER`     | Пользователь PostgreSQL                   | `movies`                                |
@@ -39,6 +39,8 @@ cp .env.example .env
 | `DOMAIN`            | Домен (без протокола)                     | `yourdomain.com`                        |
 | `CERTBOT_EMAIL`     | Email для Let's Encrypt                   | `admin@yourdomain.com`                  |
 | `GITHUB_REPOSITORY` | Полное имя репозитория (для pull образов) | `username/movies-app`                   |
+
+> **Важно:** `API_URL` используется при сборке Docker образа в GitHub Actions. Нужно также обновить GitHub secret `API_URL` (Settings → Secrets → Actions).
 
 Генерация `COOKIE_SECRET`:
 
