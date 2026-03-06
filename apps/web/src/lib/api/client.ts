@@ -7,8 +7,7 @@ import { DEFAULT_RETRY_STATUSES } from './types';
 /** Default request timeout in milliseconds */
 const DEFAULT_TIMEOUT_MS = 30000;
 
-/** Paths that should not trigger token refresh on 401 */
-const SKIP_REFRESH_PATHS = ['/api/v1/auth/login', '/api/v1/auth/register'];
+/** Default paths that should not trigger token refresh on 401 */
 
 /** Default number of retry attempts */
 const DEFAULT_RETRY_COUNT = 3;
@@ -49,7 +48,11 @@ export class HttpClient {
 				retryOn: config.retry?.retryOn ?? [...DEFAULT_RETRY_STATUSES]
 			},
 			baseURL: config.baseURL,
-			auth: config.auth
+			auth: {
+				refreshEndpoint: config.auth.refreshEndpoint,
+				csrfEndpoint: config.auth.csrfEndpoint,
+				skipRefreshPaths: config.auth.skipRefreshPaths ?? []
+			}
 		};
 	}
 
@@ -197,7 +200,8 @@ export class HttpClient {
 			});
 
 			if (response.status === 401) {
-				if (SKIP_REFRESH_PATHS.some((path) => url.includes(path))) {
+				const skipPaths = this._config.auth.skipRefreshPaths ?? [];
+				if (skipPaths.some((path) => url.includes(path))) {
 					const errorBody = await this._parseBody(response);
 					throw new HttpError(response.status, response.statusText, errorBody);
 				}
@@ -417,6 +421,7 @@ export const httpClient = new HttpClient({
 	baseURL: __API_URL__,
 	auth: {
 		refreshEndpoint: '/api/v1/auth/refresh',
-		csrfEndpoint: '/api/v1/csrf/token'
+		csrfEndpoint: '/api/v1/csrf/token',
+		skipRefreshPaths: ['/api/v1/auth/login', '/api/v1/auth/register']
 	}
 });
