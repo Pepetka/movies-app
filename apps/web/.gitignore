@@ -1,7 +1,7 @@
 docs/plans
 
 # Generated types
-openapi.json
+src/lib/api/generated/
 
 node_modules
 
