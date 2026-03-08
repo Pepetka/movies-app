@@ -112,6 +112,9 @@ jobs:
       - name: Build ui
         run: pnpm --filter ui build
 
+      - name: Generate API types
+        run: pnpm --filter web types:generate
+
       - name: Run type check
         run: pnpm run check:types
 
@@ -138,6 +141,9 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: Generate API types
+        run: pnpm --filter web types:generate
 
       - name: Cache Turbo
         uses: actions/cache@v5
