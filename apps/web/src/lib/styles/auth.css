@@ -9,6 +9,7 @@
 	flex-direction: column;
 	align-items: center;
 	position: relative;
+	padding: var(--space-8) var(--space-4);
 }
 
 /* Branding header */
