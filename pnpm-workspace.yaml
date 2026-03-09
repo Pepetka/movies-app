@@ -9,7 +9,7 @@ catalog:
 
   # Linting & Formatting
   eslint: "^10.0.2"
-  "@eslint/compat": "^1.4.0"
+  "@eslint/compat": "^2.0.3"
   prettier: "^3.8.0"
 
   # Svelte ecosystem
