@@ -2,7 +2,7 @@
 	import type { IProps } from './Spinner.types.svelte';
 
 	const {
-		size = 'md',
+		size = 'responsive',
 		variant = 'default',
 		label = 'Loading',
 		class: className,
@@ -90,6 +90,26 @@
 	.ui-spinner.lg {
 		width: var(--spinner-lg-size);
 		height: var(--spinner-lg-size);
+	}
+
+	/* Responsive - sm on mobile, md on tablet, lg on desktop */
+	.ui-spinner.responsive {
+		width: var(--spinner-sm-size);
+		height: var(--spinner-sm-size);
+	}
+
+	@media (min-width: 480px) {
+		.ui-spinner.responsive {
+			width: var(--spinner-md-size);
+			height: var(--spinner-md-size);
+		}
+	}
+
+	@media (min-width: 768px) {
+		.ui-spinner.responsive {
+			width: var(--spinner-lg-size);
+			height: var(--spinner-lg-size);
+		}
 	}
 
 	/* Variants */

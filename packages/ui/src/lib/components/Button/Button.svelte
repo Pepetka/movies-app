@@ -8,7 +8,7 @@
 
 	// Common props (exist in both variants)
 	const variant = $derived(props.variant ?? 'primary');
-	const size = $derived(props.size ?? 'md');
+	const size = $derived(props.size ?? 'responsive');
 	const loading = $derived(props.loading ?? false);
 	const fullWidth = $derived(props.fullWidth ?? false);
 	const className = $derived(props.class);
@@ -158,6 +158,32 @@
 		font-size: var(--btn-lg-font);
 		min-height: var(--btn-lg-height);
 		gap: var(--space-3);
+	}
+
+	/* Responsive - sm on mobile, md on tablet, lg on desktop */
+	.ui-btn.responsive {
+		padding: var(--btn-sm-padding);
+		font-size: var(--btn-sm-font);
+		min-height: var(--btn-sm-height);
+		gap: var(--space-1);
+	}
+
+	@media (min-width: 480px) {
+		.ui-btn.responsive {
+			padding: var(--btn-md-padding);
+			font-size: var(--btn-md-font);
+			min-height: var(--btn-md-height);
+			gap: var(--space-2);
+		}
+	}
+
+	@media (min-width: 768px) {
+		.ui-btn.responsive {
+			padding: var(--btn-lg-padding);
+			font-size: var(--btn-lg-font);
+			min-height: var(--btn-lg-height);
+			gap: var(--space-3);
+		}
 	}
 
 	/* Primary */

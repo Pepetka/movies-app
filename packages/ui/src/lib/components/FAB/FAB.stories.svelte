@@ -9,13 +9,17 @@
 		component: FAB,
 		tags: ['autodocs'],
 		argTypes: {
-			size: { control: 'select', options: ['sm', 'md', 'lg'] },
+			size: { control: 'select', options: ['sm', 'md', 'lg', 'responsive'] },
+			variant: { control: 'select', options: ['primary', 'secondary', 'ghost'] },
 			position: { control: 'select', options: ['bottom-right', 'bottom-left', 'bottom-center'] }
 		}
 	});
 </script>
 
-<Story name="Playground" args={{ size: 'md', position: 'bottom-right' }}>
+<Story
+	name="Playground"
+	args={{ size: 'responsive', variant: 'primary', position: 'bottom-right' }}
+>
 	{#snippet template(args)}
 		<div style="position: relative; min-height: 200px;">
 			<FAB {...args}>
@@ -23,6 +27,51 @@
 					<Plus />
 				{/snippet}
 			</FAB>
+		</div>
+	{/snippet}
+</Story>
+
+<Story name="Variants">
+	{#snippet template()}
+		<div style="position: relative; min-height: 300px;">
+			<div style="display: flex; gap: 24px; flex-wrap: wrap; margin-bottom: 24px;">
+				<div>
+					<p style="margin-bottom: 8px; font-size: var(--text-sm); color: var(--text-tertiary);">
+						Primary
+					</p>
+					<div style="position: relative; width: 60px; height: 60px;">
+						<FAB variant="primary" position="bottom-right">
+							{#snippet icon()}
+								<Plus />
+							{/snippet}
+						</FAB>
+					</div>
+				</div>
+				<div>
+					<p style="margin-bottom: 8px; font-size: var(--text-sm); color: var(--text-tertiary);">
+						Secondary
+					</p>
+					<div style="position: relative; width: 60px; height: 60px;">
+						<FAB variant="secondary" position="bottom-right">
+							{#snippet icon()}
+								<Plus />
+							{/snippet}
+						</FAB>
+					</div>
+				</div>
+				<div>
+					<p style="margin-bottom: 8px; font-size: var(--text-sm); color: var(--text-tertiary);">
+						Ghost
+					</p>
+					<div style="position: relative; width: 60px; height: 60px;">
+						<FAB variant="ghost" position="bottom-right">
+							{#snippet icon()}
+								<Plus />
+							{/snippet}
+						</FAB>
+					</div>
+				</div>
+			</div>
 		</div>
 	{/snippet}
 </Story>
@@ -185,33 +234,22 @@
 	{/snippet}
 </Story>
 
-<Story name="Extended In Context">
+<Story name="Ghost Over Content">
 	{#snippet template()}
 		<div style="position: relative; min-height: 400px;">
 			<div
-				style="max-width: 400px; margin: 0 auto; padding: 24px; background: var(--bg-secondary); border-radius: var(--radius-lg);"
+				style="max-width: 400px; margin: 0 auto; padding: 24px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: var(--radius-lg); color: white;"
 			>
 				<h2
 					style="margin-bottom: 16px; font-size: var(--text-xl); font-weight: var(--font-semibold);"
 				>
-					Groups
+					Ghost FAB over gradient
 				</h2>
-				<div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px;">
-					<div
-						style="padding: 16px; background: var(--bg-primary); border-radius: var(--radius-lg);"
-					>
-						<div style="font-weight: var(--font-medium);">Movie Night Crew</div>
-						<div style="font-size: var(--text-sm); color: var(--text-tertiary);">5 members</div>
-					</div>
-					<div
-						style="padding: 16px; background: var(--bg-primary); border-radius: var(--radius-lg);"
-					>
-						<div style="font-weight: var(--font-medium);">Family Movies</div>
-						<div style="font-size: var(--text-sm); color: var(--text-tertiary);">3 members</div>
-					</div>
-				</div>
+				<p style="opacity: 0.9;">
+					Ghost variant with backdrop blur works well over images and gradients.
+				</p>
 			</div>
-			<FAB size="lg" label="Create Group" position="bottom-right">
+			<FAB variant="ghost" position="bottom-right" label="Add">
 				{#snippet icon()}
 					<Plus />
 				{/snippet}

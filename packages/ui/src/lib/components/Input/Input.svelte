@@ -5,7 +5,7 @@
 
 	let {
 		type = 'text',
-		size = 'md',
+		size = 'responsive',
 		label,
 		value = $bindable(''),
 		error,
@@ -366,5 +366,97 @@
 	.ui-input-wrapper.lg .ui-input-icon-btn {
 		width: 36px;
 		height: 36px;
+	}
+
+	/* Responsive size - sm on mobile, md on tablet, lg on desktop */
+	.ui-input-wrapper.responsive .ui-input-container input {
+		height: var(--input-sm-height);
+		padding: var(--input-sm-padding);
+		font-size: 14px;
+	}
+
+	.ui-input-wrapper.responsive .ui-input-label {
+		left: var(--input-sm-padding-x);
+		font-size: var(--text-base);
+	}
+
+	.ui-input-wrapper.responsive .ui-input-label.floating {
+		font-size: 12px;
+	}
+
+	.ui-input-wrapper.responsive .ui-input-container input.with-icon {
+		padding-right: 40px;
+	}
+
+	.ui-input-wrapper.responsive .ui-input-icon,
+	.ui-input-wrapper.responsive .ui-input-icon-btn {
+		right: 8px;
+	}
+
+	.ui-input-wrapper.responsive .ui-input-icon-btn {
+		width: 28px;
+		height: 28px;
+	}
+
+	@media (min-width: 480px) {
+		.ui-input-wrapper.responsive .ui-input-container input {
+			height: var(--input-md-height);
+			padding: var(--input-md-padding);
+			font-size: var(--text-base);
+		}
+
+		.ui-input-wrapper.responsive .ui-input-label {
+			left: var(--input-md-padding-x);
+			font-size: 18px;
+		}
+
+		.ui-input-wrapper.responsive .ui-input-label.floating {
+			font-size: 13px;
+		}
+
+		.ui-input-wrapper.responsive .ui-input-container input.with-icon {
+			padding-right: 44px;
+		}
+
+		.ui-input-wrapper.responsive .ui-input-icon,
+		.ui-input-wrapper.responsive .ui-input-icon-btn {
+			right: var(--input-md-padding-x);
+		}
+
+		.ui-input-wrapper.responsive .ui-input-icon-btn {
+			width: 32px;
+			height: 32px;
+		}
+	}
+
+	@media (min-width: 768px) {
+		.ui-input-wrapper.responsive .ui-input-container input {
+			height: var(--input-lg-height);
+			padding: var(--input-lg-padding);
+			font-size: 18px;
+		}
+
+		.ui-input-wrapper.responsive .ui-input-label {
+			left: var(--input-lg-padding-x);
+			font-size: 20px;
+		}
+
+		.ui-input-wrapper.responsive .ui-input-label.floating {
+			font-size: 14px;
+		}
+
+		.ui-input-wrapper.responsive .ui-input-container input.with-icon {
+			padding-right: 52px;
+		}
+
+		.ui-input-wrapper.responsive .ui-input-icon,
+		.ui-input-wrapper.responsive .ui-input-icon-btn {
+			right: 12px;
+		}
+
+		.ui-input-wrapper.responsive .ui-input-icon-btn {
+			width: 36px;
+			height: 36px;
+		}
 	}
 </style>

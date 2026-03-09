@@ -6,7 +6,7 @@
 	const {
 		Icon,
 		label,
-		size = 'md',
+		size = 'responsive',
 		variant = 'ghost',
 		loading = false,
 		type = 'button',
@@ -19,7 +19,9 @@
 
 	const isDisabled = $derived(disabled || loading);
 	const spinnerVariant = $derived(variant === 'primary' ? 'light' : 'default');
-	const spinnerSize = $derived(size === 'sm' ? 'sm' : size === 'lg' ? 'md' : 'sm');
+	const spinnerSize = $derived(
+		size === 'sm' || size === 'responsive' ? 'sm' : size === 'lg' ? 'md' : 'sm'
+	);
 </script>
 
 <button
@@ -75,6 +77,26 @@
 	.ui-icon-btn.lg {
 		width: var(--space-12);
 		height: var(--space-12);
+	}
+
+	/* Responsive - sm on mobile, md on tablet, lg on desktop */
+	.ui-icon-btn.responsive {
+		width: var(--space-8);
+		height: var(--space-8);
+	}
+
+	@media (min-width: 480px) {
+		.ui-icon-btn.responsive {
+			width: var(--space-10);
+			height: var(--space-10);
+		}
+	}
+
+	@media (min-width: 768px) {
+		.ui-icon-btn.responsive {
+			width: var(--space-12);
+			height: var(--space-12);
+		}
 	}
 
 	/* Ghost */

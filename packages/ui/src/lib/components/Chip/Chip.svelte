@@ -6,12 +6,13 @@
 	const CHIP_ICON_SIZE_MAP: Record<ChipSize, number> = {
 		sm: 14,
 		md: 16,
-		lg: 18
+		lg: 18,
+		responsive: 14 // base for mobile, will be overridden by CSS
 	};
 
 	let {
 		selected = $bindable(false),
-		size = 'md',
+		size = 'responsive',
 		Icon,
 		disabled = false,
 		type = 'button',
@@ -123,6 +124,32 @@
 		font-size: var(--chip-lg-font);
 		min-height: var(--chip-lg-height);
 		gap: var(--chip-lg-gap);
+	}
+
+	/* Responsive - sm on mobile, md on tablet, lg on desktop */
+	.ui-chip.responsive {
+		padding: var(--chip-sm-padding);
+		font-size: var(--chip-sm-font);
+		min-height: var(--chip-sm-height);
+		gap: var(--chip-sm-gap);
+	}
+
+	@media (min-width: 480px) {
+		.ui-chip.responsive {
+			padding: var(--chip-md-padding);
+			font-size: var(--chip-md-font);
+			min-height: var(--chip-md-height);
+			gap: var(--chip-md-gap);
+		}
+	}
+
+	@media (min-width: 768px) {
+		.ui-chip.responsive {
+			padding: var(--chip-lg-padding);
+			font-size: var(--chip-lg-font);
+			min-height: var(--chip-lg-height);
+			gap: var(--chip-lg-gap);
+		}
 	}
 
 	.ui-chip-icon {

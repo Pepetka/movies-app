@@ -4,12 +4,14 @@ import type { Snippet } from 'svelte';
 
 import type { IconSize } from '../../utils/size';
 
+export type IconButtonSize = IconSize;
+
 export type IconButtonVariant = 'ghost' | 'secondary' | 'primary';
 
 export interface IProps extends Omit<HTMLButtonAttributes, 'size'> {
 	Icon: typeof Icon;
 	label: string;
-	size?: IconSize;
+	size?: IconButtonSize;
 	variant?: IconButtonVariant;
 	loading?: boolean;
 	pressed?: boolean;

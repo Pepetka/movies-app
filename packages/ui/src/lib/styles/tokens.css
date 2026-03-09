@@ -62,6 +62,7 @@
 	--z-dropdown: 1000;
 	--z-sticky: 1020;
 	--z-fixed: 1030;
+	--z-fab: 1035;
 	--z-modal-backdrop: 1040;
 	--z-modal: 1050;
 	--z-popover: 1060;
@@ -108,6 +109,7 @@
 	--fab-md-size: 56px;
 	--fab-lg-height: 48px;
 	--fab-margin: 16px;
+	--fab-offset-bottom-nav: calc(var(--fab-margin) + var(--bottom-nav-height));
 	--fab-icon-size: 24px;
 
 	/* Avatar Icon Sizes */
@@ -117,7 +119,11 @@
 	--avatar-icon-lg: 32px;
 	--avatar-icon-xl: 48px;
 
-	/* BottomNav Badge */
+	/* TopBar */
+	--top-bar-height: 56px;
+
+	/* BottomNav */
+	--bottom-nav-height: 56px;
 	--bottom-nav-badge-size: 18px;
 	--bottom-nav-badge-min-width: 18px;
 	--bottom-nav-badge-padding-x: 4px;

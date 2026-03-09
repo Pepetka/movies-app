@@ -2,9 +2,17 @@
 	import { Button, ThemeToggle } from '@repo/ui';
 
 	import { authStore } from '$lib/modules/auth';
+	import { topBarStore } from '$lib/stores';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { ROUTES } from '$lib/utils';
+
+	$effect(() => {
+		topBarStore.configure({
+			title: 'Настройки'
+		});
+		return () => topBarStore.destroy();
+	});
 
 	const handleLogout = async () => {
 		try {
@@ -17,8 +25,6 @@
 </script>
 
 <div class="settings-page">
-	<h1>Настройки</h1>
-
 	<div class="settings-section">
 		<h2>Внешний вид</h2>
 		<div class="theme-row">
@@ -35,16 +41,10 @@
 
 <style>
 	.settings-page {
-		text-align: center;
 		display: flex;
 		flex-direction: column;
 		align-items: center;
-	}
-
-	h1 {
-		font-size: var(--text-2xl);
-		font-weight: var(--font-semibold);
-		margin-bottom: var(--space-6);
+		padding-block: var(--space-4);
 	}
 
 	.settings-section {
@@ -52,14 +52,14 @@
 		flex-direction: column;
 		gap: var(--space-4);
 		width: 100%;
-		max-width: 400px;
 		margin-bottom: var(--space-6);
 	}
 
 	h2 {
-		font-size: var(--text-lg);
+		font-size: var(--text-sm);
 		font-weight: var(--font-medium);
 		color: var(--text-secondary);
+		margin: 0;
 	}
 
 	.theme-row {

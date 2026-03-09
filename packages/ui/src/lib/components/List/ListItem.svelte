@@ -6,7 +6,7 @@
 	const {
 		interactive = false,
 		disabled = false,
-		size = 'md',
+		size = 'responsive',
 		leading,
 		title,
 		subtitle,
@@ -131,6 +131,33 @@
 		padding: 0;
 	}
 
+	/* Responsive - sm on mobile, md on tablet, lg on desktop */
+	.ui-list-item.responsive {
+		padding: var(--space-2) var(--space-3);
+		gap: var(--space-2);
+		min-height: 40px;
+	}
+
+	.ui-list-item.responsive.interactive {
+		padding: 0;
+	}
+
+	@media (min-width: 480px) {
+		.ui-list-item.responsive {
+			padding: var(--space-3) var(--space-4);
+			gap: var(--space-3);
+			min-height: 48px;
+		}
+	}
+
+	@media (min-width: 768px) {
+		.ui-list-item.responsive {
+			padding: var(--space-4) var(--space-5);
+			gap: var(--space-4);
+			min-height: 56px;
+		}
+	}
+
 	/* Interactive button wrapper */
 	.ui-list-item-button {
 		display: flex;
@@ -156,6 +183,28 @@
 		gap: var(--space-4);
 		padding: var(--space-4) var(--space-5);
 		min-height: 56px;
+	}
+
+	.ui-list-item-button.responsive {
+		gap: var(--space-2);
+		padding: var(--space-2) var(--space-3);
+		min-height: 40px;
+	}
+
+	@media (min-width: 480px) {
+		.ui-list-item-button.responsive {
+			gap: var(--space-3);
+			padding: var(--space-3) var(--space-4);
+			min-height: 48px;
+		}
+	}
+
+	@media (min-width: 768px) {
+		.ui-list-item-button.responsive {
+			gap: var(--space-4);
+			padding: var(--space-4) var(--space-5);
+			min-height: 56px;
+		}
 	}
 
 	@media (hover: hover) {

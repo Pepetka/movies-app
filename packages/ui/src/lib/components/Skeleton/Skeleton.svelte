@@ -3,7 +3,7 @@
 
 	const {
 		variant = 'text',
-		size = 'md',
+		size = 'responsive',
 		width,
 		height,
 		rounded = false,
@@ -104,6 +104,50 @@
 	.ui-skeleton.circular.lg {
 		width: var(--skeleton-circular-lg);
 		height: var(--skeleton-circular-lg);
+	}
+
+	/* Responsive - sm on mobile, md on tablet, lg on desktop */
+	.ui-skeleton.text.responsive {
+		height: var(--skeleton-text-sm);
+	}
+
+	.ui-skeleton.circular.responsive {
+		width: var(--skeleton-circular-sm);
+		height: var(--skeleton-circular-sm);
+	}
+
+	.ui-skeleton.rectangular.responsive {
+		height: var(--skeleton-rect-sm);
+	}
+
+	@media (min-width: 480px) {
+		.ui-skeleton.text.responsive {
+			height: var(--skeleton-text-md);
+		}
+
+		.ui-skeleton.circular.responsive {
+			width: var(--skeleton-circular-md);
+			height: var(--skeleton-circular-md);
+		}
+
+		.ui-skeleton.rectangular.responsive {
+			height: var(--skeleton-rect-md);
+		}
+	}
+
+	@media (min-width: 768px) {
+		.ui-skeleton.text.responsive {
+			height: var(--skeleton-text-lg);
+		}
+
+		.ui-skeleton.circular.responsive {
+			width: var(--skeleton-circular-lg);
+			height: var(--skeleton-circular-lg);
+		}
+
+		.ui-skeleton.rectangular.responsive {
+			height: var(--skeleton-rect-lg);
+		}
 	}
 
 	/* Rectangular variant */

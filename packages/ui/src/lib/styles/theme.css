@@ -23,6 +23,11 @@
 	--bg-inverse: #111827;
 	--bg-overlay: rgba(0, 0, 0, 0.5);
 
+	/* Background RGB (for transparency) */
+	--bg-primary-rgb: 241, 245, 249;
+	--bg-secondary-rgb: 226, 232, 240;
+	--bg-tertiary-rgb: 203, 213, 225;
+
 	/* Text Colors */
 	--text-primary: #111827;
 	--text-secondary: #6b7280;
@@ -127,6 +132,11 @@
 	--bg-tertiary: #374151;
 	--bg-inverse: #f9fafb;
 	--bg-overlay: rgba(0, 0, 0, 0.7);
+
+	/* Background RGB (for transparency) */
+	--bg-primary-rgb: 17, 24, 39;
+	--bg-secondary-rgb: 31, 41, 55;
+	--bg-tertiary-rgb: 55, 65, 81;
 
 	/* Text Colors */
 	--text-primary: #f9fafb;

@@ -1,7 +1,7 @@
 import type { HTMLAttributes } from 'svelte/elements';
 import type { Snippet } from 'svelte';
 
-export type ListItemSize = 'sm' | 'md' | 'lg';
+export type ListItemSize = 'sm' | 'md' | 'lg' | 'responsive';
 
 export interface IProps extends Omit<HTMLAttributes<HTMLLIElement>, 'onclick'> {
 	interactive?: boolean;

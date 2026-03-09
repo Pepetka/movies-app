@@ -16,14 +16,12 @@
 	const { children }: IProps = $props();
 
 	$effect(() => {
-		if (browser) {
-			healthStore.startPolling();
-			void authStore.checkAuth();
-			return () => {
-				healthStore.destroy();
-				authStore.destroy();
-			};
-		}
+		healthStore.startPolling();
+		void authStore.checkAuth();
+		return () => {
+			healthStore.destroy();
+			authStore.destroy();
+		};
 	});
 
 	const handleHealthClick = () => {
@@ -161,9 +159,6 @@
 	main {
 		flex: 1;
 		width: 100%;
-		max-width: var(--container-max-width);
-		margin: 0 auto;
-		padding: var(--space-8) var(--container-padding);
 		position: relative;
 		z-index: 1;
 	}
