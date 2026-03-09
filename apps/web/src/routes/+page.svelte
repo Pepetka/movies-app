@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Button } from '@repo/ui';
+	import { Button, Container } from '@repo/ui';
 
 	import { authStore } from '$lib/modules/auth';
 	import { browser } from '$app/environment';
@@ -15,19 +15,21 @@
 </script>
 
 <div class="landing">
-	<div class="landing-content">
-		<div class="logo">
-			<h1>Movies App</h1>
+	<Container size="sm">
+		<div class="landing-content">
+			<div class="logo">
+				<h1>Movies App</h1>
+			</div>
+
+			<p class="tagline">Отслеживайте групповые просмотры фильмов вместе с друзьями</p>
+
+			<div class="actions">
+				<Button variant="primary" fullWidth href={ROUTES.REGISTER}>Начать</Button>
+
+				<Button variant="ghost" fullWidth href={ROUTES.LOGIN}>Уже есть аккаунт? Войти</Button>
+			</div>
 		</div>
-
-		<p class="tagline">Отслеживайте групповые просмотры фильмов вместе с друзьями</p>
-
-		<div class="actions">
-			<Button variant="primary" fullWidth href={ROUTES.REGISTER}>Начать</Button>
-
-			<Button variant="ghost" fullWidth href={ROUTES.LOGIN}>Уже есть аккаунт? Войти</Button>
-		</div>
-	</div>
+	</Container>
 </div>
 
 <style>
@@ -35,11 +37,11 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
+		padding: var(--space-8) 0;
 	}
 
 	.landing-content {
 		text-align: center;
-		max-width: 400px;
 	}
 
 	.logo {

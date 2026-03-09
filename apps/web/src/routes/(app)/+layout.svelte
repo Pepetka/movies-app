@@ -1,9 +1,10 @@
 <script lang="ts">
+	import { BottomNav, Container, IconButton, Spinner, TopBar } from '@repo/ui';
 	import { House, Settings, User } from '@lucide/svelte';
-	import { BottomNav, Spinner } from '@repo/ui';
 	import type { Snippet } from 'svelte';
 
 	import { authStore, requireAuth } from '$lib/modules/auth';
+	import { topBarStore } from '$lib/stores';
 	import { ROUTES } from '$lib/utils';
 	import { page } from '$app/state';
 
@@ -45,20 +46,41 @@
 </script>
 
 <div class="app-layout">
-	<main>
-		{#if !authStore.isInitialized || authStore.isLoading}
+	{#if topBarStore.isShow}
+		<TopBar title={topBarStore.title} contained>
+			{#snippet trailing()}
+				{#if topBarStore.trailingAction}
+					<IconButton
+						Icon={topBarStore.trailingAction.Icon}
+						label={topBarStore.trailingAction.label}
+						onclick={topBarStore.trailingAction.onclick}
+					/>
+				{/if}
+			{/snippet}
+		</TopBar>
+	{/if}
+
+	{#if !authStore.isInitialized || authStore.isLoading}
+		<Container>
 			<div class="loading">
 				<Spinner size="lg" />
 			</div>
-		{:else if authStore.isAuthenticated}
-			{@render children()}
-		{:else}
+		</Container>
+	{:else if authStore.isAuthenticated}
+		<Container>
+			<main>
+				{@render children()}
+			</main>
+		</Container>
+	{:else}
+		<Container>
 			<div class="loading">
 				<Spinner size="lg" />
 			</div>
-		{/if}
-	</main>
-	<BottomNav items={navItems} value={activeNavId} />
+		</Container>
+	{/if}
+
+	<BottomNav items={navItems} value={activeNavId} contained />
 </div>
 
 <style>
@@ -73,6 +95,7 @@
 	.app-layout {
 		display: flex;
 		flex-direction: column;
+		min-height: 100%;
 		padding-bottom: 80px;
 	}
 
