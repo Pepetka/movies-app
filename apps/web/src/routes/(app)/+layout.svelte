@@ -46,7 +46,12 @@
 </script>
 
 <div class="app-layout">
-	<TopBar title={topBarStore.title} contained>
+	<TopBar
+		title={topBarStore.title}
+		showBack={topBarStore.showBack}
+		onBack={topBarStore.onBack}
+		contained
+	>
 		{#snippet trailing()}
 			{#if topBarStore.trailingAction}
 				<IconButton

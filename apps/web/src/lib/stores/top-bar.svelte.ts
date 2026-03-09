@@ -8,6 +8,8 @@ export interface TopBarAction {
 
 interface TopBarState {
 	title?: string;
+	showBack?: boolean;
+	onBack?: () => void;
 	trailingAction?: TopBarAction;
 }
 
@@ -16,6 +18,14 @@ class TopBarStore {
 
 	get title(): string | undefined {
 		return this._state.title;
+	}
+
+	get showBack(): boolean {
+		return this._state.showBack ?? false;
+	}
+
+	get onBack(): (() => void) | undefined {
+		return this._state.onBack;
 	}
 
 	get trailingAction(): TopBarAction | undefined {

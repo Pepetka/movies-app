@@ -5,6 +5,7 @@ export const ROUTES = {
 	GROUPS: '/groups',
 	GROUPS_NEW: '/groups/new',
 	GROUP_DETAIL: (id: number) => `/groups/${String(id)}` as const,
+	GROUP_EDIT: (id: number) => `/groups/${String(id)}/edit` as const,
 	PROFILE: '/profile',
 	SETTINGS: '/settings'
 } as const;
