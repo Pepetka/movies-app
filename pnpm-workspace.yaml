@@ -17,7 +17,7 @@ catalog:
   "@sveltejs/kit": "^2.53.4"
   "@sveltejs/vite-plugin-svelte": "^6.2.1"
   prettier-plugin-svelte: "^3.5.1"
-  svelte-check: "^4.4.4"
+  svelte-check: "^4.4.5"
   vite: "^7.2.6"
   "@lucide/svelte": "^0.577.0"
 
