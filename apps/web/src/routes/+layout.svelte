@@ -151,9 +151,10 @@
 
 	.status-indicator {
 		position: fixed;
-		top: var(--space-4);
-		right: var(--space-4);
+		top: var(--space-2);
+		right: var(--space-2);
 		z-index: var(--z-fixed);
+		line-height: 0;
 	}
 
 	main {
