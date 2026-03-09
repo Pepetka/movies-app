@@ -46,19 +46,17 @@
 </script>
 
 <div class="app-layout">
-	{#if topBarStore.isShow}
-		<TopBar title={topBarStore.title} contained>
-			{#snippet trailing()}
-				{#if topBarStore.trailingAction}
-					<IconButton
-						Icon={topBarStore.trailingAction.Icon}
-						label={topBarStore.trailingAction.label}
-						onclick={topBarStore.trailingAction.onclick}
-					/>
-				{/if}
-			{/snippet}
-		</TopBar>
-	{/if}
+	<TopBar title={topBarStore.title} contained>
+		{#snippet trailing()}
+			{#if topBarStore.trailingAction}
+				<IconButton
+					Icon={topBarStore.trailingAction.Icon}
+					label={topBarStore.trailingAction.label}
+					onclick={topBarStore.trailingAction.onclick}
+				/>
+			{/if}
+		{/snippet}
+	</TopBar>
 
 	{#if !authStore.isInitialized || authStore.isLoading}
 		<Container>

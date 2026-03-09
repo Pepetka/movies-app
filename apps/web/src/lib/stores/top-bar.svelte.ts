@@ -14,10 +14,6 @@ interface TopBarState {
 class TopBarStore {
 	private _state = $state<TopBarState>({});
 
-	get isShow(): boolean {
-		return !!this._state.title?.trim() || !!this._state.trailingAction;
-	}
-
 	get title(): string | undefined {
 		return this._state.title;
 	}
