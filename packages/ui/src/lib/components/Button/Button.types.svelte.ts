@@ -2,7 +2,7 @@ import type { HTMLButtonAttributes, HTMLAnchorAttributes } from 'svelte/elements
 import type { Snippet } from 'svelte';
 
 export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger';
-export type ButtonSize = 'sm' | 'md' | 'lg';
+export type ButtonSize = 'sm' | 'md' | 'lg' | 'responsive';
 
 interface BaseProps {
 	variant?: ButtonVariant;

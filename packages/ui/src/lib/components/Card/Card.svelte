@@ -3,7 +3,7 @@
 
 	const {
 		variant = 'elevated',
-		size = 'md',
+		size = 'responsive',
 		interactive = false,
 		fullWidth = false,
 		class: className,
@@ -104,7 +104,7 @@
 		padding: var(--space-6) var(--space-8);
 	}
 
-	/* Responsive - sm on mobile, md on desktop */
+	/* Responsive - sm on mobile, md on tablet, lg on desktop */
 	.ui-card.responsive .ui-card-header,
 	.ui-card.responsive .ui-card-body,
 	.ui-card.responsive .ui-card-footer {
@@ -119,6 +119,17 @@
 
 		.ui-card.responsive .ui-card-body {
 			padding: var(--space-5) var(--space-6);
+		}
+	}
+
+	@media (min-width: 768px) {
+		.ui-card.responsive .ui-card-header,
+		.ui-card.responsive .ui-card-footer {
+			padding: var(--space-5) var(--space-8);
+		}
+
+		.ui-card.responsive .ui-card-body {
+			padding: var(--space-6) var(--space-8);
 		}
 	}
 

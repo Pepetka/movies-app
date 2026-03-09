@@ -8,6 +8,8 @@
 		defaultValue,
 		onChange,
 		class: className,
+		contained = false,
+		containerSize = 'xl',
 		...restProps
 	}: IProps = $props();
 
@@ -74,32 +76,63 @@
 </script>
 
 <nav class={['ui-bottom-nav', className]} aria-label="Main navigation" {...restProps}>
-	{#each visibleItems as item (item.id)}
-		{@const Icon = item.Icon}
-		{@const isActive = item.id === activeItem}
-		<a
-			bind:this={navLinks[item.id]}
-			class={['ui-bottom-nav-item', { active: isActive, disabled: item.disabled }]}
-			href={item.disabled ? undefined : item.href}
-			aria-current={isActive ? 'page' : undefined}
-			aria-disabled={item.disabled}
-			onclick={(e) => handleClick(e, item)}
-			onkeydown={(e) => handleKeydown(e, item)}
-		>
-			<span class="ui-bottom-nav-icon">
-				<Icon size={iconSize} />
-				{#if item.badge !== undefined && item.badge > 0}
-					<span
-						class="ui-bottom-nav-badge"
-						aria-label={item.badgeLabel ?? `${item.badge} notifications`}
-					>
-						{item.badge > 99 ? '99+' : item.badge}
+	{#if contained}
+		<div class={['ui-bottom-nav-inner', containerSize]}>
+			{#each visibleItems as item (item.id)}
+				{@const Icon = item.Icon}
+				{@const isActive = item.id === activeItem}
+				<a
+					bind:this={navLinks[item.id]}
+					class={['ui-bottom-nav-item', { active: isActive, disabled: item.disabled }]}
+					href={item.disabled ? undefined : item.href}
+					aria-current={isActive ? 'page' : undefined}
+					aria-disabled={item.disabled}
+					onclick={(e) => handleClick(e, item)}
+					onkeydown={(e) => handleKeydown(e, item)}
+				>
+					<span class="ui-bottom-nav-icon">
+						<Icon size={iconSize} />
+						{#if item.badge !== undefined && item.badge > 0}
+							<span
+								class="ui-bottom-nav-badge"
+								aria-label={item.badgeLabel ?? `${item.badge} notifications`}
+							>
+								{item.badge > 99 ? '99+' : item.badge}
+							</span>
+						{/if}
 					</span>
-				{/if}
-			</span>
-			<span class="ui-bottom-nav-label">{item.label}</span>
-		</a>
-	{/each}
+					<span class="ui-bottom-nav-label">{item.label}</span>
+				</a>
+			{/each}
+		</div>
+	{:else}
+		{#each visibleItems as item (item.id)}
+			{@const Icon = item.Icon}
+			{@const isActive = item.id === activeItem}
+			<a
+				bind:this={navLinks[item.id]}
+				class={['ui-bottom-nav-item', { active: isActive, disabled: item.disabled }]}
+				href={item.disabled ? undefined : item.href}
+				aria-current={isActive ? 'page' : undefined}
+				aria-disabled={item.disabled}
+				onclick={(e) => handleClick(e, item)}
+				onkeydown={(e) => handleKeydown(e, item)}
+			>
+				<span class="ui-bottom-nav-icon">
+					<Icon size={iconSize} />
+					{#if item.badge !== undefined && item.badge > 0}
+						<span
+							class="ui-bottom-nav-badge"
+							aria-label={item.badgeLabel ?? `${item.badge} notifications`}
+						>
+							{item.badge > 99 ? '99+' : item.badge}
+						</span>
+					{/if}
+				</span>
+				<span class="ui-bottom-nav-label">{item.label}</span>
+			</a>
+		{/each}
+	{/if}
 </nav>
 
 <style>
@@ -112,10 +145,41 @@
 		display: flex;
 		align-items: center;
 		justify-content: space-around;
-		height: 56px;
+		height: var(--bottom-nav-height);
 		padding-bottom: env(safe-area-inset-bottom);
 		background-color: var(--bottom-nav-bg);
 		border-top: 1px solid var(--bottom-nav-border);
+	}
+
+	.ui-bottom-nav-inner {
+		display: flex;
+		align-items: center;
+		justify-content: space-around;
+		flex: 1;
+		margin-left: auto;
+		margin-right: auto;
+		padding-left: var(--container-padding);
+		padding-right: var(--container-padding);
+	}
+
+	.ui-bottom-nav-inner.sm {
+		max-width: var(--container-sm-max-width);
+	}
+
+	.ui-bottom-nav-inner.md {
+		max-width: var(--container-md-max-width);
+	}
+
+	.ui-bottom-nav-inner.lg {
+		max-width: var(--container-lg-max-width);
+	}
+
+	.ui-bottom-nav-inner.xl {
+		max-width: var(--container-xl-max-width);
+	}
+
+	.ui-bottom-nav-inner.full {
+		max-width: 100%;
 	}
 
 	.ui-bottom-nav-item {

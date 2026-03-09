@@ -1,7 +1,7 @@
 import type { HTMLInputAttributes } from 'svelte/elements';
 import type { Icon } from '@lucide/svelte';
 
-export type InputSize = 'sm' | 'md' | 'lg';
+export type InputSize = 'sm' | 'md' | 'lg' | 'responsive';
 
 export interface IProps extends Omit<HTMLInputAttributes, 'size'> {
 	size?: InputSize;

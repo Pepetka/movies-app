@@ -1,4 +1,4 @@
-export type IconSize = 'sm' | 'md' | 'lg';
+export type IconSize = 'sm' | 'md' | 'lg' | 'responsive';
 
 export const getIconSize = (size: IconSize): number => {
 	switch (size) {
@@ -8,6 +8,8 @@ export const getIconSize = (size: IconSize): number => {
 			return 20;
 		case 'lg':
 			return 24;
+		case 'responsive':
+			return 16;
 		default:
 			return 20;
 	}

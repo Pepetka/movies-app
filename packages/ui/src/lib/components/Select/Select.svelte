@@ -12,7 +12,7 @@
 		error,
 		helper,
 		disabled,
-		size = 'md',
+		size = 'responsive',
 		onChange,
 		class: className,
 		placeholder,
@@ -288,5 +288,67 @@
 
 	.ui-select-wrapper.lg .ui-select-icon {
 		right: 12px;
+	}
+
+	/* Responsive size - sm on mobile, md on tablet, lg on desktop */
+	.ui-select-wrapper.responsive .ui-select-container select {
+		height: var(--input-sm-height);
+		padding: 0 32px 0 var(--input-sm-padding-x);
+		font-size: 14px;
+	}
+
+	.ui-select-wrapper.responsive .ui-select-label {
+		left: var(--input-sm-padding-x);
+		font-size: var(--text-base);
+	}
+
+	.ui-select-wrapper.responsive .ui-select-label.floating {
+		font-size: 12px;
+	}
+
+	.ui-select-wrapper.responsive .ui-select-icon {
+		right: 8px;
+	}
+
+	@media (min-width: 480px) {
+		.ui-select-wrapper.responsive .ui-select-container select {
+			height: var(--input-md-height);
+			padding: 0 36px 0 var(--input-md-padding-x);
+			font-size: var(--text-base);
+		}
+
+		.ui-select-wrapper.responsive .ui-select-label {
+			left: var(--input-md-padding-x);
+			font-size: 18px;
+		}
+
+		.ui-select-wrapper.responsive .ui-select-label.floating {
+			font-size: 13px;
+		}
+
+		.ui-select-wrapper.responsive .ui-select-icon {
+			right: 12px;
+		}
+	}
+
+	@media (min-width: 768px) {
+		.ui-select-wrapper.responsive .ui-select-container select {
+			height: var(--input-lg-height);
+			padding: 0 40px 0 var(--input-lg-padding-x);
+			font-size: 18px;
+		}
+
+		.ui-select-wrapper.responsive .ui-select-label {
+			left: var(--input-lg-padding-x);
+			font-size: 20px;
+		}
+
+		.ui-select-wrapper.responsive .ui-select-label.floating {
+			font-size: 14px;
+		}
+
+		.ui-select-wrapper.responsive .ui-select-icon {
+			right: 12px;
+		}
 	}
 </style>

@@ -12,31 +12,59 @@
 		leading,
 		trailing,
 		children,
+		contained = false,
+		containerSize = 'xl',
 		...restProps
 	}: IProps = $props();
 </script>
 
-<header class={['ui-top-bar', className]} {...restProps}>
-	{#if leading}
-		<div class="ui-top-bar-left">
-			{@render leading()}
-		</div>
-	{:else if showBack}
-		<div class="ui-top-bar-left">
-			<IconButton Icon={ArrowLeft} label="Go back" variant="ghost" size="md" onclick={onBack} />
-		</div>
-	{/if}
+<header class={['ui-top-bar', contained && 'contained', className]} {...restProps}>
+	{#if contained}
+		<div class={['ui-top-bar-inner', containerSize]}>
+			{#if leading}
+				<div class="ui-top-bar-left">
+					{@render leading()}
+				</div>
+			{:else if showBack}
+				<div class="ui-top-bar-left">
+					<IconButton Icon={ArrowLeft} label="Go back" variant="ghost" size="md" onclick={onBack} />
+				</div>
+			{/if}
 
-	{#if children}
-		{@render children()}
-	{:else if title}
-		<h1 class="ui-top-bar-title" aria-label={title}>{title}</h1>
-	{/if}
+			{#if children}
+				{@render children()}
+			{:else if title}
+				<h1 class="ui-top-bar-title" aria-label={title}>{title}</h1>
+			{/if}
 
-	{#if trailing}
-		<div class="ui-top-bar-right">
-			{@render trailing()}
+			{#if trailing}
+				<div class="ui-top-bar-right">
+					{@render trailing()}
+				</div>
+			{/if}
 		</div>
+	{:else}
+		{#if leading}
+			<div class="ui-top-bar-left">
+				{@render leading()}
+			</div>
+		{:else if showBack}
+			<div class="ui-top-bar-left">
+				<IconButton Icon={ArrowLeft} label="Go back" variant="ghost" size="md" onclick={onBack} />
+			</div>
+		{/if}
+
+		{#if children}
+			{@render children()}
+		{:else if title}
+			<h1 class="ui-top-bar-title" aria-label={title}>{title}</h1>
+		{/if}
+
+		{#if trailing}
+			<div class="ui-top-bar-right">
+				{@render trailing()}
+			</div>
+		{/if}
 	{/if}
 </header>
 
@@ -45,13 +73,48 @@
 		position: sticky;
 		top: 0;
 		z-index: var(--z-sticky);
-		height: 56px;
+		height: var(--top-bar-height);
 		display: flex;
 		align-items: center;
 		padding: 0 var(--space-4);
 		background-color: var(--bg-primary);
 		border-bottom: 1px solid var(--border-primary);
 		gap: var(--space-2);
+	}
+
+	.ui-top-bar.contained {
+		padding: 0;
+	}
+
+	.ui-top-bar-inner {
+		display: flex;
+		align-items: center;
+		flex: 1;
+		gap: var(--space-2);
+		margin-left: auto;
+		margin-right: auto;
+		padding-left: var(--container-padding);
+		padding-right: var(--container-padding);
+	}
+
+	.ui-top-bar-inner.sm {
+		max-width: var(--container-sm-max-width);
+	}
+
+	.ui-top-bar-inner.md {
+		max-width: var(--container-md-max-width);
+	}
+
+	.ui-top-bar-inner.lg {
+		max-width: var(--container-lg-max-width);
+	}
+
+	.ui-top-bar-inner.xl {
+		max-width: var(--container-xl-max-width);
+	}
+
+	.ui-top-bar-inner.full {
+		max-width: 100%;
 	}
 
 	.ui-top-bar-title {

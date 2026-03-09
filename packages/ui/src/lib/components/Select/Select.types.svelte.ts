@@ -1,6 +1,6 @@
 import type { HTMLSelectAttributes } from 'svelte/elements';
 
-export type SelectSize = 'sm' | 'md' | 'lg';
+export type SelectSize = 'sm' | 'md' | 'lg' | 'responsive';
 
 export interface Option {
 	value: string;

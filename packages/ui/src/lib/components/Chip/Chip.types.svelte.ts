@@ -2,7 +2,7 @@ import type { HTMLButtonAttributes } from 'svelte/elements';
 import type { Icon } from '@lucide/svelte';
 import type { Snippet } from 'svelte';
 
-export type ChipSize = 'sm' | 'md' | 'lg';
+export type ChipSize = 'sm' | 'md' | 'lg' | 'responsive';
 
 export interface IProps extends Omit<HTMLButtonAttributes, 'size'> {
 	selected?: boolean;

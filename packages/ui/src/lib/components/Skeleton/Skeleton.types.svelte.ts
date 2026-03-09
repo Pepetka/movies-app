@@ -1,7 +1,7 @@
 import type { HTMLAttributes } from 'svelte/elements';
 
 export type SkeletonVariant = 'text' | 'circular' | 'rectangular';
-export type SkeletonSize = 'sm' | 'md' | 'lg';
+export type SkeletonSize = 'sm' | 'md' | 'lg' | 'responsive';
 
 export interface IProps extends Omit<HTMLAttributes<HTMLSpanElement>, 'size'> {
 	variant?: SkeletonVariant;
