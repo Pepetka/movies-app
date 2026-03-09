@@ -1,9 +1,8 @@
 import { toast } from '@repo/ui';
 
 import type { AuthLoginDto, AuthRegisterDto, UserResponseDto } from '$lib/api/generated/types';
-import { HttpError, NetworkError, RetryError } from '$lib/api/errors';
 import { createQuery, type QueryResult } from '$lib/query';
-import { logger } from '$lib/utils/logger';
+import { BaseStore } from '$lib/stores/base.svelte';
 
 import {
 	getCurrentUser,
@@ -14,7 +13,7 @@ import {
 import { validateLoginForm, validateRegisterForm } from './validation.svelte';
 import type { AuthStatus, ValidationResult } from './types';
 
-class AuthStore {
+class AuthStore extends BaseStore {
 	status = $state<AuthStatus>('loading');
 	error = $state<string | null>(null);
 	isInitialized = $state(false);
@@ -146,25 +145,6 @@ class AuthStore {
 		this.status = 'loading';
 		this.error = null;
 		this.isInitialized = false;
-	}
-
-	private _extractErrorMessage(error: unknown, fallback: string): string {
-		if (
-			error instanceof HttpError ||
-			error instanceof NetworkError ||
-			error instanceof RetryError
-		) {
-			return error.getErrorMessage();
-		}
-		return fallback;
-	}
-
-	private _log(
-		level: 'debug' | 'info' | 'warn' | 'error',
-		message: string,
-		meta?: Record<string, unknown>
-	): void {
-		logger[level]('AuthStore', message, meta);
 	}
 }
 
