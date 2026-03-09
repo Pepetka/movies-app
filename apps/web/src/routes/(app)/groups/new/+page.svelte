@@ -8,7 +8,7 @@
 		topBarStore.configure({
 			title: 'Новая группа'
 		});
-		return () => topBarStore.reset();
+		return () => topBarStore.destroy();
 	});
 </script>
 

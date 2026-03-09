@@ -11,7 +11,7 @@
 		topBarStore.configure({
 			title: `Группа ${groupId}`
 		});
-		return () => topBarStore.reset();
+		return () => topBarStore.destroy();
 	});
 </script>
 

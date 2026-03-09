@@ -20,7 +20,7 @@
 		topBarStore.configure({
 			title: 'Мои группы'
 		});
-		return () => topBarStore.reset();
+		return () => topBarStore.destroy();
 	});
 
 	$effect(() => {

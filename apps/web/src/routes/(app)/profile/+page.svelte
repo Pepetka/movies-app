@@ -8,7 +8,7 @@
 		topBarStore.configure({
 			title: 'Профиль'
 		});
-		return () => topBarStore.reset();
+		return () => topBarStore.destroy();
 	});
 </script>
 

@@ -11,7 +11,7 @@
 		topBarStore.configure({
 			title: 'Настройки'
 		});
-		return () => topBarStore.reset();
+		return () => topBarStore.destroy();
 	});
 
 	const handleLogout = async () => {

@@ -37,21 +37,18 @@ class GroupsStore extends BaseStore {
 		this.status = 'loading';
 		const query = this._getQuery();
 
-		try {
-			await query.refetch();
+		await query.refetch();
 
-			if (query.data) {
-				this.groups = query.data;
-				this.status = 'loaded';
-				this.error = null;
-			} else if (query.error) {
-				this.status = 'error';
-				this.error = this._extractErrorMessage(query.error, 'Ошибка загрузки групп');
-			}
-		} catch (error) {
+		if (query.error) {
 			this.status = 'error';
-			this.error = this._extractErrorMessage(error, 'Ошибка загрузки групп');
-			this._log('error', 'Failed to fetch groups', { error });
+			this.error = this._extractErrorMessage(query.error, 'Ошибка загрузки групп');
+			this._log('error', 'Failed to fetch groups', { error: query.error });
+		} else if (query.data) {
+			this.groups = query.data;
+			this.status = 'loaded';
+			this.error = null;
+		} else {
+			this.status = 'idle';
 		}
 	}
 
