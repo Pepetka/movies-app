@@ -33,6 +33,7 @@ COPY packages/eslint-config ./packages/eslint-config
 ARG API_URL
 ENV API_URL=${API_URL}
 
+RUN pnpm --filter web exec -- svelte-kit sync
 RUN pnpm --filter web types:generate
 
 RUN pnpm run build --filter=@repo/ui && pnpm run build --filter=web
