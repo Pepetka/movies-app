@@ -23,5 +23,6 @@ cd "$SCRIPT_DIR/../apps/web"
 
 curl -s "$API_URL/api/docs/json" -o openapi.json
 pnpm run types:generate
+pnpm run format
 
 echo "Types generated successfully!"
