@@ -39,7 +39,7 @@
 		align-items: center;
 		justify-content: center;
 		gap: var(--space-4);
-		padding-top: var(--space-8);
+		padding-block: var(--space-4);
 		text-align: center;
 	}
 

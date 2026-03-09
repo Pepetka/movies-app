@@ -113,8 +113,7 @@
 		display: flex;
 		flex-direction: column;
 		min-height: 100%;
-		padding-top: var(--space-4);
-		padding-bottom: var(--space-20);
+		padding-block: var(--space-4);
 	}
 
 	.groups-page__content {

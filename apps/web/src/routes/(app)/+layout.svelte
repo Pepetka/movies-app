@@ -96,7 +96,8 @@
 		display: flex;
 		flex-direction: column;
 		min-height: 100%;
-		padding-bottom: 80px;
+		padding-top: var(--top-bar-height);
+		padding-bottom: var(--bottom-nav-height);
 	}
 
 	main {

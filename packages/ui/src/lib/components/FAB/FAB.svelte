@@ -20,7 +20,7 @@
 
 <button
 	{type}
-	class={['ui-fab', variant, size, position, offset !== 'default' && `offset-${offset}`, className]}
+	class={['ui-fab', variant, size, position, offset !== 'default' && offset, className]}
 	{disabled}
 	aria-label={label || 'Action'}
 	{...restProps}
@@ -36,7 +36,7 @@
 <style>
 	.ui-fab {
 		position: fixed;
-		z-index: var(--z-fixed);
+		z-index: var(--z-fab);
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
@@ -222,10 +222,7 @@
 
 	/* Offset from bottom nav */
 	.ui-fab.above-bottom-nav.bottom-right,
-	.ui-fab.above-bottom-nav.bottom-left {
-		bottom: var(--fab-offset-bottom-nav);
-	}
-
+	.ui-fab.above-bottom-nav.bottom-left,
 	.ui-fab.above-bottom-nav.bottom-center {
 		bottom: var(--fab-offset-bottom-nav);
 	}

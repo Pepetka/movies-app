@@ -70,8 +70,10 @@
 
 <style>
 	.ui-top-bar {
-		position: sticky;
+		position: fixed;
 		top: 0;
+		left: 0;
+		right: 0;
 		z-index: var(--z-sticky);
 		height: var(--top-bar-height);
 		display: flex;

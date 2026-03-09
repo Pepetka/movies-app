@@ -44,7 +44,7 @@
 		display: flex;
 		flex-direction: column;
 		align-items: center;
-		padding-top: var(--space-4);
+		padding-block: var(--space-4);
 	}
 
 	.settings-section {
