@@ -1,5 +1,14 @@
 # @repo/ui
 
+## 0.7.0
+
+### Minor Changes
+
+- 7c5ee4b: Enhanced Divider and Textarea components with new props and fixes
+  - Added label prop to Divider component for section headers
+  - Fixed disabled state handling in Textarea component
+  - Fixed restProps spreading in Divider for proper attribute passthrough
+
 ## 0.6.0
 
 ### Minor Changes
