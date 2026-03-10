@@ -16,7 +16,7 @@
 	const groupId = $derived(Number(page.params.id));
 
 	let form = $state<GroupFormData>({ ...EMPTY_GROUP_FORM });
-	let isLoadingGroup = $state(false);
+	let loadError = $state<string | null>(null);
 
 	$effect(() => {
 		topBarStore.configure({
@@ -24,30 +24,37 @@
 			showBack: true,
 			onBack: () => goto(resolve(ROUTES.GROUP_DETAIL(groupId)))
 		});
-		return () => {
-			topBarStore.destroy();
-		};
+		return () => topBarStore.destroy();
 	});
 
 	$effect(() => {
-		if (groupsStore.currentGroup?.id !== groupId && !isLoadingGroup) {
-			isLoadingGroup = true;
+		let cancelled = false;
+
+		const loadGroup = async () => {
 			groupsStore.resetForm();
-			void groupsStore.fetchGroup(groupId).finally(() => {
-				isLoadingGroup = false;
-			});
-		}
-	});
+			loadError = null;
 
-	$effect(() => {
-		const current = groupsStore.currentGroup;
-		if (current?.id === groupId) {
-			form = {
-				name: current.name ?? '',
-				description: current.description ?? '',
-				avatarUrl: current.avatarUrl ?? ''
-			};
-		}
+			await groupsStore.fetchGroup(groupId);
+
+			if (cancelled) return;
+
+			if (groupsStore.formError) {
+				loadError = groupsStore.formError;
+			} else if (groupsStore.currentGroup) {
+				form = {
+					name: groupsStore.currentGroup.name ?? '',
+					description: groupsStore.currentGroup.description ?? '',
+					avatarUrl: groupsStore.currentGroup.avatarUrl ?? ''
+				};
+			}
+		};
+
+		void loadGroup();
+
+		return () => {
+			cancelled = true;
+			groupsStore.resetForm();
+		};
 	});
 
 	const handleSubmit = async () => {
@@ -65,7 +72,11 @@
 		}
 	};
 
-	const isLoading = $derived(isLoadingGroup || groupsStore.currentGroup?.id !== groupId);
+	const handleRetry = () => {
+		void groupsStore.fetchGroup(groupId);
+	};
+
+	const isLoading = $derived(groupsStore.currentGroup?.id !== groupId && !loadError);
 </script>
 
 {#if isLoading}
@@ -74,16 +85,52 @@
 			<Spinner size="lg" />
 		</div>
 	</div>
+{:else if loadError}
+	<div class="group-form-page">
+		<div class="group-form-error">
+			<p class="error-message">{loadError}</p>
+			<button class="retry-button" onclick={handleRetry}>
+				Повторить
+			</button>
+		</div>
+	</div>
 {:else}
 	<GroupForm mode="edit" bind:form onSubmit={handleSubmit} />
 {/if}
 
 <style>
-	.group-form-loading {
+	.group-form-loading,
+	.group-form-error {
 		display: flex;
+		flex-direction: column;
 		align-items: center;
 		justify-content: center;
 		flex: 1;
 		padding-top: var(--space-16);
+		gap: var(--space-4);
+	}
+
+	.error-message {
+		color: var(--color-error);
+		font-size: var(--text-base);
+		text-align: center;
+		margin: 0;
+	}
+
+	.retry-button {
+		padding: var(--space-2) var(--space-4);
+		background-color: var(--color-primary);
+		color: white;
+		border: none;
+		border-radius: var(--radius-md);
+		font-size: var(--text-sm);
+		cursor: pointer;
+		transition: background-color 0.2s ease;
+	}
+
+	@media (hover: hover) {
+		.retry-button:hover {
+			background-color: var(--color-primary-hover);
+		}
 	}
 </style>
