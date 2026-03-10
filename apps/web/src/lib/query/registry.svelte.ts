@@ -63,6 +63,16 @@ class QueryRegistry {
 		}
 	}
 
+	resetAll(): void {
+		if (this._debug) {
+			logger.debug('QueryRegistry', 'Reset all queries');
+		}
+
+		for (const entry of this._queries.values()) {
+			entry.actions.reset();
+		}
+	}
+
 	private _unregister(serializedKey: string, tags: string[], debug: boolean): void {
 		this._queries.delete(serializedKey);
 		for (const tag of tags) {

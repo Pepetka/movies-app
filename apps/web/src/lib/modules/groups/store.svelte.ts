@@ -53,7 +53,7 @@ class GroupsStore extends BaseStore {
 		if (!this._query) return 'idle';
 		if (this._query.isFetching && this.groups.length === 0) return 'loading';
 		if (this._query.error) return 'error';
-		if (this.groups.length > 0) return 'loaded';
+		if (this._query.data !== null) return 'loaded';
 		return 'idle';
 	}
 

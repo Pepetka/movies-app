@@ -1,7 +1,7 @@
 import { toast } from '@repo/ui';
 
 import type { AuthLoginDto, AuthRegisterDto, UserResponseDto } from '$lib/api/generated/types';
-import { createQuery, type QueryResult } from '$lib/query';
+import { createQuery, queryRegistry, type QueryResult } from '$lib/query';
 import { BaseStore } from '$lib/stores/base.svelte';
 
 import {
@@ -118,7 +118,7 @@ class AuthStore extends BaseStore {
 			toast.error(this._extractErrorMessage(error, 'Ошибка выхода'));
 			throw error;
 		} finally {
-			this._query.reset();
+			queryRegistry.resetAll();
 		}
 	}
 
