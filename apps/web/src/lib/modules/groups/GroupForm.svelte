@@ -1,10 +1,11 @@
-<script lang="ts" generics="IProps extends GroupFormProps">
+<script lang="ts">
 	import { Avatar, Button, Card, Divider, Input, Textarea } from '@repo/ui';
 	import { Image, Save, Sparkles, Users } from '@lucide/svelte';
 
 	import { createFormFieldValidator, debounce, DEBOUNCE } from '$lib/utils';
 
-	import { groupsStore, validateGroupForm, type GroupFormProps } from './';
+	import { validateGroupForm } from './validation.svelte';
+	import type { IProps } from './types';
 
 	import '$lib/styles/group-form.css';
 
@@ -21,7 +22,8 @@
 			name: '',
 			description: '',
 			avatarUrl: ''
-		})
+		}),
+		isSubmitting = false
 	}: IProps = $props();
 
 	const fieldValidator = createFormFieldValidator(validateGroupForm);
@@ -54,7 +56,7 @@
 	const handleSubmit = async (e: Event) => {
 		e.preventDefault();
 
-		if (groupsStore.isSubmitting) return;
+		if (isSubmitting) return;
 
 		const validation = validateGroupForm(form);
 		fieldValidator.setErrors(validation.errors);
@@ -102,7 +104,7 @@
 				error={fieldValidator.errors.name}
 				Icon={Users}
 				placeholder="Киноклуб «Вечерний сеанс»"
-				disabled={groupsStore.isSubmitting}
+				disabled={isSubmitting}
 				onChange={() => fieldValidator.handleFieldChange(form, 'name')}
 			/>
 
@@ -113,7 +115,7 @@
 				placeholder="Расскажите о вашей группе — какие фильмы смотрите, как часто встречаетесь..."
 				rows={3}
 				maxlength={500}
-				disabled={groupsStore.isSubmitting}
+				disabled={isSubmitting}
 				onChange={() => fieldValidator.handleFieldChange(form, 'description')}
 			/>
 
@@ -126,11 +128,11 @@
 				error={fieldValidator.errors.avatarUrl}
 				Icon={Image}
 				placeholder="https://example.com/group-avatar.jpg"
-				disabled={groupsStore.isSubmitting}
+				disabled={isSubmitting}
 				onChange={() => fieldValidator.handleFieldChange(form, 'avatarUrl')}
 			/>
 
-			<Button type="submit" variant="primary" fullWidth loading={groupsStore.isSubmitting}>
+			<Button type="submit" variant="primary" fullWidth loading={isSubmitting}>
 				<SubmitIcon size={16} />
 				{submitLabel}
 			</Button>

@@ -13,6 +13,8 @@
 	import { ROUTES } from '$lib/utils';
 	import { page } from '$app/state';
 
+	import '$lib/styles/page-states.css';
+
 	const groupId = $derived(Number(page.params.id));
 
 	let form = $state<GroupFormData>({ ...EMPTY_GROUP_FORM });
@@ -80,55 +82,14 @@
 </script>
 
 {#if isLoading}
-	<div class="group-form-page">
-		<div class="group-form-loading">
-			<Spinner size="lg" />
-		</div>
+	<div class="page-state">
+		<Spinner size="lg" />
 	</div>
 {:else if loadError}
-	<div class="group-form-page">
-		<div class="group-form-error">
-			<p class="error-message">{loadError}</p>
-			<button class="retry-button" onclick={handleRetry}> Повторить </button>
-		</div>
+	<div class="page-state">
+		<p class="page-state__error-message">{loadError}</p>
+		<button class="page-state__retry-button" onclick={handleRetry}>Повторить</button>
 	</div>
 {:else}
-	<GroupForm mode="edit" bind:form onSubmit={handleSubmit} />
+	<GroupForm mode="edit" bind:form onSubmit={handleSubmit} isSubmitting={groupsStore.isSubmitting} />
 {/if}
-
-<style>
-	.group-form-loading,
-	.group-form-error {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		justify-content: center;
-		flex: 1;
-		padding-top: var(--space-16);
-		gap: var(--space-4);
-	}
-
-	.error-message {
-		color: var(--color-error);
-		font-size: var(--text-base);
-		text-align: center;
-		margin: 0;
-	}
-
-	.retry-button {
-		padding: var(--space-2) var(--space-4);
-		background-color: var(--color-primary);
-		color: white;
-		border: none;
-		border-radius: var(--radius-md);
-		font-size: var(--text-sm);
-		cursor: pointer;
-		transition: background-color 0.2s ease;
-	}
-
-	@media (hover: hover) {
-		.retry-button:hover {
-			background-color: var(--color-primary-hover);
-		}
-	}
-</style>

@@ -10,7 +10,7 @@ export type GroupFormStatus = FormStatus;
 
 export type GroupFormMode = 'create' | 'edit';
 
-export interface GroupFormProps {
+export interface IProps {
 	mode?: GroupFormMode;
 	title?: string;
 	subtitle?: string;
@@ -20,4 +20,5 @@ export interface GroupFormProps {
 	submitIcon?: typeof IconType;
 	onSubmit?: () => void | Promise<void>;
 	form?: GroupFormData;
+	isSubmitting?: boolean;
 }
