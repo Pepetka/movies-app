@@ -10,59 +10,56 @@ import {
 } from './api';
 import type { GroupFormStatus, GroupsStatus } from './types';
 
-const MAX_CACHED_GROUPS = 3;
-
 class GroupsStore extends BaseStore {
-	groups = $state<GroupResponseDto[]>([]);
-	status = $state<GroupsStatus>('idle');
-	error = $state<string | null>(null);
+	private _query: QueryResult<GroupResponseDto[]> | null = null;
+	private _groupQuery: QueryResult<GroupResponseDto> | null = null;
+	private _currentGroupId: number | null = null;
 
 	formStatus = $state<GroupFormStatus>('idle');
 	formError = $state<string | null>(null);
 	currentGroup = $state<GroupResponseDto | null>(null);
 
-	private _query: QueryResult<GroupResponseDto[]> | null = null;
-	private _groupQueries = new Map<number, QueryResult<GroupResponseDto>>();
-	private _groupQueryOrder: number[] = [];
-
-	private _getQuery(): QueryResult<GroupResponseDto[]> {
-		if (!this._query) {
-			this._query = createQuery<GroupResponseDto[]>({
-				key: ['groups'],
-				tags: ['groups'],
-				fetcher: (signal) => getGroups(signal),
-				enabled: false,
-				debug: import.meta.env.DEV
-			});
-		}
-		return this._query;
-	}
-
-	private _evictOldestQuery(): void {
-		if (this._groupQueryOrder.length <= MAX_CACHED_GROUPS) return;
-
-		const oldestId = this._groupQueryOrder.shift();
-		if (oldestId !== undefined) {
-			const query = this._groupQueries.get(oldestId);
-			query?.reset();
-			this._groupQueries.delete(oldestId);
-		}
+	constructor() {
+		super();
+		this._query = createQuery<GroupResponseDto[]>({
+			key: ['groups'],
+			tags: ['groups'],
+			fetcher: (signal) => getGroups(signal),
+			debug: !__IS_PROD__
+		});
 	}
 
 	private _getGroupQuery(id: number): QueryResult<GroupResponseDto> {
-		if (!this._groupQueries.has(id)) {
-			const query = createQuery<GroupResponseDto>({
-				key: ['group', id],
-				tags: ['groups'],
-				fetcher: (signal) => getGroupApi(id, signal),
-				enabled: false,
-				debug: import.meta.env.DEV
-			});
-			this._groupQueries.set(id, query);
-			this._groupQueryOrder.push(id);
-			this._evictOldestQuery();
+		if (this._groupQuery && this._currentGroupId === id) {
+			return this._groupQuery;
 		}
-		return this._groupQueries.get(id)!;
+
+		this._groupQuery?.destroy();
+		this._groupQuery = createQuery<GroupResponseDto>({
+			key: ['group', id],
+			tags: ['groups'],
+			fetcher: (signal) => getGroupApi(id, signal),
+			debug: !__IS_PROD__
+		});
+		this._currentGroupId = id;
+		return this._groupQuery;
+	}
+
+	get groups(): GroupResponseDto[] {
+		return this._query?.data ?? [];
+	}
+
+	get status(): GroupsStatus {
+		if (!this._query) return 'idle';
+		if (this._query.isFetching && this.groups.length === 0) return 'loading';
+		if (this._query.error) return 'error';
+		if (this.groups.length > 0) return 'loaded';
+		return 'idle';
+	}
+
+	get error(): string | null {
+		if (!this._query?.error) return null;
+		return this._extractErrorMessage(this._query.error, 'Ошибка загрузки групп');
 	}
 
 	get isFetching(): boolean {
@@ -78,22 +75,7 @@ class GroupsStore extends BaseStore {
 	}
 
 	async fetchGroups(): Promise<void> {
-		this.status = 'loading';
-		const query = this._getQuery();
-
-		await query.refetch();
-
-		if (query.error) {
-			this.status = 'error';
-			this.error = this._extractErrorMessage(query.error, 'Ошибка загрузки групп');
-			this._log('error', 'Failed to fetch groups', { error: query.error });
-		} else if (query.data) {
-			this.groups = query.data;
-			this.status = 'loaded';
-			this.error = null;
-		} else {
-			this.status = 'idle';
-		}
+		await this._query?.refetch();
 	}
 
 	async fetchGroup(id: number): Promise<void> {
@@ -155,24 +137,20 @@ class GroupsStore extends BaseStore {
 		this.formStatus = 'idle';
 		this.formError = null;
 		this.currentGroup = null;
-		for (const query of this._groupQueries.values()) {
-			query.reset();
-		}
-		this._groupQueries.clear();
-		this._groupQueryOrder = [];
+		this._groupQuery?.destroy();
+		this._groupQuery = null;
+		this._currentGroupId = null;
 	}
 
 	reset(): void {
 		this._query?.reset();
-		this.groups = [];
-		this.status = 'idle';
-		this.error = null;
 		this.resetForm();
 	}
 
 	destroy(): void {
-		this.reset();
+		this._query?.destroy();
 		this._query = null;
+		this.resetForm();
 	}
 }
 
