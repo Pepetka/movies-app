@@ -22,6 +22,7 @@
 		});
 		return () => {
 			topBarStore.destroy();
+			groupsStore.resetForm();
 		};
 	});
 
