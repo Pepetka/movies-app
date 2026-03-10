@@ -1,6 +1,8 @@
 import { SvelteMap } from 'svelte/reactivity';
 import { z } from 'zod';
 
+import { DEBOUNCE } from './config';
+
 export type FormStatus = 'idle' | 'submitting' | 'success' | 'error';
 
 export interface ValidationResult<T> {
@@ -28,7 +30,7 @@ export const createValidator = <T>(schema: z.ZodSchema<T>) => {
 
 export const createFormFieldValidator = <T extends Record<string, unknown>>(
 	validateForm: (data: T) => ValidationResult<T>,
-	debounceMs = 1000
+	debounceMs = DEBOUNCE.FORM_VALIDATION
 ) => {
 	let errors = $state.raw<Record<string, string>>({});
 	let touched = $state.raw<Record<string, boolean>>({});

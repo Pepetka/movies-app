@@ -2,7 +2,7 @@
 	import { Avatar, Button, Card, Divider, Input, Textarea } from '@repo/ui';
 	import { Image, Save, Sparkles, Users } from '@lucide/svelte';
 
-	import { createFormFieldValidator, debounce } from '$lib/utils';
+	import { createFormFieldValidator, debounce, DEBOUNCE } from '$lib/utils';
 
 	import { groupsStore, validateGroupForm, type GroupFormProps } from './';
 
@@ -30,7 +30,7 @@
 	let debouncedName = $state(form.name);
 	const updateDebouncedName = debounce((value: string) => {
 		debouncedName = value;
-	}, 300);
+	}, DEBOUNCE.AVATAR_NAME);
 
 	// Debounced update on user input
 	$effect(() => {
