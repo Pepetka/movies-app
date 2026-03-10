@@ -26,13 +26,22 @@
 
 	const fieldValidator = createFormFieldValidator(validateGroupForm);
 
+	// Debounce avatar name to prevent color flickering during input (avatar color depends on name)
 	let debouncedName = $state(form.name);
 	const updateDebouncedName = debounce((value: string) => {
 		debouncedName = value;
 	}, 300);
 
+	// Debounced update on user input
 	$effect(() => {
 		updateDebouncedName(form.name);
+	});
+
+	// Instant sync on external change (e.g., loading group data)
+	$effect(() => {
+		if (form.name !== debouncedName && !updateDebouncedName.pending()) {
+			debouncedName = form.name;
+		}
 	});
 
 	$effect(() => {
@@ -59,12 +68,7 @@
 <div class="group-form-page">
 	<div class="group-form-branding">
 		<div class="group-form-avatar-header">
-			<Avatar
-				src={form.avatarUrl || undefined}
-				name={debouncedName || '?'}
-				size="xl"
-				alt="Превью аватара группы"
-			/>
+			<Avatar src={form.avatarUrl} name={debouncedName} size="xl" alt="Превью аватара группы" />
 		</div>
 		<h1 class="group-form-title">
 			{title || (mode === 'create' ? 'Создание группы' : 'Редактирование')}
