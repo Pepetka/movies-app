@@ -12,7 +12,7 @@
 	import { resolve } from '$app/paths';
 	import { ROUTES } from '$lib/utils';
 
-	let form = $state<GroupFormData>(structuredClone(EMPTY_GROUP_FORM));
+	let form = $state<GroupFormData>({ ...EMPTY_GROUP_FORM });
 
 	$effect(() => {
 		topBarStore.configure({
@@ -33,7 +33,6 @@
 		});
 
 		if (group) {
-			form = structuredClone(EMPTY_GROUP_FORM);
 			toast.success('Группа создана');
 			await goto(resolve(ROUTES.GROUP_DETAIL(group.id)));
 		} else {

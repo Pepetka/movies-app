@@ -15,7 +15,7 @@
 
 	const groupId = $derived(Number(page.params.id));
 
-	let form = $state<GroupFormData>(structuredClone(EMPTY_GROUP_FORM));
+	let form = $state<GroupFormData>({ ...EMPTY_GROUP_FORM });
 	let isLoadingGroup = $state(false);
 
 	$effect(() => {
@@ -65,7 +65,7 @@
 		}
 	};
 
-	const isLoading = $derived(groupsStore.currentGroup?.id !== groupId);
+	const isLoading = $derived(isLoadingGroup || groupsStore.currentGroup?.id !== groupId);
 </script>
 
 {#if isLoading}
