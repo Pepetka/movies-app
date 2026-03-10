@@ -14,6 +14,7 @@ class GroupsStore extends BaseStore {
 	private _query: QueryResult<GroupResponseDto[]> | null = null;
 	private _groupQuery: QueryResult<GroupResponseDto> | null = null;
 	private _currentGroupId: number | null = null;
+	private _fetchVersion = 0;
 
 	formStatus = $state<GroupFormStatus>('idle');
 	formError = $state<string | null>(null);
@@ -79,11 +80,14 @@ class GroupsStore extends BaseStore {
 	}
 
 	async fetchGroup(id: number): Promise<void> {
+		const version = ++this._fetchVersion;
 		this.formStatus = 'idle';
 		this.formError = null;
 
 		const query = this._getGroupQuery(id);
 		await query.refetch();
+
+		if (version !== this._fetchVersion) return;
 
 		if (query.error) {
 			this.formStatus = 'error';
