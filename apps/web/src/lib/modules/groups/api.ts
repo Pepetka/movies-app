@@ -14,17 +14,10 @@ export const getGroup = async (id: number, signal?: AbortSignal): Promise<GroupR
 	return groupsControllerFindOneV1(id, { signal });
 };
 
-export const createGroup = async (
-	data: GroupCreateDto,
-	signal?: AbortSignal
-): Promise<GroupResponseDto> => {
-	return groupsControllerCreateV1(data, { signal });
+export const createGroup = async (data: GroupCreateDto): Promise<GroupResponseDto> => {
+	return groupsControllerCreateV1(data);
 };
 
-export const updateGroup = async (
-	id: number,
-	data: GroupUpdateDto,
-	signal?: AbortSignal
-): Promise<GroupResponseDto> => {
-	return groupsControllerUpdateV1(id, data, { signal });
+export const updateGroup = async (id: number, data: GroupUpdateDto): Promise<GroupResponseDto> => {
+	return groupsControllerUpdateV1(id, data);
 };
