@@ -32,8 +32,8 @@ export const createFormFieldValidator = <T extends Record<string, unknown>>(
 	validateForm: (data: T) => ValidationResult<T>,
 	debounceMs = DEBOUNCE.FORM_VALIDATION
 ) => {
-	let errors = $state.raw<Record<string, string>>({});
-	let touched = $state.raw<Record<string, boolean>>({});
+	let errors = $state<Record<string, string>>({});
+	let touched = $state<Record<string, boolean>>({});
 	const pendingValidations = new SvelteMap<string, ReturnType<typeof setTimeout>>();
 
 	const validateField = (form: T, field: keyof T & string) => {
