@@ -38,7 +38,6 @@ class GroupsStore extends BaseStore {
 		this._groupQuery?.destroy();
 		this._groupQuery = createQuery<GroupResponseDto>({
 			key: ['group', id],
-			tags: ['groups'],
 			fetcher: (signal) => getGroupApi(id, signal),
 			debug: !__IS_PROD__
 		});

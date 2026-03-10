@@ -89,9 +89,7 @@
 	<div class="group-form-page">
 		<div class="group-form-error">
 			<p class="error-message">{loadError}</p>
-			<button class="retry-button" onclick={handleRetry}>
-				Повторить
-			</button>
+			<button class="retry-button" onclick={handleRetry}> Повторить </button>
 		</div>
 	</div>
 {:else}
