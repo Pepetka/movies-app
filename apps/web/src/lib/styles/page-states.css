@@ -1,0 +1,38 @@
+/* ========================================
+   Page States - Loading & Error
+   ======================================== */
+
+.page-state {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	flex: 1;
+	padding-top: var(--space-16);
+	gap: var(--space-4);
+	width: 100%;
+}
+
+.page-state__error-message {
+	color: var(--color-error);
+	font-size: var(--text-base);
+	text-align: center;
+	margin: 0;
+}
+
+.page-state__retry-button {
+	padding: var(--space-2) var(--space-4);
+	background-color: var(--color-primary);
+	color: white;
+	border: none;
+	border-radius: var(--radius-md);
+	font-size: var(--text-sm);
+	cursor: pointer;
+	transition: background-color 0.2s ease;
+}
+
+@media (hover: hover) {
+	.page-state__retry-button:hover {
+		background-color: var(--color-primary-hover);
+	}
+}

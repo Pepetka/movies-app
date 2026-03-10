@@ -82,6 +82,7 @@
 			id={textareaId}
 			{value}
 			{maxlength}
+			{disabled}
 			aria-invalid={!!error}
 			aria-errormessage={error ? errorId : undefined}
 			aria-describedby={helper ? helperId : undefined}

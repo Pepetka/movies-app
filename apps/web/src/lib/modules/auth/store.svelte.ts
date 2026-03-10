@@ -11,51 +11,46 @@ import {
 	register as apiRegister
 } from './api';
 import { validateLoginForm, validateRegisterForm } from './validation.svelte';
-import type { AuthStatus, ValidationResult } from './types';
+import type { AuthStatus } from './types';
 
 class AuthStore extends BaseStore {
-	status = $state<AuthStatus>('loading');
-	error = $state<string | null>(null);
-	isInitialized = $state(false);
-
-	private _userQuery: QueryResult<UserResponseDto> | null = null;
+	private _query: QueryResult<UserResponseDto>;
 	private _checkAuthPromise: Promise<void> | null = null;
 
-	private _getQuery(): QueryResult<UserResponseDto> {
-		if (!this._userQuery) {
-			this._userQuery = createQuery<UserResponseDto>({
-				key: ['currentUser'],
-				tags: ['user'],
-				fetcher: (signal) => getCurrentUser(signal),
-				enabled: false,
-				debug: import.meta.env.DEV
-			});
-		}
-		return this._userQuery;
-	}
+	isInitialized = $state(false);
 
-	private _updateStatusFromQuery(): void {
-		const query = this._userQuery;
-		if (!query) return;
-
-		if (query.data) {
-			this.status = 'authenticated';
-			this.error = null;
-		} else if (query.error) {
-			this.status = 'unauthenticated';
-		}
+	constructor() {
+		super();
+		this._query = createQuery<UserResponseDto>({
+			key: ['currentUser'],
+			tags: ['user'],
+			fetcher: (signal) => getCurrentUser(signal),
+			debug: !__IS_PROD__
+		});
 	}
 
 	get user(): UserResponseDto | null {
-		return this._userQuery?.data ?? null;
+		return this._query.data ?? null;
+	}
+
+	get status(): AuthStatus {
+		if (this._query.isFetching && !this.user) return 'loading';
+		if (this._query.error) return 'unauthenticated';
+		if (this.user) return 'authenticated';
+		return 'unauthenticated';
+	}
+
+	get error(): string | null {
+		if (!this._query.error) return null;
+		return this._extractErrorMessage(this._query.error, 'Ошибка авторизации');
 	}
 
 	get isAuthenticated(): boolean {
-		return this.status === 'authenticated' && this._userQuery?.data !== null;
+		return this.user !== null;
 	}
 
 	get isLoading(): boolean {
-		return this.status === 'loading' || this._userQuery?.isFetching === true;
+		return this._query.isFetching;
 	}
 
 	async checkAuth(): Promise<void> {
@@ -70,50 +65,45 @@ class AuthStore extends BaseStore {
 	}
 
 	private async _doCheckAuth(): Promise<void> {
-		this.status = 'loading';
-		const query = this._getQuery();
-		await query.refetch();
-		this._updateStatusFromQuery();
+		await this._query.refetch();
 		this.isInitialized = true;
 	}
 
-	async login(data: unknown): Promise<ValidationResult<AuthLoginDto>> {
+	async login(
+		data: unknown
+	): Promise<{ isValid: boolean; data?: AuthLoginDto; errors: Record<string, string> }> {
 		const validation = validateLoginForm(data);
-		if (!validation.isValid || !validation.data) return validation;
+		if (!validation.isValid || !validation.data)
+			return { isValid: false, errors: validation.errors };
 
 		try {
-			this.status = 'loading';
 			await apiLogin(validation.data);
-			const query = this._getQuery();
-			await query.refetch();
-			this._updateStatusFromQuery();
+			await this._query.refetch();
 			toast.success('Добро пожаловать!');
 		} catch (error) {
-			this.status = 'unauthenticated';
-			this.error = this._extractErrorMessage(error, 'Ошибка входа');
-			toast.error(this.error);
+			const message = this._extractErrorMessage(error, 'Ошибка входа');
+			toast.error(message);
 			throw error;
 		}
 
 		return { isValid: true, data: validation.data, errors: {} };
 	}
 
-	async register(data: unknown): Promise<ValidationResult<AuthRegisterDto>> {
+	async register(
+		data: unknown
+	): Promise<{ isValid: boolean; data?: AuthRegisterDto; errors: Record<string, string> }> {
 		const validation = validateRegisterForm(data);
-		if (!validation.isValid || !validation.data) return validation;
+		if (!validation.isValid || !validation.data)
+			return { isValid: false, errors: validation.errors };
 
 		try {
-			this.status = 'loading';
 			const { name, email, password } = validation.data;
 			await apiRegister({ name, email, password });
-			const query = this._getQuery();
-			await query.refetch();
-			this._updateStatusFromQuery();
+			await this._query.refetch();
 			toast.success('Регистрация успешна!');
 		} catch (error) {
-			this.status = 'unauthenticated';
-			this.error = this._extractErrorMessage(error, 'Ошибка регистрации');
-			toast.error(this.error);
+			const message = this._extractErrorMessage(error, 'Ошибка регистрации');
+			toast.error(message);
 			throw error;
 		}
 
@@ -128,22 +118,13 @@ class AuthStore extends BaseStore {
 			toast.error(this._extractErrorMessage(error, 'Ошибка выхода'));
 			throw error;
 		} finally {
-			this._userQuery?.reset();
-			this.status = 'unauthenticated';
-			this.error = null;
+			this._query.reset();
 		}
 	}
 
-	clearError(): void {
-		this.error = null;
-	}
-
 	destroy(): void {
-		this._userQuery?.reset();
-		this._userQuery = null;
+		this._query.destroy();
 		this._checkAuthPromise = null;
-		this.status = 'loading';
-		this.error = null;
 		this.isInitialized = false;
 	}
 }

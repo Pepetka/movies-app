@@ -5,7 +5,7 @@ const toError = (e: unknown): Error => (e instanceof Error ? e : new Error(Strin
 const isAbortError = (e: unknown): boolean => e instanceof Error && e.name === 'AbortError';
 
 export const createQuery = <T>(options: QueryOptions<T>): QueryResult<T> => {
-	const { key, fetcher, tags = [], enabled = true, debug = false } = options;
+	const { key, fetcher, tags = [], debug = false } = options;
 
 	const state = $state<QueryState<T>>({
 		data: null,
@@ -14,6 +14,7 @@ export const createQuery = <T>(options: QueryOptions<T>): QueryResult<T> => {
 	});
 
 	let controller: AbortController | null = null;
+	let registered = false;
 
 	const refetch = async (): Promise<void> => {
 		controller?.abort();
@@ -40,17 +41,17 @@ export const createQuery = <T>(options: QueryOptions<T>): QueryResult<T> => {
 		state.isFetching = false;
 	};
 
-	const unregister = queryRegistry.register(key, tags, { refetch, reset }, debug);
-
-	$effect(() => {
-		if (enabled) {
-			void refetch();
-		}
-		return () => {
-			controller?.abort();
+	const destroy = (): void => {
+		controller?.abort();
+		reset();
+		if (registered) {
 			unregister();
-		};
-	});
+			registered = false;
+		}
+	};
+
+	const unregister = queryRegistry.register(key, tags, { refetch, reset, destroy }, debug);
+	registered = true;
 
 	return {
 		get data() {
@@ -66,6 +67,7 @@ export const createQuery = <T>(options: QueryOptions<T>): QueryResult<T> => {
 			return state.error !== null;
 		},
 		refetch,
-		reset
+		reset,
+		destroy
 	};
 };

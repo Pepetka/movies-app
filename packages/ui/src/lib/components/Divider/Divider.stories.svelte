@@ -16,12 +16,13 @@
 				control: 'select',
 				options: ['horizontal', 'vertical'] as DividerOrientation[]
 			},
-			inset: { control: 'boolean' }
+			inset: { control: 'boolean' },
+			label: { control: 'text' }
 		}
 	});
 </script>
 
-<Story name="Playground" args={{ orientation: 'horizontal', inset: false }} />
+<Story name="Playground" args={{ orientation: 'horizontal', inset: false, label: '' }} />
 
 <Story name="Horizontal">
 	{#snippet template()}
@@ -160,5 +161,58 @@
 				<p style="margin: 0; color: var(--text-secondary);">More content below the divider.</p>
 			</div>
 		</div>
+	{/snippet}
+</Story>
+
+<Story name="With Label">
+	{#snippet template()}
+		<div style="display: flex; flex-direction: column; gap: 16px; max-width: 400px;">
+			<div>
+				<h3 style="margin: 0 0 8px 0;">Основная информация</h3>
+				<p style="margin: 0; color: var(--text-secondary);">Название и описание.</p>
+			</div>
+			<Divider label="Настройки" />
+			<div>
+				<h3 style="margin: 0 0 8px 0;">Дополнительные параметры</h3>
+				<p style="margin: 0; color: var(--text-secondary);">Уведомления и доступ.</p>
+			</div>
+		</div>
+	{/snippet}
+</Story>
+
+<Story name="With Label - Multiple">
+	{#snippet template()}
+		<div style="display: flex; flex-direction: column; gap: 16px; max-width: 400px;">
+			<div>
+				<h3 style="margin: 0 0 8px 0;">Личные данные</h3>
+				<p style="margin: 0; color: var(--text-secondary);">Имя и email.</p>
+			</div>
+			<Divider label="Контакты" />
+			<div>
+				<h3 style="margin: 0 0 8px 0;">Телефон и адрес</h3>
+				<p style="margin: 0; color: var(--text-secondary);">Как с вами связаться.</p>
+			</div>
+			<Divider label="Безопасность" />
+			<div>
+				<h3 style="margin: 0 0 8px 0;">Пароль</h3>
+				<p style="margin: 0; color: var(--text-secondary);">Двухфакторная аутентификация.</p>
+			</div>
+		</div>
+	{/snippet}
+</Story>
+
+<Story name="With Label - In Card">
+	{#snippet template()}
+		<Card variant="elevated" size="md">
+			<div style="margin-bottom: 16px;">
+				<h3 style="margin: 0 0 8px 0;">Название группы</h3>
+				<p style="margin: 0; color: var(--text-secondary);">Описание группы.</p>
+			</div>
+			<Divider label="Настройки" />
+			<div style="margin-top: 16px;">
+				<h3 style="margin: 0 0 8px 0;">Аватар</h3>
+				<p style="margin: 0; color: var(--text-secondary);">URL изображения.</p>
+			</div>
+		</Card>
 	{/snippet}
 </Story>
