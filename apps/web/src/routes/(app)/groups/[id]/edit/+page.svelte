@@ -91,5 +91,10 @@
 		<button class="page-state__retry-button" onclick={handleRetry}>Повторить</button>
 	</div>
 {:else}
-	<GroupForm mode="edit" bind:form onSubmit={handleSubmit} isSubmitting={groupsStore.isSubmitting} />
+	<GroupForm
+		mode="edit"
+		bind:form
+		onSubmit={handleSubmit}
+		isSubmitting={groupsStore.isSubmitting}
+	/>
 {/if}

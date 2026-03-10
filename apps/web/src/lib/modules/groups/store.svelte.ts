@@ -92,7 +92,7 @@ class GroupsStore extends BaseStore {
 			this.formStatus = 'error';
 			this.formError = this._extractErrorMessage(query.error, 'Ошибка загрузки группы');
 			this._log('error', 'Failed to fetch group', { error: query.error });
-		} else if (query.data) {
+		} else if (query.data && query.data.id === id) {
 			this.currentGroup = query.data;
 		}
 	}

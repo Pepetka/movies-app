@@ -42,4 +42,9 @@
 	};
 </script>
 
-<GroupForm mode="create" bind:form onSubmit={handleSubmit} isSubmitting={groupsStore.isSubmitting} />
+<GroupForm
+	mode="create"
+	bind:form
+	onSubmit={handleSubmit}
+	isSubmitting={groupsStore.isSubmitting}
+/>
