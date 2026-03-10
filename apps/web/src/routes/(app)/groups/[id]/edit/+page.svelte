@@ -1,7 +1,12 @@
 <script lang="ts">
 	import { Spinner, toast } from '@repo/ui';
 
-	import { GroupForm, groupsStore, type GroupFormData } from '$lib/modules/groups';
+	import {
+		GroupForm,
+		groupsStore,
+		EMPTY_GROUP_FORM,
+		type GroupFormData
+	} from '$lib/modules/groups';
 	import { topBarStore } from '$lib/stores';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
@@ -10,11 +15,8 @@
 
 	const groupId = $derived(Number(page.params.id));
 
-	let form = $state<GroupFormData>({
-		name: '',
-		description: '',
-		avatarUrl: ''
-	});
+	let form = $state<GroupFormData>(structuredClone(EMPTY_GROUP_FORM));
+	let isLoadingGroup = $state(false);
 
 	$effect(() => {
 		topBarStore.configure({
@@ -28,11 +30,18 @@
 	});
 
 	$effect(() => {
-		const current = groupsStore.currentGroup;
-		if (current?.id !== groupId) {
+		if (groupsStore.currentGroup?.id !== groupId && !isLoadingGroup) {
+			isLoadingGroup = true;
 			groupsStore.resetForm();
-			void groupsStore.fetchGroup(groupId);
-		} else if (current) {
+			void groupsStore.fetchGroup(groupId).finally(() => {
+				isLoadingGroup = false;
+			});
+		}
+	});
+
+	$effect(() => {
+		const current = groupsStore.currentGroup;
+		if (current?.id === groupId) {
 			form = {
 				name: current.name ?? '',
 				description: current.description ?? '',

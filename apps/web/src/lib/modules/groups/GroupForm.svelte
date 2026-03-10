@@ -37,7 +37,7 @@
 
 	$effect(() => {
 		return () => {
-			fieldValidator.cancel();
+			fieldValidator.reset();
 			updateDebouncedName.cancel();
 		};
 	});
@@ -113,7 +113,7 @@
 				onChange={() => fieldValidator.handleFieldChange(form, 'description')}
 			/>
 
-			<Divider label="Настройки" style="margin-bottom: var(--space-2);" />
+			<Divider label="Настройки" class="group-form-divider" />
 
 			<Input
 				type="url"

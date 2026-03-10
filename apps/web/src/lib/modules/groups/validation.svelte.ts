@@ -10,4 +10,10 @@ export const groupSchema = z.object({
 
 export type GroupFormData = z.infer<typeof groupSchema>;
 
+export const EMPTY_GROUP_FORM: GroupFormData = {
+	name: '',
+	description: '',
+	avatarUrl: ''
+};
+
 export const validateGroupForm = createValidator(groupSchema);

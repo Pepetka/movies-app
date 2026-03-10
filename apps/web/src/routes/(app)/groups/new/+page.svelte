@@ -1,17 +1,18 @@
 <script lang="ts">
 	import { toast } from '@repo/ui';
 
-	import { GroupForm, groupsStore, type GroupFormData } from '$lib/modules/groups';
+	import {
+		GroupForm,
+		groupsStore,
+		EMPTY_GROUP_FORM,
+		type GroupFormData
+	} from '$lib/modules/groups';
 	import { topBarStore } from '$lib/stores';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { ROUTES } from '$lib/utils';
 
-	let form = $state<GroupFormData>({
-		name: '',
-		description: '',
-		avatarUrl: ''
-	});
+	let form = $state<GroupFormData>(structuredClone(EMPTY_GROUP_FORM));
 
 	$effect(() => {
 		topBarStore.configure({
@@ -32,7 +33,7 @@
 		});
 
 		if (group) {
-			form = { name: '', description: '', avatarUrl: '' };
+			form = structuredClone(EMPTY_GROUP_FORM);
 			toast.success('Группа создана');
 			await goto(resolve(ROUTES.GROUP_DETAIL(group.id)));
 		} else {
