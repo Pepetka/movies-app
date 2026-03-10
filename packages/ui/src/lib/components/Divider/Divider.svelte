@@ -6,16 +6,16 @@
 		inset = false,
 		label,
 		class: className,
-		style
+		...restProps
 	}: IProps = $props();
 </script>
 
 {#if label && orientation === 'horizontal'}
-	<div class={['ui-divider', 'with-label', inset && 'inset', className]} {style}>
+	<div class={['ui-divider', 'with-label', inset && 'inset', className]} {...restProps}>
 		<span class="ui-divider__label">{label}</span>
 	</div>
 {:else}
-	<hr class={['ui-divider', orientation, inset && 'inset', className]} {style} />
+	<hr class={['ui-divider', orientation, inset && 'inset', className]} {...restProps} />
 {/if}
 
 <style>
