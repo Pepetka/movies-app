@@ -59,6 +59,22 @@ class GroupsStore extends BaseStore {
 		return this._query.status;
 	}
 
+	get isLoading(): boolean {
+		return this._query.isLoading;
+	}
+
+	get isLoaded(): boolean {
+		return this._query.isLoaded;
+	}
+
+	get isFetching(): boolean {
+		return this._query.isFetching;
+	}
+
+	get isError(): boolean {
+		return this._query.isError;
+	}
+
 	get error(): string | null {
 		if (!this._query.error) return null;
 		return this._extractErrorMessage(this._query.error, 'Ошибка загрузки');
@@ -157,13 +173,29 @@ class GroupStore extends BaseStore {
 		return this._query.status;
 	}
 
+	get isLoading(): boolean {
+		return this._query.isLoading;
+	}
+
+	get isLoaded(): boolean {
+		return this._query.isLoaded;
+	}
+
+	get isFetching(): boolean {
+		return this._query.isFetching;
+	}
+
+	get isError(): boolean {
+		return this._query.isError;
+	}
+
 	get error(): string | null {
 		if (!this._query.error) return null;
 		return this._extractErrorMessage(this._query.error, 'Ошибка загрузки');
 	}
 
 	async fetchGroup(id: number): Promise<void> {
-		if (this._query.isCurrentKey(['group', id]) && this.status === 'loaded') return;
+		if (this._query.isCurrentKey(['group', id]) && this.isLoaded) return;
 		await this._query.revalidate(['group', id], id);
 	}
 
@@ -180,6 +212,10 @@ class GroupStore extends BaseStore {
 
 	get isCreating(): boolean {
 		return this._createMutation.isSubmitting;
+	}
+
+	get isCreateSuccess(): boolean {
+		return this._createMutation.isSuccess;
 	}
 
 	async createGroup(data: GroupCreateDto): Promise<GroupResponseDto | null> {
@@ -203,6 +239,10 @@ class GroupStore extends BaseStore {
 
 	get isUpdating(): boolean {
 		return this._updateMutation.isSubmitting;
+	}
+
+	get isUpdateSuccess(): boolean {
+		return this._updateMutation.isSuccess;
 	}
 
 	async updateGroup(id: number, data: GroupUpdateDto): Promise<GroupResponseDto | null> {
@@ -280,6 +320,8 @@ interface QueryResult<T, K> {
 	error: Error | null;
 	isFetching: boolean;
 	isError: boolean;
+	isLoading: boolean;   // true если первый запрос (данных ещё нет)
+	isLoaded: boolean;    // true если данные успешно загружены
 	status: FetchStatus;
 
 	// Методы
@@ -335,6 +377,7 @@ interface MutationResult<T, V> {
 	error: Error | null;
 	isSubmitting: boolean;
 	isError: boolean;
+	isSuccess: boolean;   // true если мутация успешно завершена
 	status: PostStatus;
 
 	// Методы
@@ -387,10 +430,10 @@ queryRegistry.resetAll();
 	});
 </script>
 
-<div aria-busy={groupsStore.status === 'loading'}>
-	{#if groupsStore.status === 'loading'}
+<div aria-busy={groupsStore.isLoading}>
+	{#if groupsStore.isLoading}
 		<Skeleton />
-	{:else if groupsStore.status === 'error'}
+	{:else if groupsStore.isError}
 		<EmptyState variant="error" description={groupsStore.error}>
 			<Button onclick={() => groupsStore.fetch()}>Повторить</Button>
 		</EmptyState>
@@ -403,7 +446,7 @@ queryRegistry.resetAll();
 			{/each}
 		</List>
 
-		{#if groupsStore.status === 'fetching'}
+		{#if groupsStore.isFetching}
 			<Spinner />
 		{/if}
 	{/if}
@@ -487,9 +530,9 @@ queryRegistry.resetAll();
 	};
 </script>
 
-{#if groupStore.status === 'loading'}
+{#if groupStore.isLoading}
 	<Spinner />
-{:else if groupStore.status === 'error'}
+{:else if groupStore.isError}
 	<EmptyState variant="error" description={groupStore.error}>
 		<Button onclick={handleRetry}>Повторить</Button>
 	</EmptyState>
@@ -518,15 +561,16 @@ queryRegistry.resetAll();
 
 3. **items-store.svelte.ts**
    - [ ] `createQuery<Item[]>` с key `['items']`
-   - [ ] Геттеры: `items`, `status`, `error`, `isEmpty`
+   - [ ] Геттеры: `items`, `status`, `isLoading`, `isLoaded`, `isFetching`, `isError`, `error`, `isEmpty`
    - [ ] Методы: `fetchItems()`, `fetch()`, `reset()`
 
 4. **item-store.svelte.ts**
    - [ ] `createQuery<Item, number>` с key `['item']` и params
    - [ ] `createMutation` для create с tags: `['items']`
    - [ ] `createMutation` для update с tags + `invalidateKeys`
-   - [ ] Геттеры делегируют к query/mutation
-   - [ ] Защита от повторных запросов: `isCurrentKey() && status === 'loaded'`
+   - [ ] Query геттеры: `status`, `isLoading`, `isLoaded`, `isFetching`, `isError`, `error`
+   - [ ] Mutation геттеры: `createStatus`, `isCreating`, `isCreateSuccess`, `updateStatus`, `isUpdating`, `isUpdateSuccess`
+   - [ ] Защита от повторных запросов: `isCurrentKey() && isLoaded`
 
 5. **index.ts**
    - [ ] Экспорт обоих сторов
@@ -604,7 +648,7 @@ async fetchItem(id: number) {
 ```typescript
 // ПРАВИЛЬНО — защита по isCurrentKey
 async fetchItem(id: number): Promise<void> {
-	if (this._query.isCurrentKey(['item', id]) && this.status === 'loaded') return;
+	if (this._query.isCurrentKey(['item', id]) && this.isLoaded) return;
 	await this._query.revalidate(['item', id], id);
 }
 ```

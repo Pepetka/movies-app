@@ -48,6 +48,14 @@ class Query<T, K = never> implements QueryResult<T, K> {
 		return this._state.error !== null;
 	}
 
+	get isLoading(): boolean {
+		return this._state.isFetching && this._state.data === null;
+	}
+
+	get isLoaded(): boolean {
+		return !this._state.isFetching && this._state.data !== null && this._state.error === null;
+	}
+
 	get status(): FetchStatus {
 		if (this._state.isFetching && this._state.data === null) return 'loading';
 		if (this._state.isFetching) return 'fetching';

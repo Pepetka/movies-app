@@ -25,6 +25,22 @@ class GroupsStore extends BaseStore {
 		return this._query.status;
 	}
 
+	get isLoading(): boolean {
+		return this._query.isLoading;
+	}
+
+	get isLoaded(): boolean {
+		return this._query.isLoaded;
+	}
+
+	get isFetching(): boolean {
+		return this._query.isFetching;
+	}
+
+	get isError(): boolean {
+		return this._query.isError;
+	}
+
 	get error(): string | null {
 		if (!this._query.error) return null;
 		return this._extractErrorMessage(this._query.error, 'Ошибка загрузки групп');

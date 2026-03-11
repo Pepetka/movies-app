@@ -32,8 +32,8 @@
 </script>
 
 <div class="groups-page">
-	<div class="groups-page__content" aria-busy={groupsStore.status === 'loading'}>
-		{#if groupsStore.status === 'loading'}
+	<div class="groups-page__content" aria-busy={groupsStore.isLoading}>
+		{#if groupsStore.isLoading}
 			<List variant="outlined">
 				{#each Array.from({ length: 3 }, (_, i) => i) as i (i)}
 					<ListItem size="responsive" showChevron>
@@ -47,7 +47,7 @@
 					</ListItem>
 				{/each}
 			</List>
-		{:else if groupsStore.status === 'error'}
+		{:else if groupsStore.isError}
 			<EmptyState
 				variant="error"
 				title="Ошибка загрузки"
@@ -87,7 +87,7 @@
 				{/each}
 			</List>
 
-			{#if groupsStore.status === 'fetching'}
+			{#if groupsStore.isFetching}
 				<div class="groups-page__refreshing">
 					<Spinner size="sm" />
 				</div>

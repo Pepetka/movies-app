@@ -46,6 +46,10 @@ class Mutation<T, V> implements MutationResult<T, V> {
 		return this._state.error !== null;
 	}
 
+	get isSuccess(): boolean {
+		return !this._state.isSubmitting && this._state.data !== null && this._state.error === null;
+	}
+
 	get status(): PostStatus {
 		if (this._state.isSubmitting) return 'submitting';
 		if (this._state.error) return 'error';

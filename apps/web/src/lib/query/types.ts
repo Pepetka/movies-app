@@ -24,6 +24,8 @@ export interface QueryActions {
 
 export interface QueryResult<T, K = never> extends QueryState<T> {
 	readonly isError: boolean;
+	readonly isLoading: boolean;
+	readonly isLoaded: boolean;
 	fetch: () => Promise<void>;
 	reset: () => void;
 	destroy: () => void;
@@ -58,6 +60,7 @@ export type PostStatus = 'idle' | 'submitting' | 'success' | 'error';
 
 export interface MutationResult<T, V> extends MutationState<T> {
 	readonly isError: boolean;
+	readonly isSuccess: boolean;
 	mutate: (variables: V) => Promise<T | null>;
 	reset: () => void;
 	status: PostStatus;

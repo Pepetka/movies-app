@@ -67,11 +67,11 @@
 	};
 </script>
 
-{#if groupStore.status === 'loading'}
+{#if groupStore.isLoading}
 	<div class="page-state">
 		<Spinner size="lg" />
 	</div>
-{:else if groupStore.status === 'error'}
+{:else if groupStore.isError}
 	<div class="page-state">
 		<p class="page-state__error-message">{groupStore.error}</p>
 		<button class="page-state__retry-button" onclick={handleRetry}>Повторить</button>

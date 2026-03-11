@@ -60,6 +60,22 @@ class GroupStore extends BaseStore {
 		return this._query.status;
 	}
 
+	get isLoading(): boolean {
+		return this._query.isLoading;
+	}
+
+	get isLoaded(): boolean {
+		return this._query.isLoaded;
+	}
+
+	get isFetching(): boolean {
+		return this._query.isFetching;
+	}
+
+	get isError(): boolean {
+		return this._query.isError;
+	}
+
 	get error(): string | null {
 		if (!this._query.error) return null;
 		return this._extractErrorMessage(this._query.error, 'Ошибка загрузки группы');
@@ -85,6 +101,10 @@ class GroupStore extends BaseStore {
 		return this._createMutation.isSubmitting;
 	}
 
+	get isCreateSuccess(): boolean {
+		return this._createMutation.isSuccess;
+	}
+
 	async createGroup(data: GroupCreateDto): Promise<GroupResponseDto | null> {
 		return this._createMutation.mutate(data);
 	}
@@ -106,6 +126,10 @@ class GroupStore extends BaseStore {
 
 	get isUpdating(): boolean {
 		return this._updateMutation.isSubmitting;
+	}
+
+	get isUpdateSuccess(): boolean {
+		return this._updateMutation.isSuccess;
 	}
 
 	async updateGroup(id: number, data: GroupUpdateDto): Promise<GroupResponseDto | null> {
