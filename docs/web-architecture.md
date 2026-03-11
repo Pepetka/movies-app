@@ -65,6 +65,8 @@ modules/{name}/
 ├── index.ts            # Barrel export
 ```
 
+**Подробнее:** [Query Store Pattern](query-store-pattern.md) — паттерн использования `createQuery` и `createMutation` в сторах.
+
 ## Component Layers
 
 | Layer | Location | Purpose |

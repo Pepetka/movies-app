@@ -1,12 +1,8 @@
 <script lang="ts">
 	import { Spinner, toast } from '@repo/ui';
+	import { untrack } from 'svelte';
 
-	import {
-		GroupForm,
-		groupsStore,
-		EMPTY_GROUP_FORM,
-		type GroupFormData
-	} from '$lib/modules/groups';
+	import { GroupForm, groupStore, EMPTY_GROUP_FORM, type GroupFormData } from '$lib/modules/groups';
 	import { topBarStore } from '$lib/stores';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
@@ -18,7 +14,7 @@
 	const groupId = $derived(Number(page.params.id));
 
 	let form = $state<GroupFormData>({ ...EMPTY_GROUP_FORM });
-	let loadError = $state<string | null>(null);
+	let isFormInitialized = $state(false);
 
 	$effect(() => {
 		topBarStore.configure({
@@ -30,37 +26,29 @@
 	});
 
 	$effect(() => {
-		let cancelled = false;
-
-		const loadGroup = async () => {
-			groupsStore.resetForm();
-			loadError = null;
-
-			await groupsStore.fetchGroup(groupId);
-
-			if (cancelled) return;
-
-			if (groupsStore.formError) {
-				loadError = groupsStore.formError;
-			} else if (groupsStore.currentGroup) {
-				form = {
-					name: groupsStore.currentGroup.name ?? '',
-					description: groupsStore.currentGroup.description ?? '',
-					avatarUrl: groupsStore.currentGroup.avatarUrl ?? ''
-				};
-			}
-		};
-
-		void loadGroup();
+		untrack(() => {
+			void groupStore.fetchGroup(groupId);
+		});
 
 		return () => {
-			cancelled = true;
-			groupsStore.resetForm();
+			groupStore.resetForm();
+			isFormInitialized = false;
 		};
 	});
 
+	$effect(() => {
+		if (groupStore.currentGroup && !groupStore.updateError && !isFormInitialized) {
+			form = {
+				name: groupStore.currentGroup.name ?? '',
+				description: groupStore.currentGroup.description ?? '',
+				avatarUrl: groupStore.currentGroup.avatarUrl ?? ''
+			};
+			isFormInitialized = true;
+		}
+	});
+
 	const handleSubmit = async () => {
-		const group = await groupsStore.updateGroup(groupId, {
+		const group = await groupStore.updateGroup(groupId, {
 			name: form.name,
 			description: form.description || undefined,
 			avatarUrl: form.avatarUrl || undefined
@@ -69,32 +57,25 @@
 		if (group) {
 			toast.success('Группа обновлена');
 			await goto(resolve(ROUTES.GROUP_DETAIL(group.id)));
-		} else if (groupsStore.formError) {
-			toast.error(groupsStore.formError);
+		} else if (groupStore.updateError) {
+			toast.error(groupStore.updateError);
 		}
 	};
 
 	const handleRetry = () => {
-		void groupsStore.fetchGroup(groupId);
+		void groupStore.fetchGroup(groupId);
 	};
-
-	const isLoading = $derived(groupsStore.currentGroup?.id !== groupId && !loadError);
 </script>
 
-{#if isLoading}
+{#if groupStore.isLoading}
 	<div class="page-state">
 		<Spinner size="lg" />
 	</div>
-{:else if loadError}
+{:else if groupStore.isError}
 	<div class="page-state">
-		<p class="page-state__error-message">{loadError}</p>
+		<p class="page-state__error-message">{groupStore.error}</p>
 		<button class="page-state__retry-button" onclick={handleRetry}>Повторить</button>
 	</div>
 {:else}
-	<GroupForm
-		mode="edit"
-		bind:form
-		onSubmit={handleSubmit}
-		isSubmitting={groupsStore.isSubmitting}
-	/>
+	<GroupForm mode="edit" bind:form onSubmit={handleSubmit} isSubmitting={groupStore.isUpdating} />
 {/if}

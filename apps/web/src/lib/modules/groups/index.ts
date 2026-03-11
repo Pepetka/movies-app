@@ -1,6 +1,7 @@
-export type { GroupFormStatus, GroupsStatus, GroupFormMode, IProps } from './types';
+export type { GroupFormStatus, GroupFormMode, IProps } from './types';
 
-export { groupsStore } from './store.svelte';
+export { groupsStore } from './groups-store.svelte';
+export { groupStore } from './group-store.svelte';
 
 export { EMPTY_GROUP_FORM, type GroupFormData } from './validation.svelte';
 

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { Avatar, Button, EmptyState, FAB, List, ListItem, Skeleton, Spinner } from '@repo/ui';
 	import { Plus, Users } from '@lucide/svelte';
+	import { untrack } from 'svelte';
 
 	import { groupsStore } from '$lib/modules/groups';
 	import { topBarStore } from '$lib/stores';
@@ -24,15 +25,15 @@
 	});
 
 	$effect(() => {
-		if (groupsStore.status === 'idle') {
+		untrack(() => {
 			void groupsStore.fetchGroups();
-		}
+		});
 	});
 </script>
 
 <div class="groups-page">
-	<div class="groups-page__content" aria-busy={groupsStore.status === 'loading'}>
-		{#if groupsStore.status === 'loading' && groupsStore.groups.length === 0}
+	<div class="groups-page__content" aria-busy={groupsStore.isLoading}>
+		{#if groupsStore.isLoading}
 			<List variant="outlined">
 				{#each Array.from({ length: 3 }, (_, i) => i) as i (i)}
 					<ListItem size="responsive" showChevron>
@@ -46,14 +47,14 @@
 					</ListItem>
 				{/each}
 			</List>
-		{:else if groupsStore.status === 'error'}
+		{:else if groupsStore.isError}
 			<EmptyState
 				variant="error"
 				title="Ошибка загрузки"
 				description={groupsStore.error ?? 'Не удалось загрузить список групп'}
 			>
 				{#snippet action()}
-					<Button variant="secondary" onclick={() => groupsStore.refetch()}>Повторить</Button>
+					<Button variant="secondary" onclick={() => groupsStore.fetch()}>Повторить</Button>
 				{/snippet}
 			</EmptyState>
 		{:else if groupsStore.isEmpty}

@@ -7,6 +7,7 @@ import type { QueryActions, RegistryEntry } from './types';
 class QueryRegistry {
 	private _queries = new Map<string, RegistryEntry>();
 	private _tagIndex = $state.raw(new Map<string, Set<string>>());
+	private _resetCallbacks = new Set<() => void>();
 	private _debug = $state(false);
 
 	setDebug(enabled: boolean): void {
@@ -38,6 +39,11 @@ class QueryRegistry {
 		return () => this._unregister(serializedKey, tags, debug);
 	}
 
+	onReset(callback: () => void): () => void {
+		this._resetCallbacks.add(callback);
+		return () => this._resetCallbacks.delete(callback);
+	}
+
 	invalidateByTag(tag: string): void {
 		if (this._debug) {
 			logger.debug('QueryRegistry', 'Invalidate by tag', { tag });
@@ -46,7 +52,7 @@ class QueryRegistry {
 		const keys = this._tagIndex.get(tag);
 		if (keys) {
 			for (const key of keys) {
-				void this._queries.get(key)?.actions.refetch();
+				void this._queries.get(key)?.actions.fetch();
 			}
 		}
 	}
@@ -58,18 +64,22 @@ class QueryRegistry {
 
 		for (const entry of this._queries.values()) {
 			if (this._keyMatchesPrefix(entry.key, prefix)) {
-				void entry.actions.refetch();
+				void entry.actions.fetch();
 			}
 		}
 	}
 
 	resetAll(): void {
 		if (this._debug) {
-			logger.debug('QueryRegistry', 'Reset all queries');
+			logger.debug('QueryRegistry', 'Reset all queries and mutations');
 		}
 
 		for (const entry of this._queries.values()) {
 			entry.actions.reset();
+		}
+
+		for (const callback of this._resetCallbacks) {
+			callback();
 		}
 	}
 
