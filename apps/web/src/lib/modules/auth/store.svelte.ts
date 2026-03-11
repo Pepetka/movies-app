@@ -50,11 +50,12 @@ class AuthStore extends BaseStore {
 	}
 
 	get isLoading(): boolean {
-		return this._query.isFetching;
+		return this._query.isLoading;
 	}
 
 	async checkAuth(): Promise<void> {
 		if (this._checkAuthPromise) return this._checkAuthPromise;
+		if (this.user) return;
 
 		this._checkAuthPromise = this._doCheckAuth();
 		try {
