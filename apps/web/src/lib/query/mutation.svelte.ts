@@ -26,6 +26,8 @@ class Mutation<T, V> implements MutationResult<T, V> {
 		this._invalidateTags = tags;
 		this._invalidateKeys = invalidateKeys;
 		this._debug = debug;
+
+		queryRegistry.onReset(() => this.reset());
 	}
 
 	get data(): T | null {

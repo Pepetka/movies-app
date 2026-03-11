@@ -367,7 +367,7 @@ queryRegistry.invalidateByTag('groups');
 // Инвалидация по ключу (префиксное совпадение)
 queryRegistry.invalidateByKey(['group', id]);
 
-// Сброс всех query (при logout)
+// Сброс всех query и mutations (при logout)
 queryRegistry.resetAll();
 ```
 
