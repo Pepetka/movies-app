@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { Avatar, Button, EmptyState, FAB, List, ListItem, Skeleton, Spinner } from '@repo/ui';
 	import { Plus, Users } from '@lucide/svelte';
+	import { untrack } from 'svelte';
 
 	import { groupsStore } from '$lib/modules/groups';
 	import { topBarStore } from '$lib/stores';
@@ -24,15 +25,15 @@
 	});
 
 	$effect(() => {
-		if (groupsStore.status === 'idle') {
+		untrack(() => {
 			void groupsStore.fetchGroups();
-		}
+		});
 	});
 </script>
 
 <div class="groups-page">
 	<div class="groups-page__content" aria-busy={groupsStore.status === 'loading'}>
-		{#if groupsStore.status === 'loading' && groupsStore.groups.length === 0}
+		{#if groupsStore.status === 'loading'}
 			<List variant="outlined">
 				{#each Array.from({ length: 3 }, (_, i) => i) as i (i)}
 					<ListItem size="responsive" showChevron>
@@ -86,7 +87,7 @@
 				{/each}
 			</List>
 
-			{#if groupsStore.isFetching}
+			{#if groupsStore.status === 'fetching'}
 				<div class="groups-page__refreshing">
 					<Spinner size="sm" />
 				</div>

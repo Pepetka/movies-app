@@ -4,7 +4,7 @@ import type { FormStatus } from '$lib/utils/validation.svelte';
 
 import type { GroupFormData } from './validation.svelte';
 
-export type GroupsStatus = 'idle' | 'loading' | 'loaded' | 'error';
+export type PostStatus = 'idle' | 'submitting' | 'success' | 'error';
 
 export type GroupFormStatus = FormStatus;
 
