@@ -23,24 +23,40 @@
 	const errorId = generateId();
 	const helperId = generateId();
 
+	let inputRef: HTMLInputElement | undefined = $state();
 	let isFocused = $state(false);
+	let isAutoFilled = $state(false);
 	let hasValue = $derived((value?.length ?? 0) > 0);
-	let isLabelFloating = $derived(isFocused || hasValue);
+	let isLabelFloating = $derived(isFocused || hasValue || isAutoFilled);
 
 	const handleInput = (e: Event) => {
 		const target = e.target as HTMLInputElement;
 		value = target.value;
 		onChange?.(value);
 	};
+
+	const handleAnimationStart = (e: AnimationEvent) => {
+		if (e.animationName === 'autofill-start') {
+			isAutoFilled = true;
+			if (inputRef && !value) {
+				value = inputRef.value;
+				onChange?.(value);
+			}
+		} else if (e.animationName === 'autofill-cancel') {
+			isAutoFilled = false;
+		}
+	};
 </script>
 
 <div class={['ui-input-wrapper', size, { error, disabled }, className]}>
 	<div class="ui-input-container">
 		<input
+			bind:this={inputRef}
 			id={inputId}
 			{type}
 			{value}
 			oninput={handleInput}
+			onanimationstart={handleAnimationStart}
 			{disabled}
 			aria-invalid={!!error}
 			aria-errormessage={error ? errorId : undefined}
@@ -124,12 +140,39 @@
 		-webkit-text-fill-color: var(--text-primary) !important;
 		-webkit-box-shadow: 0 0 0 1000px var(--input-bg) inset !important;
 		transition: background-color 5000s ease-in-out 0s;
+		animation-name: autofill-start;
+		animation-duration: 0.001s;
 	}
 
 	.ui-input-container input:-webkit-autofill:disabled {
 		-webkit-text-fill-color: var(--text-tertiary) !important;
 		-webkit-box-shadow: 0 0 0 1000px var(--bg-tertiary) inset !important;
 		transition: none !important;
+	}
+
+	/* Standard autofill detection */
+	.ui-input-container input:autofill {
+		animation-name: autofill-start;
+		animation-duration: 0.001s;
+	}
+
+	/* Keyframes for autofill detection */
+	@keyframes autofill-start {
+		from {
+			opacity: 0.99;
+		}
+		to {
+			opacity: 1;
+		}
+	}
+
+	@keyframes autofill-cancel {
+		from {
+			opacity: 0.99;
+		}
+		to {
+			opacity: 1;
+		}
 	}
 
 	/* Hide placeholder */
