@@ -14,7 +14,7 @@ import { validateLoginForm, validateRegisterForm } from './validation.svelte';
 import type { AuthStatus } from './types';
 
 class AuthStore extends BaseStore {
-	private _query: QueryResult<UserResponseDto>;
+	private readonly _query: QueryResult<UserResponseDto>;
 	private _checkAuthPromise: Promise<void> | null = null;
 
 	isInitialized = $state(false);
@@ -122,8 +122,8 @@ class AuthStore extends BaseStore {
 		}
 	}
 
-	destroy(): void {
-		this._query.destroy();
+	reset(): void {
+		this._query.reset();
 		this._checkAuthPromise = null;
 		this.isInitialized = false;
 	}

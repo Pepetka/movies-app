@@ -36,7 +36,7 @@ import { BaseStore } from '$lib/stores/base.svelte';
 import { getItems } from './api';
 
 class ItemsStore extends BaseStore {
-	private _query: QueryResult<Item[]> | null = null;
+	private readonly _query: QueryResult<Item[]>;
 
 	constructor() {
 		super();
@@ -51,16 +51,15 @@ class ItemsStore extends BaseStore {
 	// === Геттеры — делегируют к query ===
 
 	get items(): Item[] {
-		return this._query?.data ?? [];
+		return this._query.data ?? [];
 	}
 
 	get status(): FetchStatus {
-		if (!this._query) return 'idle';
 		return this._query.status;
 	}
 
 	get error(): string | null {
-		if (!this._query?.error) return null;
+		if (!this._query.error) return null;
 		return this._extractErrorMessage(this._query.error, 'Ошибка загрузки');
 	}
 
@@ -71,21 +70,16 @@ class ItemsStore extends BaseStore {
 	// === Действия ===
 
 	async fetchItems(): Promise<void> {
-		if (this.status === 'loaded') return; // Защита от повторных запросов
-		await this._query?.refetch();
+		if (this.status === 'loaded') return;
+		await this._query.refetch();
 	}
 
 	async refetch(): Promise<void> {
-		await this._query?.refetch();
+		await this._query.refetch();
 	}
 
 	reset(): void {
-		this._query?.reset();
-	}
-
-	destroy(): void {
-		this._query?.destroy();
-		this._query = null;
+		this._query.reset();
 	}
 }
 
@@ -103,7 +97,7 @@ import { createItem as createItemApi, getItem as getItemApi, updateItem as updat
 import type { PostStatus } from './types';
 
 class ItemStore extends BaseStore {
-	private _query: QueryResult<ItemResponseDto, number> | null = null;
+	private readonly _query: QueryResult<ItemResponseDto, number>;
 	private _currentId: number | null = null;
 
 	// === Состояние формы ===
@@ -126,16 +120,15 @@ class ItemStore extends BaseStore {
 	// === Геттеры — делегируют к query ===
 
 	get currentItem(): ItemResponseDto | null {
-		return this._query?.data ?? null;
+		return this._query.data ?? null;
 	}
 
 	get status(): FetchStatus {
-		if (!this._query) return 'idle';
 		return this._query.status;
 	}
 
 	get error(): string | null {
-		if (!this._query?.error) return null;
+		if (!this._query.error) return null;
 		return this._extractErrorMessage(this._query.error, 'Ошибка загрузки');
 	}
 
@@ -146,8 +139,8 @@ class ItemStore extends BaseStore {
 	// === Загрузка ===
 
 	async fetchItem(id: number): Promise<void> {
-		if (this._currentId === id) return; // Защита от повторных запросов того же id
-		await this._query?.revalidate(['item', id], id);
+		if (this._currentId === id) return;
+		await this._query.revalidate(['item', id], id);
 		this._currentId = id;
 	}
 
@@ -193,18 +186,13 @@ class ItemStore extends BaseStore {
 	// === Сброс ===
 
 	reset(): void {
-		this._query?.reset();
+		this._query.reset();
+		this._currentId = null;
 	}
 
 	resetForm(): void {
 		this.formStatus = 'idle';
 		this.formError = null;
-	}
-
-	destroy(): void {
-		this._query?.destroy();
-		this._query = null;
-		this.resetForm();
 	}
 }
 
@@ -270,7 +258,6 @@ interface QueryResult<T, K> {
 	// Методы
 	refetch(): Promise<void>;
 	reset(): void;
-	destroy(): void;
 	revalidate(newKey: unknown[], newParams?: K | null): Promise<void>;
 }
 ```
@@ -445,13 +432,13 @@ queryRegistry.resetAll();
 3. **items-store.svelte.ts**
    - [ ] `createQuery<Item[]>` с key `['items']`
    - [ ] Геттеры: `items`, `status`, `error`, `isEmpty`
-   - [ ] Методы: `fetchItems()`, `refetch()`, `reset()`, `destroy()`
+   - [ ] Методы: `fetchItems()`, `refetch()`, `reset()`
 
 4. **item-store.svelte.ts**
    - [ ] `createQuery<Item, number>` с key `['item']` и params
    - [ ] Состояние формы: `formStatus`, `formError`
    - [ ] Геттеры: `currentItem`, `status`, `error`, `isSubmitting`
-   - [ ] Методы: `fetchItem(id)`, `createItem()`, `updateItem()`, `resetForm()`, `destroy()`
+   - [ ] Методы: `fetchItem(id)`, `createItem()`, `updateItem()`, `reset()`, `resetForm()`
    - [ ] Защита от повторных запросов: `if (this._currentId === id) return`
 
 5. **index.ts**

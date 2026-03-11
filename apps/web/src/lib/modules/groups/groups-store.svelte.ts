@@ -5,7 +5,7 @@ import { BaseStore } from '$lib/stores/base.svelte';
 import { getGroups } from './api';
 
 class GroupsStore extends BaseStore {
-	private _query: QueryResult<GroupResponseDto[]> | null = null;
+	private readonly _query: QueryResult<GroupResponseDto[]>;
 
 	constructor() {
 		super();
@@ -18,16 +18,15 @@ class GroupsStore extends BaseStore {
 	}
 
 	get groups(): GroupResponseDto[] {
-		return this._query?.data ?? [];
+		return this._query.data ?? [];
 	}
 
 	get status(): FetchStatus {
-		if (!this._query) return 'idle';
 		return this._query.status;
 	}
 
 	get error(): string | null {
-		if (!this._query?.error) return null;
+		if (!this._query.error) return null;
 		return this._extractErrorMessage(this._query.error, 'Ошибка загрузки групп');
 	}
 
@@ -37,20 +36,15 @@ class GroupsStore extends BaseStore {
 
 	async fetchGroups(): Promise<void> {
 		if (this.status === 'loaded') return;
-		await this._query?.refetch();
+		await this._query.refetch();
 	}
 
 	async refetch(): Promise<void> {
-		await this._query?.refetch();
+		await this._query.refetch();
 	}
 
 	reset(): void {
-		this._query?.reset();
-	}
-
-	destroy(): void {
-		this._query?.destroy();
-		this._query = null;
+		this._query.reset();
 	}
 }
 

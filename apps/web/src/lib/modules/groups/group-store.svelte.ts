@@ -10,7 +10,7 @@ import {
 import type { PostStatus } from './types';
 
 class GroupStore extends BaseStore {
-	private _query: QueryResult<GroupResponseDto, number> | null = null;
+	private readonly _query: QueryResult<GroupResponseDto, number>;
 	private _currentId: number | null = null;
 
 	constructor() {
@@ -27,22 +27,21 @@ class GroupStore extends BaseStore {
 	}
 
 	get currentGroup(): GroupResponseDto | null {
-		return this._query?.data ?? null;
+		return this._query.data ?? null;
 	}
 
 	get status(): FetchStatus {
-		if (!this._query) return 'idle';
 		return this._query.status;
 	}
 
 	get error(): string | null {
-		if (!this._query?.error) return null;
+		if (!this._query.error) return null;
 		return this._extractErrorMessage(this._query.error, 'Ошибка загрузки групп');
 	}
 
 	async fetchGroup(id: number): Promise<void> {
 		if (this._currentId === id) return;
-		await this._query?.revalidate(['group', id], id);
+		await this._query.revalidate(['group', id], id);
 		this._currentId = id;
 	}
 
@@ -87,18 +86,13 @@ class GroupStore extends BaseStore {
 	}
 
 	reset(): void {
-		this._query?.reset();
+		this._query.reset();
+		this._currentId = null;
 	}
 
 	resetForm(): void {
 		this.formStatus = 'idle';
 		this.formError = null;
-	}
-
-	destroy(): void {
-		this._query?.destroy();
-		this._query = null;
-		this.resetForm();
 	}
 }
 

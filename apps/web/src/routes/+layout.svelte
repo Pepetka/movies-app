@@ -20,7 +20,6 @@
 		void authStore.checkAuth();
 		return () => {
 			healthStore.destroy();
-			authStore.destroy();
 		};
 	});
 
