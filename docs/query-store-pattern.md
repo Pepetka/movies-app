@@ -1,13 +1,13 @@
 # Query Store Pattern
 
-Паттерн для создания сторов на базе `createQuery` с чётким разделением ответственности.
+Паттерн для создания сторов на базе `createQuery` и `createMutation` с чётким разделением ответственности.
 
 ## Архитектура
 
 ```
 Module
-├── xxx-store.svelte.ts      # Список сущностей (только чтение)
-├── xxx-store.svelte.ts      # Отдельная сущность + формы (CRUD)
+├── groups-store.svelte.ts   # Список сущностей (только чтение)
+├── group-store.svelte.ts    # Отдельная сущность + формы (CRUD)
 ├── types.ts                 # PostStatus, GroupFormMode, etc.
 ├── api.ts                   # API функции
 └── validation.svelte.ts     # Валидация форм
@@ -15,42 +15,43 @@ Module
 
 **Ключевой принцип:** Один модуль = несколько отдельных сторов для списка и одной сущности + формы:
 - **List Store** — только список, без форм
-- **Item Store** — одна сущность + create/update формы
+- **Item Store** — одна сущность + create/update mutations
 
 ## Принципы
 
-1. **Единственный источник правды** — query state, геттеры только делегируют
+1. **Единственный источник правды** — query/mutation state, геттеры только делегируют
 2. **FetchStatus** — единый тип статуса загрузки из query
-3. **PostStatus** — отдельный тип для форм (`idle | submitting | success | error`)
+3. **PostStatus** — статус из mutation для форм (`idle | submitting | success | error`)
 4. **Разделение ответственности** — list store не знает про формы, item store управляет формами
+5. **Все query/mutation создаются в constructor** — не динамически!
 
 ## Структура сторов
 
 ### List Store (только чтение)
 
 ```typescript
-import type { Item } from '$lib/api/generated/types';
+import type { GroupResponseDto } from '$lib/api/generated/types';
 import { createQuery, type FetchStatus, type QueryResult } from '$lib/query';
 import { BaseStore } from '$lib/stores/base.svelte';
 
-import { getItems } from './api';
+import { getGroups } from './api';
 
-class ItemsStore extends BaseStore {
-	private readonly _query: QueryResult<Item[]>;
+class GroupsStore extends BaseStore {
+	private readonly _query: QueryResult<GroupResponseDto[]>;
 
 	constructor() {
 		super();
-		this._query = createQuery<Item[]>({
-			key: ['items'],
-			tags: ['items'],
-			fetcher: (signal) => getItems(signal),
+		this._query = createQuery<GroupResponseDto[]>({
+			key: ['groups'],
+			tags: ['groups'],
+			fetcher: (signal) => getGroups(signal),
 			debug: !__IS_PROD__
 		});
 	}
 
 	// === Геттеры — делегируют к query ===
 
-	get items(): Item[] {
+	get groups(): GroupResponseDto[] {
 		return this._query.data ?? [];
 	}
 
@@ -64,18 +65,18 @@ class ItemsStore extends BaseStore {
 	}
 
 	get isEmpty(): boolean {
-		return this.items.length === 0;
+		return this.groups.length === 0;
 	}
 
 	// === Действия ===
 
-	async fetchItems(): Promise<void> {
+	async fetchGroups(): Promise<void> {
 		if (this.status === 'loaded') return;
-		await this._query.refetch();
+		await this._query.fetch();
 	}
 
-	async refetch(): Promise<void> {
-		await this._query.refetch();
+	async fetch(): Promise<void> {
+		await this._query.fetch();
 	}
 
 	reset(): void {
@@ -83,43 +84,72 @@ class ItemsStore extends BaseStore {
 	}
 }
 
-export const itemsStore = new ItemsStore();
+export const groupsStore = new GroupsStore();
 ```
 
-### Item Store (CRUD + формы)
+### Item Store (CRUD + mutations)
 
 ```typescript
-import type { ItemCreateDto, ItemResponseDto, ItemUpdateDto } from '$lib/api/generated/types';
-import { createQuery, queryRegistry, type FetchStatus, type QueryResult } from '$lib/query';
+import type { GroupCreateDto, GroupResponseDto, GroupUpdateDto } from '$lib/api/generated/types';
+import {
+	createMutation,
+	createQuery,
+	type FetchStatus,
+	type MutationResult,
+	type PostStatus,
+	type QueryResult
+} from '$lib/query';
 import { BaseStore } from '$lib/stores/base.svelte';
 
-import { createItem as createItemApi, getItem as getItemApi, updateItem as updateItemApi } from './api';
-import type { PostStatus } from './types';
+import {
+	createGroup as createGroupApi,
+	getGroup as getGroupApi,
+	updateGroup as updateGroupApi
+} from './api';
 
-class ItemStore extends BaseStore {
-	private readonly _query: QueryResult<ItemResponseDto, number>;
-	private _currentId: number | null = null;
-
-	// === Состояние формы ===
-	formStatus = $state<PostStatus>('idle');
-	formError = $state<string | null>(null);
+class GroupStore extends BaseStore {
+	private readonly _query: QueryResult<GroupResponseDto, number>;
+	private readonly _createMutation: MutationResult<GroupResponseDto, GroupCreateDto>;
+	private readonly _updateMutation: MutationResult<
+		GroupResponseDto,
+		{ id: number; data: GroupUpdateDto }
+	>;
 
 	constructor() {
 		super();
-		this._query = createQuery<ItemResponseDto, number>({
-			key: ['item'],
-			tags: ['item'],
+
+		this._query = createQuery<GroupResponseDto, number>({
+			key: ['group'],
+			tags: ['group'],
 			fetcher: (signal, id) => {
-				if (!id) throw new Error('No item id');
-				return getItemApi(id, signal);
+				if (!id) throw new Error('No group id');
+				return getGroupApi(id, signal);
 			},
+			debug: !__IS_PROD__
+		});
+
+		this._createMutation = createMutation<GroupResponseDto, GroupCreateDto>({
+			key: ['group', 'create'],
+			tags: ['groups'],
+			mutator: createGroupApi,
+			debug: !__IS_PROD__
+		});
+
+		this._updateMutation = createMutation<
+			GroupResponseDto,
+			{ id: number; data: GroupUpdateDto }
+		>({
+			key: ['group', 'update'],
+			tags: ['groups'],
+			mutator: ({ id, data }) => updateGroupApi(id, data),
+			invalidateKeys: (_, { id }) => [['group', id]],
 			debug: !__IS_PROD__
 		});
 	}
 
-	// === Геттеры — делегируют к query ===
+	// === Query геттеры ===
 
-	get currentItem(): ItemResponseDto | null {
+	get currentGroup(): GroupResponseDto | null {
 		return this._query.data ?? null;
 	}
 
@@ -132,71 +162,70 @@ class ItemStore extends BaseStore {
 		return this._extractErrorMessage(this._query.error, 'Ошибка загрузки');
 	}
 
-	get isSubmitting(): boolean {
-		return this.formStatus === 'submitting';
+	async fetchGroup(id: number): Promise<void> {
+		if (this._query.isCurrentKey(['group', id]) && this.status === 'loaded') return;
+		await this._query.revalidate(['group', id], id);
 	}
 
-	// === Загрузка ===
+	// === Create mutation ===
 
-	async fetchItem(id: number): Promise<void> {
-		if (this._currentId === id) return;
-		await this._query.revalidate(['item', id], id);
-		this._currentId = id;
+	get createStatus(): PostStatus {
+		return this._createMutation.status;
 	}
 
-	// === Создание ===
-
-	async createItem(data: ItemCreateDto): Promise<ItemResponseDto | null> {
-		this.formStatus = 'submitting';
-		this.formError = null;
-
-		try {
-			const item = await createItemApi(data);
-			this.formStatus = 'success';
-			queryRegistry.invalidateByTag('items');
-			return item;
-		} catch (error) {
-			this.formStatus = 'error';
-			this.formError = this._extractErrorMessage(error, 'Ошибка создания');
-			this._log('error', 'Failed to create item', { error });
-			return null;
-		}
+	get createError(): string | null {
+		if (!this._createMutation.error) return null;
+		return this._extractErrorMessage(this._createMutation.error, 'Ошибка создания');
 	}
 
-	// === Обновление ===
-
-	async updateItem(id: number, data: ItemUpdateDto): Promise<ItemResponseDto | null> {
-		this.formStatus = 'submitting';
-		this.formError = null;
-
-		try {
-			const item = await updateItemApi(id, data);
-			this.formStatus = 'success';
-			queryRegistry.invalidateByTag('items');
-			queryRegistry.invalidateByKey(['item', id]);
-			return item;
-		} catch (error) {
-			this.formStatus = 'error';
-			this.formError = this._extractErrorMessage(error, 'Ошибка обновления');
-			this._log('error', 'Failed to update item', { error });
-			return null;
-		}
+	get isCreating(): boolean {
+		return this._createMutation.isSubmitting;
 	}
 
-	// === Сброс ===
+	async createGroup(data: GroupCreateDto): Promise<GroupResponseDto | null> {
+		return this._createMutation.mutate(data);
+	}
+
+	resetCreate(): void {
+		this._createMutation.reset();
+	}
+
+	// === Update mutation ===
+
+	get updateStatus(): PostStatus {
+		return this._updateMutation.status;
+	}
+
+	get updateError(): string | null {
+		if (!this._updateMutation.error) return null;
+		return this._extractErrorMessage(this._updateMutation.error, 'Ошибка обновления');
+	}
+
+	get isUpdating(): boolean {
+		return this._updateMutation.isSubmitting;
+	}
+
+	async updateGroup(id: number, data: GroupUpdateDto): Promise<GroupResponseDto | null> {
+		return this._updateMutation.mutate({ id, data });
+	}
+
+	resetUpdate(): void {
+		this._updateMutation.reset();
+	}
+
+	// === Reset ===
 
 	reset(): void {
 		this._query.reset();
-		this._currentId = null;
 	}
 
 	resetForm(): void {
-		this.formStatus = 'idle';
-		this.formError = null;
+		this._createMutation.reset();
+		this._updateMutation.reset();
 	}
 }
 
-export const itemStore = new ItemStore();
+export const groupStore = new GroupStore();
 ```
 
 ## Типы
@@ -204,7 +233,6 @@ export const itemStore = new ItemStore();
 ### FetchStatus (из query)
 
 ```typescript
-// В $lib/query/types.ts
 export type FetchStatus = 'idle' | 'loaded' | 'error' | 'loading' | 'fetching';
 ```
 
@@ -216,10 +244,9 @@ export type FetchStatus = 'idle' | 'loaded' | 'error' | 'loading' | 'fetching';
 | `loaded` | Данные успешно загружены |
 | `error` | Ошибка загрузки |
 
-### PostStatus (для форм)
+### PostStatus (из mutation)
 
 ```typescript
-// В module/types.ts
 export type PostStatus = 'idle' | 'submitting' | 'success' | 'error';
 ```
 
@@ -256,22 +283,92 @@ interface QueryResult<T, K> {
 	status: FetchStatus;
 
 	// Методы
-	refetch(): Promise<void>;
+	fetch(): Promise<void>;
 	reset(): void;
+	destroy(): void;
 	revalidate(newKey: unknown[], newParams?: K | null): Promise<void>;
+	isCurrentKey(key: unknown[]): boolean;
 }
 ```
 
 ### revalidate(newKey, newParams)
 
-Меняет ключ и параметры, затем делает запрос.
+Меняет ключ и параметры, затем делает запрос. Используется для динамических ключей.
 
 ```typescript
 // Для query с параметрами
-await query.revalidate(['item', id], id);
+await query.revalidate(['group', id], id);
 
 // fetcher получит id как второй аргумент
-fetcher: (signal, id) => getItem(id, signal)
+fetcher: (signal, id) => getGroup(id, signal)
+```
+
+### isCurrentKey(key)
+
+Проверяет, совпадает ли текущий ключ с переданным. Используется для защиты от повторных запросов.
+
+```typescript
+if (query.isCurrentKey(['group', id]) && status === 'loaded') return;
+await query.revalidate(['group', id], id);
+```
+
+## Mutation API
+
+### createMutation(options)
+
+```typescript
+const mutation = createMutation<T, V>({
+	key: ['entity', 'create'],              // Уникальный ключ
+	tags: ['entities'],                     // Теги для инвалидации после успеха
+	mutator: (variables) => api.create(variables), // Функция мутации
+	invalidateKeys: (data, variables) => [['entity', variables.id]], // Доп. ключи для инвалидации
+	debug: !__IS_PROD__                     // Логирование в dev
+});
+```
+
+### MutationResult
+
+```typescript
+interface MutationResult<T, V> {
+	// Геттеры
+	data: T | null;
+	error: Error | null;
+	isSubmitting: boolean;
+	isError: boolean;
+	status: PostStatus;
+
+	// Методы
+	mutate(variables: V): Promise<T | null>;
+	reset(): void;
+}
+```
+
+### Инвалидация
+
+После успешной мутации автоматически инвалидируются:
+1. Все query с тегами из `tags`
+2. Все query с ключами из `invalidateKeys(data, variables)`
+
+```typescript
+createMutation({
+	tags: ['groups'],  // Инвалидирует все query с тегом 'groups'
+	invalidateKeys: (_, { id }) => [['group', id]], // + инвалидирует конкретный group
+});
+```
+
+## Query Registry
+
+```typescript
+import { queryRegistry } from '$lib/query';
+
+// Инвалидация по тегу (все query с этим тегом)
+queryRegistry.invalidateByTag('groups');
+
+// Инвалидация по ключу (префиксное совпадение)
+queryRegistry.invalidateByKey(['group', id]);
+
+// Сброс всех query (при logout)
+queryRegistry.resetAll();
 ```
 
 ## Использование в компонентах
@@ -281,32 +378,32 @@ fetcher: (signal, id) => getItem(id, signal)
 ```svelte
 <script lang="ts">
 	import { untrack } from 'svelte';
-	import { itemsStore } from '$lib/modules/items';
+	import { groupsStore } from '$lib/modules/groups';
 
 	$effect(() => {
 		untrack(() => {
-			void itemsStore.fetchItems();
+			void groupsStore.fetchGroups();
 		});
 	});
 </script>
 
-<div aria-busy={itemsStore.status === 'loading'}>
-	{#if itemsStore.status === 'loading'}
+<div aria-busy={groupsStore.status === 'loading'}>
+	{#if groupsStore.status === 'loading'}
 		<Skeleton />
-	{:else if itemsStore.status === 'error'}
-		<EmptyState variant="error" description={itemsStore.error}>
-			<Button onclick={() => itemsStore.refetch()}>Повторить</Button>
+	{:else if groupsStore.status === 'error'}
+		<EmptyState variant="error" description={groupsStore.error}>
+			<Button onclick={() => groupsStore.fetch()}>Повторить</Button>
 		</EmptyState>
-	{:else if itemsStore.isEmpty}
-		<EmptyState title="Пусто" />
+	{:else if groupsStore.isEmpty}
+		<EmptyState title="Нет групп" />
 	{:else}
 		<List>
-			{#each itemsStore.items as item (item.id)}
-				<ListItem>{item.name}</ListItem>
+			{#each groupsStore.groups as group (group.id)}
+				<ListItem>{group.name}</ListItem>
 			{/each}
 		</List>
 
-		{#if itemsStore.status === 'fetching'}
+		{#if groupsStore.status === 'fetching'}
 			<Spinner />
 		{/if}
 	{/if}
@@ -318,32 +415,32 @@ fetcher: (signal, id) => getItem(id, signal)
 ```svelte
 <script lang="ts">
 	import { toast } from '@repo/ui';
-	import { itemStore } from '$lib/modules/items';
+	import { groupStore, EMPTY_GROUP_FORM, type GroupFormData } from '$lib/modules/groups';
+	import { goto } from '$app/navigation';
 
-	let form = $state({ name: '' });
+	let form = $state<GroupFormData>({ ...EMPTY_GROUP_FORM });
 
 	$effect(() => {
-		// cleanup при уходе
-		return () => itemStore.resetForm();
+		return () => groupStore.resetForm();
 	});
 
 	const handleSubmit = async () => {
-		const item = await itemStore.createItem(form);
-		if (item) {
-			toast.success('Создано');
-			goto('/items/' + item.id);
+		const group = await groupStore.createGroup(form);
+		if (group) {
+			toast.success('Группа создана');
+			await goto('/groups/' + group.id);
 		} else {
-			toast.error(itemStore.formError ?? 'Ошибка');
+			toast.error(groupStore.createError ?? 'Ошибка');
 		}
 	};
 </script>
 
-<form onsubmit={handleSubmit}>
-	<input bind:value={form.name} />
-	<Button type="submit" disabled={itemStore.isSubmitting}>
-		{itemStore.isSubmitting ? 'Создание...' : 'Создать'}
-	</Button>
-</form>
+<GroupForm
+	mode="create"
+	bind:form
+	onSubmit={handleSubmit}
+	isSubmitting={groupStore.isCreating}
+/>
 ```
 
 ### Форма редактирования
@@ -352,74 +449,64 @@ fetcher: (signal, id) => getItem(id, signal)
 <script lang="ts">
 	import { untrack } from 'svelte';
 	import { toast, Spinner } from '@repo/ui';
-	import { itemStore } from '$lib/modules/items';
+	import { groupStore, EMPTY_GROUP_FORM, type GroupFormData } from '$lib/modules/groups';
+	import { page } from '$app/state';
 
-	const itemId = $derived(Number(page.params.id));
-	let form = $state({ name: '' });
+	const groupId = $derived(Number(page.params.id));
+	let form = $state<GroupFormData>({ ...EMPTY_GROUP_FORM });
 
 	$effect(() => {
 		untrack(() => {
-			void itemStore.fetchItem(itemId);
+			void groupStore.fetchGroup(groupId);
 		});
-		return () => itemStore.resetForm();
+		return () => groupStore.resetForm();
 	});
 
 	$effect(() => {
-		if (itemStore.currentItem && !itemStore.formError) {
-			form = { name: itemStore.currentItem.name };
+		if (groupStore.currentGroup && !groupStore.updateError) {
+			form = {
+				name: groupStore.currentGroup.name ?? '',
+				description: groupStore.currentGroup.description ?? '',
+				avatarUrl: groupStore.currentGroup.avatarUrl ?? ''
+			};
 		}
 	});
 
 	const handleSubmit = async () => {
-		const item = await itemStore.updateItem(itemId, form);
-		if (item) {
+		const group = await groupStore.updateGroup(groupId, form);
+		if (group) {
 			toast.success('Сохранено');
-			goto('/items/' + item.id);
-		} else if (itemStore.formError) {
-			toast.error(itemStore.formError);
+			await goto('/groups/' + group.id);
+		} else if (groupStore.updateError) {
+			toast.error(groupStore.updateError);
 		}
 	};
 
 	const handleRetry = () => {
-		void itemStore.fetchItem(itemId);
+		void groupStore.fetchGroup(groupId);
 	};
 </script>
 
-{#if itemStore.status === 'loading'}
+{#if groupStore.status === 'loading'}
 	<Spinner />
-{:else if itemStore.status === 'error'}
-	<EmptyState variant="error" description={itemStore.error}>
+{:else if groupStore.status === 'error'}
+	<EmptyState variant="error" description={groupStore.error}>
 		<Button onclick={handleRetry}>Повторить</Button>
 	</EmptyState>
 {:else}
-	<form onsubmit={handleSubmit}>
-		<input bind:value={form.name} />
-		<Button type="submit" disabled={itemStore.isSubmitting}>
-			{itemStore.isSubmitting ? 'Сохранение...' : 'Сохранить'}
-		</Button>
-	</form>
+	<GroupForm
+		mode="edit"
+		bind:form
+		onSubmit={handleSubmit}
+		isSubmitting={groupStore.isUpdating}
+	/>
 {/if}
-```
-
-## Query Registry
-
-```typescript
-import { queryRegistry } from '$lib/query';
-
-// Инвалидация по тегу (все query с этим тегом)
-queryRegistry.invalidateByTag('items');
-
-// Инвалидация по ключу (префиксное совпадение)
-queryRegistry.invalidateByKey(['item', id]);
-
-// Сброс всех query (при logout)
-queryRegistry.resetAll();
 ```
 
 ## Чек-лист создания нового модуля
 
 1. **types.ts**
-   - [ ] `PostStatus` — если есть формы
+   - [ ] `PostStatus` — импортировать из `$lib/query`
    - [ ] `FormMode` — если есть create/edit
    - [ ] `IProps` — для компонентов формы
 
@@ -432,18 +519,19 @@ queryRegistry.resetAll();
 3. **items-store.svelte.ts**
    - [ ] `createQuery<Item[]>` с key `['items']`
    - [ ] Геттеры: `items`, `status`, `error`, `isEmpty`
-   - [ ] Методы: `fetchItems()`, `refetch()`, `reset()`
+   - [ ] Методы: `fetchItems()`, `fetch()`, `reset()`
 
 4. **item-store.svelte.ts**
    - [ ] `createQuery<Item, number>` с key `['item']` и params
-   - [ ] Состояние формы: `formStatus`, `formError`
-   - [ ] Геттеры: `currentItem`, `status`, `error`, `isSubmitting`
-   - [ ] Методы: `fetchItem(id)`, `createItem()`, `updateItem()`, `reset()`, `resetForm()`
-   - [ ] Защита от повторных запросов: `if (this._currentId === id) return`
+   - [ ] `createMutation` для create с tags: `['items']`
+   - [ ] `createMutation` для update с tags + `invalidateKeys`
+   - [ ] Геттеры делегируют к query/mutation
+   - [ ] Защита от повторных запросов: `isCurrentKey() && status === 'loaded'`
 
 5. **index.ts**
    - [ ] Экспорт обоих сторов
    - [ ] Экспорт типов
+   - [ ] Экспорт компонентов формы
 
 ## Эталонные реализации
 
@@ -461,7 +549,7 @@ queryRegistry.resetAll();
 items = $state<Item[]>([]);
 
 async fetchItems() {
-	await this._query.refetch();
+	await this._query.fetch();
 	this.items = this._query.data ?? []; // Дублирование!
 }
 ```
@@ -469,7 +557,7 @@ async fetchItems() {
 ```typescript
 // ПРАВИЛЬНО — геттер делегирует
 get items(): Item[] {
-	return this._query?.data ?? [];
+	return this._query.data ?? [];
 }
 ```
 
@@ -483,7 +571,7 @@ status = $state<'idle' | 'loading' | 'submitting' | 'error'>('idle');
 ```typescript
 // ПРАВИЛЬНО — раздельные статусы
 // FetchStatus — из query (loading/fetching/loaded/error/idle)
-// PostStatus — для форм (idle/submitting/success/error)
+// PostStatus — из mutation (idle/submitting/success/error)
 ```
 
 ### ❌ Забывать инвалидацию
@@ -497,12 +585,11 @@ async createItem(data) {
 ```
 
 ```typescript
-// ПРАВИЛЬНО
-async createItem(data) {
-	const item = await api.create(data);
-	queryRegistry.invalidateByTag('items');
-	return item;
-}
+// ПРАВИЛЬНО — createMutation автоматически инвалидирует по tags
+createMutation({
+	tags: ['items'],
+	mutator: api.create,
+});
 ```
 
 ### ❌ Не защищать от повторных запросов
@@ -510,17 +597,30 @@ async createItem(data) {
 ```typescript
 // НЕПРАВИЛЬНО — при каждом ререндере будет запрос
 async fetchItem(id: number) {
-	await this._query?.revalidate(['item', id], id);
+	await this._query.revalidate(['item', id], id);
 }
 ```
 
 ```typescript
-// ПРАВИЛЬНО — защита по id
-private _currentId: number | null = null;
+// ПРАВИЛЬНО — защита по isCurrentKey
+async fetchItem(id: number): Promise<void> {
+	if (this._query.isCurrentKey(['item', id]) && this.status === 'loaded') return;
+	await this._query.revalidate(['item', id], id);
+}
+```
 
+### ❌ Создавать query динамически
+
+```typescript
+// НЕПРАВИЛЬНО — query создаётся в методе
 async fetchItem(id: number) {
-	if (this._currentId === id) return;
-	await this._query?.revalidate(['item', id], id);
-	this._currentId = id;
+	this._query = createQuery({ ... }); // Будет утечка!
+}
+```
+
+```typescript
+// ПРАВИЛЬНО — query создаётся в constructor
+constructor() {
+	this._query = createQuery({ ... });
 }
 ```

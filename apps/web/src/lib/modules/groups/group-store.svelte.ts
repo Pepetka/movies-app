@@ -1,5 +1,12 @@
+import {
+	createMutation,
+	createQuery,
+	type FetchStatus,
+	type MutationResult,
+	type PostStatus,
+	type QueryResult
+} from '$lib/query';
 import type { GroupCreateDto, GroupResponseDto, GroupUpdateDto } from '$lib/api/generated/types';
-import { createQuery, queryRegistry, type FetchStatus, type QueryResult } from '$lib/query';
 import { BaseStore } from '$lib/stores/base.svelte';
 
 import {
@@ -7,13 +14,18 @@ import {
 	getGroup as getGroupApi,
 	updateGroup as updateGroupApi
 } from './api';
-import type { PostStatus } from './types';
 
 class GroupStore extends BaseStore {
 	private readonly _query: QueryResult<GroupResponseDto, number>;
+	private readonly _createMutation: MutationResult<GroupResponseDto, GroupCreateDto>;
+	private readonly _updateMutation: MutationResult<
+		GroupResponseDto,
+		{ id: number; data: GroupUpdateDto }
+	>;
 
 	constructor() {
 		super();
+
 		this._query = createQuery<GroupResponseDto, number>({
 			key: ['group'],
 			tags: ['group'],
@@ -21,6 +33,21 @@ class GroupStore extends BaseStore {
 				if (!id) throw new Error('No group id');
 				return getGroupApi(id, signal);
 			},
+			debug: !__IS_PROD__
+		});
+
+		this._createMutation = createMutation<GroupResponseDto, GroupCreateDto>({
+			key: ['group', 'create'],
+			tags: ['groups'],
+			mutator: createGroupApi,
+			debug: !__IS_PROD__
+		});
+
+		this._updateMutation = createMutation<GroupResponseDto, { id: number; data: GroupUpdateDto }>({
+			key: ['group', 'update'],
+			tags: ['groups'],
+			mutator: ({ id, data }) => updateGroupApi(id, data),
+			invalidateKeys: (_, { id }) => [['group', id]],
 			debug: !__IS_PROD__
 		});
 	}
@@ -35,7 +62,7 @@ class GroupStore extends BaseStore {
 
 	get error(): string | null {
 		if (!this._query.error) return null;
-		return this._extractErrorMessage(this._query.error, 'Ошибка загрузки групп');
+		return this._extractErrorMessage(this._query.error, 'Ошибка загрузки группы');
 	}
 
 	async fetchGroup(id: number): Promise<void> {
@@ -43,44 +70,50 @@ class GroupStore extends BaseStore {
 		await this._query.revalidate(['group', id], id);
 	}
 
-	// forms
+	// Create mutation
 
-	formStatus = $state<PostStatus>('idle');
-	formError = $state<string | null>(null);
+	get createStatus(): PostStatus {
+		return this._createMutation.status;
+	}
+
+	get createError(): string | null {
+		if (!this._createMutation.error) return null;
+		return this._extractErrorMessage(this._createMutation.error, 'Ошибка создания группы');
+	}
+
+	get isCreating(): boolean {
+		return this._createMutation.isSubmitting;
+	}
 
 	async createGroup(data: GroupCreateDto): Promise<GroupResponseDto | null> {
-		this.formStatus = 'submitting';
-		this.formError = null;
+		return this._createMutation.mutate(data);
+	}
 
-		try {
-			const group = await createGroupApi(data);
-			this.formStatus = 'success';
-			queryRegistry.invalidateByTag('groups');
-			return group;
-		} catch (error) {
-			this.formStatus = 'error';
-			this.formError = this._extractErrorMessage(error, 'Ошибка создания группы');
-			this._log('error', 'Failed to create group', { error });
-			return null;
-		}
+	resetCreate(): void {
+		this._createMutation.reset();
+	}
+
+	// Update mutation
+
+	get updateStatus(): PostStatus {
+		return this._updateMutation.status;
+	}
+
+	get updateError(): string | null {
+		if (!this._updateMutation.error) return null;
+		return this._extractErrorMessage(this._updateMutation.error, 'Ошибка обновления группы');
+	}
+
+	get isUpdating(): boolean {
+		return this._updateMutation.isSubmitting;
 	}
 
 	async updateGroup(id: number, data: GroupUpdateDto): Promise<GroupResponseDto | null> {
-		this.formStatus = 'submitting';
-		this.formError = null;
+		return this._updateMutation.mutate({ id, data });
+	}
 
-		try {
-			const group = await updateGroupApi(id, data);
-			this.formStatus = 'success';
-			queryRegistry.invalidateByTag('groups');
-			queryRegistry.invalidateByKey(['group', id]);
-			return group;
-		} catch (error) {
-			this.formStatus = 'error';
-			this.formError = this._extractErrorMessage(error, 'Ошибка обновления группы');
-			this._log('error', 'Failed to update group', { error });
-			return null;
-		}
+	resetUpdate(): void {
+		this._updateMutation.reset();
 	}
 
 	reset(): void {
@@ -88,8 +121,8 @@ class GroupStore extends BaseStore {
 	}
 
 	resetForm(): void {
-		this.formStatus = 'idle';
-		this.formError = null;
+		this._createMutation.reset();
+		this._updateMutation.reset();
 	}
 }
 

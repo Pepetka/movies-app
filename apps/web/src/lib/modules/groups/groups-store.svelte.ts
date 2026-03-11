@@ -36,11 +36,11 @@ class GroupsStore extends BaseStore {
 
 	async fetchGroups(): Promise<void> {
 		if (this.status === 'loaded') return;
-		await this._query.refetch();
+		await this._query.fetch();
 	}
 
-	async refetch(): Promise<void> {
-		await this._query.refetch();
+	async fetch(): Promise<void> {
+		await this._query.fetch();
 	}
 
 	reset(): void {

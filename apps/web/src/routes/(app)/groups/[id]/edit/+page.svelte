@@ -14,6 +14,7 @@
 	const groupId = $derived(Number(page.params.id));
 
 	let form = $state<GroupFormData>({ ...EMPTY_GROUP_FORM });
+	let isFormInitialized = $state(false);
 
 	$effect(() => {
 		topBarStore.configure({
@@ -31,16 +32,18 @@
 
 		return () => {
 			groupStore.resetForm();
+			isFormInitialized = false;
 		};
 	});
 
 	$effect(() => {
-		if (groupStore.currentGroup && !groupStore.formError) {
+		if (groupStore.currentGroup && !groupStore.updateError && !isFormInitialized) {
 			form = {
 				name: groupStore.currentGroup.name ?? '',
 				description: groupStore.currentGroup.description ?? '',
 				avatarUrl: groupStore.currentGroup.avatarUrl ?? ''
 			};
+			isFormInitialized = true;
 		}
 	});
 
@@ -54,8 +57,8 @@
 		if (group) {
 			toast.success('Группа обновлена');
 			await goto(resolve(ROUTES.GROUP_DETAIL(group.id)));
-		} else if (groupStore.formError) {
-			toast.error(groupStore.formError);
+		} else if (groupStore.updateError) {
+			toast.error(groupStore.updateError);
 		}
 	};
 
@@ -74,10 +77,5 @@
 		<button class="page-state__retry-button" onclick={handleRetry}>Повторить</button>
 	</div>
 {:else}
-	<GroupForm
-		mode="edit"
-		bind:form
-		onSubmit={handleSubmit}
-		isSubmitting={groupStore.formStatus === 'submitting'}
-	/>
+	<GroupForm mode="edit" bind:form onSubmit={handleSubmit} isSubmitting={groupStore.isUpdating} />
 {/if}

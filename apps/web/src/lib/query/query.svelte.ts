@@ -15,8 +15,8 @@ class Query<T, K = never> implements QueryResult<T, K> {
 		isFetching: false
 	});
 
-	private _fetcherParams: K | null;
-	private _fetchKey: unknown[];
+	private _params: K | null;
+	private _key: unknown[];
 	private _controller: AbortController | null = null;
 	private _unregister: (() => void) | null = null;
 
@@ -26,8 +26,8 @@ class Query<T, K = never> implements QueryResult<T, K> {
 		this._fetcher = fetcher;
 		this._tags = tags;
 		this._debug = debug;
-		this._fetcherParams = params;
-		this._fetchKey = key;
+		this._params = params;
+		this._key = key;
 
 		this._register();
 	}
@@ -57,10 +57,10 @@ class Query<T, K = never> implements QueryResult<T, K> {
 	}
 
 	isCurrentKey(key: unknown[]): boolean {
-		return JSON.stringify(key) === JSON.stringify(this._fetchKey);
+		return JSON.stringify(key) === JSON.stringify(this._key);
 	}
 
-	async refetch(): Promise<void> {
+	async fetch(): Promise<void> {
 		this._controller?.abort();
 		this._controller = new AbortController();
 
@@ -68,7 +68,7 @@ class Query<T, K = never> implements QueryResult<T, K> {
 		this._state.error = null;
 
 		try {
-			const data = await this._fetcher(this._controller.signal, this._fetcherParams);
+			const data = await this._fetcher(this._controller.signal, this._params);
 			this._state.data = data;
 		} catch (e) {
 			if (isAbortError(e)) return;
@@ -99,19 +99,19 @@ class Query<T, K = never> implements QueryResult<T, K> {
 
 		if (this._unregister) this._unregister();
 
-		this._fetchKey = newKey;
-		this._fetcherParams = newParams ?? null;
+		this._key = newKey;
+		this._params = newParams ?? null;
 
 		this._register();
 
-		await this.refetch();
+		await this.fetch();
 	}
 
 	private _register(): void {
 		this._unregister = queryRegistry.register(
-			this._fetchKey,
+			this._key,
 			this._tags,
-			{ refetch: () => this.refetch(), reset: () => this.reset(), destroy: () => this.destroy() },
+			{ fetch: () => this.fetch(), reset: () => this.reset(), destroy: () => this.destroy() },
 			this._debug
 		);
 	}

@@ -65,7 +65,7 @@ class AuthStore extends BaseStore {
 	}
 
 	private async _doCheckAuth(): Promise<void> {
-		await this._query.refetch();
+		await this._query.fetch();
 		this.isInitialized = true;
 	}
 
@@ -78,7 +78,7 @@ class AuthStore extends BaseStore {
 
 		try {
 			await apiLogin(validation.data);
-			await this._query.refetch();
+			await this._query.fetch();
 			toast.success('Добро пожаловать!');
 		} catch (error) {
 			const message = this._extractErrorMessage(error, 'Ошибка входа');
@@ -99,7 +99,7 @@ class AuthStore extends BaseStore {
 		try {
 			const { name, email, password } = validation.data;
 			await apiRegister({ name, email, password });
-			await this._query.refetch();
+			await this._query.fetch();
 			toast.success('Регистрация успешна!');
 		} catch (error) {
 			const message = this._extractErrorMessage(error, 'Ошибка регистрации');

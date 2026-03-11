@@ -1,3 +1,5 @@
+// === Query ===
+
 export interface QueryState<T> {
 	data: T | null;
 	error: Error | null;
@@ -15,14 +17,14 @@ export interface QueryOptions<T, K = never> {
 export type FetchStatus = 'idle' | 'loaded' | 'error' | 'loading' | 'fetching';
 
 export interface QueryActions {
-	refetch: () => Promise<void>;
+	fetch: () => Promise<void>;
 	reset: () => void;
 	destroy: () => void;
 }
 
 export interface QueryResult<T, K = never> extends QueryState<T> {
 	readonly isError: boolean;
-	refetch: () => Promise<void>;
+	fetch: () => Promise<void>;
 	reset: () => void;
 	destroy: () => void;
 	revalidate: (newKey: unknown[], newParams?: K | null) => Promise<void>;
@@ -34,4 +36,29 @@ export interface RegistryEntry {
 	key: unknown[];
 	tags: string[];
 	actions: QueryActions;
+}
+
+// === Mutation ===
+
+export interface MutationState<T> {
+	data: T | null;
+	error: Error | null;
+	isSubmitting: boolean;
+}
+
+export interface MutationOptions<T, V> {
+	key: unknown[];
+	mutator: (variables: V) => Promise<T>;
+	tags?: string[];
+	invalidateKeys?: (data: T, variables: V) => unknown[][];
+	debug?: boolean;
+}
+
+export type PostStatus = 'idle' | 'submitting' | 'success' | 'error';
+
+export interface MutationResult<T, V> extends MutationState<T> {
+	readonly isError: boolean;
+	mutate: (variables: V) => Promise<T | null>;
+	reset: () => void;
+	status: PostStatus;
 }

@@ -46,7 +46,7 @@ class QueryRegistry {
 		const keys = this._tagIndex.get(tag);
 		if (keys) {
 			for (const key of keys) {
-				void this._queries.get(key)?.actions.refetch();
+				void this._queries.get(key)?.actions.fetch();
 			}
 		}
 	}
@@ -58,7 +58,7 @@ class QueryRegistry {
 
 		for (const entry of this._queries.values()) {
 			if (this._keyMatchesPrefix(entry.key, prefix)) {
-				void entry.actions.refetch();
+				void entry.actions.fetch();
 			}
 		}
 	}

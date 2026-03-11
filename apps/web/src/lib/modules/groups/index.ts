@@ -1,4 +1,4 @@
-export type { GroupFormStatus, GroupFormMode, IProps, PostStatus } from './types';
+export type { GroupFormStatus, GroupFormMode, IProps } from './types';
 
 export { groupsStore } from './groups-store.svelte';
 export { groupStore } from './group-store.svelte';

@@ -32,14 +32,9 @@
 			toast.success('Группа создана');
 			await goto(resolve(ROUTES.GROUP_DETAIL(group.id)));
 		} else {
-			toast.error(groupStore.formError ?? 'Не удалось создать группу');
+			toast.error(groupStore.createError ?? 'Не удалось создать группу');
 		}
 	};
 </script>
 
-<GroupForm
-	mode="create"
-	bind:form
-	onSubmit={handleSubmit}
-	isSubmitting={groupStore.formStatus === 'submitting'}
-/>
+<GroupForm mode="create" bind:form onSubmit={handleSubmit} isSubmitting={groupStore.isCreating} />

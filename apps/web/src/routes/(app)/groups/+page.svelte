@@ -54,7 +54,7 @@
 				description={groupsStore.error ?? 'Не удалось загрузить список групп'}
 			>
 				{#snippet action()}
-					<Button variant="secondary" onclick={() => groupsStore.refetch()}>Повторить</Button>
+					<Button variant="secondary" onclick={() => groupsStore.fetch()}>Повторить</Button>
 				{/snippet}
 			</EmptyState>
 		{:else if groupsStore.isEmpty}
