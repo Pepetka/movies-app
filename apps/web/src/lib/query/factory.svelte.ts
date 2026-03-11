@@ -1,11 +1,11 @@
-import type { QueryOptions, QueryResult, QueryState } from './types';
+import type { FetchStatus, QueryOptions, QueryResult, QueryState } from './types';
 import { queryRegistry } from './registry.svelte';
 
 const toError = (e: unknown): Error => (e instanceof Error ? e : new Error(String(e)));
 const isAbortError = (e: unknown): boolean => e instanceof Error && e.name === 'AbortError';
 
-export const createQuery = <T>(options: QueryOptions<T>): QueryResult<T> => {
-	const { key, fetcher, tags = [], debug = false } = options;
+export const createQuery = <T, K = never>(options: QueryOptions<T, K>): QueryResult<T, K> => {
+	const { fetcher, key, tags = [], debug = false, params = null } = options;
 
 	const state = $state<QueryState<T>>({
 		data: null,
@@ -13,8 +13,12 @@ export const createQuery = <T>(options: QueryOptions<T>): QueryResult<T> => {
 		isFetching: false
 	});
 
+	let fetcherParams = params;
+	let fetchKey = key;
+
 	let controller: AbortController | null = null;
 	let registered = false;
+	let unregister: () => void;
 
 	const refetch = async (): Promise<void> => {
 		controller?.abort();
@@ -24,7 +28,7 @@ export const createQuery = <T>(options: QueryOptions<T>): QueryResult<T> => {
 		state.error = null;
 
 		try {
-			const data = await fetcher(controller.signal);
+			const data = await fetcher(controller.signal, fetcherParams);
 			state.data = data;
 		} catch (e) {
 			if (isAbortError(e)) return;
@@ -32,6 +36,14 @@ export const createQuery = <T>(options: QueryOptions<T>): QueryResult<T> => {
 		} finally {
 			state.isFetching = false;
 		}
+	};
+
+	const getStatus = (): FetchStatus => {
+		if (state.isFetching && state.data === null) return 'loading';
+		if (state.isFetching) return 'fetching';
+		if (state.error) return 'error';
+		if (state.data !== null) return 'loaded';
+		return 'idle';
 	};
 
 	const reset = (): void => {
@@ -50,7 +62,21 @@ export const createQuery = <T>(options: QueryOptions<T>): QueryResult<T> => {
 		}
 	};
 
-	const unregister = queryRegistry.register(key, tags, { refetch, reset, destroy }, debug);
+	const revalidate = async (newKey: unknown[], newParams?: K | null): Promise<void> => {
+		reset();
+
+		if (registered) unregister();
+
+		registered = true;
+		unregister = queryRegistry.register(newKey, tags, { refetch, reset, destroy }, debug);
+
+		fetchKey = newKey;
+		fetcherParams = newParams ?? null;
+
+		await refetch();
+	};
+
+	unregister = queryRegistry.register(fetchKey, tags, { refetch, reset, destroy }, debug);
 	registered = true;
 
 	return {
@@ -66,8 +92,12 @@ export const createQuery = <T>(options: QueryOptions<T>): QueryResult<T> => {
 		get isError() {
 			return state.error !== null;
 		},
+		get status() {
+			return getStatus();
+		},
 		refetch,
 		reset,
-		destroy
+		destroy,
+		revalidate
 	};
 };

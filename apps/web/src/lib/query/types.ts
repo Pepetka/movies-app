@@ -4,12 +4,15 @@ export interface QueryState<T> {
 	isFetching: boolean;
 }
 
-export interface QueryOptions<T> {
+export interface QueryOptions<T, K = never> {
 	key: unknown[];
-	fetcher: (signal: AbortSignal) => Promise<T>;
+	fetcher: (signal: AbortSignal, params?: K | null) => Promise<T>;
+	params?: K | null;
 	tags?: string[];
 	debug?: boolean;
 }
+
+export type FetchStatus = 'idle' | 'loaded' | 'error' | 'loading' | 'fetching';
 
 export interface QueryActions {
 	refetch: () => Promise<void>;
@@ -17,11 +20,13 @@ export interface QueryActions {
 	destroy: () => void;
 }
 
-export interface QueryResult<T> extends QueryState<T> {
+export interface QueryResult<T, K = never> extends QueryState<T> {
 	readonly isError: boolean;
 	refetch: () => Promise<void>;
 	reset: () => void;
 	destroy: () => void;
+	revalidate: (newKey: unknown[], newParams?: K | null) => Promise<void>;
+	status: FetchStatus;
 }
 
 export interface RegistryEntry {
