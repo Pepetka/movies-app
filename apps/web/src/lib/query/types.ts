@@ -27,6 +27,7 @@ export interface QueryResult<T, K = never> extends QueryState<T> {
 	destroy: () => void;
 	revalidate: (newKey: unknown[], newParams?: K | null) => Promise<void>;
 	status: FetchStatus;
+	isCurrentKey: (key: unknown[]) => boolean;
 }
 
 export interface RegistryEntry {

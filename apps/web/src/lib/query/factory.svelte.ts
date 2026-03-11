@@ -76,6 +76,10 @@ export const createQuery = <T, K = never>(options: QueryOptions<T, K>): QueryRes
 		await refetch();
 	};
 
+	const isCurrentKey = (key: unknown[]): boolean => {
+		return JSON.stringify(key) === JSON.stringify(fetchKey);
+	};
+
 	unregister = queryRegistry.register(fetchKey, tags, { refetch, reset, destroy }, debug);
 	registered = true;
 
@@ -95,6 +99,7 @@ export const createQuery = <T, K = never>(options: QueryOptions<T, K>): QueryRes
 		get status() {
 			return getStatus();
 		},
+		isCurrentKey,
 		refetch,
 		reset,
 		destroy,

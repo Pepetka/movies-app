@@ -11,7 +11,6 @@ import type { PostStatus } from './types';
 
 class GroupStore extends BaseStore {
 	private readonly _query: QueryResult<GroupResponseDto, number>;
-	private _currentId: number | null = null;
 
 	constructor() {
 		super();
@@ -40,9 +39,8 @@ class GroupStore extends BaseStore {
 	}
 
 	async fetchGroup(id: number): Promise<void> {
-		if (this._currentId === id) return;
+		if (this._query.isCurrentKey(['group', id]) && this.status === 'loaded') return;
 		await this._query.revalidate(['group', id], id);
-		this._currentId = id;
 	}
 
 	// forms
@@ -87,7 +85,6 @@ class GroupStore extends BaseStore {
 
 	reset(): void {
 		this._query.reset();
-		this._currentId = null;
 	}
 
 	resetForm(): void {
