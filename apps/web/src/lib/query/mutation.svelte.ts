@@ -62,7 +62,7 @@ class Mutation<T, V> implements MutationResult<T, V> {
 	async mutate(variables: V): Promise<T | null> {
 		this._state.isSubmitting = true;
 		this._state.error = null;
-		this._state.hasSucceeded = false;
+		this._hasSucceeded = false;
 
 		if (this._debug) {
 			logger.debug('Mutation', 'Starting', { key: this._key, variables });
@@ -71,7 +71,7 @@ class Mutation<T, V> implements MutationResult<T, V> {
 		try {
 			const data = await this._mutator(variables);
 			this._state.data = data;
-			this._state.hasSucceeded = true;
+			this._hasSucceeded = true;
 
 			if (this._debug) {
 				logger.debug('Mutation', 'Success', { key: this._key, data });
@@ -98,7 +98,7 @@ class Mutation<T, V> implements MutationResult<T, V> {
 		this._state.data = null;
 		this._state.error = null;
 		this._state.isSubmitting = false;
-		this._state.hasSucceeded = false;
+		this._hasSucceeded = false;
 	}
 
 	private _invalidate(variables: V, data: T): void {
