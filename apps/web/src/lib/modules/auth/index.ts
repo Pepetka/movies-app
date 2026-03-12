@@ -6,5 +6,9 @@ export {
 	validateLoginForm,
 	validateRegisterForm,
 	checkPasswordStrength,
-	createFormFieldValidator
+	EMPTY_LOGIN_FORM,
+	EMPTY_REGISTER_FORM,
+	loginFormToDto,
+	registerFormToDto
 } from './validation.svelte';
+export { createFormFieldValidator } from '$lib/utils/validation.svelte';

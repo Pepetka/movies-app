@@ -1,9 +1,7 @@
 import { z } from 'zod';
 
-import {
-	createValidator,
-	createFormFieldValidator as createFieldValidator
-} from '$lib/utils/validation.svelte';
+import type { AuthLoginDto, AuthRegisterDto } from '$lib/api/generated/types';
+import { createValidator } from '$lib/utils/validation.svelte';
 
 export const PASSWORD_PATTERNS = {
 	lowercase: /[a-z]/,
@@ -48,7 +46,30 @@ export const registerSchema = z
 export type LoginFormData = z.infer<typeof loginSchema>;
 export type RegisterFormData = z.infer<typeof registerSchema>;
 
+export const EMPTY_LOGIN_FORM: LoginFormData = {
+	email: '',
+	password: ''
+};
+
+export const EMPTY_REGISTER_FORM: RegisterFormData = {
+	name: '',
+	email: '',
+	password: '',
+	confirmPassword: ''
+};
+
 export const validateLoginForm = createValidator(loginSchema);
 export const validateRegisterForm = createValidator(registerSchema);
 
-export const createFormFieldValidator = createFieldValidator;
+// === Transformers ===
+
+export const loginFormToDto = (form: LoginFormData): AuthLoginDto => ({
+	email: form.email,
+	password: form.password
+});
+
+export const registerFormToDto = (form: RegisterFormData): AuthRegisterDto => ({
+	name: form.name,
+	email: form.email,
+	password: form.password
+});

@@ -4,8 +4,7 @@
 
 	import { createFormFieldValidator, debounce, DEBOUNCE } from '$lib/utils';
 
-	import { validateGroupForm } from './validation.svelte';
-	import type { IProps } from './types';
+	import { validateGroupForm, EMPTY_GROUP_FORM, type GroupFormProps } from './validation.svelte';
 
 	import '$lib/styles/group-form.css';
 
@@ -18,13 +17,9 @@
 		submitLabel = mode === 'create' ? 'Создать' : 'Сохранить',
 		submitIcon: SubmitIcon = mode === 'create' ? Sparkles : Save,
 		onSubmit,
-		form = $bindable({
-			name: '',
-			description: '',
-			avatarUrl: ''
-		}),
+		form = $bindable({ ...EMPTY_GROUP_FORM }),
 		isSubmitting = false
-	}: IProps = $props();
+	}: GroupFormProps = $props();
 
 	const fieldValidator = createFormFieldValidator(validateGroupForm);
 
