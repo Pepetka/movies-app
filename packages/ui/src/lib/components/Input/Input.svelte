@@ -253,16 +253,7 @@
 	}
 
 	/* Icon */
-	.ui-input-icon {
-		position: absolute;
-		right: var(--input-md-padding-x);
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		color: var(--text-tertiary);
-		pointer-events: none;
-	}
-
+	.ui-input-icon,
 	.ui-input-icon-btn {
 		position: absolute;
 		right: 8px;
@@ -271,10 +262,17 @@
 		justify-content: center;
 		width: 32px;
 		height: 32px;
+		color: var(--text-tertiary);
+	}
+
+	.ui-input-icon {
+		pointer-events: none;
+	}
+
+	.ui-input-icon-btn {
 		border: none;
 		background: transparent;
 		border-radius: 8px;
-		color: var(--text-tertiary);
 		cursor: pointer;
 		transition:
 			background-color 0.15s ease,
@@ -373,10 +371,7 @@
 
 	.ui-input-wrapper.sm .ui-input-icon,
 	.ui-input-wrapper.sm .ui-input-icon-btn {
-		right: 8px;
-	}
-
-	.ui-input-wrapper.sm .ui-input-icon-btn {
+		right: 6px;
 		width: 28px;
 		height: 28px;
 	}
@@ -403,10 +398,7 @@
 
 	.ui-input-wrapper.lg .ui-input-icon,
 	.ui-input-wrapper.lg .ui-input-icon-btn {
-		right: 12px;
-	}
-
-	.ui-input-wrapper.lg .ui-input-icon-btn {
+		right: 8px;
 		width: 36px;
 		height: 36px;
 	}
@@ -433,10 +425,7 @@
 
 	.ui-input-wrapper.responsive .ui-input-icon,
 	.ui-input-wrapper.responsive .ui-input-icon-btn {
-		right: 8px;
-	}
-
-	.ui-input-wrapper.responsive .ui-input-icon-btn {
+		right: 6px;
 		width: 28px;
 		height: 28px;
 	}
@@ -463,10 +452,7 @@
 
 		.ui-input-wrapper.responsive .ui-input-icon,
 		.ui-input-wrapper.responsive .ui-input-icon-btn {
-			right: var(--input-md-padding-x);
-		}
-
-		.ui-input-wrapper.responsive .ui-input-icon-btn {
+			right: 8px;
 			width: 32px;
 			height: 32px;
 		}
@@ -494,10 +480,7 @@
 
 		.ui-input-wrapper.responsive .ui-input-icon,
 		.ui-input-wrapper.responsive .ui-input-icon-btn {
-			right: 12px;
-		}
-
-		.ui-input-wrapper.responsive .ui-input-icon-btn {
+			right: 8px;
 			width: 36px;
 			height: 36px;
 		}
