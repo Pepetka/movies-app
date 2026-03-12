@@ -18,6 +18,8 @@ class Mutation<T, V> implements MutationResult<T, V> {
 		isSubmitting: false
 	});
 
+	private _hasSucceeded = $state(false);
+
 	constructor(options: MutationOptions<T, V>) {
 		const { mutator, key, tags = [], invalidateKeys, debug = false } = options;
 
@@ -47,19 +49,20 @@ class Mutation<T, V> implements MutationResult<T, V> {
 	}
 
 	get isSuccess(): boolean {
-		return !this._state.isSubmitting && this._state.data !== null && this._state.error === null;
+		return this._hasSucceeded && !this._state.isSubmitting && !this.isError;
 	}
 
 	get status(): PostStatus {
 		if (this._state.isSubmitting) return 'submitting';
 		if (this._state.error) return 'error';
-		if (this._state.data !== null) return 'success';
+		if (this._hasSucceeded) return 'success';
 		return 'idle';
 	}
 
 	async mutate(variables: V): Promise<T | null> {
 		this._state.isSubmitting = true;
 		this._state.error = null;
+		this._state.hasSucceeded = false;
 
 		if (this._debug) {
 			logger.debug('Mutation', 'Starting', { key: this._key, variables });
@@ -68,6 +71,7 @@ class Mutation<T, V> implements MutationResult<T, V> {
 		try {
 			const data = await this._mutator(variables);
 			this._state.data = data;
+			this._state.hasSucceeded = true;
 
 			if (this._debug) {
 				logger.debug('Mutation', 'Success', { key: this._key, data });
@@ -94,6 +98,7 @@ class Mutation<T, V> implements MutationResult<T, V> {
 		this._state.data = null;
 		this._state.error = null;
 		this._state.isSubmitting = false;
+		this._state.hasSucceeded = false;
 	}
 
 	private _invalidate(variables: V, data: T): void {
