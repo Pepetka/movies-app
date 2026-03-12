@@ -399,6 +399,119 @@ createMutation({
 });
 ```
 
+### isSuccess и void-мутации
+
+`isSuccess` работает корректно даже если мутация возвращает `void`:
+
+```typescript
+// Внутри Mutation:
+// isSuccess = hasSucceeded && !isSubmitting && !isError
+
+// Мутация без возвращаемого значения
+const deleteMutation = createMutation<void, number>({
+	key: ['item', 'delete'],
+	tags: ['items'],
+	mutator: (id) => api.deleteItem(id)  // возвращает void
+});
+
+// После успешного вызова:
+// deleteMutation.data = undefined (или null)
+// deleteMutation.isSuccess = true  ✓
+// deleteMutation.status = 'success' ✓
+```
+
+**ВАЖНО:** Всегда используй `isSuccess` для проверки успеха mutation, а не проверку возвращаемого значения. См. раздел "Паттерны в компонентах".
+
+## Обработка ошибок
+
+### Типы ошибок
+
+HTTP-клиент генерирует специальные классы ошибок:
+
+| Класс | Когда | `getErrorMessage()` |
+|-------|-------|---------------------|
+| `HttpError` | Сервер вернул 4xx/5xx | `body.message` или `HTTP ${status}` |
+| `AuthError` | 401 после неудачного refresh | 'Unauthorized' |
+| `NetworkError` | Нет сети / timeout | Сообщение из конструктора |
+| `RetryError` | Все retry попытки исчерпаны | Сообщение последней ошибки |
+
+### BaseStore._extractErrorMessage()
+
+Store использует `_extractErrorMessage` для получения читаемого сообщения:
+
+```typescript
+// BaseStore
+protected _extractErrorMessage(error: unknown, fallback: string): string {
+    if (error instanceof HttpError || error instanceof NetworkError || error instanceof RetryError) {
+        return error.getErrorMessage();
+    }
+    if (error instanceof Error) {
+        return error.message;
+    }
+    return fallback;
+}
+
+// В store:
+get createError(): string | null {
+    if (!this._createMutation.error) return null;
+    return this._extractErrorMessage(this._createMutation.error, 'Ошибка создания');
+}
+```
+
+**toError-трансформер в store НЕ нужен** — HTTP-клиент уже генерирует правильные ошибки.
+
+### Стратегия показа ошибок
+
+| Операция | Где отслеживать | Как показывать |
+|----------|-----------------|----------------|
+| **Query** (загрузка) | Store → Component | `EmptyState` в UI |
+| **Mutation** (формы) | Component | `toast.error` |
+| **Фоновые операции** | — | Не показывать |
+
+### Паттерны в компонентах
+
+**Унифицированный паттерн для ВСЕХ mutations:**
+
+```typescript
+const handleSubmit = async () => {
+    await store.createItem(data);
+
+    if (store.isCreateSuccess) {
+        toast.success('Создано');
+        await goto('/items/' + store.currentItem?.id);
+    } else {
+        toast.error(store.createError ?? 'Ошибка');
+    }
+};
+```
+
+**Почему НЕЛЬЗЯ проверять `if (result)`:**
+
+```typescript
+// ❌ НЕПРАВИЛЬНО — ломается при void / 204 No Content
+const result = await store.deleteItem(id);
+if (result) { ... }  // result всегда null/undefined!
+
+// ✅ ПРАВИЛЬНО — isSuccess работает для всех случаев
+await store.deleteItem(id);
+if (store.isDeleteSuccess) {
+    toast.success('Удалено');
+    await goto('/items');
+} else {
+    toast.error(store.deleteError ?? 'Ошибка удаления');
+}
+```
+
+**Query (загрузка данных) — toast НЕ нужен:**
+
+```svelte
+{#if store.isError}
+    <EmptyState variant="error" description={store.error}>
+        <Button onclick={() => store.fetch()}>Повторить</Button>
+    </EmptyState>
+{/if}
+```
+
 ## Query Registry
 
 ```typescript
@@ -468,10 +581,11 @@ queryRegistry.resetAll();
 	});
 
 	const handleSubmit = async () => {
-		const group = await groupStore.createGroup(form);
-		if (group) {
+		await groupStore.createGroup(form);
+
+		if (groupStore.isCreateSuccess) {
 			toast.success('Группа создана');
-			await goto('/groups/' + group.id);
+			await goto('/groups/' + groupStore.currentGroup?.id);
 		} else {
 			toast.error(groupStore.createError ?? 'Ошибка');
 		}
@@ -516,12 +630,13 @@ queryRegistry.resetAll();
 	});
 
 	const handleSubmit = async () => {
-		const group = await groupStore.updateGroup(groupId, form);
-		if (group) {
+		await groupStore.updateGroup(groupId, form);
+
+		if (groupStore.isUpdateSuccess) {
 			toast.success('Сохранено');
-			await goto('/groups/' + group.id);
-		} else if (groupStore.updateError) {
-			toast.error(groupStore.updateError);
+			await goto('/groups/' + groupId);
+		} else {
+			toast.error(groupStore.updateError ?? 'Ошибка');
 		}
 	};
 
@@ -569,7 +684,7 @@ queryRegistry.resetAll();
    - [ ] `createMutation` для create с tags: `['items']`
    - [ ] `createMutation` для update с tags + `invalidateKeys`
    - [ ] Query геттеры: `status`, `isLoading`, `isLoaded`, `isFetching`, `isError`, `error`
-   - [ ] Mutation геттеры: `createStatus`, `isCreating`, `isCreateSuccess`, `updateStatus`, `isUpdating`, `isUpdateSuccess`
+   - [ ] Mutation геттеры: `createStatus`, `isCreating`, `isCreateSuccess`, `createError`, `updateStatus`, `isUpdating`, `isUpdateSuccess`, `updateError`
    - [ ] Защита от повторных запросов: `isCurrentKey() && isLoaded`
 
 5. **index.ts**
