@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Button, ThemeToggle } from '@repo/ui';
+	import { Button, ThemeToggle, toast } from '@repo/ui';
 
 	import { authStore } from '$lib/modules/auth';
 	import { topBarStore } from '$lib/stores';
@@ -17,8 +17,9 @@
 	const handleLogout = async () => {
 		try {
 			await authStore.logout();
+			toast.success('Вы вышли из аккаунта');
 		} catch {
-			// already handled in store
+			toast.error('Ошибка выхода');
 		}
 		await goto(resolve(ROUTES.HOME), { replaceState: true });
 	};

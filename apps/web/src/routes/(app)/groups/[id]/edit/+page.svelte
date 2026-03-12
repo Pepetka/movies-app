@@ -2,7 +2,14 @@
 	import { Spinner, toast } from '@repo/ui';
 	import { untrack } from 'svelte';
 
-	import { GroupForm, groupStore, EMPTY_GROUP_FORM, type GroupFormData } from '$lib/modules/groups';
+	import {
+		GroupForm,
+		groupStore,
+		EMPTY_GROUP_FORM,
+		groupFormToUpdateDto,
+		groupFormFromEntity,
+		type GroupFormData
+	} from '$lib/modules/groups';
 	import { topBarStore } from '$lib/stores';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
@@ -14,7 +21,7 @@
 	const groupId = $derived(Number(page.params.id));
 
 	let form = $state<GroupFormData>({ ...EMPTY_GROUP_FORM });
-	let isFormInitialized = $state(false);
+	let loadedGroup = $state<number | null>(null);
 
 	$effect(() => {
 		topBarStore.configure({
@@ -32,33 +39,25 @@
 
 		return () => {
 			groupStore.resetForm();
-			isFormInitialized = false;
+			loadedGroup = null;
 		};
 	});
 
 	$effect(() => {
-		if (groupStore.currentGroup && !groupStore.updateError && !isFormInitialized) {
-			form = {
-				name: groupStore.currentGroup.name ?? '',
-				description: groupStore.currentGroup.description ?? '',
-				avatarUrl: groupStore.currentGroup.avatarUrl ?? ''
-			};
-			isFormInitialized = true;
+		if (groupStore.currentGroup && groupStore.currentGroup.id !== loadedGroup) {
+			form = groupFormFromEntity(groupStore.currentGroup);
+			loadedGroup = groupStore.currentGroup.id;
 		}
 	});
 
 	const handleSubmit = async () => {
-		const group = await groupStore.updateGroup(groupId, {
-			name: form.name,
-			description: form.description || undefined,
-			avatarUrl: form.avatarUrl || undefined
-		});
+		await groupStore.updateGroup(groupId, groupFormToUpdateDto(form));
 
-		if (group) {
+		if (groupStore.isUpdateSuccess) {
 			toast.success('Группа обновлена');
-			await goto(resolve(ROUTES.GROUP_DETAIL(group.id)));
-		} else if (groupStore.updateError) {
-			toast.error(groupStore.updateError);
+			await goto(resolve(ROUTES.GROUP_DETAIL(groupId)));
+		} else {
+			toast.error(groupStore.updateError ?? 'Ошибка обновления');
 		}
 	};
 

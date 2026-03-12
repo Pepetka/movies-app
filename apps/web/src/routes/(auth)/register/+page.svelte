@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Eye, EyeOff, Film, Mail, User, Users } from '@lucide/svelte';
-	import { Button, Card, Input } from '@repo/ui';
+	import { Button, Card, Input, toast } from '@repo/ui';
 	import { fade } from 'svelte/transition';
 
 	import {
@@ -8,7 +8,9 @@
 		type RegisterFormData,
 		validateRegisterForm,
 		checkPasswordStrength,
-		createFormFieldValidator
+		createFormFieldValidator,
+		EMPTY_REGISTER_FORM,
+		registerFormToDto
 	} from '$lib/modules/auth';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
@@ -16,16 +18,10 @@
 
 	import '$lib/styles/auth.css';
 
-	let form = $state<RegisterFormData>({
-		name: '',
-		email: '',
-		password: '',
-		confirmPassword: ''
-	});
+	let form = $state<RegisterFormData>({ ...EMPTY_REGISTER_FORM });
 
 	let showPassword = $state(false);
 	let showConfirmPassword = $state(false);
-	let isLoading = $state(false);
 
 	const fieldValidator = createFormFieldValidator(validateRegisterForm);
 	const passwordChecks = $derived(checkPasswordStrength(form.password));
@@ -33,24 +29,27 @@
 	$effect(() => {
 		return () => {
 			fieldValidator.cancel();
+			authStore.resetForm();
 		};
 	});
 
 	const handleSubmit = async (e: Event) => {
 		e.preventDefault();
 
-		if (isLoading) return;
-		isLoading = true;
+		if (authStore.isRegistering) return;
 
-		try {
-			const result = await authStore.register(form);
-			fieldValidator.setErrors(result.errors);
+		const validation = validateRegisterForm(form);
+		fieldValidator.setErrors(validation.errors);
 
-			if (result.isValid) {
-				await goto(resolve(ROUTES.GROUPS), { replaceState: true });
-			}
-		} finally {
-			isLoading = false;
+		if (!validation.isValid) return;
+
+		await authStore.register(registerFormToDto(form));
+
+		if (authStore.isRegisterSuccess) {
+			toast.success('Регистрация успешна!');
+			await goto(resolve(ROUTES.GROUPS), { replaceState: true });
+		} else {
+			toast.error(authStore.registerError ?? 'Ошибка регистрации');
 		}
 	};
 </script>
@@ -94,7 +93,7 @@
 					error={fieldValidator.errors.name}
 					placeholder="Маргарита Александровна"
 					Icon={User}
-					disabled={isLoading}
+					disabled={authStore.isRegistering}
 					onChange={() => fieldValidator.handleFieldChange(form, 'name')}
 				/>
 
@@ -106,7 +105,7 @@
 					placeholder="anaconda@mail.ru"
 					Icon={Mail}
 					autocomplete="email"
-					disabled={isLoading}
+					disabled={authStore.isRegistering}
 					onChange={() => fieldValidator.handleFieldChange(form, 'email')}
 				/>
 
@@ -121,7 +120,7 @@
 						iconAction={() => (showPassword = !showPassword)}
 						iconLabel={showPassword ? 'Скрыть пароль' : 'Показать пароль'}
 						autocomplete="new-password"
-						disabled={isLoading}
+						disabled={authStore.isRegistering}
 						onChange={() => fieldValidator.handleFieldChange(form, 'password')}
 					/>
 
@@ -146,11 +145,11 @@
 					iconAction={() => (showConfirmPassword = !showConfirmPassword)}
 					iconLabel={showConfirmPassword ? 'Скрыть пароль' : 'Показать пароль'}
 					autocomplete="new-password"
-					disabled={isLoading}
+					disabled={authStore.isRegistering}
 					onChange={() => fieldValidator.handleFieldChange(form, 'confirmPassword')}
 				/>
 
-				<Button type="submit" variant="primary" fullWidth loading={isLoading}>
+				<Button type="submit" variant="primary" fullWidth loading={authStore.isRegistering}>
 					Зарегистрироваться
 				</Button>
 			</form>

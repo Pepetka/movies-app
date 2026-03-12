@@ -1,12 +1,14 @@
 <script lang="ts">
 	import { Eye, EyeOff, Film, Mail } from '@lucide/svelte';
-	import { Button, Card, Input } from '@repo/ui';
+	import { Button, Card, Input, toast } from '@repo/ui';
 
 	import {
 		authStore,
 		type LoginFormData,
 		validateLoginForm,
-		createFormFieldValidator
+		createFormFieldValidator,
+		EMPTY_LOGIN_FORM,
+		loginFormToDto
 	} from '$lib/modules/auth';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
@@ -14,37 +16,35 @@
 
 	import '$lib/styles/auth.css';
 
-	let form = $state<LoginFormData>({
-		email: '',
-		password: ''
-	});
-
+	let form = $state<LoginFormData>({ ...EMPTY_LOGIN_FORM });
 	let showPassword = $state(false);
-	let isLoading = $state(false);
 
 	const fieldValidator = createFormFieldValidator(validateLoginForm);
 
 	$effect(() => {
 		return () => {
 			fieldValidator.cancel();
+			authStore.resetForm();
 		};
 	});
 
 	const handleSubmit = async (e: Event) => {
 		e.preventDefault();
 
-		if (isLoading) return;
-		isLoading = true;
+		if (authStore.isLoggingIn) return;
 
-		try {
-			const result = await authStore.login(form);
-			fieldValidator.setErrors(result.errors);
+		const validation = validateLoginForm(form);
+		fieldValidator.setErrors(validation.errors);
 
-			if (result.isValid) {
-				await goto(resolve(ROUTES.GROUPS), { replaceState: true });
-			}
-		} finally {
-			isLoading = false;
+		if (!validation.isValid) return;
+
+		await authStore.login(loginFormToDto(form));
+
+		if (authStore.isLoginSuccess) {
+			toast.success('Добро пожаловать!');
+			await goto(resolve(ROUTES.GROUPS), { replaceState: true });
+		} else {
+			toast.error(authStore.loginError ?? 'Ошибка входа');
 		}
 	};
 </script>
@@ -77,7 +77,7 @@
 					error={fieldValidator.errors.email}
 					Icon={Mail}
 					placeholder="anaconda@mail.ru"
-					disabled={isLoading}
+					disabled={authStore.isLoggingIn}
 					onChange={() => fieldValidator.handleFieldChange(form, 'email')}
 				/>
 
@@ -91,11 +91,13 @@
 					iconAction={() => (showPassword = !showPassword)}
 					iconLabel={showPassword ? 'Скрыть пароль' : 'Показать пароль'}
 					autocomplete="current-password"
-					disabled={isLoading}
+					disabled={authStore.isLoggingIn}
 					onChange={() => fieldValidator.handleFieldChange(form, 'password')}
 				/>
 
-				<Button type="submit" variant="primary" fullWidth loading={isLoading}>Войти</Button>
+				<Button type="submit" variant="primary" fullWidth loading={authStore.isLoggingIn}
+					>Войти</Button
+				>
 			</form>
 		</div>
 

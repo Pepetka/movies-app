@@ -1,7 +1,13 @@
 <script lang="ts">
 	import { toast } from '@repo/ui';
 
-	import { GroupForm, groupStore, EMPTY_GROUP_FORM, type GroupFormData } from '$lib/modules/groups';
+	import {
+		GroupForm,
+		groupStore,
+		EMPTY_GROUP_FORM,
+		groupFormToCreateDto,
+		type GroupFormData
+	} from '$lib/modules/groups';
 	import { topBarStore } from '$lib/stores';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
@@ -22,15 +28,11 @@
 	});
 
 	const handleSubmit = async () => {
-		const group = await groupStore.createGroup({
-			name: form.name,
-			description: form.description || undefined,
-			avatarUrl: form.avatarUrl || undefined
-		});
+		await groupStore.createGroup(groupFormToCreateDto(form));
 
-		if (group) {
+		if (groupStore.isCreateSuccess && groupStore.currentGroup) {
 			toast.success('Группа создана');
-			await goto(resolve(ROUTES.GROUP_DETAIL(group.id)));
+			await goto(resolve(ROUTES.GROUP_DETAIL(groupStore.currentGroup.id)));
 		} else {
 			toast.error(groupStore.createError ?? 'Не удалось создать группу');
 		}
