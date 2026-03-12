@@ -18,8 +18,8 @@ import type { AuthStatus } from './types';
 
 class AuthStore extends BaseStore {
 	private readonly _query: QueryResult<UserResponseDto>;
-	private readonly _loginMutation: MutationResult<UserResponseDto, AuthLoginDto>;
-	private readonly _registerMutation: MutationResult<UserResponseDto, AuthRegisterDto>;
+	private readonly _loginMutation: MutationResult<void, AuthLoginDto>;
+	private readonly _registerMutation: MutationResult<void, AuthRegisterDto>;
 	private _checkAuthPromise: Promise<void> | null = null;
 
 	isInitialized = $state(false);
@@ -34,22 +34,20 @@ class AuthStore extends BaseStore {
 			debug: !__IS_PROD__
 		});
 
-		this._loginMutation = createMutation<UserResponseDto, AuthLoginDto>({
+		this._loginMutation = createMutation<void, AuthLoginDto>({
 			key: ['auth', 'login'],
 			tags: ['user'],
 			mutator: async (data) => {
 				await apiLogin(data);
-				return getCurrentUser();
 			},
 			debug: !__IS_PROD__
 		});
 
-		this._registerMutation = createMutation<UserResponseDto, AuthRegisterDto>({
+		this._registerMutation = createMutation<void, AuthRegisterDto>({
 			key: ['auth', 'register'],
 			tags: ['user'],
 			mutator: async (data) => {
 				await apiRegister(data);
-				return getCurrentUser();
 			},
 			debug: !__IS_PROD__
 		});
@@ -96,8 +94,8 @@ class AuthStore extends BaseStore {
 		return this._extractErrorMessage(this._loginMutation.error, 'Ошибка входа');
 	}
 
-	async login(data: AuthLoginDto): Promise<UserResponseDto | null> {
-		return this._loginMutation.mutate(data);
+	async login(data: AuthLoginDto): Promise<void> {
+		await this._loginMutation.mutate(data);
 	}
 
 	// === Register mutation ===
@@ -115,8 +113,8 @@ class AuthStore extends BaseStore {
 		return this._extractErrorMessage(this._registerMutation.error, 'Ошибка регистрации');
 	}
 
-	async register(data: AuthRegisterDto): Promise<UserResponseDto | null> {
-		return this._registerMutation.mutate(data);
+	async register(data: AuthRegisterDto): Promise<void> {
+		await this._registerMutation.mutate(data);
 	}
 
 	// === Logout ===
