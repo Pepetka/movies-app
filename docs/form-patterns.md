@@ -42,8 +42,9 @@ const handleSubmit = async (e: Event) => {
 	fieldValidator.setErrors(validation.errors);
 	if (!validation.isValid) return;
 
-	const result = await authStore.login(loginFormToDto(form));
-	if (result) {
+	await authStore.login(loginFormToDto(form));
+
+	if (authStore.isLoginSuccess) {
 		toast.success('Добро пожаловать!');
 		await goto(ROUTES.GROUPS);
 	} else {
@@ -74,10 +75,11 @@ $effect(() => {
 });
 
 const handleSubmit = async () => {
-	const group = await groupStore.createGroup(groupFormToCreateDto(form));
-	if (group) {
+	await groupStore.createGroup(groupFormToCreateDto(form));
+
+	if (groupStore.isCreateSuccess && groupStore.currentGroup) {
 		toast.success('Создано');
-		await goto(ROUTES.GROUP_DETAIL(group.id));
+		await goto(ROUTES.GROUP_DETAIL(groupStore.currentGroup.id));
 	} else {
 		toast.error(groupStore.createError ?? 'Ошибка');
 	}
