@@ -571,7 +571,12 @@ queryRegistry.resetAll();
 ```svelte
 <script lang="ts">
 	import { toast } from '@repo/ui';
-	import { groupStore, EMPTY_GROUP_FORM, type GroupFormData } from '$lib/modules/groups';
+	import {
+		groupStore,
+		EMPTY_GROUP_FORM,
+		groupFormToCreateDto,
+		type GroupFormData
+	} from '$lib/modules/groups';
 	import { goto } from '$app/navigation';
 
 	let form = $state<GroupFormData>({ ...EMPTY_GROUP_FORM });
@@ -581,7 +586,7 @@ queryRegistry.resetAll();
 	});
 
 	const handleSubmit = async () => {
-		await groupStore.createGroup(form);
+		await groupStore.createGroup(groupFormToCreateDto(form));
 
 		if (groupStore.isCreateSuccess) {
 			toast.success('Группа создана');
@@ -606,7 +611,13 @@ queryRegistry.resetAll();
 <script lang="ts">
 	import { untrack } from 'svelte';
 	import { toast, Spinner } from '@repo/ui';
-	import { groupStore, EMPTY_GROUP_FORM, type GroupFormData } from '$lib/modules/groups';
+	import {
+		groupStore,
+		EMPTY_GROUP_FORM,
+		groupFormToUpdateDto,
+		groupFormFromEntity,
+		type GroupFormData
+	} from '$lib/modules/groups';
 	import { page } from '$app/state';
 
 	const groupId = $derived(Number(page.params.id));
@@ -621,16 +632,12 @@ queryRegistry.resetAll();
 
 	$effect(() => {
 		if (groupStore.currentGroup && !groupStore.updateError) {
-			form = {
-				name: groupStore.currentGroup.name ?? '',
-				description: groupStore.currentGroup.description ?? '',
-				avatarUrl: groupStore.currentGroup.avatarUrl ?? ''
-			};
+			form = groupFormFromEntity(groupStore.currentGroup);
 		}
 	});
 
 	const handleSubmit = async () => {
-		await groupStore.updateGroup(groupId, form);
+		await groupStore.updateGroup(groupId, groupFormToUpdateDto(form));
 
 		if (groupStore.isUpdateSuccess) {
 			toast.success('Сохранено');

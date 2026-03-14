@@ -30,6 +30,14 @@ styles/
 | `.form-fields` | Контейнер полей (gap: var(--space-1)) |
 | `.form-footer` | Футер со ссылками |
 
+**Исходный файл:** [`apps/web/src/lib/styles/form-base.css`](../../apps/web/src/lib/styles/form-base.css)
+
+**Ключевые стили:**
+- `.form-branding` — `fadeInUp` анимация 0.5s, центрирование
+- `.form-card` — `max-width: 400px`, `fadeInUp` 0.4s с задержкой 0.1s
+- `.form-fields` — `gap: var(--space-1)`, flex column
+- `.form-title` — responsive: xl → 2xl (480px) → 3xl (768px)
+
 ## Константы
 
 | Значение | Описание |

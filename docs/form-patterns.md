@@ -576,7 +576,7 @@ class GroupStore extends BaseStore {
 // modules/auth/store.svelte.ts
 class AuthStore extends BaseStore {
 	private readonly _query: QueryResult<UserResponseDto>;
-	private readonly _loginMutation: MutationResult<UserResponseDto, AuthLoginDto>;
+	private readonly _loginMutation: MutationResult<void, AuthLoginDto>;
 
 	constructor() {
 		super();
@@ -588,12 +588,11 @@ class AuthStore extends BaseStore {
 			debug: !__IS_PROD__
 		});
 
-		this._loginMutation = createMutation<UserResponseDto, AuthLoginDto>({
+		this._loginMutation = createMutation<void, AuthLoginDto>({
 			key: ['auth', 'login'],
 			tags: ['user'],
 			mutator: async (data) => {
 				await apiLogin(data);
-				return getCurrentUser();
 			},
 			debug: !__IS_PROD__
 		});
@@ -605,13 +604,17 @@ class AuthStore extends BaseStore {
 		return this._loginMutation.isSubmitting;
 	}
 
+	get isLoginSuccess(): boolean {
+		return this._loginMutation.isSuccess;
+	}
+
 	get loginError(): string | null {
 		if (!this._loginMutation.error) return null;
 		return this._extractErrorMessage(this._loginMutation.error, 'Ошибка входа');
 	}
 
-	async login(data: AuthLoginDto): Promise<UserResponseDto | null> {
-		return this._loginMutation.mutate(data);
+	async login(data: AuthLoginDto): Promise<void> {
+		await this._loginMutation.mutate(data);
 	}
 
 	resetForm(): void {
