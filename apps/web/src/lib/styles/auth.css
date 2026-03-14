@@ -1,28 +1,20 @@
 /* ========================================
-   Auth Pages - Premium Design System
+   Auth Forms - Auth-Specific Styles
    ======================================== */
 
-@import './animations.css';
+@import './form-base.css';
 
-/* Main container */
+/* ========================================
+   Auth Page (extends .form-page)
+   ======================================== */
+
 .auth-page {
-	width: 100%;
-	display: flex;
-	flex-direction: column;
-	align-items: center;
 	position: relative;
-	padding: var(--space-4);
 }
 
-/* Branding header */
-.auth-branding {
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	margin-bottom: var(--space-6);
-	text-align: center;
-	animation: fadeInUp 0.5s ease-out backwards;
-}
+/* ========================================
+   Auth Logo (Branding)
+   ======================================== */
 
 .auth-logo {
 	display: flex;
@@ -78,34 +70,10 @@
 	line-height: 1.5;
 }
 
-/* Card */
-.auth-card {
-	width: 100%;
-	max-width: 400px;
-	animation: fadeInUp 0.4s ease-out 0.1s backwards;
-}
+/* ========================================
+   Auth Benefits
+   ======================================== */
 
-/* Card content styles */
-.auth-card-title {
-	font-size: var(--text-lg);
-	font-weight: var(--font-semibold);
-	color: var(--text-primary);
-	margin-bottom: var(--space-1);
-}
-
-.auth-card-subtitle {
-	font-size: var(--text-sm);
-	color: var(--text-tertiary);
-}
-
-/* Form styles */
-.auth-form {
-	display: flex;
-	flex-direction: column;
-	gap: var(--space-1);
-}
-
-/* Benefits section */
 .auth-benefits {
 	display: flex;
 	flex-direction: column;
@@ -131,29 +99,10 @@
 	flex-shrink: 0;
 }
 
-/* Footer links */
-.auth-card-footer p {
-	font-size: var(--text-sm);
-	color: var(--text-tertiary);
-	margin: 0;
-}
+/* ========================================
+   Password Requirements
+   ======================================== */
 
-.auth-card-footer a {
-	color: var(--color-primary);
-	text-decoration: none;
-	font-weight: var(--font-semibold);
-	transition: color 0.2s ease;
-}
-
-@media (hover: hover) {
-	.auth-card-footer a:hover {
-		color: var(--color-primary-hover);
-		text-decoration: underline;
-	}
-}
-
-/* Animations */
-/* Password requirements */
 .password-field {
 	display: flex;
 	flex-direction: column;
@@ -183,11 +132,13 @@
 	background-color: color-mix(in srgb, var(--color-success) 10%, transparent);
 }
 
-/* Responsive */
+/* ========================================
+   Responsive
+   ======================================== */
+
 @media (min-width: 480px) {
 	.auth-branding {
 		margin-top: var(--space-2);
-		margin-bottom: var(--space-4);
 	}
 
 	.auth-logo {

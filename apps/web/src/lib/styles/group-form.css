@@ -1,26 +1,12 @@
 /* ========================================
-   Group Form Pages - Premium Design
+   Group Forms - Group-Specific Styles
    ======================================== */
 
-@import './animations.css';
+@import './form-base.css';
 
-.group-form-page {
-	width: 100%;
-	min-height: 100%;
-	display: flex;
-	flex-direction: column;
-	padding-block: var(--space-4);
-}
-
-/* Branding header */
-.group-form-branding {
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	margin-bottom: var(--space-6);
-	text-align: center;
-	animation: fadeInUp 0.5s ease-out backwards;
-}
+/* ========================================
+   Group Form Avatar Header
+   ======================================== */
 
 .group-form-avatar-header {
 	display: flex;
@@ -45,79 +31,10 @@
 	}
 }
 
-.group-form-title {
-	font-size: var(--text-xl);
-	font-weight: var(--font-bold);
-	color: var(--text-primary);
-	margin-bottom: var(--space-1);
-	letter-spacing: -0.02em;
-}
+/* ========================================
+   Group Form Divider
+   ======================================== */
 
-.group-form-subtitle {
-	font-size: var(--text-sm);
-	color: var(--text-tertiary);
-	max-width: 280px;
-	line-height: 1.5;
-}
-
-/* Form Card */
-.group-form-card {
-	width: 100%;
-	max-width: 400px;
-	animation: fadeInUp 0.4s ease-out 0.1s backwards;
-}
-
-/* Card Header */
-.group-form-card-header {
-	text-align: center;
-}
-
-.group-form-card-title {
-	font-size: var(--text-lg);
-	font-weight: var(--font-semibold);
-	color: var(--text-primary);
-	margin-bottom: var(--space-1);
-}
-
-.group-form-card-subtitle {
-	font-size: var(--text-sm);
-	color: var(--text-tertiary);
-}
-
-/* Form Fields */
-.group-form-fields {
-	display: flex;
-	flex-direction: column;
-	gap: var(--space-1);
-}
-
-/* Divider */
 .group-form-divider {
 	margin-bottom: var(--space-3);
-}
-
-/* Responsive */
-@media (min-width: 480px) {
-	.group-form-page {
-		padding: var(--space-6) var(--space-6) var(--space-10);
-	}
-
-	.group-form-branding {
-		margin-bottom: var(--space-8);
-	}
-
-	.group-form-title {
-		font-size: var(--text-2xl);
-	}
-}
-
-@media (min-width: 768px) {
-	.group-form-page {
-		align-items: center;
-		padding-top: var(--space-8);
-	}
-
-	.group-form-title {
-		font-size: var(--text-3xl);
-	}
 }

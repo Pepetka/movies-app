@@ -1,0 +1,134 @@
+/* ========================================
+   Form Base - Shared Form Styles
+   ======================================== */
+
+@import './animations.css';
+
+/* ========================================
+   Form Page Container
+   ======================================== */
+
+.form-page {
+	width: 100%;
+	display: flex;
+	flex-direction: column;
+	padding-block: var(--space-4);
+}
+
+/* ========================================
+   Form Branding (Header)
+   ======================================== */
+
+.form-branding {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	margin-bottom: var(--space-6);
+	text-align: center;
+	animation: fadeInUp 0.5s ease-out backwards;
+}
+
+.form-title {
+	font-size: var(--text-xl);
+	font-weight: var(--font-bold);
+	color: var(--text-primary);
+	margin-bottom: var(--space-1);
+	letter-spacing: -0.02em;
+}
+
+.form-subtitle {
+	font-size: var(--text-sm);
+	color: var(--text-tertiary);
+	max-width: 280px;
+	line-height: 1.5;
+}
+
+/* ========================================
+   Form Card
+   ======================================== */
+
+.form-card {
+	width: 100%;
+	max-width: 400px;
+	animation: fadeInUp 0.4s ease-out 0.1s backwards;
+}
+
+/* Card Header */
+.form-card-header {
+	text-align: center;
+}
+
+.form-card-title {
+	font-size: var(--text-lg);
+	font-weight: var(--font-semibold);
+	color: var(--text-primary);
+	margin-bottom: var(--space-1);
+}
+
+.form-card-subtitle {
+	font-size: var(--text-sm);
+	color: var(--text-tertiary);
+}
+
+/* ========================================
+   Form Fields
+   ======================================== */
+
+.form-fields {
+	display: flex;
+	flex-direction: column;
+	gap: var(--space-1);
+}
+
+/* ========================================
+   Form Footer
+   ======================================== */
+
+.form-footer p {
+	font-size: var(--text-sm);
+	color: var(--text-tertiary);
+	margin: 0;
+}
+
+.form-footer a {
+	color: var(--color-primary);
+	text-decoration: none;
+	font-weight: var(--font-semibold);
+	transition: color 0.2s ease;
+}
+
+@media (hover: hover) {
+	.form-footer a:hover {
+		color: var(--color-primary-hover);
+		text-decoration: underline;
+	}
+}
+
+/* ========================================
+   Responsive
+   ======================================== */
+
+@media (min-width: 480px) {
+	.form-page {
+		padding: var(--space-6) var(--space-6) var(--space-10);
+	}
+
+	.form-branding {
+		margin-bottom: var(--space-8);
+	}
+
+	.form-title {
+		font-size: var(--text-2xl);
+	}
+}
+
+@media (min-width: 768px) {
+	.form-page {
+		align-items: center;
+		padding-top: var(--space-8);
+	}
+
+	.form-title {
+		font-size: var(--text-3xl);
+	}
+}

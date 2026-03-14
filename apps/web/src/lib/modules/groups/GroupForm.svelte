@@ -62,15 +62,15 @@
 	};
 </script>
 
-<div class="group-form-page">
-	<div class="group-form-branding">
+<div class="form-page">
+	<div class="form-branding">
 		<div class="group-form-avatar-header">
 			<Avatar src={form.avatarUrl} name={debouncedName} size="xl" alt="Превью аватара группы" />
 		</div>
-		<h1 class="group-form-title">
+		<h1 class="form-title">
 			{title || (mode === 'create' ? 'Создание группы' : 'Редактирование')}
 		</h1>
-		<p class="group-form-subtitle">
+		<p class="form-subtitle">
 			{subtitle ||
 				(mode === 'create'
 					? 'Соберите друзей для совместных просмотров'
@@ -78,20 +78,20 @@
 		</p>
 	</div>
 
-	<Card variant="outlined" class="group-form-card">
+	<Card variant="outlined" class="form-card">
 		{#snippet header()}
-			<div class="group-form-card-header">
-				<h2 class="group-form-card-title">
+			<div class="form-card-header">
+				<h2 class="form-card-title">
 					{cardTitle || 'Данные группы'}
 				</h2>
-				<p class="group-form-card-subtitle">
+				<p class="form-card-subtitle">
 					{cardSubtitle ||
 						(mode === 'create' ? 'Заполните информацию о группе' : 'Обновите информацию о группе')}
 				</p>
 			</div>
 		{/snippet}
 
-		<form class="group-form-fields" onsubmit={handleSubmit}>
+		<form class="form-fields" onsubmit={handleSubmit}>
 			<Input
 				type="text"
 				label="Название"

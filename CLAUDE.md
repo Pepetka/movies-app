@@ -62,6 +62,7 @@ cd apps/api && pnpm run db:generate / db:migrate / db:seed
 | **Web Architecture** | [docs/web-architecture.md](docs/web-architecture.md) — modules, TODO |
 | **Query Store Pattern** | [docs/query-store-pattern.md](docs/query-store-pattern.md) — stores, query, mutation |
 | **Form Patterns** | [docs/form-patterns.md](docs/form-patterns.md) — validation, components, integration |
+| **Form Styles** | [docs/form-styles.md](docs/form-styles.md) — layout, card structure, CSS patterns |
 | **Deployment** | [docs/deployment.md](docs/deployment.md) — CI/CD, SSL, VPS setup |
 | **Roadmap** | [docs/product-roadmap.md](docs/product-roadmap.md) — status, plans |
 | **Future** | [docs/future-improvements.md](docs/future-improvements.md) — TODOs, ideas |

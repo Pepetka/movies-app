@@ -30,9 +30,21 @@ import {
 	loginFormToDto,
 	type LoginFormData
 } from '$lib/modules/auth';
+import { goto } from '$app/navigation';
+import { resolve } from '$app/paths';
+import { ROUTES } from '$lib/utils';
+
+import '$lib/styles/auth.css';
 
 let form = $state<LoginFormData>({ ...EMPTY_LOGIN_FORM });
 const fieldValidator = createFormFieldValidator(validateLoginForm);
+
+$effect(() => {
+	return () => {
+		fieldValidator.cancel();
+		authStore.resetForm();
+	};
+});
 
 const handleSubmit = async (e: Event) => {
 	e.preventDefault();
@@ -46,7 +58,7 @@ const handleSubmit = async (e: Event) => {
 
 	if (authStore.isLoginSuccess) {
 		toast.success('Добро пожаловать!');
-		await goto(ROUTES.GROUPS);
+		await goto(resolve(ROUTES.GROUPS), { replaceState: true });
 	} else {
 		toast.error(authStore.loginError ?? 'Ошибка входа');
 	}
@@ -58,6 +70,7 @@ const handleSubmit = async (e: Event) => {
 - `isSubmitting` из mutation (`authStore.isLoggingIn`)
 - Валидация на уровне страницы
 - Toast на уровне страницы
+- Cleanup через `$effect` с `fieldValidator.cancel()` и `store.resetForm()`
 - Форма инлайн в странице
 
 ### 2. Component Form (переиспользуемый компонент)
@@ -252,6 +265,8 @@ export { default as GroupForm } from './GroupForm.svelte';
 	import { createFormFieldValidator } from '$lib/utils';
 	import { validateGroupForm, EMPTY_GROUP_FORM, type GroupFormProps } from './validation.svelte';
 
+	import '$lib/styles/group-form.css';
+
 	let {
 		mode = 'create',
 		submitLabel = mode === 'create' ? 'Создать' : 'Сохранить',
@@ -262,7 +277,6 @@ export { default as GroupForm } from './GroupForm.svelte';
 
 	const fieldValidator = createFormFieldValidator(validateGroupForm);
 
-	// Cleanup при unmount
 	$effect(() => {
 		return () => fieldValidator.reset();
 	});
@@ -279,21 +293,29 @@ export { default as GroupForm } from './GroupForm.svelte';
 	};
 </script>
 
-<Card>
-	<form onsubmit={handleSubmit}>
-		<Input
-			label="Название"
-			bind:value={form.name}
-			error={fieldValidator.errors.name}
-			disabled={isSubmitting}
-			onChange={() => fieldValidator.handleFieldChange(form, 'name')}
-		/>
+<div class="form-page">
+	<Card variant="outlined" class="form-card">
+		{#snippet header()}
+			<div class="form-card-header">
+				<h2 class="form-card-title">Данные</h2>
+			</div>
+		{/snippet}
 
-		<Button type="submit" loading={isSubmitting}>
-			{submitLabel}
-		</Button>
-	</form>
-</Card>
+		<form class="form-fields" onsubmit={handleSubmit}>
+			<Input
+				label="Название"
+				bind:value={form.name}
+				error={fieldValidator.errors.name}
+				disabled={isSubmitting}
+				onChange={() => fieldValidator.handleFieldChange(form, 'name')}
+			/>
+
+			<Button type="submit" variant="primary" fullWidth loading={isSubmitting}>
+				{submitLabel}
+			</Button>
+		</form>
+	</Card>
+</div>
 ```
 
 ### Ключевые моменты
@@ -319,7 +341,10 @@ export { default as GroupForm } from './GroupForm.svelte';
 		type GroupFormData
 	} from '$lib/modules/groups';
 	import { goto } from '$app/navigation';
+	import { resolve } from '$app/paths';
 	import { ROUTES } from '$lib/utils';
+
+	import '$lib/styles/group-form.css';
 
 	let form = $state<GroupFormData>({ ...EMPTY_GROUP_FORM });
 
@@ -332,7 +357,7 @@ export { default as GroupForm } from './GroupForm.svelte';
 
 		if (groupStore.isCreateSuccess) {
 			toast.success('Группа создана');
-			await goto(ROUTES.GROUP_DETAIL(groupStore.currentGroup!.id));
+			await goto(resolve(ROUTES.GROUP_DETAIL(groupStore.currentGroup!.id)));
 		} else {
 			toast.error(groupStore.createError ?? 'Ошибка');
 		}
@@ -346,7 +371,7 @@ export { default as GroupForm } from './GroupForm.svelte';
 
 ```svelte
 <script lang="ts">
-	import { Spinner, toast } from '@repo/ui';
+	import { Button, EmptyState, Spinner, toast } from '@repo/ui';
 	import { untrack } from 'svelte';
 	import {
 		GroupForm,
@@ -356,13 +381,18 @@ export { default as GroupForm } from './GroupForm.svelte';
 		groupFormFromEntity,
 		type GroupFormData
 	} from '$lib/modules/groups';
+	import { goto } from '$app/navigation';
+	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
+	import { ROUTES } from '$lib/utils';
+
+	import '$lib/styles/group-form.css';
+	import '$lib/styles/page-states.css';
 
 	const groupId = $derived(Number(page.params.id));
 	let form = $state<GroupFormData>({ ...EMPTY_GROUP_FORM });
 	let isFormInitialized = $state(false);
 
-	// Загрузка данных
 	$effect(() => {
 		untrack(() => {
 			void groupStore.fetchGroup(groupId);
@@ -373,7 +403,6 @@ export { default as GroupForm } from './GroupForm.svelte';
 		};
 	});
 
-	// Инициализация формы из загруженных данных
 	$effect(() => {
 		if (groupStore.currentGroup && !groupStore.updateError && !isFormInitialized) {
 			form = groupFormFromEntity(groupStore.currentGroup);
@@ -386,7 +415,7 @@ export { default as GroupForm } from './GroupForm.svelte';
 
 		if (groupStore.isUpdateSuccess) {
 			toast.success('Сохранено');
-			await goto(ROUTES.GROUP_DETAIL(groupId));
+			await goto(resolve(ROUTES.GROUP_DETAIL(groupId)));
 		} else {
 			toast.error(groupStore.updateError ?? 'Ошибка');
 		}
@@ -394,11 +423,15 @@ export { default as GroupForm } from './GroupForm.svelte';
 </script>
 
 {#if groupStore.isLoading}
-	<Spinner />
+	<div class="page-state">
+		<Spinner size="lg" />
+	</div>
 {:else if groupStore.isError}
-	<EmptyState variant="error" description={groupStore.error}>
-		<Button onclick={() => groupStore.fetchGroup(groupId)}>Повторить</Button>
-	</EmptyState>
+	<div class="page-state">
+		<EmptyState variant="error" description={groupStore.error}>
+			<Button onclick={() => groupStore.fetchGroup(groupId)}>Повторить</Button>
+		</EmptyState>
+	</div>
 {:else}
 	<GroupForm mode="edit" bind:form onSubmit={handleSubmit} isSubmitting={groupStore.isUpdating} />
 {/if}
@@ -614,6 +647,7 @@ export const DEBOUNCE = {
 
 ### 2. Компонент (для Component Form)
 
+- [ ] Импорт CSS: `import '$lib/styles/xx-form.css'`
 - [ ] `$bindable` для `form`
 - [ ] `fieldValidator = createFormFieldValidator(validateForm)`
 - [ ] `handleSubmit` с валидацией на submit
@@ -621,12 +655,16 @@ export const DEBOUNCE = {
 - [ ] `disabled={isSubmitting}` для полей
 - [ ] `loading={isSubmitting}` для кнопки
 - [ ] Cleanup в `$effect`
+- [ ] Контейнер `<div class="form-page">`
+- [ ] Card: `variant="outlined"` + `class="form-card"`
+- [ ] Форма: `<form class="form-fields">`
 
 ### 3. Страница
 
+- [ ] Импорт CSS: `import '$lib/styles/xx-form.css'`
 - [ ] `let form = $state<FormData>({ ...EMPTY_FORM })`
 - [ ] Для edit: `isFormInitialized` флаг + `$effect` для заполнения из store через `formFromEntity`
-- [ ] `$effect` с cleanup: `return () => store.resetForm()`
+- [ ] `$effect` с cleanup: `return () => { fieldValidator.cancel(); store.resetForm(); }`
 - [ ] `handleSubmit` вызывает store-метод с `formToCreateDto`/`formToUpdateDto`
 - [ ] `toast.success` при успехе
 - [ ] `toast.error(store.xxxError ?? 'Сообщение')` при неудаче

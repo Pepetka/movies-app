@@ -49,8 +49,8 @@
 	};
 </script>
 
-<div class="auth-page">
-	<div class="auth-branding">
+<div class="form-page auth-page">
+	<div class="form-branding">
 		<a href={ROUTES.HOME} class="auth-logo-link">
 			<div class="auth-logo">
 				<Film />
@@ -60,49 +60,47 @@
 		<p class="auth-tagline">Смотрите фильмы вместе с друзьями</p>
 	</div>
 
-	<Card variant="outlined" size="responsive" class="auth-card">
+	<Card variant="outlined" size="responsive" class="form-card">
 		{#snippet header()}
-			<div class="auth-card-header">
-				<h2 class="auth-card-title">Вход</h2>
-				<p class="auth-card-subtitle">Войдите в свой аккаунт</p>
+			<div class="form-card-header">
+				<h2 class="form-card-title">Вход</h2>
+				<p class="form-card-subtitle">Войдите в свой аккаунт</p>
 			</div>
 		{/snippet}
 
-		<div class="auth-card-body">
-			<form class="auth-form" onsubmit={handleSubmit}>
-				<Input
-					type="email"
-					label="Email"
-					bind:value={form.email}
-					error={fieldValidator.errors.email}
-					Icon={Mail}
-					placeholder="anaconda@mail.ru"
-					disabled={authStore.isLoggingIn}
-					onChange={() => fieldValidator.handleFieldChange(form, 'email')}
-				/>
+		<form class="form-fields" onsubmit={handleSubmit}>
+			<Input
+				type="email"
+				label="Email"
+				bind:value={form.email}
+				error={fieldValidator.errors.email}
+				Icon={Mail}
+				placeholder="anaconda@mail.ru"
+				disabled={authStore.isLoggingIn}
+				onChange={() => fieldValidator.handleFieldChange(form, 'email')}
+			/>
 
-				<Input
-					type={showPassword ? 'text' : 'password'}
-					label="Пароль"
-					bind:value={form.password}
-					error={fieldValidator.errors.password}
-					placeholder="Введите пароль"
-					Icon={showPassword ? EyeOff : Eye}
-					iconAction={() => (showPassword = !showPassword)}
-					iconLabel={showPassword ? 'Скрыть пароль' : 'Показать пароль'}
-					autocomplete="current-password"
-					disabled={authStore.isLoggingIn}
-					onChange={() => fieldValidator.handleFieldChange(form, 'password')}
-				/>
+			<Input
+				type={showPassword ? 'text' : 'password'}
+				label="Пароль"
+				bind:value={form.password}
+				error={fieldValidator.errors.password}
+				placeholder="Введите пароль"
+				Icon={showPassword ? EyeOff : Eye}
+				iconAction={() => (showPassword = !showPassword)}
+				iconLabel={showPassword ? 'Скрыть пароль' : 'Показать пароль'}
+				autocomplete="current-password"
+				disabled={authStore.isLoggingIn}
+				onChange={() => fieldValidator.handleFieldChange(form, 'password')}
+			/>
 
-				<Button type="submit" variant="primary" fullWidth loading={authStore.isLoggingIn}
-					>Войти</Button
-				>
-			</form>
-		</div>
+			<Button type="submit" variant="primary" fullWidth loading={authStore.isLoggingIn}
+				>Войти</Button
+			>
+		</form>
 
 		{#snippet footer()}
-			<div class="auth-card-footer">
+			<div class="form-footer">
 				<p>
 					Нет аккаунта? <a href={ROUTES.REGISTER}>Зарегистрироваться</a>
 				</p>
