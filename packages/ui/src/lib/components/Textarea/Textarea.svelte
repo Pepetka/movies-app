@@ -21,10 +21,23 @@
 	const errorId = generateId();
 	const helperId = generateId();
 
-	let isFocused = $state(false);
-	let hasValue = $derived((value?.length ?? 0) > 0);
-	let isLabelFloating = $derived(isFocused || hasValue);
 	let textareaElement = $state.raw<HTMLTextAreaElement | null>(null);
+	let isFocused = $state(false);
+	let isAutoFilled = $state(false);
+	let hasValue = $derived((value?.length ?? 0) > 0);
+	let isLabelFloating = $derived(isFocused || hasValue || isAutoFilled);
+
+	const handleAnimationStart = (e: AnimationEvent) => {
+		if (e.animationName === 'autofill-start') {
+			isAutoFilled = true;
+			if (textareaElement && !value) {
+				value = textareaElement.value;
+				onChange?.(value);
+			}
+		} else if (e.animationName === 'autofill-cancel') {
+			isAutoFilled = false;
+		}
+	};
 
 	const calculateHeight = () => {
 		if (!textareaElement) return { minHeight: 0, maxHeight: Infinity };
@@ -89,6 +102,7 @@
 			onfocus={() => (isFocused = true)}
 			onblur={() => (isFocused = false)}
 			oninput={handleInput}
+			onanimationstart={handleAnimationStart}
 			class:auto-grow={autoGrow}
 			style:--min-rows={rows}
 			style:--max-rows={maxRows ?? 'unset'}
@@ -157,6 +171,38 @@
 		overflow: hidden;
 		min-height: calc(1.5em * var(--min-rows, 3) + 24px);
 		max-height: calc(1.5em * var(--max-rows, 20) + 24px);
+	}
+
+	/* Autofill detection */
+	.ui-textarea-container textarea:-webkit-autofill,
+	.ui-textarea-container textarea:-webkit-autofill:hover,
+	.ui-textarea-container textarea:-webkit-autofill:focus,
+	.ui-textarea-container textarea:-webkit-autofill:active {
+		animation-name: autofill-start;
+		animation-duration: 0.001s;
+	}
+
+	.ui-textarea-container textarea:autofill {
+		animation-name: autofill-start;
+		animation-duration: 0.001s;
+	}
+
+	@keyframes autofill-start {
+		from {
+			opacity: 0.99;
+		}
+		to {
+			opacity: 1;
+		}
+	}
+
+	@keyframes autofill-cancel {
+		from {
+			opacity: 0.99;
+		}
+		to {
+			opacity: 1;
+		}
 	}
 
 	/* Hide placeholder */

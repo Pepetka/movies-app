@@ -1,7 +1,11 @@
-import { toast } from '@repo/ui';
-
+import {
+	createMutation,
+	createQuery,
+	queryRegistry,
+	type MutationResult,
+	type QueryResult
+} from '$lib/query';
 import type { AuthLoginDto, AuthRegisterDto, UserResponseDto } from '$lib/api/generated/types';
-import { createQuery, queryRegistry, type QueryResult } from '$lib/query';
 import { BaseStore } from '$lib/stores/base.svelte';
 
 import {
@@ -10,24 +14,46 @@ import {
 	logout as apiLogout,
 	register as apiRegister
 } from './api';
-import { validateLoginForm, validateRegisterForm } from './validation.svelte';
 import type { AuthStatus } from './types';
 
 class AuthStore extends BaseStore {
 	private readonly _query: QueryResult<UserResponseDto>;
+	private readonly _loginMutation: MutationResult<void, AuthLoginDto>;
+	private readonly _registerMutation: MutationResult<void, AuthRegisterDto>;
 	private _checkAuthPromise: Promise<void> | null = null;
 
 	isInitialized = $state(false);
 
 	constructor() {
 		super();
+
 		this._query = createQuery<UserResponseDto>({
 			key: ['currentUser'],
 			tags: ['user'],
 			fetcher: (signal) => getCurrentUser(signal),
 			debug: !__IS_PROD__
 		});
+
+		this._loginMutation = createMutation<void, AuthLoginDto>({
+			key: ['auth', 'login'],
+			tags: ['user'],
+			mutator: async (data) => {
+				await apiLogin(data);
+			},
+			debug: !__IS_PROD__
+		});
+
+		this._registerMutation = createMutation<void, AuthRegisterDto>({
+			key: ['auth', 'register'],
+			tags: ['user'],
+			mutator: async (data) => {
+				await apiRegister(data);
+			},
+			debug: !__IS_PROD__
+		});
 	}
+
+	// === Query геттеры ===
 
 	get user(): UserResponseDto | null {
 		return this._query.data ?? null;
@@ -50,11 +76,65 @@ class AuthStore extends BaseStore {
 	}
 
 	get isLoading(): boolean {
-		return this._query.isFetching;
+		return this._query.isLoading;
 	}
+
+	// === Login mutation ===
+
+	get isLoggingIn(): boolean {
+		return this._loginMutation.isSubmitting;
+	}
+
+	get isLoginSuccess(): boolean {
+		return this._loginMutation.isSuccess;
+	}
+
+	get loginError(): string | null {
+		if (!this._loginMutation.error) return null;
+		return this._extractErrorMessage(this._loginMutation.error, 'Ошибка входа');
+	}
+
+	async login(data: AuthLoginDto): Promise<void> {
+		await this._loginMutation.mutate(data);
+	}
+
+	// === Register mutation ===
+
+	get isRegistering(): boolean {
+		return this._registerMutation.isSubmitting;
+	}
+
+	get isRegisterSuccess(): boolean {
+		return this._registerMutation.isSuccess;
+	}
+
+	get registerError(): string | null {
+		if (!this._registerMutation.error) return null;
+		return this._extractErrorMessage(this._registerMutation.error, 'Ошибка регистрации');
+	}
+
+	async register(data: AuthRegisterDto): Promise<void> {
+		await this._registerMutation.mutate(data);
+	}
+
+	// === Logout ===
+
+	async logout(): Promise<void> {
+		try {
+			await apiLogout();
+		} catch (error) {
+			this._log('error', 'Logout failed', { error });
+			throw error;
+		} finally {
+			queryRegistry.resetAll();
+		}
+	}
+
+	// === Check Auth ===
 
 	async checkAuth(): Promise<void> {
 		if (this._checkAuthPromise) return this._checkAuthPromise;
+		if (this.user) return;
 
 		this._checkAuthPromise = this._doCheckAuth();
 		try {
@@ -69,63 +149,17 @@ class AuthStore extends BaseStore {
 		this.isInitialized = true;
 	}
 
-	async login(
-		data: unknown
-	): Promise<{ isValid: boolean; data?: AuthLoginDto; errors: Record<string, string> }> {
-		const validation = validateLoginForm(data);
-		if (!validation.isValid || !validation.data)
-			return { isValid: false, errors: validation.errors };
-
-		try {
-			await apiLogin(validation.data);
-			await this._query.fetch();
-			toast.success('Добро пожаловать!');
-		} catch (error) {
-			const message = this._extractErrorMessage(error, 'Ошибка входа');
-			toast.error(message);
-			throw error;
-		}
-
-		return { isValid: true, data: validation.data, errors: {} };
-	}
-
-	async register(
-		data: unknown
-	): Promise<{ isValid: boolean; data?: AuthRegisterDto; errors: Record<string, string> }> {
-		const validation = validateRegisterForm(data);
-		if (!validation.isValid || !validation.data)
-			return { isValid: false, errors: validation.errors };
-
-		try {
-			const { name, email, password } = validation.data;
-			await apiRegister({ name, email, password });
-			await this._query.fetch();
-			toast.success('Регистрация успешна!');
-		} catch (error) {
-			const message = this._extractErrorMessage(error, 'Ошибка регистрации');
-			toast.error(message);
-			throw error;
-		}
-
-		return { isValid: true, data: validation.data, errors: {} };
-	}
-
-	async logout(): Promise<void> {
-		try {
-			await apiLogout();
-		} catch (error) {
-			this._log('error', 'Logout failed', { error });
-			toast.error(this._extractErrorMessage(error, 'Ошибка выхода'));
-			throw error;
-		} finally {
-			queryRegistry.resetAll();
-		}
-	}
+	// === Reset ===
 
 	reset(): void {
 		this._query.reset();
 		this._checkAuthPromise = null;
 		this.isInitialized = false;
+	}
+
+	resetForm(): void {
+		this._loginMutation.reset();
+		this._registerMutation.reset();
 	}
 }
 
