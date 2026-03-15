@@ -1,5 +1,13 @@
 # @repo/ui
 
+## 0.7.1
+
+### Patch Changes
+
+- 79e7d31: Input and Textarea improvements for better form UX
+  - Floating labels now correctly detect browser autofill via CSS animation events
+  - Unified icon positioning across Input component sizes (sm/md/lg/responsive)
+
 ## 0.7.0
 
 ### Minor Changes
