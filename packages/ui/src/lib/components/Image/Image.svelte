@@ -21,6 +21,7 @@
 
 	let imageLoaded = $state(false);
 	let imageError = $state(false);
+	let imgElement: HTMLImageElement | undefined = $state();
 
 	const formatDimension = (value: string | number | undefined): string | undefined => {
 		if (value === undefined) return undefined;
@@ -41,6 +42,15 @@
 		const _src = src;
 		imageLoaded = false;
 		imageError = false;
+	});
+
+	$effect(() => {
+		if (imgElement && src) {
+			if (imgElement.complete && imgElement.naturalHeight > 0) {
+				imageLoaded = true;
+				imageError = false;
+			}
+		}
 	});
 
 	const showImage = $derived(!skeleton && src && imageLoaded && !imageError);
@@ -73,6 +83,7 @@
 >
 	{#if src}
 		<img
+			bind:this={imgElement}
 			{src}
 			{alt}
 			class={['ui-image-img', objectFit, imageLoaded && 'loaded', imageError && 'error']}

@@ -27,7 +27,7 @@
 	let debouncedName = $state(form.name);
 	const updateDebouncedName = debounce((value: string) => {
 		debouncedName = value;
-	}, DEBOUNCE.AVATAR_NAME);
+	}, DEBOUNCE);
 
 	// Debounced update on user input
 	$effect(() => {
