@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 
 export class ProviderMovieSummary {
-  @ApiProperty()
+  @ApiProperty({ type: String, nullable: true })
   imdbId: string | null;
 
   @ApiProperty()
@@ -10,13 +10,13 @@ export class ProviderMovieSummary {
   @ApiProperty()
   title: string;
 
-  @ApiProperty()
+  @ApiProperty({ type: String, nullable: true })
   posterPath: string | null;
 
   @ApiProperty()
   overview: string;
 
-  @ApiProperty()
+  @ApiProperty({ type: Number, nullable: true })
   releaseYear: number | null;
 
   @ApiProperty()
@@ -38,7 +38,7 @@ export class ProviderSearchResult {
 }
 
 export class ProviderMovieDetails {
-  @ApiProperty({ required: false })
+  @ApiProperty({ type: String, nullable: true })
   imdbId?: string;
 
   @ApiProperty()
@@ -47,13 +47,13 @@ export class ProviderMovieDetails {
   @ApiProperty()
   title: string;
 
-  @ApiProperty()
+  @ApiProperty({ type: String, nullable: true })
   posterPath: string | null;
 
-  @ApiProperty()
+  @ApiProperty({ type: String, nullable: true })
   overview: string | null;
 
-  @ApiProperty()
+  @ApiProperty({ type: Number, nullable: true })
   releaseYear: number | null;
 
   @ApiProperty()
@@ -62,6 +62,6 @@ export class ProviderMovieDetails {
   @ApiProperty({ type: [String] })
   genres: string[];
 
-  @ApiProperty()
+  @ApiProperty({ type: Number, nullable: true })
   runtime: number | null;
 }
