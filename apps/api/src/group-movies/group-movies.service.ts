@@ -2,7 +2,10 @@ import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 
 import { MovieAlreadyInGroupException } from '$common/exceptions';
 
-import { GroupMoviesRepository } from './group-movies.repository';
+import {
+  GroupMoviesRepository,
+  type GroupMovieWithDetails,
+} from './group-movies.repository';
 import { MoviesRepository } from '../movies/movies.repository';
 import { DEFAULT_PROVIDER } from '../movies/movies.constants';
 import { MovieProvidersService } from '../movies/providers';
@@ -117,10 +120,10 @@ export class GroupMoviesService {
   /**
    * Gets all movies for a group
    * @param groupId - Group ID
-   * @returns Array of group movies
+   * @returns Array of group movies with movie details
    */
-  async findByGroup(groupId: number): Promise<GroupMovie[]> {
-    return this.groupMoviesRepository.findByGroup(groupId);
+  async findByGroup(groupId: number): Promise<GroupMovieWithDetails[]> {
+    return this.groupMoviesRepository.findByGroupWithDetails(groupId);
   }
 
   /**

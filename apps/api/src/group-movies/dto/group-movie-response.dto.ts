@@ -35,6 +35,24 @@ export class GroupMovieResponseDto {
 
   @ApiProperty()
   updatedAt: Date;
+
+  @ApiProperty()
+  title: string;
+
+  @ApiProperty({ required: false })
+  posterPath?: string;
+
+  @ApiProperty({ required: false })
+  overview?: string;
+
+  @ApiProperty({ required: false })
+  releaseYear?: number;
+
+  @ApiProperty({ required: false })
+  runtime?: number;
+
+  @ApiProperty({ required: false })
+  rating?: string;
 }
 
 export class SearchInGroupResponseDto {
