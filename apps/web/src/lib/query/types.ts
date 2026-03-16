@@ -27,6 +27,7 @@ export interface QueryResult<T, K = never> extends QueryState<T> {
 	readonly isLoading: boolean;
 	readonly isLoaded: boolean;
 	fetch: () => Promise<void>;
+	refetch: (newParams?: K | null) => Promise<void>;
 	reset: () => void;
 	destroy: () => void;
 	revalidate: (newKey: unknown[], newParams?: K | null) => Promise<void>;

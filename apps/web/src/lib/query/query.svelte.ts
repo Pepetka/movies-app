@@ -86,6 +86,28 @@ class Query<T, K = never> implements QueryResult<T, K> {
 		}
 	}
 
+	async refetch(newParams?: K | null): Promise<void> {
+		this._controller?.abort();
+		this._controller = new AbortController();
+
+		if (newParams !== undefined) {
+			this._params = newParams;
+		}
+
+		this._state.isFetching = true;
+		this._state.error = null;
+
+		try {
+			const data = await this._fetcher(this._controller.signal, this._params);
+			this._state.data = data;
+		} catch (e) {
+			if (isAbortError(e)) return;
+			this._state.error = toError(e);
+		} finally {
+			this._state.isFetching = false;
+		}
+	}
+
 	reset(): void {
 		this._controller?.abort();
 		this._state.data = null;

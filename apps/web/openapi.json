@@ -1326,12 +1326,12 @@
 			"ProviderMovieSummary": {
 				"type": "object",
 				"properties": {
-					"imdbId": { "type": "object" },
+					"imdbId": { "type": "string", "nullable": true },
 					"externalId": { "type": "string" },
 					"title": { "type": "string" },
-					"posterPath": { "type": "object" },
+					"posterPath": { "type": "string", "nullable": true },
 					"overview": { "type": "string" },
-					"releaseYear": { "type": "object" },
+					"releaseYear": { "type": "number", "nullable": true },
 					"rating": { "type": "number" }
 				},
 				"required": [
@@ -1591,9 +1591,24 @@
 					"plannedDate": { "format": "date-time", "type": "string" },
 					"watchedDate": { "format": "date-time", "type": "string" },
 					"createdAt": { "format": "date-time", "type": "string" },
-					"updatedAt": { "format": "date-time", "type": "string" }
+					"updatedAt": { "format": "date-time", "type": "string" },
+					"title": { "type": "string" },
+					"posterPath": { "type": "string" },
+					"overview": { "type": "string" },
+					"releaseYear": { "type": "number" },
+					"runtime": { "type": "number" },
+					"rating": { "type": "string" }
 				},
-				"required": ["id", "groupId", "movieId", "addedBy", "status", "createdAt", "updatedAt"]
+				"required": [
+					"id",
+					"groupId",
+					"movieId",
+					"addedBy",
+					"status",
+					"createdAt",
+					"updatedAt",
+					"title"
+				]
 			},
 			"AddMovieDto": {
 				"type": "object",
