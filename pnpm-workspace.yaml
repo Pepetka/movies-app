@@ -5,7 +5,7 @@ packages:
 catalog:
   # TypeScript
   typescript: "5.9.3"
-  "@types/node": "^25.3.5"
+  "@types/node": "^25.5.0"
 
   # Linting & Formatting
   eslint: "^10.0.3"
