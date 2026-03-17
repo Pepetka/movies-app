@@ -24,11 +24,11 @@ export class GroupMovieResponseDto {
   @ApiProperty({ enum: GroupMovieStatus })
   status: GroupMovieStatus;
 
-  @ApiProperty({ required: false })
-  plannedDate?: Date;
+  @ApiProperty({ type: Date, nullable: true })
+  plannedDate: Date | null;
 
-  @ApiProperty({ required: false })
-  watchedDate?: Date;
+  @ApiProperty({ type: Date, nullable: true })
+  watchedDate: Date | null;
 
   @ApiProperty()
   createdAt: Date;
@@ -39,20 +39,20 @@ export class GroupMovieResponseDto {
   @ApiProperty()
   title: string;
 
-  @ApiProperty({ required: false })
-  posterPath?: string;
+  @ApiProperty({ type: String, nullable: true })
+  posterPath: string | null;
 
-  @ApiProperty({ required: false })
-  overview?: string;
+  @ApiProperty({ type: String, nullable: true })
+  overview: string | null;
 
-  @ApiProperty({ required: false })
-  releaseYear?: number;
+  @ApiProperty({ type: Number, nullable: true })
+  releaseYear: number | null;
 
-  @ApiProperty({ required: false })
-  runtime?: number;
+  @ApiProperty({ type: Number, nullable: true })
+  runtime: number | null;
 
-  @ApiProperty({ required: false })
-  rating?: string;
+  @ApiProperty({ type: String, nullable: true })
+  rating: string | null;
 }
 
 export class SearchInGroupResponseDto {

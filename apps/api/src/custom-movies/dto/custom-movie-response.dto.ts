@@ -1,4 +1,4 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty } from '@nestjs/swagger';
 
 import { MovieStatus, MovieStatusEnum } from '$common/dto/movie-status.dto';
 
@@ -12,17 +12,17 @@ export class CustomMovieResponseDto {
   @ApiProperty()
   title: string;
 
-  @ApiPropertyOptional()
-  posterPath?: string;
+  @ApiProperty({ type: String, nullable: true })
+  posterPath: string | null;
 
-  @ApiPropertyOptional()
-  overview?: string;
+  @ApiProperty({ type: String, nullable: true })
+  overview: string | null;
 
-  @ApiPropertyOptional()
-  releaseYear?: number;
+  @ApiProperty({ type: Number, nullable: true })
+  releaseYear: number | null;
 
-  @ApiPropertyOptional()
-  runtime?: number;
+  @ApiProperty({ type: Number, nullable: true })
+  runtime: number | null;
 
   @ApiProperty({
     description: 'Movie status',
@@ -31,11 +31,11 @@ export class CustomMovieResponseDto {
   })
   status: MovieStatus;
 
-  @ApiPropertyOptional()
-  plannedDate?: Date;
+  @ApiProperty({ type: Date, nullable: true })
+  plannedDate: Date | null;
 
-  @ApiPropertyOptional()
-  watchedDate?: Date;
+  @ApiProperty({ type: Date, nullable: true })
+  watchedDate: Date | null;
 
   @ApiProperty()
   createdById: number;

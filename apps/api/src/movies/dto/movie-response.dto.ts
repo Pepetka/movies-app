@@ -7,29 +7,29 @@ export class MovieResponseDto {
   @ApiProperty()
   externalId: string;
 
-  @ApiProperty({ required: false })
-  imdbId?: string | null;
+  @ApiProperty({ type: String, nullable: true })
+  imdbId: string | null;
 
   @ApiProperty()
   title: string;
 
-  @ApiProperty({ required: false })
-  posterPath?: string;
+  @ApiProperty({ type: String, nullable: true })
+  posterPath: string | null;
 
-  @ApiProperty({ required: false })
-  overview?: string;
+  @ApiProperty({ type: String, nullable: true })
+  overview: string | null;
 
-  @ApiProperty({ required: false })
-  releaseYear?: number;
+  @ApiProperty({ type: Number, nullable: true })
+  releaseYear: number | null;
 
-  @ApiProperty({ required: false })
-  rating?: string;
+  @ApiProperty({ type: String, nullable: true })
+  rating: string | null;
 
-  @ApiProperty({ required: false, type: [String] })
-  genres?: string[];
+  @ApiProperty({ type: [String], nullable: true })
+  genres: string[] | null;
 
-  @ApiProperty({ required: false })
-  runtime?: number;
+  @ApiProperty({ type: Number, nullable: true })
+  runtime: number | null;
 
   @ApiProperty()
   createdAt: Date;

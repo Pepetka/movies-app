@@ -1,4 +1,4 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty } from '@nestjs/swagger';
 
 export class GroupResponseDto {
   @ApiProperty()
@@ -7,11 +7,11 @@ export class GroupResponseDto {
   @ApiProperty()
   name: string;
 
-  @ApiPropertyOptional()
-  description?: string;
+  @ApiProperty({ type: String, nullable: true })
+  description: string | null;
 
-  @ApiPropertyOptional()
-  avatarUrl?: string;
+  @ApiProperty({ type: String, nullable: true })
+  avatarUrl: string | null;
 
   @ApiProperty()
   createdAt: Date;
