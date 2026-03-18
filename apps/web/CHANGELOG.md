@@ -1,5 +1,23 @@
 # web
 
+## 0.10.0
+
+### Minor Changes
+
+- d06ef76: Group movies management with provider search
+  - Created movies module (api, stores, components, types, validation)
+  - Group page with movies grid and status filtering (all/tracking/planned/watched)
+  - Movies search page with Kinopoisk provider integration
+  - MovieCard, MovieGrid, MovieStatusBadge components
+  - groupMoviesStore — fetches provider + custom movies with unified type
+  - groupMovieStore — mutations for add/create/update/remove operations
+  - Query system integration with automatic invalidation
+
+### Patch Changes
+
+- Updated dependencies [d06ef76]
+  - @repo/ui@0.7.2
+
 ## 0.9.0
 
 ### Minor Changes

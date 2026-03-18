@@ -1,5 +1,13 @@
 # @repo/ui
 
+## 0.7.2
+
+### Patch Changes
+
+- d06ef76: Image component improvements
+  - Added fallback prop for placeholder when image fails to load
+  - Better error handling for broken image URLs
+
 ## 0.7.1
 
 ### Patch Changes
