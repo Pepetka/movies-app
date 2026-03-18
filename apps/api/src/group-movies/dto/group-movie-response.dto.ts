@@ -24,17 +24,35 @@ export class GroupMovieResponseDto {
   @ApiProperty({ enum: GroupMovieStatus })
   status: GroupMovieStatus;
 
-  @ApiProperty({ required: false })
-  plannedDate?: Date;
+  @ApiProperty({ type: Date, nullable: true })
+  plannedDate: Date | null;
 
-  @ApiProperty({ required: false })
-  watchedDate?: Date;
+  @ApiProperty({ type: Date, nullable: true })
+  watchedDate: Date | null;
 
   @ApiProperty()
   createdAt: Date;
 
   @ApiProperty()
   updatedAt: Date;
+
+  @ApiProperty()
+  title: string;
+
+  @ApiProperty({ type: String, nullable: true })
+  posterPath: string | null;
+
+  @ApiProperty({ type: String, nullable: true })
+  overview: string | null;
+
+  @ApiProperty({ type: Number, nullable: true })
+  releaseYear: number | null;
+
+  @ApiProperty({ type: Number, nullable: true })
+  runtime: number | null;
+
+  @ApiProperty({ type: String, nullable: true })
+  rating: string | null;
 }
 
 export class SearchInGroupResponseDto {

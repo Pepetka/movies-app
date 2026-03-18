@@ -1326,12 +1326,12 @@
 			"ProviderMovieSummary": {
 				"type": "object",
 				"properties": {
-					"imdbId": { "type": "object" },
+					"imdbId": { "type": "string", "nullable": true },
 					"externalId": { "type": "string" },
 					"title": { "type": "string" },
-					"posterPath": { "type": "object" },
+					"posterPath": { "type": "string", "nullable": true },
 					"overview": { "type": "string" },
-					"releaseYear": { "type": "object" },
+					"releaseYear": { "type": "number", "nullable": true },
 					"rating": { "type": "number" }
 				},
 				"required": [
@@ -1362,18 +1362,31 @@
 				"properties": {
 					"id": { "type": "number" },
 					"externalId": { "type": "string" },
-					"imdbId": { "type": "object" },
+					"imdbId": { "type": "string", "nullable": true },
 					"title": { "type": "string" },
-					"posterPath": { "type": "string" },
-					"overview": { "type": "string" },
-					"releaseYear": { "type": "number" },
-					"rating": { "type": "string" },
-					"genres": { "type": "array", "items": { "type": "string" } },
-					"runtime": { "type": "number" },
+					"posterPath": { "type": "string", "nullable": true },
+					"overview": { "type": "string", "nullable": true },
+					"releaseYear": { "type": "number", "nullable": true },
+					"rating": { "type": "string", "nullable": true },
+					"genres": { "nullable": true, "type": "array", "items": { "type": "string" } },
+					"runtime": { "type": "number", "nullable": true },
 					"createdAt": { "format": "date-time", "type": "string" },
 					"updatedAt": { "format": "date-time", "type": "string" }
 				},
-				"required": ["id", "externalId", "title", "createdAt", "updatedAt"]
+				"required": [
+					"id",
+					"externalId",
+					"imdbId",
+					"title",
+					"posterPath",
+					"overview",
+					"releaseYear",
+					"rating",
+					"genres",
+					"runtime",
+					"createdAt",
+					"updatedAt"
+				]
 			},
 			"MovieCreateDto": {
 				"type": "object",
@@ -1411,12 +1424,12 @@
 				"properties": {
 					"id": { "type": "number" },
 					"name": { "type": "string" },
-					"description": { "type": "string" },
-					"avatarUrl": { "type": "string" },
+					"description": { "type": "string", "nullable": true },
+					"avatarUrl": { "type": "string", "nullable": true },
 					"createdAt": { "format": "date-time", "type": "string" },
 					"updatedAt": { "format": "date-time", "type": "string" }
 				},
-				"required": ["id", "name", "createdAt", "updatedAt"]
+				"required": ["id", "name", "description", "avatarUrl", "createdAt", "updatedAt"]
 			},
 			"GroupCreateDto": {
 				"type": "object",
@@ -1502,23 +1515,37 @@
 					"id": { "type": "number" },
 					"groupId": { "type": "number" },
 					"title": { "type": "string" },
-					"posterPath": { "type": "string" },
-					"overview": { "type": "string" },
-					"releaseYear": { "type": "number" },
-					"runtime": { "type": "number" },
+					"posterPath": { "type": "string", "nullable": true },
+					"overview": { "type": "string", "nullable": true },
+					"releaseYear": { "type": "number", "nullable": true },
+					"runtime": { "type": "number", "nullable": true },
 					"status": {
 						"type": "string",
 						"description": "Movie status",
 						"enum": ["tracking", "planned", "watched"],
 						"default": "tracking"
 					},
-					"plannedDate": { "format": "date-time", "type": "string" },
-					"watchedDate": { "format": "date-time", "type": "string" },
+					"plannedDate": { "format": "date-time", "type": "string", "nullable": true },
+					"watchedDate": { "format": "date-time", "type": "string", "nullable": true },
 					"createdById": { "type": "number" },
 					"createdAt": { "format": "date-time", "type": "string" },
 					"updatedAt": { "format": "date-time", "type": "string" }
 				},
-				"required": ["id", "groupId", "title", "status", "createdById", "createdAt", "updatedAt"]
+				"required": [
+					"id",
+					"groupId",
+					"title",
+					"posterPath",
+					"overview",
+					"releaseYear",
+					"runtime",
+					"status",
+					"plannedDate",
+					"watchedDate",
+					"createdById",
+					"createdAt",
+					"updatedAt"
+				]
 			},
 			"CreateCustomMovieDto": {
 				"type": "object",
@@ -1588,12 +1615,34 @@
 					"movieId": { "type": "number" },
 					"addedBy": { "type": "number" },
 					"status": { "type": "string", "enum": ["tracking", "planned", "watched"] },
-					"plannedDate": { "format": "date-time", "type": "string" },
-					"watchedDate": { "format": "date-time", "type": "string" },
+					"plannedDate": { "format": "date-time", "type": "string", "nullable": true },
+					"watchedDate": { "format": "date-time", "type": "string", "nullable": true },
 					"createdAt": { "format": "date-time", "type": "string" },
-					"updatedAt": { "format": "date-time", "type": "string" }
+					"updatedAt": { "format": "date-time", "type": "string" },
+					"title": { "type": "string" },
+					"posterPath": { "type": "string", "nullable": true },
+					"overview": { "type": "string", "nullable": true },
+					"releaseYear": { "type": "number", "nullable": true },
+					"runtime": { "type": "number", "nullable": true },
+					"rating": { "type": "string", "nullable": true }
 				},
-				"required": ["id", "groupId", "movieId", "addedBy", "status", "createdAt", "updatedAt"]
+				"required": [
+					"id",
+					"groupId",
+					"movieId",
+					"addedBy",
+					"status",
+					"plannedDate",
+					"watchedDate",
+					"createdAt",
+					"updatedAt",
+					"title",
+					"posterPath",
+					"overview",
+					"releaseYear",
+					"runtime",
+					"rating"
+				]
 			},
 			"AddMovieDto": {
 				"type": "object",

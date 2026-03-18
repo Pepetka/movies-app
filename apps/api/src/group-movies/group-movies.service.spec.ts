@@ -43,7 +43,7 @@ const mockMovie = {
 const createMockRepositories = () => ({
   groupMoviesRepository: {
     create: jest.fn(),
-    findByGroup: jest.fn(),
+    findByGroupWithDetails: jest.fn(),
     findOne: jest.fn(),
     exists: jest.fn(),
     countByMovie: jest.fn(),
@@ -220,14 +220,16 @@ describe('GroupMoviesService', () => {
   describe('findByGroup', () => {
     it('should return movies for group', async () => {
       const mockGroupMovies = [mockGroupMovie];
-      mocks.groupMoviesRepository.findByGroup.mockResolvedValue(
+      mocks.groupMoviesRepository.findByGroupWithDetails.mockResolvedValue(
         mockGroupMovies,
       );
 
       const result = await service.findByGroup(1);
 
       expect(result).toEqual(mockGroupMovies);
-      expect(mocks.groupMoviesRepository.findByGroup).toHaveBeenCalledWith(1);
+      expect(
+        mocks.groupMoviesRepository.findByGroupWithDetails,
+      ).toHaveBeenCalledWith(1);
     });
   });
 

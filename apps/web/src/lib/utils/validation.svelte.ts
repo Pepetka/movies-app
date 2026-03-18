@@ -30,7 +30,7 @@ export const createValidator = <T>(schema: z.ZodSchema<T>) => {
 
 export const createFormFieldValidator = <T extends Record<string, unknown>>(
 	validateForm: (data: T) => ValidationResult<T>,
-	debounceMs = DEBOUNCE.FORM_VALIDATION
+	debounceMs = DEBOUNCE
 ) => {
 	let errors = $state<Record<string, string>>({});
 	let touched = $state<Record<string, boolean>>({});

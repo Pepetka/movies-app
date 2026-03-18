@@ -30,6 +30,7 @@
     "lint-staged": "^16.4.0",
     "prettier-plugin-svelte": "catalog:",
     "syncpack": "14.2.0",
+    "typescript": "catalog:",
     "turbo": "^2.8.17"
   },
   "packageManager": "pnpm@10.29.3",

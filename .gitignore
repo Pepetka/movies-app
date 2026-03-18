@@ -4,6 +4,8 @@
 
 docs/plans
 
+design/
+
 # Dependencies
 node_modules
 .pnp
