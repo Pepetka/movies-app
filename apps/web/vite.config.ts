@@ -1,3 +1,4 @@
+import devtoolsJson from 'vite-plugin-devtools-json';
 import { sveltekit } from '@sveltejs/kit/vite';
 import { defineConfig, loadEnv } from 'vite';
 
@@ -6,7 +7,7 @@ export default defineConfig(({ mode }) => {
 	const isProd = mode === 'production';
 
 	return {
-		plugins: [sveltekit()],
+		plugins: [sveltekit(), devtoolsJson()],
 		server: {
 			proxy: isProd
 				? undefined
