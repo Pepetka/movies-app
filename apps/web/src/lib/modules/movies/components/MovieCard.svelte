@@ -49,12 +49,6 @@
 		border-radius: var(--radius-md) var(--radius-md) 0 0;
 	}
 
-	.movie-card__poster :global(img) {
-		width: 100%;
-		height: 100%;
-		object-fit: cover;
-	}
-
 	.movie-card__badge {
 		position: absolute;
 		bottom: var(--space-2);
