@@ -105,6 +105,10 @@ class GroupStore extends BaseStore {
 		return this._createMutation.isSuccess;
 	}
 
+	get createdGroup(): GroupResponseDto | null {
+		return this._createMutation.data ?? null;
+	}
+
 	async createGroup(data: GroupCreateDto): Promise<GroupResponseDto | null> {
 		return this._createMutation.mutate(data);
 	}

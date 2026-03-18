@@ -30,9 +30,9 @@
 	const handleSubmit = async () => {
 		await groupStore.createGroup(groupFormToCreateDto(form));
 
-		if (groupStore.isCreateSuccess && groupStore.currentGroup) {
+		if (groupStore.isCreateSuccess && groupStore.createdGroup) {
 			toast.success('Группа создана');
-			await goto(resolve(ROUTES.GROUP_DETAIL(groupStore.currentGroup.id)));
+			await goto(resolve(ROUTES.GROUP_DETAIL(groupStore.createdGroup.id)));
 		} else {
 			toast.error(groupStore.createError ?? 'Не удалось создать группу');
 		}
