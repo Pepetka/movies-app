@@ -2,7 +2,7 @@
 	import { EmptyState, Grid, Skeleton } from '@repo/ui';
 	import { Film } from '@lucide/svelte';
 
-	import type { IProps } from './MovieGrid.types.svelte';
+	import type { IProps } from './MovieGrid.types';
 	import MovieCard from './MovieCard.svelte';
 
 	let {

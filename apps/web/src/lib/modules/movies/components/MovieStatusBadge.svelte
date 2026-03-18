@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Badge } from '@repo/ui';
 
-	import type { IProps } from './MovieStatusBadge.types.svelte';
+	import type { IProps } from './MovieStatusBadge.types';
 
 	let { status, ...restProps }: IProps = $props();
 

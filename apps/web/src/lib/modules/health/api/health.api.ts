@@ -2,7 +2,7 @@ import { healthControllerHealthV1 } from '$lib/api/generated/api';
 import { HttpError, NetworkError, RetryError } from '$lib/api';
 import { logger } from '$lib/utils/logger';
 
-import type { HealthCheckResult } from './types';
+import type { HealthCheckResult } from '../types';
 
 export async function checkHealth(): Promise<HealthCheckResult> {
 	const startTime = Date.now();

@@ -1,7 +1,7 @@
-export { groupMoviesStore } from './group-movies-store.svelte';
-export { groupMovieStore } from './group-movie-store.svelte';
-export { moviesSearchStore } from './movies-search-store.svelte';
+// Stores
+export { groupMoviesStore, groupMovieStore, moviesSearchStore } from './stores';
 
+// Types
 export {
 	mapGroupMovieToUnified,
 	mapCustomMovieToUnified,
@@ -11,11 +11,13 @@ export {
 	type UnifiedMovie
 } from './types';
 
+// Validation
 export {
 	validateCustomMovieForm,
 	customMovieFormToCreateDto,
 	customMovieFormToUpdateDto,
 	customMovieFormFromEntity
-} from './validation.svelte';
+} from './validation';
 
+// Components
 export { MovieCard, MovieGrid, MovieStatusBadge } from './components';

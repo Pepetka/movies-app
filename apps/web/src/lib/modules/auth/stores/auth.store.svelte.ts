@@ -13,8 +13,8 @@ import {
 	login as apiLogin,
 	logout as apiLogout,
 	register as apiRegister
-} from './api';
-import type { AuthStatus } from './types';
+} from '../api';
+import type { AuthStatus } from '../types';
 
 class AuthStore extends BaseStore {
 	private readonly _query: QueryResult<UserResponseDto>;

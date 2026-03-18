@@ -7,8 +7,8 @@ import {
 	mapGroupMovieToUnified,
 	type MovieStatus,
 	type UnifiedMovie
-} from './types';
-import { getCustomMovies, getGroupMovies } from './api';
+} from '../types';
+import { getCustomMovies, getGroupMovies } from '../api';
 
 class GroupMoviesStore extends BaseStore {
 	private readonly _providerQuery: QueryResult<GroupMovieResponseDto[], number>;

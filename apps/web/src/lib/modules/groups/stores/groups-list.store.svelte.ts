@@ -2,7 +2,7 @@ import { createQuery, type FetchStatus, type QueryResult } from '$lib/query';
 import type { GroupResponseDto } from '$lib/api/generated/types';
 import { BaseStore } from '$lib/stores/base.svelte';
 
-import { getGroups } from './api';
+import { getGroups } from '../api';
 
 class GroupsStore extends BaseStore {
 	private readonly _query: QueryResult<GroupResponseDto[]>;

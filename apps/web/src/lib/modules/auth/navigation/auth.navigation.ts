@@ -3,7 +3,7 @@ import { goto } from '$app/navigation';
 import { resolve } from '$app/paths';
 import { ROUTES } from '$lib/utils';
 
-import { authStore } from './store.svelte';
+import { authStore } from '../stores';
 
 export function requireAuth(): void {
 	if (!browser || !authStore.isInitialized) return;

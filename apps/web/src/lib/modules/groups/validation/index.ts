@@ -1,8 +1,5 @@
-// Stores
-export { groupsStore, groupStore } from './stores';
-
-// Validation
 export {
+	groupSchema,
 	EMPTY_GROUP_FORM,
 	validateGroupForm,
 	groupFormToCreateDto,
@@ -11,7 +8,4 @@ export {
 	type GroupFormData,
 	type GroupFormMode,
 	type GroupFormProps
-} from './validation';
-
-// Components
-export { GroupForm } from './components';
+} from './groups.validation.svelte';

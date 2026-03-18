@@ -13,7 +13,7 @@ import {
 	createGroup as createGroupApi,
 	getGroup as getGroupApi,
 	updateGroup as updateGroupApi
-} from './api';
+} from '../api';
 
 class GroupStore extends BaseStore {
 	private readonly _query: QueryResult<GroupResponseDto, number>;

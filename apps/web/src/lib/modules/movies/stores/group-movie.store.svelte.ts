@@ -16,7 +16,7 @@ import {
 	removeGroupMovie,
 	updateCustomMovie,
 	updateMovieStatus
-} from './api';
+} from '../api';
 
 class GroupMovieStore extends BaseStore {
 	private readonly _addMutation: MutationResult<

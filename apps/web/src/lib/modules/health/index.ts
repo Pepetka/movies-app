@@ -1,12 +1,11 @@
 // Types
 export type { HealthStatus, HealthCheckState, HealthCheckResult } from './types';
-export type { HealthConfig } from './config';
 
 // Config
-export { healthConfig } from './config';
+export { healthConfig, type HealthConfig } from './config';
 
 // API
 export { checkHealth } from './api';
 
 // Store
-export { healthStore } from './store.svelte';
+export { healthStore } from './stores';

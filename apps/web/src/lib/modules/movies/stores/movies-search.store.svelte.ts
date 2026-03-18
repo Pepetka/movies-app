@@ -3,7 +3,7 @@ import type { ProviderMovieSummary } from '$lib/api/generated/types';
 import { BaseStore } from '$lib/stores/base.svelte';
 import { DEBOUNCE, debounce } from '$lib/utils';
 
-import { searchMovies } from './api';
+import { searchMovies } from '../api';
 
 type SearchResponse = { results: ProviderMovieSummary[] };
 
@@ -23,7 +23,7 @@ class MoviesSearchStore extends BaseStore {
 
 		this._debouncedSearch = debounce((query: string) => {
 			if (query.trim()) {
-				void this._query.refetch(query);
+				void this._query.revalidate(['movies', 'search', query], query);
 			} else {
 				this._query.reset();
 			}

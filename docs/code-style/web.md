@@ -57,32 +57,72 @@ export const healthStore = new HealthStore();
 
 ## Module structure
 
+Модули организованы в подпапки по ответственности:
+
 ```
 modules/
-  health/
-    api.ts           # HTTP запросы
-    config.ts        # Конфигурация
-    store.svelte.ts  # Reactive store (класс)
-    types.ts         # TypeScript типы
-    index.ts         # Public API (реэкспорт)
+  {name}/
+    api/
+      {name}.api.ts       # HTTP запросы
+      index.ts            # Реэкспорт
+    stores/
+      {entity}.store.svelte.ts  # Reactive store (класс)
+      index.ts            # Реэкспорт
+    components/           # Svelte компоненты (опционально)
+      Component.svelte
+      Component.types.ts
+      index.ts
+    types/
+      {name}.types.ts     # TypeScript типы
+      index.ts
+    validation/           # Валидация форм (опционально)
+      {name}.validation.svelte.ts
+      index.ts
+    config/               # Конфигурация (опционально)
+      {name}.config.ts
+      index.ts
+    index.ts              # Public API модуля
 ```
 
-## API client
+### Назначение подпапок
+
+| Папка | Содержимое |
+|-------|------------|
+| `api/` | HTTP-запросы к бэкенду |
+| `stores/` | Реактивные сторы с `$state`, query/mutation |
+| `components/` | Svelte-компоненты модуля |
+| `types/` | TypeScript типы (не из generated) |
+| `validation/` | Zod-схемы, мапперы форм |
+| `config/` | Константы и настройки |
+
+### Правила импортов
 
 ```typescript
-// api.ts
+// ❌ ИЗВНЕ — запрещено
+import { store } from '$lib/modules/auth/stores/auth.store.svelte';
+
+// ✅ ИЗВНЕ — только через index модуля
+import { authStore } from '$lib/modules/auth';
+
+// ✅ ВНУТРИ модуля — прямой импорт
+import { login } from '../api/auth.api';
+```
+
+## API layer
+
+```typescript
+// api/auth.api.ts
 import { apiClient } from '$lib/api/client';
 
-export async function checkHealth(): Promise<HealthCheckResult> {
-  const response = await apiClient.get('/health');
-  return response.data;
+export async function login(data: AuthLoginDto): Promise<void> {
+  await apiClient.post('/auth/login', data);
 }
 ```
 
 ## Config
 
 ```typescript
-// config.ts
+// config/health.config.ts
 export const healthConfig = {
   defaultPollingInterval: 30000,
   maxConsecutiveFailures: 3,
@@ -94,7 +134,7 @@ export const healthConfig = {
 ## Types
 
 ```typescript
-// types.ts
+// types/health.types.ts
 export type HealthStatus = 'loading' | 'online' | 'offline' | 'degraded';
 
 export interface HealthCheckResult {
@@ -108,9 +148,11 @@ export interface HealthCheckResult {
 ## Index (реэкспорт)
 
 ```typescript
-// index.ts
-export { healthStore } from './store.svelte';
+// index.ts — публичный API модуля
+export { healthStore } from './stores';
+export { checkHealth } from './api';
 export type { HealthStatus, HealthCheckResult } from './types';
+export { healthConfig } from './config';
 ```
 
 ## Использование в компонентах

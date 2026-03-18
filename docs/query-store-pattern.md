@@ -6,11 +6,17 @@
 
 ```
 Module
-├── groups-store.svelte.ts   # Список сущностей (только чтение)
-├── group-store.svelte.ts    # Отдельная сущность + формы (CRUD)
-├── types.ts                 # PostStatus, GroupFormMode, etc.
-├── api.ts                   # API функции
-└── validation.svelte.ts     # Валидация форм
+├── api/
+│   └── groups.api.ts           # API функции
+├── stores/
+│   ├── groups-list.store.svelte.ts   # Список сущностей (только чтение)
+│   ├── group-item.store.svelte.ts    # Отдельная сущность + формы (CRUD)
+│   └── index.ts
+├── types/
+│   └── groups.types.ts         # PostStatus, GroupFormMode, etc.
+├── validation/
+│   └── groups.validation.svelte.ts   # Валидация форм
+└── index.ts                    # Public API
 ```
 
 **Ключевой принцип:** Один модуль = несколько отдельных сторов для списка и одной сущности + формы:
@@ -34,7 +40,7 @@ import type { GroupResponseDto } from '$lib/api/generated/types';
 import { createQuery, type FetchStatus, type QueryResult } from '$lib/query';
 import { BaseStore } from '$lib/stores/base.svelte';
 
-import { getGroups } from './api';
+import { getGroups } from '../api/groups.api';
 
 class GroupsStore extends BaseStore {
 	private readonly _query: QueryResult<GroupResponseDto[]>;
@@ -121,7 +127,7 @@ import {
 	createGroup as createGroupApi,
 	getGroup as getGroupApi,
 	updateGroup as updateGroupApi
-} from './api';
+} from '../api/groups.api';
 
 class GroupStore extends BaseStore {
 	private readonly _query: QueryResult<GroupResponseDto, number>;
@@ -670,23 +676,23 @@ queryRegistry.resetAll();
 
 ## Чек-лист создания нового модуля
 
-1. **types.ts**
+1. **types/items.types.ts**
    - [ ] `PostStatus` — импортировать из `$lib/query`
    - [ ] `FormMode` — если есть create/edit
    - [ ] `IProps` — для компонентов формы
 
-2. **api.ts**
+2. **api/items.api.ts**
    - [ ] `getItems(signal)` — список
    - [ ] `getItem(id, signal)` — одна сущность
    - [ ] `createItem(data)` — создание
    - [ ] `updateItem(id, data)` — обновление
 
-3. **items-store.svelte.ts**
+3. **stores/items-list.store.svelte.ts**
    - [ ] `createQuery<Item[]>` с key `['items']`
    - [ ] Геттеры: `items`, `status`, `isLoading`, `isLoaded`, `isFetching`, `isError`, `error`, `isEmpty`
    - [ ] Методы: `fetchItems()`, `fetch()`, `reset()`
 
-4. **item-store.svelte.ts**
+4. **stores/item-item.store.svelte.ts**
    - [ ] `createQuery<Item, number>` с key `['item']` и params
    - [ ] `createMutation` для create с tags: `['items']`
    - [ ] `createMutation` для update с tags + `invalidateKeys`
@@ -703,8 +709,8 @@ queryRegistry.resetAll();
 
 | Модуль | List Store | Item Store |
 |--------|------------|------------|
-| Groups | `groups-store.svelte.ts` | `group-store.svelte.ts` |
-| Auth | `auth/store.svelte.ts` | — (только currentUser) |
+| Groups | `stores/groups-list.store.svelte.ts` | `stores/group-item.store.svelte.ts` |
+| Auth | `stores/auth.store.svelte.ts` | — (только currentUser) |
 
 ## Что НЕ делать
 

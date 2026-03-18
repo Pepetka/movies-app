@@ -1,7 +1,13 @@
+// Types
 export type { AuthStatus, ValidationResult } from './types';
-export type { LoginFormData, RegisterFormData } from './validation.svelte';
-export { authStore } from './store.svelte';
+
+// Store
+export { authStore } from './stores';
+
+// Navigation
 export { requireAuth, redirectIfAuthenticated } from './navigation';
+
+// Validation
 export {
 	validateLoginForm,
 	validateRegisterForm,
@@ -9,6 +15,10 @@ export {
 	EMPTY_LOGIN_FORM,
 	EMPTY_REGISTER_FORM,
 	loginFormToDto,
-	registerFormToDto
-} from './validation.svelte';
+	registerFormToDto,
+	type LoginFormData,
+	type RegisterFormData
+} from './validation';
+
+// Re-export createFormFieldValidator for convenience
 export { createFormFieldValidator } from '$lib/utils/validation.svelte';

@@ -1,8 +1,8 @@
 import { logger } from '$lib/utils/logger';
 
-import type { HealthCheckResult, HealthStatus } from './types';
-import { healthConfig } from './config';
-import { checkHealth } from './api';
+import type { HealthCheckResult, HealthStatus } from '../types';
+import { healthConfig } from '../config';
+import { checkHealth } from '../api';
 
 class HealthStore {
 	status = $state<HealthStatus>('loading');

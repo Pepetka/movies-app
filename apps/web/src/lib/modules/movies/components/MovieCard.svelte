@@ -2,7 +2,7 @@
 	import { Card, Image } from '@repo/ui';
 
 	import MovieStatusBadge from './MovieStatusBadge.svelte';
-	import type { IProps } from './MovieCard.types.svelte';
+	import type { IProps } from './MovieCard.types';
 
 	let { movie, onclick, ...restProps }: IProps = $props();
 

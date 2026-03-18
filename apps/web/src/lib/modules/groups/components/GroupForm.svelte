@@ -4,7 +4,7 @@
 
 	import { createFormFieldValidator, debounce, DEBOUNCE } from '$lib/utils';
 
-	import { validateGroupForm, EMPTY_GROUP_FORM, type GroupFormProps } from './validation.svelte';
+	import { validateGroupForm, EMPTY_GROUP_FORM, type GroupFormProps } from '../validation';
 
 	import '$lib/styles/group-form.css';
 
