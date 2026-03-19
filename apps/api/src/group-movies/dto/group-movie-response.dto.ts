@@ -1,11 +1,16 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-import { CustomMovieResponseDto } from '../../custom-movies/dto';
+import { GroupMemberRole } from '$common/enums';
 
 export enum GroupMovieStatus {
   TRACKING = 'tracking',
   PLANNED = 'planned',
   WATCHED = 'watched',
+}
+
+export enum MovieSource {
+  PROVIDER = 'provider',
+  CUSTOM = 'custom',
 }
 
 export class GroupMovieResponseDto {
@@ -15,8 +20,29 @@ export class GroupMovieResponseDto {
   @ApiProperty()
   groupId: number;
 
+  @ApiProperty({ enum: MovieSource })
+  source: MovieSource;
+
+  @ApiProperty({ nullable: true })
+  movieId: number | null;
+
   @ApiProperty()
-  movieId: number;
+  title: string;
+
+  @ApiProperty({ nullable: true })
+  posterPath: string | null;
+
+  @ApiProperty({ nullable: true })
+  overview: string | null;
+
+  @ApiProperty({ nullable: true })
+  releaseYear: number | null;
+
+  @ApiProperty({ nullable: true })
+  runtime: number | null;
+
+  @ApiProperty({ nullable: true })
+  rating: string | null;
 
   @ApiProperty()
   addedBy: number;
@@ -36,29 +62,14 @@ export class GroupMovieResponseDto {
   @ApiProperty()
   updatedAt: Date;
 
-  @ApiProperty()
-  title: string;
-
-  @ApiProperty({ type: String, nullable: true })
-  posterPath: string | null;
-
-  @ApiProperty({ type: String, nullable: true })
-  overview: string | null;
-
-  @ApiProperty({ type: Number, nullable: true })
-  releaseYear: number | null;
-
-  @ApiProperty({ type: Number, nullable: true })
-  runtime: number | null;
-
-  @ApiProperty({ type: String, nullable: true })
-  rating: string | null;
+  @ApiProperty({ enum: GroupMemberRole, required: false })
+  currentUserRole?: GroupMemberRole;
 }
 
 export class SearchInGroupResponseDto {
   @ApiProperty()
   provider: Record<string, unknown>;
 
-  @ApiProperty({ type: [CustomMovieResponseDto] })
-  currentGroup: CustomMovieResponseDto[];
+  @ApiProperty({ type: [GroupMovieResponseDto] })
+  currentGroup: GroupMovieResponseDto[];
 }

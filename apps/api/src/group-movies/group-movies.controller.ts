@@ -27,25 +27,22 @@ import { User } from '$common/decorators';
 
 import {
   AddMovieDto,
-  EditGroupMovieDto,
+  CreateCustomMovieDto,
   GroupMovieUpdateDto,
   MovieSearchGroupDto,
   GroupMovieResponseDto,
   SearchInGroupResponseDto,
 } from './dto';
-import { CustomMoviesService } from '../custom-movies/custom-movies.service';
-import { CustomMovieResponseDto } from '../custom-movies/dto';
 import { GroupMoviesService } from './group-movies.service';
 import { MoviesService } from '../movies/movies.service';
 
-@ApiTags('Groups / Provider Movies')
+@ApiTags('Groups / Movies')
 @ApiBearerAuth('access-token')
 @Controller('groups/:groupId/movies')
 export class GroupMoviesController {
   constructor(
     private readonly groupMoviesService: GroupMoviesService,
     private readonly moviesService: MoviesService,
-    private readonly customMoviesService: CustomMoviesService,
   ) {}
 
   @Get('search')
@@ -59,24 +56,24 @@ export class GroupMoviesController {
   @ApiQuery({ name: 'page', required: false, example: 1 })
   @ApiResponse({
     status: 200,
-    description: 'Search results with provider and custom movies',
+    description: 'Search results with provider and group movies',
   })
   @ApiResponse({ status: 403, description: 'Forbidden - Not a group member' })
   async searchInGroup(
     @Param('groupId', ParseIntPipe) groupId: number,
     @Query() dto: MovieSearchGroupDto,
   ) {
-    const [providerResults, currentCustom] = await Promise.all([
+    const [providerResults, groupMovies] = await Promise.all([
       this.moviesService.search({
         query: dto.query,
         page: dto.page,
       }),
-      this.customMoviesService.findByGroup(groupId, dto.query),
+      this.groupMoviesService.findByGroup(groupId, undefined, dto.query),
     ]);
 
     return {
       provider: providerResults,
-      currentGroup: currentCustom,
+      currentGroup: groupMovies,
     };
   }
 
@@ -84,17 +81,27 @@ export class GroupMoviesController {
   @UseGuards(GroupMemberGuard)
   @SerializeOptions({ type: GroupMovieResponseDto })
   @ApiOperation({
-    summary: 'Get provider movies in group (Group members only)',
+    summary: 'Get all movies in group (Group members only)',
   })
   @ApiParam({ name: 'groupId', description: 'Group ID' })
+  @ApiQuery({
+    name: 'status',
+    required: false,
+    enum: ['tracking', 'planned', 'watched'],
+  })
+  @ApiQuery({ name: 'query', required: false })
   @ApiResponse({
     status: 200,
     description: 'List of group movies',
     type: [GroupMovieResponseDto],
   })
   @ApiResponse({ status: 403, description: 'Forbidden - Not a group member' })
-  findAll(@Param('groupId', ParseIntPipe) groupId: number) {
-    return this.groupMoviesService.findByGroup(groupId);
+  findAll(
+    @Param('groupId', ParseIntPipe) groupId: number,
+    @Query('status') status?: string,
+    @Query('query') query?: string,
+  ) {
+    return this.groupMoviesService.findByGroup(groupId, status, query);
   }
 
   @Post()
@@ -110,10 +117,6 @@ export class GroupMoviesController {
     type: GroupMovieResponseDto,
   })
   @ApiResponse({
-    status: 404,
-    description: 'Movie not found (when adding by movieId)',
-  })
-  @ApiResponse({
     status: 403,
     description: 'Forbidden - Not a group moderator',
   })
@@ -121,20 +124,44 @@ export class GroupMoviesController {
     status: 409,
     description: 'Movie already added to this group',
   })
-  add(
+  addProviderMovie(
     @Param('groupId', ParseIntPipe) groupId: number,
     @Body() dto: AddMovieDto,
     @User('id') userId: number,
   ) {
-    return this.groupMoviesService.addMovieByDto(groupId, dto, userId);
+    return this.groupMoviesService.addProviderMovie(groupId, dto, userId);
   }
 
-  @Get(':movieId')
+  @Post('custom')
+  @UseGuards(GroupModeratorGuard)
+  @SerializeOptions({ type: GroupMovieResponseDto })
+  @ApiOperation({
+    summary: 'Create custom movie in group (Group moderators only)',
+  })
+  @ApiParam({ name: 'groupId', description: 'Group ID' })
+  @ApiResponse({
+    status: 201,
+    description: 'Custom movie created',
+    type: GroupMovieResponseDto,
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden - Not a group moderator',
+  })
+  createCustomMovie(
+    @Param('groupId', ParseIntPipe) groupId: number,
+    @Body() dto: CreateCustomMovieDto,
+    @User('id') userId: number,
+  ) {
+    return this.groupMoviesService.createCustomMovie(groupId, dto, userId);
+  }
+
+  @Get(':id')
   @UseGuards(GroupMemberGuard)
   @SerializeOptions({ type: GroupMovieResponseDto })
   @ApiOperation({ summary: 'Get movie details in group (Group members only)' })
   @ApiParam({ name: 'groupId', description: 'Group ID' })
-  @ApiParam({ name: 'movieId', description: 'Movie ID' })
+  @ApiParam({ name: 'id', description: 'Group Movie ID' })
   @ApiResponse({
     status: 200,
     description: 'Group movie found',
@@ -144,19 +171,20 @@ export class GroupMoviesController {
   @ApiResponse({ status: 403, description: 'Forbidden - Not a group member' })
   findOne(
     @Param('groupId', ParseIntPipe) groupId: number,
-    @Param('movieId', ParseIntPipe) movieId: number,
+    @Param('id', ParseIntPipe) id: number,
+    @User('id') userId: number,
   ) {
-    return this.groupMoviesService.findOne(groupId, movieId);
+    return this.groupMoviesService.findOne(groupId, id, userId);
   }
 
-  @Patch(':movieId')
+  @Patch(':id')
   @UseGuards(GroupModeratorGuard)
   @SerializeOptions({ type: GroupMovieResponseDto })
   @ApiOperation({
-    summary: 'Update movie status in group (Group moderators only)',
+    summary: 'Update movie in group (Group moderators only)',
   })
   @ApiParam({ name: 'groupId', description: 'Group ID' })
-  @ApiParam({ name: 'movieId', description: 'Movie ID' })
+  @ApiParam({ name: 'id', description: 'Group Movie ID' })
   @ApiResponse({
     status: 200,
     description: 'Movie updated',
@@ -169,55 +197,18 @@ export class GroupMoviesController {
   })
   update(
     @Param('groupId', ParseIntPipe) groupId: number,
-    @Param('movieId', ParseIntPipe) movieId: number,
+    @Param('id', ParseIntPipe) id: number,
     @Body() dto: GroupMovieUpdateDto,
   ) {
-    return this.groupMoviesService.update(groupId, movieId, dto);
+    return this.groupMoviesService.update(groupId, id, dto);
   }
 
-  @Patch(':movieId/edit')
-  @UseGuards(GroupModeratorGuard)
-  @SerializeOptions({ type: CustomMovieResponseDto })
-  @ApiOperation({
-    summary: 'Edit and convert movie to custom (Group moderators only)',
-    description:
-      'Edits movie data (title, poster, etc.) and converts to custom movie. Status and dates are preserved.',
-  })
-  @ApiParam({ name: 'groupId', description: 'Group ID' })
-  @ApiParam({ name: 'movieId', description: 'Movie ID' })
-  @ApiResponse({
-    status: 200,
-    description: 'Movie converted to custom',
-    type: CustomMovieResponseDto,
-  })
-  @ApiResponse({ status: 404, description: 'Movie not found in group' })
-  @ApiResponse({
-    status: 403,
-    description: 'Forbidden - Not a group moderator',
-  })
-  async edit(
-    @Param('groupId', ParseIntPipe) groupId: number,
-    @Param('movieId', ParseIntPipe) movieId: number,
-    @Body() dto: EditGroupMovieDto,
-  ) {
-    const groupMovie = await this.groupMoviesService.findOne(groupId, movieId);
-
-    const customMovie = await this.customMoviesService.convertFromGroupMovie(
-      groupMovie,
-      dto,
-    );
-
-    await this.groupMoviesService.remove(groupId, movieId);
-
-    return customMovie;
-  }
-
-  @Delete(':movieId')
+  @Delete(':id')
   @UseGuards(GroupModeratorGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Remove movie from group (Group moderators only)' })
   @ApiParam({ name: 'groupId', description: 'Group ID' })
-  @ApiParam({ name: 'movieId', description: 'Movie ID' })
+  @ApiParam({ name: 'id', description: 'Group Movie ID' })
   @ApiResponse({ status: 204, description: 'Movie removed from group' })
   @ApiResponse({ status: 404, description: 'Movie not found in group' })
   @ApiResponse({
@@ -226,8 +217,8 @@ export class GroupMoviesController {
   })
   remove(
     @Param('groupId', ParseIntPipe) groupId: number,
-    @Param('movieId', ParseIntPipe) movieId: number,
+    @Param('id', ParseIntPipe) id: number,
   ) {
-    return this.groupMoviesService.remove(groupId, movieId);
+    return this.groupMoviesService.remove(groupId, id);
   }
 }
