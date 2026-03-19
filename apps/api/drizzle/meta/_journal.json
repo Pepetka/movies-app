@@ -57,6 +57,27 @@
       "when": 1771008105173,
       "tag": "0007_great_thunderbolt_ross",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1773908518179,
+      "tag": "0008_flowery_the_watchers",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1773908600000,
+      "tag": "0009_drop_custom_movies",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1773927430003,
+      "tag": "0010_lively_mikhail_rasputin",
+      "breakpoints": true
     }
   ]
 }
