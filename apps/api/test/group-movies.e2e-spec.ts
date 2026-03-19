@@ -11,13 +11,7 @@ import cookie from '@fastify/cookie';
 import request from 'supertest';
 import postgres from 'postgres';
 
-import {
-  users,
-  groups,
-  movies,
-  groupMovies,
-  customMovies,
-} from '../src/db/schemas';
+import { users, groups, movies, groupMovies } from '../src/db/schemas';
 import { registerUserViaApi, createGroup } from './helpers';
 import { KinopoiskService } from '../src/movies/providers';
 import { AppModule } from '../src/app.module';
@@ -50,7 +44,7 @@ describe('Group Movies E2E', () => {
   let app: NestFastifyApplication;
   let drizzleDb: ReturnType<typeof drizzle>;
   let sql: ReturnType<typeof postgres>;
-  let seededMovie: { id: number };
+  let seededMovie: { id: number; title: string };
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -102,7 +96,6 @@ describe('Group Movies E2E', () => {
   });
 
   beforeEach(async () => {
-    await drizzleDb.delete(customMovies);
     await drizzleDb.delete(groupMovies);
     await drizzleDb.delete(groups);
     await drizzleDb.delete(movies);
@@ -136,6 +129,7 @@ describe('Group Movies E2E', () => {
 
       expect(addRes.body.movieId).toBe(seededMovie.id);
       expect(addRes.body.status).toBe('tracking');
+      const groupMovieId = addRes.body.id;
 
       // List movies
       const listRes = await request(app.getHttpServer())
@@ -147,7 +141,7 @@ describe('Group Movies E2E', () => {
 
       // Get single movie
       const getRes = await request(app.getHttpServer())
-        .get(`/groups/${group.id}/movies/${seededMovie.id}`)
+        .get(`/groups/${group.id}/movies/${groupMovieId}`)
         .set('Authorization', `Bearer ${accessToken}`)
         .expect(200);
 
@@ -155,7 +149,7 @@ describe('Group Movies E2E', () => {
 
       // Update status
       const updateRes = await request(app.getHttpServer())
-        .patch(`/groups/${group.id}/movies/${seededMovie.id}`)
+        .patch(`/groups/${group.id}/movies/${groupMovieId}`)
         .set('Authorization', `Bearer ${accessToken}`)
         .send({ status: 'watched', watchedDate: '2024-12-25T20:00:00Z' })
         .expect(200);
@@ -164,12 +158,12 @@ describe('Group Movies E2E', () => {
 
       // Remove movie
       await request(app.getHttpServer())
-        .delete(`/groups/${group.id}/movies/${seededMovie.id}`)
+        .delete(`/groups/${group.id}/movies/${groupMovieId}`)
         .set('Authorization', `Bearer ${accessToken}`)
         .expect(204);
 
       await request(app.getHttpServer())
-        .get(`/groups/${group.id}/movies/${seededMovie.id}`)
+        .get(`/groups/${group.id}/movies/${groupMovieId}`)
         .set('Authorization', `Bearer ${accessToken}`)
         .expect(404);
     });
@@ -183,7 +177,9 @@ describe('Group Movies E2E', () => {
 
       await drizzleDb.insert(groupMovies).values({
         groupId: group.id,
+        source: 'provider',
         movieId: seededMovie.id,
+        title: seededMovie.title,
         addedBy: userId,
         status: 'tracking',
       });
@@ -196,34 +192,100 @@ describe('Group Movies E2E', () => {
     });
   });
 
-  describe('Convert to custom movie', () => {
-    it('should convert group movie to custom', async () => {
+  describe('Edit movie data', () => {
+    it('should edit movie title and overview', async () => {
       const { accessToken, userId } = await registerUserViaApi(
         app,
-        'convert@example.com',
+        'edit@example.com',
       );
-      const group = await createGroup(app, accessToken, 'Convert Group');
+      const group = await createGroup(app, accessToken, 'Edit Group');
 
+      const [groupMovie] = await drizzleDb
+        .insert(groupMovies)
+        .values({
+          groupId: group.id,
+          source: 'provider',
+          movieId: seededMovie.id,
+          title: seededMovie.title,
+          addedBy: userId,
+          status: 'tracking',
+        })
+        .returning();
+
+      const res = await request(app.getHttpServer())
+        .patch(`/groups/${group.id}/movies/${groupMovie.id}`)
+        .set('Authorization', `Bearer ${accessToken}`)
+        .send({ title: 'Edited Title', overview: 'New overview' })
+        .expect(200);
+
+      expect(res.body.title).toBe('Edited Title');
+      expect(res.body.overview).toBe('New overview');
+    });
+  });
+
+  describe('Custom movies', () => {
+    it('should create custom movie in group', async () => {
+      const { accessToken } = await registerUserViaApi(
+        app,
+        'custom@example.com',
+      );
+      const group = await createGroup(app, accessToken, 'Custom Group');
+
+      const res = await request(app.getHttpServer())
+        .post(`/groups/${group.id}/movies/custom`)
+        .set('Authorization', `Bearer ${accessToken}`)
+        .send({
+          title: 'My Custom Movie',
+          overview: 'A custom movie description',
+          releaseYear: 2024,
+          runtime: 90,
+          status: 'planned',
+          plannedDate: '2024-12-31T20:00:00Z',
+        })
+        .expect(201);
+
+      expect(res.body.title).toBe('My Custom Movie');
+      expect(res.body.source).toBe('custom');
+      expect(res.body.movieId).toBeNull();
+      expect(res.body.status).toBe('planned');
+      expect(res.body.overview).toBe('A custom movie description');
+      expect(res.body.releaseYear).toBe(2024);
+      expect(res.body.runtime).toBe(90);
+    });
+
+    it('should list custom movies alongside provider movies', async () => {
+      const { accessToken, userId } = await registerUserViaApi(
+        app,
+        'mixed@example.com',
+      );
+      const group = await createGroup(app, accessToken, 'Mixed Group');
+
+      // Add provider movie
       await drizzleDb.insert(groupMovies).values({
         groupId: group.id,
+        source: 'provider',
         movieId: seededMovie.id,
+        title: seededMovie.title,
         addedBy: userId,
         status: 'tracking',
       });
 
-      const res = await request(app.getHttpServer())
-        .patch(`/groups/${group.id}/movies/${seededMovie.id}/edit`)
+      // Add custom movie
+      await request(app.getHttpServer())
+        .post(`/groups/${group.id}/movies/custom`)
         .set('Authorization', `Bearer ${accessToken}`)
-        .send({ title: 'Custom Title' })
+        .send({ title: 'Custom Movie' })
+        .expect(201);
+
+      const res = await request(app.getHttpServer())
+        .get(`/groups/${group.id}/movies`)
+        .set('Authorization', `Bearer ${accessToken}`)
         .expect(200);
 
-      expect(res.body.title).toBe('Custom Title');
-
-      // Group movie removed
-      await request(app.getHttpServer())
-        .get(`/groups/${group.id}/movies/${seededMovie.id}`)
-        .set('Authorization', `Bearer ${accessToken}`)
-        .expect(404);
+      expect(res.body).toHaveLength(2);
+      const sources = res.body.map((m: { source: string }) => m.source);
+      expect(sources).toContain('provider');
+      expect(sources).toContain('custom');
     });
   });
 
@@ -236,7 +298,7 @@ describe('Group Movies E2E', () => {
       const group = await createGroup(app, accessToken, 'Empty Group');
 
       await request(app.getHttpServer())
-        .get(`/groups/${group.id}/movies/${seededMovie.id}`)
+        .get(`/groups/${group.id}/movies/99999`)
         .set('Authorization', `Bearer ${accessToken}`)
         .expect(404);
     });
