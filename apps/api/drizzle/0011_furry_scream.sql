@@ -1,0 +1,4 @@
+ALTER TABLE "group_movies" ADD CONSTRAINT "source_movie_consistency" CHECK (("group_movies"."source" = 'provider' AND "group_movies"."movie_id" IS NOT NULL));--> statement-breakpoint
+ALTER TABLE "group_movies" ADD CONSTRAINT "custom_movie_no_provider_id" CHECK (("group_movies"."source" = 'custom' AND "group_movies"."movie_id" IS NULL));--> statement-breakpoint
+ALTER TABLE "group_movies" ADD CONSTRAINT "planned_requires_planned_date" CHECK (("group_movies"."status" != 'planned' OR "group_movies"."planned_date" IS NOT NULL));--> statement-breakpoint
+ALTER TABLE "group_movies" ADD CONSTRAINT "watched_requires_watched_date" CHECK (("group_movies"."status" != 'watched' OR "group_movies"."watched_date" IS NOT NULL));

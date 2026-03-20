@@ -9,7 +9,9 @@ import {
   unique,
   pgEnum,
   index,
+  check,
 } from 'drizzle-orm/pg-core';
+import { sql } from 'drizzle-orm';
 
 import { timestamps } from './timestamps';
 import { groups } from './groups';
@@ -52,5 +54,21 @@ export const groupMovies = pgTable(
     index('group_movies_group_status_idx').on(table.groupId, table.status),
     index('group_movies_movie_id_idx').on(table.movieId),
     unique().on(table.groupId, table.movieId),
+    check(
+      'source_movie_consistency',
+      sql`(${table.source} = 'provider' AND ${table.movieId} IS NOT NULL)`,
+    ),
+    check(
+      'custom_movie_no_provider_id',
+      sql`(${table.source} = 'custom' AND ${table.movieId} IS NULL)`,
+    ),
+    check(
+      'planned_requires_planned_date',
+      sql`(${table.status} != 'planned' OR ${table.plannedDate} IS NOT NULL)`,
+    ),
+    check(
+      'watched_requires_watched_date',
+      sql`(${table.status} != 'watched' OR ${table.watchedDate} IS NOT NULL)`,
+    ),
   ],
 );
