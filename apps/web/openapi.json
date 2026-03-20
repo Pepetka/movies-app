@@ -813,185 +813,6 @@
 				"tags": ["Groups"]
 			}
 		},
-		"/api/v1/groups/{groupId}/custom-movies": {
-			"get": {
-				"operationId": "CustomMoviesController_findAll_v1",
-				"parameters": [
-					{
-						"name": "groupId",
-						"required": true,
-						"in": "path",
-						"description": "Group ID",
-						"schema": { "type": "number" }
-					},
-					{
-						"name": "query",
-						"required": false,
-						"in": "query",
-						"description": "Search query",
-						"schema": { "type": "string" }
-					},
-					{ "name": "limit", "required": false, "in": "query", "schema": { "example": 20 } },
-					{ "name": "page", "required": false, "in": "query", "schema": { "example": 1 } }
-				],
-				"responses": {
-					"200": {
-						"description": "List of custom movies",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "array",
-									"items": { "$ref": "#/components/schemas/CustomMovieResponseDto" }
-								}
-							}
-						}
-					},
-					"403": { "description": "Forbidden - Not a group member" }
-				},
-				"security": [{ "access-token": [] }],
-				"summary": "Get custom movies in group (Group members only)",
-				"tags": ["Groups / Custom Movies"]
-			},
-			"post": {
-				"operationId": "CustomMoviesController_create_v1",
-				"parameters": [
-					{
-						"name": "groupId",
-						"required": true,
-						"in": "path",
-						"description": "Group ID",
-						"schema": { "type": "number" }
-					}
-				],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": { "$ref": "#/components/schemas/CreateCustomMovieDto" }
-						}
-					}
-				},
-				"responses": {
-					"201": {
-						"description": "Custom movie created",
-						"content": {
-							"application/json": {
-								"schema": { "$ref": "#/components/schemas/CustomMovieResponseDto" }
-							}
-						}
-					},
-					"403": { "description": "Forbidden - Not a group moderator" }
-				},
-				"security": [{ "access-token": [] }],
-				"summary": "Create custom movie in group (Group moderators only)",
-				"tags": ["Groups / Custom Movies"]
-			}
-		},
-		"/api/v1/groups/{groupId}/custom-movies/{customMovieId}": {
-			"get": {
-				"operationId": "CustomMoviesController_findOne_v1",
-				"parameters": [
-					{
-						"name": "groupId",
-						"required": true,
-						"in": "path",
-						"description": "Group ID",
-						"schema": { "type": "number" }
-					},
-					{
-						"name": "customMovieId",
-						"required": true,
-						"in": "path",
-						"description": "Custom Movie ID",
-						"schema": { "type": "number" }
-					}
-				],
-				"responses": {
-					"200": {
-						"description": "Custom movie found",
-						"content": {
-							"application/json": {
-								"schema": { "$ref": "#/components/schemas/CustomMovieResponseDto" }
-							}
-						}
-					},
-					"403": { "description": "Forbidden - Not a group member" },
-					"404": { "description": "Custom movie not found" }
-				},
-				"security": [{ "access-token": [] }],
-				"summary": "Get custom movie by id (Group members only)",
-				"tags": ["Groups / Custom Movies"]
-			},
-			"patch": {
-				"operationId": "CustomMoviesController_update_v1",
-				"parameters": [
-					{
-						"name": "groupId",
-						"required": true,
-						"in": "path",
-						"description": "Group ID",
-						"schema": { "type": "number" }
-					},
-					{
-						"name": "customMovieId",
-						"required": true,
-						"in": "path",
-						"description": "Custom Movie ID",
-						"schema": { "type": "number" }
-					}
-				],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": { "$ref": "#/components/schemas/UpdateCustomMovieDto" }
-						}
-					}
-				},
-				"responses": {
-					"200": {
-						"description": "Custom movie updated",
-						"content": {
-							"application/json": {
-								"schema": { "$ref": "#/components/schemas/CustomMovieResponseDto" }
-							}
-						}
-					},
-					"403": { "description": "Forbidden - Not a group moderator" },
-					"404": { "description": "Custom movie not found" }
-				},
-				"security": [{ "access-token": [] }],
-				"summary": "Update custom movie (Group moderators only)",
-				"tags": ["Groups / Custom Movies"]
-			},
-			"delete": {
-				"operationId": "CustomMoviesController_remove_v1",
-				"parameters": [
-					{
-						"name": "groupId",
-						"required": true,
-						"in": "path",
-						"description": "Group ID",
-						"schema": { "type": "number" }
-					},
-					{
-						"name": "customMovieId",
-						"required": true,
-						"in": "path",
-						"description": "Custom Movie ID",
-						"schema": { "type": "number" }
-					}
-				],
-				"responses": {
-					"204": { "description": "Custom movie deleted" },
-					"403": { "description": "Forbidden - Not a group moderator" },
-					"404": { "description": "Custom movie not found" }
-				},
-				"security": [{ "access-token": [] }],
-				"summary": "Delete custom movie (Group moderators only)",
-				"tags": ["Groups / Custom Movies"]
-			}
-		},
 		"/api/v1/groups/{groupId}/movies/search": {
 			"get": {
 				"operationId": "GroupMoviesController_searchInGroup_v1",
@@ -1019,12 +840,12 @@
 					}
 				],
 				"responses": {
-					"200": { "description": "Search results with provider and custom movies" },
+					"200": { "description": "Search results with provider and group movies" },
 					"403": { "description": "Forbidden - Not a group member" }
 				},
 				"security": [{ "access-token": [] }],
 				"summary": "Search movies in group context (Group members only)",
-				"tags": ["Groups / Provider Movies"]
+				"tags": ["Groups / Movies"]
 			}
 		},
 		"/api/v1/groups/{groupId}/movies": {
@@ -1037,7 +858,14 @@
 						"in": "path",
 						"description": "Group ID",
 						"schema": { "type": "number" }
-					}
+					},
+					{
+						"name": "status",
+						"required": false,
+						"in": "query",
+						"schema": { "enum": ["tracking", "planned", "watched"], "type": "string" }
+					},
+					{ "name": "query", "required": false, "in": "query", "schema": { "type": "string" } }
 				],
 				"responses": {
 					"200": {
@@ -1054,11 +882,11 @@
 					"403": { "description": "Forbidden - Not a group member" }
 				},
 				"security": [{ "access-token": [] }],
-				"summary": "Get provider movies in group (Group members only)",
-				"tags": ["Groups / Provider Movies"]
+				"summary": "Get all movies in group (Group members only)",
+				"tags": ["Groups / Movies"]
 			},
 			"post": {
-				"operationId": "GroupMoviesController_add_v1",
+				"operationId": "GroupMoviesController_addProviderMovie_v1",
 				"parameters": [
 					{
 						"name": "groupId",
@@ -1084,15 +912,50 @@
 						}
 					},
 					"403": { "description": "Forbidden - Not a group moderator" },
-					"404": { "description": "Movie not found (when adding by movieId)" },
 					"409": { "description": "Movie already added to this group" }
 				},
 				"security": [{ "access-token": [] }],
 				"summary": "Add provider movie to group (Group moderators only)",
-				"tags": ["Groups / Provider Movies"]
+				"tags": ["Groups / Movies"]
 			}
 		},
-		"/api/v1/groups/{groupId}/movies/{movieId}": {
+		"/api/v1/groups/{groupId}/movies/custom": {
+			"post": {
+				"operationId": "GroupMoviesController_createCustomMovie_v1",
+				"parameters": [
+					{
+						"name": "groupId",
+						"required": true,
+						"in": "path",
+						"description": "Group ID",
+						"schema": { "type": "number" }
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": { "$ref": "#/components/schemas/CreateCustomMovieDto" }
+						}
+					}
+				},
+				"responses": {
+					"201": {
+						"description": "Custom movie created",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/GroupMovieResponseDto" }
+							}
+						}
+					},
+					"403": { "description": "Forbidden - Not a group moderator" }
+				},
+				"security": [{ "access-token": [] }],
+				"summary": "Create custom movie in group (Group moderators only)",
+				"tags": ["Groups / Movies"]
+			}
+		},
+		"/api/v1/groups/{groupId}/movies/{id}": {
 			"get": {
 				"operationId": "GroupMoviesController_findOne_v1",
 				"parameters": [
@@ -1104,10 +967,10 @@
 						"schema": { "type": "number" }
 					},
 					{
-						"name": "movieId",
+						"name": "id",
 						"required": true,
 						"in": "path",
-						"description": "Movie ID",
+						"description": "Group Movie ID",
 						"schema": { "type": "number" }
 					}
 				],
@@ -1125,7 +988,7 @@
 				},
 				"security": [{ "access-token": [] }],
 				"summary": "Get movie details in group (Group members only)",
-				"tags": ["Groups / Provider Movies"]
+				"tags": ["Groups / Movies"]
 			},
 			"patch": {
 				"operationId": "GroupMoviesController_update_v1",
@@ -1138,10 +1001,10 @@
 						"schema": { "type": "number" }
 					},
 					{
-						"name": "movieId",
+						"name": "id",
 						"required": true,
 						"in": "path",
-						"description": "Movie ID",
+						"description": "Group Movie ID",
 						"schema": { "type": "number" }
 					}
 				],
@@ -1164,8 +1027,8 @@
 					"404": { "description": "Movie not found in group" }
 				},
 				"security": [{ "access-token": [] }],
-				"summary": "Update movie status in group (Group moderators only)",
-				"tags": ["Groups / Provider Movies"]
+				"summary": "Update movie in group (Group moderators only)",
+				"tags": ["Groups / Movies"]
 			},
 			"delete": {
 				"operationId": "GroupMoviesController_remove_v1",
@@ -1178,10 +1041,10 @@
 						"schema": { "type": "number" }
 					},
 					{
-						"name": "movieId",
+						"name": "id",
 						"required": true,
 						"in": "path",
-						"description": "Movie ID",
+						"description": "Group Movie ID",
 						"schema": { "type": "number" }
 					}
 				],
@@ -1192,50 +1055,7 @@
 				},
 				"security": [{ "access-token": [] }],
 				"summary": "Remove movie from group (Group moderators only)",
-				"tags": ["Groups / Provider Movies"]
-			}
-		},
-		"/api/v1/groups/{groupId}/movies/{movieId}/edit": {
-			"patch": {
-				"description": "Edits movie data (title, poster, etc.) and converts to custom movie. Status and dates are preserved.",
-				"operationId": "GroupMoviesController_edit_v1",
-				"parameters": [
-					{
-						"name": "groupId",
-						"required": true,
-						"in": "path",
-						"description": "Group ID",
-						"schema": { "type": "number" }
-					},
-					{
-						"name": "movieId",
-						"required": true,
-						"in": "path",
-						"description": "Movie ID",
-						"schema": { "type": "number" }
-					}
-				],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": { "schema": { "$ref": "#/components/schemas/EditGroupMovieDto" } }
-					}
-				},
-				"responses": {
-					"200": {
-						"description": "Movie converted to custom",
-						"content": {
-							"application/json": {
-								"schema": { "$ref": "#/components/schemas/CustomMovieResponseDto" }
-							}
-						}
-					},
-					"403": { "description": "Forbidden - Not a group moderator" },
-					"404": { "description": "Movie not found in group" }
-				},
-				"security": [{ "access-token": [] }],
-				"summary": "Edit and convert movie to custom (Group moderators only)",
-				"tags": ["Groups / Provider Movies"]
+				"tags": ["Groups / Movies"]
 			}
 		}
 	},
@@ -1509,139 +1329,44 @@
 				},
 				"required": ["targetUserId"]
 			},
-			"CustomMovieResponseDto": {
-				"type": "object",
-				"properties": {
-					"id": { "type": "number" },
-					"groupId": { "type": "number" },
-					"title": { "type": "string" },
-					"posterPath": { "type": "string", "nullable": true },
-					"overview": { "type": "string", "nullable": true },
-					"releaseYear": { "type": "number", "nullable": true },
-					"runtime": { "type": "number", "nullable": true },
-					"status": {
-						"type": "string",
-						"description": "Movie status",
-						"enum": ["tracking", "planned", "watched"],
-						"default": "tracking"
-					},
-					"plannedDate": { "format": "date-time", "type": "string", "nullable": true },
-					"watchedDate": { "format": "date-time", "type": "string", "nullable": true },
-					"createdById": { "type": "number" },
-					"createdAt": { "format": "date-time", "type": "string" },
-					"updatedAt": { "format": "date-time", "type": "string" }
-				},
-				"required": [
-					"id",
-					"groupId",
-					"title",
-					"posterPath",
-					"overview",
-					"releaseYear",
-					"runtime",
-					"status",
-					"plannedDate",
-					"watchedDate",
-					"createdById",
-					"createdAt",
-					"updatedAt"
-				]
-			},
-			"CreateCustomMovieDto": {
-				"type": "object",
-				"properties": {
-					"title": { "type": "string", "description": "Movie title", "example": "Мой фильм" },
-					"posterPath": {
-						"type": "string",
-						"description": "Poster path or URL",
-						"example": "/uploads/custom-movie-poster.jpg"
-					},
-					"overview": {
-						"type": "string",
-						"description": "Movie overview/description",
-						"example": "Кастомный фильм созданный пользователем"
-					},
-					"releaseYear": { "type": "number", "description": "Release year", "example": 2024 },
-					"runtime": { "type": "number", "description": "Runtime in minutes", "example": 120 },
-					"status": {
-						"type": "string",
-						"description": "Movie status",
-						"enum": ["tracking", "planned", "watched"],
-						"default": "tracking"
-					},
-					"plannedDate": {
-						"type": "string",
-						"description": "Planned watch date (ISO 8601)",
-						"example": "2024-12-31T20:00:00Z"
-					},
-					"watchedDate": {
-						"type": "string",
-						"description": "Watched date (ISO 8601)",
-						"example": "2024-12-31T22:30:00Z"
-					}
-				},
-				"required": ["title"]
-			},
-			"UpdateCustomMovieDto": {
-				"type": "object",
-				"properties": {
-					"title": { "type": "string", "description": "Movie title" },
-					"posterPath": { "type": "string", "description": "Poster path or URL" },
-					"overview": { "type": "string", "description": "Movie overview/description" },
-					"releaseYear": { "type": "number", "description": "Release year", "example": 2024 },
-					"runtime": { "type": "number", "description": "Runtime in minutes" },
-					"status": {
-						"type": "string",
-						"description": "Movie status",
-						"enum": ["tracking", "planned", "watched"]
-					},
-					"plannedDate": {
-						"type": "string",
-						"description": "Planned watch date (ISO 8601)",
-						"example": "2024-12-31T20:00:00Z"
-					},
-					"watchedDate": {
-						"type": "string",
-						"description": "Watched date (ISO 8601)",
-						"example": "2024-12-31T22:30:00Z"
-					}
-				}
-			},
 			"GroupMovieResponseDto": {
 				"type": "object",
 				"properties": {
 					"id": { "type": "number" },
 					"groupId": { "type": "number" },
-					"movieId": { "type": "number" },
+					"source": { "type": "string", "enum": ["provider", "custom"] },
+					"movieId": { "type": "object", "nullable": true },
+					"title": { "type": "string" },
+					"posterPath": { "type": "object", "nullable": true },
+					"overview": { "type": "object", "nullable": true },
+					"releaseYear": { "type": "object", "nullable": true },
+					"runtime": { "type": "object", "nullable": true },
+					"rating": { "type": "object", "nullable": true },
 					"addedBy": { "type": "number" },
 					"status": { "type": "string", "enum": ["tracking", "planned", "watched"] },
 					"plannedDate": { "format": "date-time", "type": "string", "nullable": true },
 					"watchedDate": { "format": "date-time", "type": "string", "nullable": true },
 					"createdAt": { "format": "date-time", "type": "string" },
 					"updatedAt": { "format": "date-time", "type": "string" },
-					"title": { "type": "string" },
-					"posterPath": { "type": "string", "nullable": true },
-					"overview": { "type": "string", "nullable": true },
-					"releaseYear": { "type": "number", "nullable": true },
-					"runtime": { "type": "number", "nullable": true },
-					"rating": { "type": "string", "nullable": true }
+					"currentUserRole": { "type": "string", "enum": ["admin", "moderator", "member"] }
 				},
 				"required": [
 					"id",
 					"groupId",
+					"source",
 					"movieId",
-					"addedBy",
-					"status",
-					"plannedDate",
-					"watchedDate",
-					"createdAt",
-					"updatedAt",
 					"title",
 					"posterPath",
 					"overview",
 					"releaseYear",
 					"runtime",
-					"rating"
+					"rating",
+					"addedBy",
+					"status",
+					"plannedDate",
+					"watchedDate",
+					"createdAt",
+					"updatedAt"
 				]
 			},
 			"AddMovieDto": {
@@ -1658,6 +1383,33 @@
 						"example": "301"
 					}
 				}
+			},
+			"CreateCustomMovieDto": {
+				"type": "object",
+				"properties": {
+					"title": { "type": "string", "description": "Movie title" },
+					"posterPath": { "type": "string", "description": "Poster path" },
+					"overview": { "type": "string", "description": "Movie overview" },
+					"releaseYear": { "type": "number", "description": "Release year" },
+					"runtime": { "type": "number", "description": "Runtime in minutes" },
+					"status": {
+						"type": "string",
+						"description": "Movie status",
+						"enum": ["tracking", "planned", "watched"],
+						"default": "tracking"
+					},
+					"plannedDate": {
+						"type": "string",
+						"description": "Planned watch date",
+						"example": "2024-12-31T20:00:00Z"
+					},
+					"watchedDate": {
+						"type": "string",
+						"description": "Watched date",
+						"example": "2024-12-25T20:00:00Z"
+					}
+				},
+				"required": ["title"]
 			},
 			"GroupMovieUpdateDto": {
 				"type": "object",
@@ -1676,32 +1428,12 @@
 						"type": "string",
 						"description": "Watched date",
 						"example": "2024-12-25T20:00:00Z"
-					}
-				}
-			},
-			"EditGroupMovieDto": {
-				"type": "object",
-				"properties": {
+					},
 					"title": { "type": "string", "description": "Movie title" },
 					"posterPath": { "type": "string", "description": "Poster path" },
 					"overview": { "type": "string", "description": "Movie overview" },
 					"releaseYear": { "type": "number", "description": "Release year" },
-					"runtime": { "type": "number", "description": "Runtime in minutes" },
-					"status": {
-						"type": "string",
-						"description": "Update status (optional)",
-						"enum": ["tracking", "planned", "watched"]
-					},
-					"plannedDate": {
-						"type": "string",
-						"description": "Update planned date (optional)",
-						"example": "2024-12-31T20:00:00Z"
-					},
-					"watchedDate": {
-						"type": "string",
-						"description": "Update watched date (optional)",
-						"example": "2024-12-25T20:00:00Z"
-					}
+					"runtime": { "type": "number", "description": "Runtime in minutes" }
 				}
 			}
 		}
