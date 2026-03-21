@@ -23,11 +23,7 @@ class GroupMoviesStore extends BaseStore {
 	}
 
 	get status(): FetchStatus {
-		if (this.isLoading) return 'loading';
-		if (this.isFetching) return 'fetching';
-		if (this.isError) return 'error';
-		if (this.isLoaded) return 'loaded';
-		return 'idle';
+		return this._query.status;
 	}
 
 	get isLoading(): boolean {
