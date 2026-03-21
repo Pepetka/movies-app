@@ -374,3 +374,55 @@ interface MovieProvider {
 
 - **movieId = NULL** — не связаны с таблицей movies
 - **rating = NULL** — рейтинг недоступен для custom фильмов
+
+---
+
+## Frontend: UnifiedMovie
+
+Фронтенд использует унифицированный интерфейс `UnifiedMovie` для работы с фильмами независимо от их source.
+
+### UnifiedMovie
+
+```typescript
+interface UnifiedMovie {
+  id: number;           // group_movies.id (НЕ movie.movieId!)
+  isCustom: boolean;    // source === 'custom'
+  groupId: number;
+  title: string;
+  posterPath?: string;
+  overview?: string;
+  releaseYear?: number;
+  runtime?: number;
+  rating?: number;      // parseFloat(dto.rating) для provider, undefined для custom
+  status: MovieStatus;  // 'tracking' | 'planned' | 'watched'
+  plannedDate?: string;
+  watchedDate?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+```
+
+### mapToUnified
+
+Единая функция для преобразования `GroupMovieResponseDto` → `UnifiedMovie`:
+
+```typescript
+export const mapToUnified = (movie: GroupMovieResponseDto): UnifiedMovie => ({
+  id: movie.id,                    // group_movies.id
+  isCustom: movie.source === 'custom',
+  groupId: movie.groupId,
+  title: movie.title,
+  posterPath: movie.posterPath ?? undefined,
+  overview: movie.overview ?? undefined,
+  releaseYear: movie.releaseYear ?? undefined,
+  runtime: movie.runtime ?? undefined,
+  rating: movie.rating ? parseFloat(movie.rating) : undefined,
+  status: movie.status,
+  plannedDate: movie.plannedDate ?? undefined,
+  watchedDate: movie.watchedDate ?? undefined,
+  createdAt: movie.createdAt,
+  updatedAt: movie.updatedAt
+});
+```
+
+**Важно:** `UnifiedMovie.id` = `group_movies.id`, а не `movie.movieId`. Это ID записи в таблице `group_movies`, который используется для всех операций (update, remove).
