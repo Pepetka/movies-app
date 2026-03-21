@@ -840,7 +840,14 @@
 					}
 				],
 				"responses": {
-					"200": { "description": "Search results with provider and group movies" },
+					"200": {
+						"description": "Search results with provider and group movies",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/SearchInGroupResponseDto" }
+							}
+						}
+					},
 					"403": { "description": "Forbidden - Not a group member" }
 				},
 				"security": [{ "access-token": [] }],
@@ -1335,13 +1342,13 @@
 					"id": { "type": "number" },
 					"groupId": { "type": "number" },
 					"source": { "type": "string", "enum": ["provider", "custom"] },
-					"movieId": { "type": "object", "nullable": true },
+					"movieId": { "type": "number", "nullable": true },
 					"title": { "type": "string" },
-					"posterPath": { "type": "object", "nullable": true },
-					"overview": { "type": "object", "nullable": true },
-					"releaseYear": { "type": "object", "nullable": true },
-					"runtime": { "type": "object", "nullable": true },
-					"rating": { "type": "object", "nullable": true },
+					"posterPath": { "type": "string", "nullable": true },
+					"overview": { "type": "string", "nullable": true },
+					"releaseYear": { "type": "number", "nullable": true },
+					"runtime": { "type": "number", "nullable": true },
+					"rating": { "type": "string", "nullable": true },
 					"addedBy": { "type": "number" },
 					"status": { "type": "string", "enum": ["tracking", "planned", "watched"] },
 					"plannedDate": { "format": "date-time", "type": "string", "nullable": true },
@@ -1368,6 +1375,17 @@
 					"createdAt",
 					"updatedAt"
 				]
+			},
+			"SearchInGroupResponseDto": {
+				"type": "object",
+				"properties": {
+					"provider": { "$ref": "#/components/schemas/ProviderSearchResult" },
+					"currentGroup": {
+						"type": "array",
+						"items": { "$ref": "#/components/schemas/GroupMovieResponseDto" }
+					}
+				},
+				"required": ["provider", "currentGroup"]
 			},
 			"AddMovieDto": {
 				"type": "object",

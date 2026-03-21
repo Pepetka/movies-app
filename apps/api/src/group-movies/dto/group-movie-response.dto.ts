@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 
+import { ProviderSearchResult } from '$src/movies/providers/interfaces/provider-result.dto';
 import { GroupMemberRole } from '$common/enums';
 
 export enum GroupMovieStatus {
@@ -23,25 +24,25 @@ export class GroupMovieResponseDto {
   @ApiProperty({ enum: MovieSource })
   source: MovieSource;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ type: Number, nullable: true })
   movieId: number | null;
 
   @ApiProperty()
   title: string;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ type: String, nullable: true })
   posterPath: string | null;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ type: String, nullable: true })
   overview: string | null;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ type: Number, nullable: true })
   releaseYear: number | null;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ type: Number, nullable: true })
   runtime: number | null;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ type: String, nullable: true })
   rating: string | null;
 
   @ApiProperty()
@@ -67,8 +68,8 @@ export class GroupMovieResponseDto {
 }
 
 export class SearchInGroupResponseDto {
-  @ApiProperty()
-  provider: Record<string, unknown>;
+  @ApiProperty({ type: ProviderSearchResult })
+  provider: ProviderSearchResult;
 
   @ApiProperty({ type: [GroupMovieResponseDto] })
   currentGroup: GroupMovieResponseDto[];

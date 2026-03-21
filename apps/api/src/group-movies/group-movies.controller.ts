@@ -57,6 +57,7 @@ export class GroupMoviesController {
   @ApiResponse({
     status: 200,
     description: 'Search results with provider and group movies',
+    type: SearchInGroupResponseDto,
   })
   @ApiResponse({ status: 403, description: 'Forbidden - Not a group member' })
   async searchInGroup(
