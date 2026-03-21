@@ -1,60 +1,44 @@
 import type {
 	AddMovieDto,
 	CreateCustomMovieDto,
-	CustomMovieResponseDto,
 	GroupMovieResponseDto,
-	GroupMovieUpdateDto,
-	UpdateCustomMovieDto
+	GroupMovieUpdateDto
 } from '$lib/api/generated/types';
 import { createMutation, type MutationResult, type PostStatus } from '$lib/query';
 import { BaseStore } from '$lib/stores/base.svelte';
 
-import {
-	addGroupMovie,
-	createCustomMovie,
-	removeCustomMovie,
-	removeGroupMovie,
-	updateCustomMovie,
-	updateMovieStatus
-} from '../api';
+import { addProviderMovie, createCustomMovie, removeMovie, updateMovie } from '../api';
 
 class GroupMovieStore extends BaseStore {
-	private readonly _addMutation: MutationResult<
+	private readonly _addProviderMutation: MutationResult<
 		GroupMovieResponseDto,
 		{ groupId: number; data: AddMovieDto }
 	>;
-	private readonly _createMutation: MutationResult<
-		CustomMovieResponseDto,
+	private readonly _createCustomMutation: MutationResult<
+		GroupMovieResponseDto,
 		{ groupId: number; data: CreateCustomMovieDto }
 	>;
-	private readonly _updateStatusMutation: MutationResult<
+	private readonly _updateMutation: MutationResult<
 		GroupMovieResponseDto,
 		{ groupId: number; movieId: number; data: GroupMovieUpdateDto }
 	>;
-	private readonly _updateCustomMutation: MutationResult<
-		CustomMovieResponseDto,
-		{ groupId: number; movieId: number; data: UpdateCustomMovieDto }
-	>;
-	private readonly _removeMutation: MutationResult<
-		void,
-		{ groupId: number; movieId: number; isCustom: boolean }
-	>;
+	private readonly _removeMutation: MutationResult<void, { groupId: number; movieId: number }>;
 
 	constructor() {
 		super();
 
-		this._addMutation = createMutation<
+		this._addProviderMutation = createMutation<
 			GroupMovieResponseDto,
 			{ groupId: number; data: AddMovieDto }
 		>({
 			key: ['group-movies', 'add'],
 			tags: ['group-movies'],
-			mutator: ({ groupId, data }) => addGroupMovie(groupId, data),
+			mutator: ({ groupId, data }) => addProviderMovie(groupId, data),
 			debug: !__IS_PROD__
 		});
 
-		this._createMutation = createMutation<
-			CustomMovieResponseDto,
+		this._createCustomMutation = createMutation<
+			GroupMovieResponseDto,
 			{ groupId: number; data: CreateCustomMovieDto }
 		>({
 			key: ['group-movies', 'create'],
@@ -63,34 +47,20 @@ class GroupMovieStore extends BaseStore {
 			debug: !__IS_PROD__
 		});
 
-		this._updateStatusMutation = createMutation<
+		this._updateMutation = createMutation<
 			GroupMovieResponseDto,
 			{ groupId: number; movieId: number; data: GroupMovieUpdateDto }
 		>({
-			key: ['group-movies', 'update-status'],
+			key: ['group-movies', 'update'],
 			tags: ['group-movies'],
-			mutator: ({ groupId, movieId, data }) => updateMovieStatus(groupId, movieId, data),
+			mutator: ({ groupId, movieId, data }) => updateMovie(groupId, movieId, data),
 			debug: !__IS_PROD__
 		});
 
-		this._updateCustomMutation = createMutation<
-			CustomMovieResponseDto,
-			{ groupId: number; movieId: number; data: UpdateCustomMovieDto }
-		>({
-			key: ['group-movies', 'update-custom'],
-			tags: ['group-movies'],
-			mutator: ({ groupId, movieId, data }) => updateCustomMovie(groupId, movieId, data),
-			debug: !__IS_PROD__
-		});
-
-		this._removeMutation = createMutation<
-			void,
-			{ groupId: number; movieId: number; isCustom: boolean }
-		>({
+		this._removeMutation = createMutation<void, { groupId: number; movieId: number }>({
 			key: ['group-movies', 'remove'],
 			tags: ['group-movies'],
-			mutator: ({ groupId, movieId, isCustom }) =>
-				isCustom ? removeCustomMovie(groupId, movieId) : removeGroupMovie(groupId, movieId),
+			mutator: ({ groupId, movieId }) => removeMovie(groupId, movieId),
 			debug: !__IS_PROD__
 		});
 	}
@@ -98,120 +68,89 @@ class GroupMovieStore extends BaseStore {
 	// === Add provider movie ===
 
 	get addStatus(): PostStatus {
-		return this._addMutation.status;
+		return this._addProviderMutation.status;
 	}
 
 	get isAdding(): boolean {
-		return this._addMutation.isSubmitting;
+		return this._addProviderMutation.isSubmitting;
 	}
 
 	get isAddSuccess(): boolean {
-		return this._addMutation.isSuccess;
+		return this._addProviderMutation.isSuccess;
 	}
 
 	get addError(): string | null {
-		if (!this._addMutation.error) return null;
-		return this._extractErrorMessage(this._addMutation.error, 'Ошибка добавления фильма');
+		if (!this._addProviderMutation.error) return null;
+		return this._extractErrorMessage(this._addProviderMutation.error, 'Ошибка добавления фильма');
 	}
 
 	async addMovie(groupId: number, data: AddMovieDto): Promise<GroupMovieResponseDto | null> {
-		return this._addMutation.mutate({ groupId, data });
+		return this._addProviderMutation.mutate({ groupId, data });
 	}
 
 	resetAdd(): void {
-		this._addMutation.reset();
+		this._addProviderMutation.reset();
 	}
 
 	// === Create custom movie ===
 
 	get createStatus(): PostStatus {
-		return this._createMutation.status;
+		return this._createCustomMutation.status;
 	}
 
 	get isCreating(): boolean {
-		return this._createMutation.isSubmitting;
+		return this._createCustomMutation.isSubmitting;
 	}
 
 	get isCreateSuccess(): boolean {
-		return this._createMutation.isSuccess;
+		return this._createCustomMutation.isSuccess;
 	}
 
 	get createError(): string | null {
-		if (!this._createMutation.error) return null;
-		return this._extractErrorMessage(this._createMutation.error, 'Ошибка создания фильма');
+		if (!this._createCustomMutation.error) return null;
+		return this._extractErrorMessage(this._createCustomMutation.error, 'Ошибка создания фильма');
 	}
 
 	async createMovie(
 		groupId: number,
 		data: CreateCustomMovieDto
-	): Promise<CustomMovieResponseDto | null> {
-		return this._createMutation.mutate({ groupId, data });
+	): Promise<GroupMovieResponseDto | null> {
+		return this._createCustomMutation.mutate({ groupId, data });
 	}
 
 	resetCreate(): void {
-		this._createMutation.reset();
+		this._createCustomMutation.reset();
 	}
 
-	// === Update status ===
+	// === Update movie (unified) ===
 
-	get updateStatusStatus(): PostStatus {
-		return this._updateStatusMutation.status;
+	get updateStatus(): PostStatus {
+		return this._updateMutation.status;
 	}
 
-	get isUpdatingStatus(): boolean {
-		return this._updateStatusMutation.isSubmitting;
+	get isUpdating(): boolean {
+		return this._updateMutation.isSubmitting;
 	}
 
-	get isUpdateStatusSuccess(): boolean {
-		return this._updateStatusMutation.isSuccess;
+	get isUpdateSuccess(): boolean {
+		return this._updateMutation.isSuccess;
 	}
 
-	get updateStatusError(): string | null {
-		if (!this._updateStatusMutation.error) return null;
-		return this._extractErrorMessage(this._updateStatusMutation.error, 'Ошибка обновления статуса');
+	get updateError(): string | null {
+		if (!this._updateMutation.error) return null;
+		return this._extractErrorMessage(this._updateMutation.error, 'Ошибка обновления фильма');
 	}
 
-	async updateStatus(
+	async updateMovie(
 		groupId: number,
 		movieId: number,
 		data: GroupMovieUpdateDto
 	): Promise<GroupMovieResponseDto | null> {
-		return this._updateStatusMutation.mutate({ groupId, movieId, data });
+		return this._updateMutation.mutate({ groupId, movieId, data });
 	}
 
-	resetUpdateStatus(): void {
-		this._updateStatusMutation.reset();
-	}
-
-	// === Update custom movie ===
-
-	get updateCustomStatus(): PostStatus {
-		return this._updateCustomMutation.status;
-	}
-
-	get isUpdatingCustom(): boolean {
-		return this._updateCustomMutation.isSubmitting;
-	}
-
-	get isUpdateCustomSuccess(): boolean {
-		return this._updateCustomMutation.isSuccess;
-	}
-
-	get updateCustomError(): string | null {
-		if (!this._updateCustomMutation.error) return null;
-		return this._extractErrorMessage(this._updateCustomMutation.error, 'Ошибка обновления фильма');
-	}
-
-	async updateCustom(
-		groupId: number,
-		movieId: number,
-		data: UpdateCustomMovieDto
-	): Promise<CustomMovieResponseDto | null> {
-		return this._updateCustomMutation.mutate({ groupId, movieId, data });
-	}
-
-	resetUpdateCustom(): void {
-		this._updateCustomMutation.reset();
+	resetUpdate(): void {
+		this._updateMutation.reset();
 	}
 
 	// === Remove movie ===
@@ -233,8 +172,8 @@ class GroupMovieStore extends BaseStore {
 		return this._extractErrorMessage(this._removeMutation.error, 'Ошибка удаления фильма');
 	}
 
-	async removeMovie(groupId: number, movieId: number, isCustom: boolean): Promise<void> {
-		await this._removeMutation.mutate({ groupId, movieId, isCustom });
+	async removeMovie(groupId: number, movieId: number): Promise<void> {
+		await this._removeMutation.mutate({ groupId, movieId });
 	}
 
 	resetRemove(): void {
@@ -244,10 +183,9 @@ class GroupMovieStore extends BaseStore {
 	// === Reset all ===
 
 	resetForm(): void {
-		this._addMutation.reset();
-		this._createMutation.reset();
-		this._updateStatusMutation.reset();
-		this._updateCustomMutation.reset();
+		this._addProviderMutation.reset();
+		this._createCustomMutation.reset();
+		this._updateMutation.reset();
 		this._removeMutation.reset();
 	}
 }

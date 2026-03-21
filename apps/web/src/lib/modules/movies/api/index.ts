@@ -1,12 +1,8 @@
 export {
 	getGroupMovies,
-	getCustomMovies,
 	searchMovies,
-	addGroupMovie,
+	addProviderMovie,
 	createCustomMovie,
-	updateMovieStatus,
-	updateCustomMovie,
-	editAndConvertMovie,
-	removeGroupMovie,
-	removeCustomMovie
+	updateMovie,
+	removeMovie
 } from './movies.api';

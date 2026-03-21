@@ -1,4 +1,4 @@
-import type { CustomMovieResponseDto, GroupMovieResponseDto } from '$lib/api/generated/types';
+import type { GroupMovieResponseDto } from '$lib/api/generated/types';
 
 export type MovieStatus = 'tracking' | 'planned' | 'watched';
 
@@ -21,9 +21,9 @@ export interface UnifiedMovie {
 	updatedAt: string;
 }
 
-export const mapGroupMovieToUnified = (movie: GroupMovieResponseDto): UnifiedMovie => ({
-	id: movie.movieId,
-	isCustom: false,
+export const mapToUnified = (movie: GroupMovieResponseDto): UnifiedMovie => ({
+	id: movie.id,
+	isCustom: movie.source === 'custom',
 	groupId: movie.groupId,
 	title: movie.title,
 	posterPath: movie.posterPath ?? undefined,
@@ -31,23 +31,6 @@ export const mapGroupMovieToUnified = (movie: GroupMovieResponseDto): UnifiedMov
 	releaseYear: movie.releaseYear ?? undefined,
 	runtime: movie.runtime ?? undefined,
 	rating: movie.rating ? parseFloat(movie.rating) : undefined,
-	status: movie.status,
-	plannedDate: movie.plannedDate ?? undefined,
-	watchedDate: movie.watchedDate ?? undefined,
-	createdAt: movie.createdAt,
-	updatedAt: movie.updatedAt
-});
-
-export const mapCustomMovieToUnified = (movie: CustomMovieResponseDto): UnifiedMovie => ({
-	id: movie.id,
-	isCustom: true,
-	groupId: movie.groupId,
-	title: movie.title,
-	posterPath: movie.posterPath ?? undefined,
-	overview: movie.overview ?? undefined,
-	releaseYear: movie.releaseYear ?? undefined,
-	runtime: movie.runtime ?? undefined,
-	rating: undefined,
 	status: movie.status,
 	plannedDate: movie.plannedDate ?? undefined,
 	watchedDate: movie.watchedDate ?? undefined,
