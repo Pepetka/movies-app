@@ -55,12 +55,8 @@ export const groupMovies = pgTable(
     index('group_movies_movie_id_idx').on(table.movieId),
     unique().on(table.groupId, table.movieId),
     check(
-      'source_movie_consistency',
-      sql`(${table.source} = 'provider' AND ${table.movieId} IS NOT NULL)`,
-    ),
-    check(
-      'custom_movie_no_provider_id',
-      sql`(${table.source} = 'custom' AND ${table.movieId} IS NULL)`,
+      'source_movie_integrity',
+      sql`((${table.source} = 'provider' AND ${table.movieId} IS NOT NULL) OR (${table.source} = 'custom' AND ${table.movieId} IS NULL))`,
     ),
     check(
       'planned_requires_planned_date',
