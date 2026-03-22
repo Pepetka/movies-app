@@ -1,5 +1,6 @@
 import {
   IsString,
+  IsNotEmpty,
   IsOptional,
   IsNumber,
   IsEnum,
@@ -16,6 +17,7 @@ import { IsValidMovieStatus } from '$common/validators';
 export class CreateCustomMovieDto {
   @ApiProperty({ description: 'Movie title' })
   @IsString()
+  @IsNotEmpty()
   @MaxLength(255)
   title: string;
 

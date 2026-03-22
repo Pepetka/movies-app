@@ -1,4 +1,4 @@
-import { eq, and, desc, count, ilike, or } from 'drizzle-orm';
+import { eq, and, desc, ilike, or } from 'drizzle-orm';
 import { Inject, Injectable } from '@nestjs/common';
 
 import { groupMovies, type GroupMovie, type NewGroupMovie } from '$db/schemas';
@@ -60,13 +60,14 @@ export class GroupMoviesRepository {
   }
 
   async exists(groupId: number, movieId: number): Promise<boolean> {
-    const result = await this.db
-      .select({ count: count() })
+    const [result] = await this.db
+      .select({ id: groupMovies.id })
       .from(groupMovies)
       .where(
         and(eq(groupMovies.groupId, groupId), eq(groupMovies.movieId, movieId)),
-      );
-    return result[0].count > 0;
+      )
+      .limit(1);
+    return !!result;
   }
 
   async update(
