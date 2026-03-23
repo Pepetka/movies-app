@@ -312,13 +312,9 @@
       },
       "policies": {},
       "checkConstraints": {
-        "source_movie_consistency": {
-          "name": "source_movie_consistency",
-          "value": "(\"group_movies\".\"source\" = 'provider' AND \"group_movies\".\"movie_id\" IS NOT NULL)"
-        },
-        "custom_movie_no_provider_id": {
-          "name": "custom_movie_no_provider_id",
-          "value": "(\"group_movies\".\"source\" = 'custom' AND \"group_movies\".\"movie_id\" IS NULL)"
+        "source_movie_integrity": {
+          "name": "source_movie_integrity",
+          "value": "((\"group_movies\".\"source\" = 'provider' AND \"group_movies\".\"movie_id\" IS NOT NULL) OR (\"group_movies\".\"source\" = 'custom' AND \"group_movies\".\"movie_id\" IS NULL))"
         },
         "planned_requires_planned_date": {
           "name": "planned_requires_planned_date",

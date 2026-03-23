@@ -1,3 +1,4 @@
-ALTER TABLE "group_movies" DROP CONSTRAINT "source_movie_consistency";--> statement-breakpoint
-ALTER TABLE "group_movies" DROP CONSTRAINT "custom_movie_no_provider_id";--> statement-breakpoint
+ALTER TABLE "group_movies" DROP CONSTRAINT IF EXISTS "source_movie_consistency";--> statement-breakpoint
+ALTER TABLE "group_movies" DROP CONSTRAINT IF EXISTS "custom_movie_no_provider_id";--> statement-breakpoint
+ALTER TABLE "group_movies" DROP CONSTRAINT IF EXISTS "source_movie_integrity";--> statement-breakpoint
 ALTER TABLE "group_movies" ADD CONSTRAINT "source_movie_integrity" CHECK ((("group_movies"."source" = 'provider' AND "group_movies"."movie_id" IS NOT NULL) OR ("group_movies"."source" = 'custom' AND "group_movies"."movie_id" IS NULL)));
