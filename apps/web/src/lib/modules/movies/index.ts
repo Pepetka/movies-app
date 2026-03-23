@@ -3,8 +3,7 @@ export { groupMoviesStore, groupMovieStore, moviesSearchStore } from './stores';
 
 // Types
 export {
-	mapGroupMovieToUnified,
-	mapCustomMovieToUnified,
+	mapToUnified,
 	getStatusLabel,
 	type MovieStatus,
 	type MovieFilter,

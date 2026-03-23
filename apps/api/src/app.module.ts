@@ -7,7 +7,6 @@ import { AuthGuard, AuthorGuard, RolesGuard, CsrfGuard } from '$common/guards';
 import { validate } from '$common/configs/validation';
 import { Environment } from '$common/configs';
 
-import { CustomMoviesModule } from './custom-movies/custom-movies.module';
 import { GroupMoviesModule } from './group-movies/group-movies.module';
 import { GroupsModule } from './groups/groups.module';
 import { HealthModule } from './health/health.module';
@@ -46,7 +45,6 @@ const isTest = process.env.NODE_ENV === Environment.Test;
     CsrfModule,
     MoviesModule,
     GroupsModule,
-    CustomMoviesModule,
     GroupMoviesModule,
   ],
   providers: [

@@ -3,8 +3,8 @@ import { z } from 'zod';
 
 import type {
 	CreateCustomMovieDto,
-	CustomMovieResponseDto,
-	UpdateCustomMovieDto
+	GroupMovieResponseDto,
+	GroupMovieUpdateDto
 } from '$lib/api/generated/types';
 import { createValidator } from '$lib/utils/validation.svelte';
 
@@ -76,7 +76,7 @@ export const customMovieFormToCreateDto = (form: CustomMovieFormData): CreateCus
 	runtime: form.runtime
 });
 
-export const customMovieFormToUpdateDto = (form: CustomMovieFormData): UpdateCustomMovieDto => ({
+export const customMovieFormToUpdateDto = (form: CustomMovieFormData): GroupMovieUpdateDto => ({
 	title: form.title || undefined,
 	posterPath: form.posterPath || undefined,
 	overview: form.overview || undefined,
@@ -84,10 +84,10 @@ export const customMovieFormToUpdateDto = (form: CustomMovieFormData): UpdateCus
 	runtime: form.runtime
 });
 
-export const customMovieFormFromEntity = (movie: CustomMovieResponseDto): CustomMovieFormData => ({
-	title: movie.title ?? '',
-	posterPath: movie.posterPath ?? '',
-	overview: movie.overview ?? '',
-	releaseYear: movie.releaseYear ?? undefined,
-	runtime: movie.runtime ?? undefined
+export const customMovieFormFromEntity = (movie: GroupMovieResponseDto): CustomMovieFormData => ({
+	title: typeof movie.title === 'string' ? movie.title : '',
+	posterPath: typeof movie.posterPath === 'string' ? movie.posterPath : '',
+	overview: typeof movie.overview === 'string' ? movie.overview : '',
+	releaseYear: typeof movie.releaseYear === 'number' ? movie.releaseYear : undefined,
+	runtime: typeof movie.runtime === 'number' ? movie.runtime : undefined
 });

@@ -66,7 +66,7 @@
 			Icon={Search}
 			iconAction={inputValue ? handleClear : undefined}
 			iconLabel={inputValue ? 'Очистить' : undefined}
-			onChange={(value) => moviesSearchStore.search(value)}
+			onChange={(value) => moviesSearchStore.search(groupId, value)}
 		/>
 	</div>
 

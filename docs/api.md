@@ -112,20 +112,13 @@ New accessToken returned, retry original request
 
 | Method | Endpoint        | Access      | Description |
 | ------ | --------------- | ----------- | ----------- |
-| GET    | /               | Member      | List movies |
-| GET    | /search         | Member      | Search (Kinopoisk + custom) |
-| POST   | /               | Moderator+  | Add movie |
-| PATCH  | /:movieId       | Moderator+  | Update status |
-| DELETE | /:movieId       | Moderator+  | Remove movie |
-
-### Custom Movies (`/groups/:id/custom-movies`)
-
-| Method | Endpoint            | Access      | Description |
-| ------ | ------------------- | ----------- | ----------- |
-| GET    | /                   | Member      | List custom movies |
-| POST   | /                   | Moderator+  | Create custom movie |
-| PATCH  | /:customMovieId     | Moderator+  | Update |
-| DELETE | /:customMovieId     | Moderator+  | Delete |
+| GET    | /               | Member      | List all movies in group |
+| GET    | /search         | Member      | Search (Kinopoisk + group) |
+| POST   | /               | Moderator+  | Add provider movie |
+| POST   | /custom          | Moderator+  | Create custom movie |
+| GET    | /:id             | Member      | Movie details |
+| PATCH  | /:id             | Moderator+  | Update status/data |
+| DELETE | /:id             | Moderator+  | Remove movie |
 
 ### Movies (`/movies`)
 

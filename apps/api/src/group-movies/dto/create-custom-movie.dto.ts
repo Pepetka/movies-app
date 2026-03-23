@@ -1,5 +1,6 @@
 import {
   IsString,
+  IsNotEmpty,
   IsOptional,
   IsNumber,
   IsEnum,
@@ -8,17 +9,17 @@ import {
   Min,
   Max,
 } from 'class-validator';
-import { ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 import { MovieStatus, MovieStatusEnum } from '$common/dto/movie-status.dto';
 import { IsValidMovieStatus } from '$common/validators';
 
-export class EditGroupMovieDto {
-  @ApiPropertyOptional({ description: 'Movie title' })
-  @IsOptional()
+export class CreateCustomMovieDto {
+  @ApiProperty({ description: 'Movie title' })
   @IsString()
+  @IsNotEmpty()
   @MaxLength(255)
-  title?: string;
+  title: string;
 
   @ApiPropertyOptional({ description: 'Poster path' })
   @IsOptional()
@@ -45,15 +46,16 @@ export class EditGroupMovieDto {
   runtime?: number;
 
   @ApiPropertyOptional({
-    description: 'Update status (optional)',
+    description: 'Movie status',
     enum: MovieStatusEnum,
+    default: 'tracking',
   })
   @IsOptional()
   @IsEnum(MovieStatusEnum)
   status?: MovieStatus;
 
   @ApiPropertyOptional({
-    description: 'Update planned date (optional)',
+    description: 'Planned watch date',
     example: '2024-12-31T20:00:00Z',
   })
   @IsOptional()
@@ -61,7 +63,7 @@ export class EditGroupMovieDto {
   plannedDate?: string;
 
   @ApiPropertyOptional({
-    description: 'Update watched date (optional)',
+    description: 'Watched date',
     example: '2024-12-25T20:00:00Z',
   })
   @IsOptional()

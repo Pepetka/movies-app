@@ -2,16 +2,14 @@ import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 
 import { MovieAlreadyInGroupException } from '$common/exceptions';
 
-import {
-  GroupMoviesRepository,
-  type GroupMovieWithDetails,
-} from './group-movies.repository';
+import { AddMovieDto, CreateCustomMovieDto, GroupMovieUpdateDto } from './dto';
+import { GroupMoviesRepository } from './group-movies.repository';
+import { GroupMovie, Movie, NewGroupMovie } from '../db/schemas';
+import { GroupsRepository } from '../groups/groups.repository';
 import { MoviesRepository } from '../movies/movies.repository';
 import { DEFAULT_PROVIDER } from '../movies/movies.constants';
 import { MovieProvidersService } from '../movies/providers';
-import { AddMovieDto, GroupMovieUpdateDto } from './dto';
 import type { MovieProvider } from '../movies/providers';
-import { GroupMovie, Movie } from '../db/schemas';
 
 @Injectable()
 export class GroupMoviesService {
@@ -21,67 +19,87 @@ export class GroupMoviesService {
     private readonly groupMoviesRepository: GroupMoviesRepository,
     private readonly moviesRepository: MoviesRepository,
     private readonly movieProvidersService: MovieProvidersService,
+    private readonly groupsRepository: GroupsRepository,
   ) {}
 
   /**
-   * Adds an existing movie to a group
+   * Adds a provider movie to a group (creates copy in group_movies)
    * @param groupId - Group ID
-   * @param movieId - Movie ID from database
-   * @param addedBy - User ID who is adding the movie
-   * @returns Created group movie record
-   * @throws NotFoundException if movie not found
+   * @param dto - Movie identification data (imdbId or externalId)
+   * @param addedBy - User ID who adds the movie
+   * @returns Created group movie
    * @throws MovieAlreadyInGroupException if movie already in group
    */
-  async addMovie(
-    groupId: number,
-    movieId: number,
-    addedBy: number,
-  ): Promise<GroupMovie> {
-    const movie = await this.moviesRepository.findById(movieId);
-    if (!movie) {
-      throw new NotFoundException(`Movie with id ${movieId} not found`);
-    }
-
-    const exists = await this.groupMoviesRepository.exists(groupId, movieId);
-
-    if (exists) {
-      throw new MovieAlreadyInGroupException();
-    }
-
-    const newGroupMovie = {
-      groupId,
-      movieId,
-      addedBy,
-      status: 'tracking' as const,
-    };
-
-    const groupMovie = await this.groupMoviesRepository.create(newGroupMovie);
-    this._logger.log(
-      `Movie ${movieId} added to group ${groupId} with status: tracking`,
-    );
-    return groupMovie;
-  }
-
-  /**
-   * Adds movie to group by DTO (finds or creates movie first)
-   * @param groupId - Group ID
-   * @param dto - Movie addition data with imdbId or externalId
-   * @param addedBy - User ID who is adding the movie
-   * @returns Created group movie record
-   */
-  async addMovieByDto(
+  async addProviderMovie(
     groupId: number,
     dto: AddMovieDto,
     addedBy: number,
   ): Promise<GroupMovie> {
     const movie = await this.findOrCreateMovie(dto);
-    return this.addMovie(groupId, movie.id, addedBy);
+
+    const exists = await this.groupMoviesRepository.exists(groupId, movie.id);
+    if (exists) {
+      throw new MovieAlreadyInGroupException();
+    }
+
+    const groupMovie = await this.groupMoviesRepository.create({
+      groupId,
+      source: 'provider',
+      movieId: movie.id,
+      title: movie.title,
+      posterPath: movie.posterPath,
+      overview: movie.overview,
+      releaseYear: movie.releaseYear,
+      runtime: movie.runtime,
+      rating: movie.rating,
+      addedBy,
+      status: 'tracking',
+    });
+
+    this._logger.log(
+      `Provider movie ${movie.id} added to group ${groupId} with status: tracking`,
+    );
+    return groupMovie;
+  }
+
+  /**
+   * Creates a custom movie in a group
+   * @param groupId - Group ID
+   * @param dto - Custom movie creation data
+   * @param createdById - User ID who creates the movie
+   * @returns Created group movie
+   */
+  async createCustomMovie(
+    groupId: number,
+    dto: CreateCustomMovieDto,
+    createdById: number,
+  ): Promise<GroupMovie> {
+    const groupMovie = await this.groupMoviesRepository.create({
+      groupId,
+      source: 'custom',
+      movieId: null,
+      title: dto.title,
+      posterPath: dto.posterPath ?? null,
+      overview: dto.overview ?? null,
+      releaseYear: dto.releaseYear ?? null,
+      runtime: dto.runtime ?? null,
+      rating: null,
+      addedBy: createdById,
+      status: dto.status ?? 'tracking',
+      plannedDate: dto.plannedDate ? new Date(dto.plannedDate) : null,
+      watchedDate: dto.watchedDate ? new Date(dto.watchedDate) : null,
+    });
+
+    this._logger.log(
+      `Custom movie created in group ${groupId} with id: ${groupMovie.id}`,
+    );
+    return groupMovie;
   }
 
   /**
    * Finds movie in database or imports from provider
-   * @param dto - Movie identifier (imdbId or externalId)
-   * @returns Movie from database or newly imported
+   * @param dto - Movie identification data (imdbId or externalId)
+   * @returns Found or created movie
    */
   async findOrCreateMovie(dto: AddMovieDto): Promise<Movie> {
     const provider = this.movieProvidersService.getProvider(DEFAULT_PROVIDER);
@@ -102,6 +120,12 @@ export class GroupMoviesService {
     return this.importMovie(dto, provider);
   }
 
+  /**
+   * Imports movie from provider
+   * @param dto - Movie identification data
+   * @param provider - Movie provider instance
+   * @returns Imported movie
+   */
   private async importMovie(
     dto: AddMovieDto,
     provider: MovieProvider,
@@ -118,51 +142,94 @@ export class GroupMoviesService {
   }
 
   /**
-   * Gets all movies for a group
+   * Gets all movies for a group (unified list)
    * @param groupId - Group ID
-   * @returns Array of group movies with movie details
+   * @param status - Optional status filter
+   * @param query - Optional search query
+   * @returns Array of group movies
    */
-  async findByGroup(groupId: number): Promise<GroupMovieWithDetails[]> {
-    return this.groupMoviesRepository.findByGroupWithDetails(groupId);
+  async findByGroup(
+    groupId: number,
+    status?: string,
+    query?: string,
+  ): Promise<GroupMovie[]> {
+    return this.groupMoviesRepository.findByGroup(groupId, status, query);
   }
 
   /**
-   * Gets a single movie from group
+   * Gets a single movie from group with current user's role
    * @param groupId - Group ID
-   * @param movieId - Movie ID
-   * @returns Group movie record
-   * @throws NotFoundException if movie not in group
+   * @param id - Group movie ID
+   * @param userId - Current user ID
+   * @returns Group movie with current user role
+   * @throws NotFoundException if movie not found
    */
-  async findOne(groupId: number, movieId: number): Promise<GroupMovie> {
-    const groupMovie = await this.groupMoviesRepository.findOne(
+  async findOne(
+    groupId: number,
+    id: number,
+    userId: number,
+  ): Promise<GroupMovie & { currentUserRole: string }> {
+    const groupMovie = await this._findOneOrThrow(groupId, id);
+
+    const memberData = await this.groupsRepository.getGroupWithMember(
       groupId,
-      movieId,
+      userId,
     );
 
+    return {
+      ...groupMovie,
+      currentUserRole: memberData?.member?.role ?? 'member',
+    };
+  }
+
+  /**
+   * Gets a single movie from group (for internal use)
+   * @param groupId - Group ID
+   * @param id - Group movie ID
+   * @returns Group movie
+   * @throws NotFoundException if movie not found
+   */
+  async findById(groupId: number, id: number): Promise<GroupMovie> {
+    return this._findOneOrThrow(groupId, id);
+  }
+
+  /**
+   * Finds group movie or throws NotFoundException
+   * @param groupId - Group ID
+   * @param id - Group movie ID
+   * @returns Group movie
+   * @throws NotFoundException if movie not found
+   */
+  private async _findOneOrThrow(
+    groupId: number,
+    id: number,
+  ): Promise<GroupMovie> {
+    const groupMovie = await this.groupMoviesRepository.findOne(groupId, id);
+
     if (!groupMovie) {
-      throw new NotFoundException(
-        `Movie ${movieId} not found in group ${groupId}`,
-      );
+      throw new NotFoundException(`Movie ${id} not found in group ${groupId}`);
     }
 
     return groupMovie;
   }
 
   /**
-   * Updates movie status in group
+   * Updates movie in group (status and/or data)
    * @param groupId - Group ID
-   * @param movieId - Movie ID
-   * @param dto - Update data (status, plannedDate, watchedDate)
-   * @returns Updated group movie record
+   * @param id - Group movie ID
+   * @param dto - Update data
+   * @returns Updated group movie
+   * @throws NotFoundException if movie not found
    */
   async update(
     groupId: number,
-    movieId: number,
+    id: number,
     dto: GroupMovieUpdateDto,
   ): Promise<GroupMovie> {
-    await this.findOne(groupId, movieId);
+    await this._findOneOrThrow(groupId, id);
 
-    const updateData: Partial<Record<string, unknown>> = {};
+    const updateData: Partial<NewGroupMovie> = {};
+
     if (dto.status !== undefined) updateData.status = dto.status;
     if (dto.plannedDate !== undefined)
       updateData.plannedDate = dto.plannedDate
@@ -173,36 +240,32 @@ export class GroupMoviesService {
         ? new Date(dto.watchedDate)
         : null;
 
+    if (dto.title !== undefined) updateData.title = dto.title;
+    if (dto.posterPath !== undefined) updateData.posterPath = dto.posterPath;
+    if (dto.overview !== undefined) updateData.overview = dto.overview;
+    if (dto.releaseYear !== undefined) updateData.releaseYear = dto.releaseYear;
+    if (dto.runtime !== undefined) updateData.runtime = dto.runtime;
+
     const updated = await this.groupMoviesRepository.update(
       groupId,
-      movieId,
+      id,
       updateData,
     );
 
-    this._logger.log(
-      `Movie ${movieId} in group ${groupId} updated with status: ${dto.status}`,
-    );
+    this._logger.log(`Movie ${id} in group ${groupId} updated`);
     return updated;
   }
 
   /**
    * Removes movie from group
    * @param groupId - Group ID
-   * @param movieId - Movie ID
+   * @param id - Group movie ID
+   * @throws NotFoundException if movie not found
    */
-  async remove(groupId: number, movieId: number): Promise<void> {
-    await this.findOne(groupId, movieId);
+  async remove(groupId: number, id: number): Promise<void> {
+    await this._findOneOrThrow(groupId, id);
+    await this.groupMoviesRepository.delete(groupId, id);
 
-    await this.groupMoviesRepository.delete(groupId, movieId);
-
-    const references = await this.groupMoviesRepository.countByMovie(movieId);
-
-    if (references === 0) {
-      this._logger.log(
-        `Movie ${movieId} is no longer referenced in any groups (keeping in DB for potential reuse)`,
-      );
-    }
-
-    this._logger.log(`Movie ${movieId} removed from group ${groupId}`);
+    this._logger.log(`Movie ${id} removed from group ${groupId}`);
   }
 }
