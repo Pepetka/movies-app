@@ -120,7 +120,7 @@
 		</div>
 	</div>
 
-	<FAB label="Добавить фильм" onclick={handleAddMovie} offset="above-bottom-nav">
+	<FAB label="Добавить фильм" onclick={handleAddMovie} offset="above-bottom-nav" variant="ghost">
 		<Plus size={20} />
 	</FAB>
 {:else}

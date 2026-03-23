@@ -22,7 +22,7 @@ class MoviesSearchStore extends BaseStore {
 
 		this._query = createQuery<SearchInGroupResponseDto, { groupId: number; query: string }>({
 			key: ['movies', 'search'],
-			tags: ['group-movies'],
+			tags: ['movies-search'],
 			fetcher: (signal, params) => {
 				if (!params?.groupId) {
 					throw new Error('No group id');

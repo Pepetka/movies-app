@@ -82,7 +82,7 @@ class GroupStore extends BaseStore {
 	}
 
 	async fetchGroup(id: number): Promise<void> {
-		if (this._query.isCurrentKey(['group', id]) && this.status === 'loaded') return;
+		if (this._query.isCurrentKey(['group', id]) && (this.isLoaded || this.isFetching)) return;
 		await this._query.revalidate(['group', id], id);
 	}
 

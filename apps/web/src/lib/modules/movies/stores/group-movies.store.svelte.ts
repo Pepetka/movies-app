@@ -62,7 +62,7 @@ class GroupMoviesStore extends BaseStore {
 	async fetchMovies(groupId: number): Promise<void> {
 		const key = ['group-movies', groupId];
 
-		if (this._query.isCurrentKey(key) && this.isLoaded) {
+		if (this._query.isCurrentKey(key) && (this.isLoaded || this.isFetching)) {
 			return;
 		}
 
