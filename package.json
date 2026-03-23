@@ -29,9 +29,9 @@
     "husky": "^9.1.7",
     "lint-staged": "^16.4.0",
     "prettier-plugin-svelte": "catalog:",
-    "syncpack": "14.2.0",
+    "syncpack": "14.2.1",
     "typescript": "catalog:",
-    "turbo": "^2.8.17"
+    "turbo": "^2.8.20"
   },
   "packageManager": "pnpm@10.29.3",
   "engines": {
