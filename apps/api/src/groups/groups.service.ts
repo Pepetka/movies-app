@@ -79,27 +79,36 @@ export class GroupsService {
   }
 
   /**
-   * Gets a single group by ID
+   * Gets a single group by ID with current user's role
    * @param id - Group ID
    * @param userId - User ID for membership check
-   * @returns Group
+   * @returns Group with current user role
    * @throws GroupNotFoundException if group not found
    * @throws NotGroupMemberException if user not member
    */
-  async findOne(id: number, userId: number): Promise<Group> {
+  async findOne(
+    id: number,
+    userId: number,
+  ): Promise<Group & { currentUserRole: GroupMemberRole }> {
     const group = await this.groupsRepository.findGroupById(id);
 
     if (!group) {
       throw new GroupNotFoundException(id);
     }
 
-    const isMember = await this.isMember(id, userId);
+    const memberData = await this.groupsRepository.getGroupWithMember(
+      id,
+      userId,
+    );
 
-    if (!isMember) {
+    if (!memberData?.member) {
       throw new NotGroupMemberException();
     }
 
-    return group;
+    return {
+      ...group,
+      currentUserRole: memberData.member.role as GroupMemberRole,
+    };
   }
 
   /**

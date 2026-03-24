@@ -1254,7 +1254,8 @@
 					"description": { "type": "string", "nullable": true },
 					"avatarUrl": { "type": "string", "nullable": true },
 					"createdAt": { "format": "date-time", "type": "string" },
-					"updatedAt": { "format": "date-time", "type": "string" }
+					"updatedAt": { "format": "date-time", "type": "string" },
+					"currentUserRole": { "type": "string", "enum": ["admin", "moderator", "member"] }
 				},
 				"required": ["id", "name", "description", "avatarUrl", "createdAt", "updatedAt"]
 			},
