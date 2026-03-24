@@ -36,6 +36,8 @@ Module
 ### List Store (только чтение)
 
 ```typescript
+import { untrack } from 'svelte';
+
 import type { GroupResponseDto } from '$lib/api/generated/types';
 import { createQuery, type FetchStatus, type QueryResult } from '$lib/query';
 import { BaseStore } from '$lib/stores/base.svelte';
@@ -93,12 +95,14 @@ class GroupsStore extends BaseStore {
 	// === Действия ===
 
 	async fetchGroups(): Promise<void> {
-		if (this.status === 'loaded') return;
-		await this._query.fetch();
+		return untrack(async () => {
+			if (this.isLoaded || this.isFetching) return;
+			await this._query.fetch();
+		});
 	}
 
 	async fetch(): Promise<void> {
-		await this._query.fetch();
+		return untrack(() => this._query.fetch());
 	}
 
 	reset(): void {
@@ -112,6 +116,8 @@ export const groupsStore = new GroupsStore();
 ### Item Store (CRUD + mutations)
 
 ```typescript
+import { untrack } from 'svelte';
+
 import type { GroupCreateDto, GroupResponseDto, GroupUpdateDto } from '$lib/api/generated/types';
 import {
 	createMutation,
@@ -175,6 +181,18 @@ class GroupStore extends BaseStore {
 		return this._query.data ?? null;
 	}
 
+	get currentUserRole(): string | null {
+		return this._query.data?.currentUserRole ?? null;
+	}
+
+	get isAdmin(): boolean {
+		return this.currentUserRole === 'admin';
+	}
+
+	get isModerator(): boolean {
+		return this.currentUserRole === 'moderator' || this.currentUserRole === 'admin';
+	}
+
 	get status(): FetchStatus {
 		return this._query.status;
 	}
@@ -201,8 +219,10 @@ class GroupStore extends BaseStore {
 	}
 
 	async fetchGroup(id: number): Promise<void> {
-		if (this._query.isCurrentKey(['group', id]) && this.isLoaded) return;
-		await this._query.revalidate(['group', id], id);
+		return untrack(async () => {
+			if (this._query.isCurrentKey(['group', id]) && (this.isLoaded || this.isFetching)) return;
+			await this._query.revalidate(['group', id], id);
+		});
 	}
 
 	// === Create mutation ===
@@ -224,8 +244,12 @@ class GroupStore extends BaseStore {
 		return this._createMutation.isSuccess;
 	}
 
+	get createdGroup(): GroupResponseDto | null {
+		return this._createMutation.data ?? null;
+	}
+
 	async createGroup(data: GroupCreateDto): Promise<GroupResponseDto | null> {
-		return this._createMutation.mutate(data);
+		return untrack(() => this._createMutation.mutate(data));
 	}
 
 	resetCreate(): void {
@@ -252,7 +276,7 @@ class GroupStore extends BaseStore {
 	}
 
 	async updateGroup(id: number, data: GroupUpdateDto): Promise<GroupResponseDto | null> {
-		return this._updateMutation.mutate({ id, data });
+		return untrack(() => this._updateMutation.mutate({ id, data }));
 	}
 
 	resetUpdate(): void {
@@ -539,13 +563,10 @@ queryRegistry.resetAll();
 
 ```svelte
 <script lang="ts">
-	import { untrack } from 'svelte';
 	import { groupsStore } from '$lib/modules/groups';
 
 	$effect(() => {
-		untrack(() => {
-			void groupsStore.fetchGroups();
-		});
+		void groupsStore.fetchGroups();
 	});
 </script>
 
@@ -596,7 +617,7 @@ queryRegistry.resetAll();
 
 		if (groupStore.isCreateSuccess) {
 			toast.success('Группа создана');
-			await goto('/groups/' + groupStore.currentGroup?.id);
+			await goto('/groups/' + groupStore.createdGroup?.id);
 		} else {
 			toast.error(groupStore.createError ?? 'Ошибка');
 		}
@@ -615,7 +636,6 @@ queryRegistry.resetAll();
 
 ```svelte
 <script lang="ts">
-	import { untrack } from 'svelte';
 	import { toast, Spinner } from '@repo/ui';
 	import {
 		groupStore,
@@ -628,17 +648,20 @@ queryRegistry.resetAll();
 
 	const groupId = $derived(Number(page.params.id));
 	let form = $state<GroupFormData>({ ...EMPTY_GROUP_FORM });
+	let isFormInitialized = $state(false);
 
 	$effect(() => {
-		untrack(() => {
-			void groupStore.fetchGroup(groupId);
-		});
-		return () => groupStore.resetForm();
+		void groupStore.fetchGroup(groupId);
+		return () => {
+			groupStore.resetForm();
+			isFormInitialized = false;
+		};
 	});
 
 	$effect(() => {
-		if (groupStore.currentGroup && !groupStore.updateError) {
+		if (groupStore.currentGroup && !groupStore.updateError && !isFormInitialized) {
 			form = groupFormFromEntity(groupStore.currentGroup);
+			isFormInitialized = true;
 		}
 	});
 

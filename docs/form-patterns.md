@@ -90,9 +90,9 @@ $effect(() => {
 const handleSubmit = async () => {
 	await groupStore.createGroup(groupFormToCreateDto(form));
 
-	if (groupStore.isCreateSuccess && groupStore.currentGroup) {
+	if (groupStore.isCreateSuccess && groupStore.createdGroup) {
 		toast.success('Создано');
-		await goto(ROUTES.GROUP_DETAIL(groupStore.currentGroup.id));
+		await goto(ROUTES.GROUP_DETAIL(groupStore.createdGroup.id));
 	} else {
 		toast.error(groupStore.createError ?? 'Ошибка');
 	}
@@ -355,9 +355,9 @@ export { default as GroupForm } from './GroupForm.svelte';
 	const handleSubmit = async () => {
 		await groupStore.createGroup(groupFormToCreateDto(form));
 
-		if (groupStore.isCreateSuccess) {
+		if (groupStore.isCreateSuccess && groupStore.createdGroup) {
 			toast.success('Группа создана');
-			await goto(resolve(ROUTES.GROUP_DETAIL(groupStore.currentGroup!.id)));
+			await goto(resolve(ROUTES.GROUP_DETAIL(groupStore.createdGroup.id)));
 		} else {
 			toast.error(groupStore.createError ?? 'Ошибка');
 		}
@@ -372,7 +372,6 @@ export { default as GroupForm } from './GroupForm.svelte';
 ```svelte
 <script lang="ts">
 	import { Button, EmptyState, Spinner, toast } from '@repo/ui';
-	import { untrack } from 'svelte';
 	import {
 		GroupForm,
 		groupStore,
@@ -394,9 +393,7 @@ export { default as GroupForm } from './GroupForm.svelte';
 	let isFormInitialized = $state(false);
 
 	$effect(() => {
-		untrack(() => {
-			void groupStore.fetchGroup(groupId);
-		});
+		void groupStore.fetchGroup(groupId);
 		return () => {
 			groupStore.resetForm();
 			isFormInitialized = false;
@@ -456,7 +453,7 @@ const handleSubmit = async () => {
 
     if (store.isCreateSuccess) {
         toast.success('Создано');
-        await goto('/items/' + store.currentItem?.id);
+        await goto('/items/' + store.createdItem?.id);
     } else {
         toast.error(store.createError ?? 'Ошибка');
     }
@@ -514,6 +511,8 @@ Store делегирует через `BaseStore._extractErrorMessage(error, fal
 
 ```typescript
 // modules/groups/group-store.svelte.ts
+import { untrack } from 'svelte';
+
 class GroupStore extends BaseStore {
 	private readonly _createMutation: MutationResult<GroupResponseDto, GroupCreateDto>;
 	private readonly _updateMutation: MutationResult<GroupResponseDto, { id: number; data: GroupUpdateDto }>;
@@ -547,7 +546,7 @@ class GroupStore extends BaseStore {
 	}
 
 	async createGroup(data: GroupCreateDto): Promise<GroupResponseDto | null> {
-		return this._createMutation.mutate(data);
+		return untrack(() => this._createMutation.mutate(data));
 	}
 
 	// Update
@@ -560,7 +559,7 @@ class GroupStore extends BaseStore {
 	}
 
 	async updateGroup(id: number, data: GroupUpdateDto): Promise<GroupResponseDto | null> {
-		return this._updateMutation.mutate({ id, data });
+		return untrack(() => this._updateMutation.mutate({ id, data }));
 	}
 
 	resetForm(): void {
@@ -574,6 +573,8 @@ class GroupStore extends BaseStore {
 
 ```typescript
 // modules/auth/store.svelte.ts
+import { untrack } from 'svelte';
+
 class AuthStore extends BaseStore {
 	private readonly _query: QueryResult<UserResponseDto>;
 	private readonly _loginMutation: MutationResult<void, AuthLoginDto>;
@@ -614,7 +615,7 @@ class AuthStore extends BaseStore {
 	}
 
 	async login(data: AuthLoginDto): Promise<void> {
-		await this._loginMutation.mutate(data);
+		await untrack(() => this._loginMutation.mutate(data));
 	}
 
 	resetForm(): void {
