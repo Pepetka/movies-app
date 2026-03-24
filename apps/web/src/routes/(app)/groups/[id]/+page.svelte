@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { FAB, Tabs, Avatar, Spinner } from '@repo/ui';
 	import { Plus, Pencil } from '@lucide/svelte';
-	import { untrack } from 'svelte';
 
 	import {
 		groupMoviesStore,
@@ -34,7 +33,7 @@
 			title: group?.name ?? `Группа ${groupId}`,
 			showBack: true,
 			onBack: () => goto(resolve(ROUTES.GROUPS)),
-			trailingAction: group
+			trailingAction: groupStore.isModerator
 				? {
 						Icon: Pencil,
 						label: 'Редактировать',
@@ -47,10 +46,8 @@
 
 	$effect(() => {
 		if (groupId) {
-			untrack(() => {
-				void groupStore.fetchGroup(groupId);
-				void groupMoviesStore.fetchMovies(groupId);
-			});
+			void groupStore.fetchGroup(groupId);
+			void groupMoviesStore.fetchMovies(groupId);
 		}
 	});
 

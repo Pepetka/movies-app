@@ -1,3 +1,5 @@
+import { untrack } from 'svelte';
+
 import {
 	createMutation,
 	createQuery,
@@ -56,6 +58,18 @@ class GroupStore extends BaseStore {
 		return this._query.data ?? null;
 	}
 
+	get currentUserRole(): string | null {
+		return this._query.data?.currentUserRole ?? null;
+	}
+
+	get isAdmin(): boolean {
+		return this.currentUserRole === 'admin';
+	}
+
+	get isModerator(): boolean {
+		return this.currentUserRole === 'moderator' || this.currentUserRole === 'admin';
+	}
+
 	get status(): FetchStatus {
 		return this._query.status;
 	}
@@ -82,8 +96,10 @@ class GroupStore extends BaseStore {
 	}
 
 	async fetchGroup(id: number): Promise<void> {
-		if (this._query.isCurrentKey(['group', id]) && (this.isLoaded || this.isFetching)) return;
-		await this._query.revalidate(['group', id], id);
+		return untrack(async () => {
+			if (this._query.isCurrentKey(['group', id]) && (this.isLoaded || this.isFetching)) return;
+			await this._query.revalidate(['group', id], id);
+		});
 	}
 
 	// Create mutation
@@ -110,7 +126,7 @@ class GroupStore extends BaseStore {
 	}
 
 	async createGroup(data: GroupCreateDto): Promise<GroupResponseDto | null> {
-		return this._createMutation.mutate(data);
+		return untrack(() => this._createMutation.mutate(data));
 	}
 
 	resetCreate(): void {
@@ -137,7 +153,7 @@ class GroupStore extends BaseStore {
 	}
 
 	async updateGroup(id: number, data: GroupUpdateDto): Promise<GroupResponseDto | null> {
-		return this._updateMutation.mutate({ id, data });
+		return untrack(() => this._updateMutation.mutate({ id, data }));
 	}
 
 	resetUpdate(): void {

@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { Spinner, toast } from '@repo/ui';
-	import { untrack } from 'svelte';
 
 	import {
 		GroupForm,
@@ -21,7 +20,6 @@
 	const groupId = $derived(Number(page.params.id));
 
 	let form = $state<GroupFormData>({ ...EMPTY_GROUP_FORM });
-	let loadedGroup = $state<number | null>(null);
 
 	$effect(() => {
 		topBarStore.configure({
@@ -33,20 +31,25 @@
 	});
 
 	$effect(() => {
-		untrack(() => {
+		if (groupId) {
 			void groupStore.fetchGroup(groupId);
-		});
+		}
 
 		return () => {
 			groupStore.resetForm();
-			loadedGroup = null;
 		};
 	});
 
 	$effect(() => {
-		if (groupStore.currentGroup && groupStore.currentGroup.id !== loadedGroup) {
+		if (groupStore.isLoaded && groupStore.currentGroup?.id === groupId) {
 			form = groupFormFromEntity(groupStore.currentGroup);
-			loadedGroup = groupStore.currentGroup.id;
+		}
+	});
+
+	$effect(() => {
+		if (groupStore.isLoaded && groupStore.currentGroup?.id === groupId && !groupStore.isModerator) {
+			toast.error('Редактирование доступно только модераторам');
+			void goto(resolve(ROUTES.GROUP_DETAIL(groupId)));
 		}
 	});
 
