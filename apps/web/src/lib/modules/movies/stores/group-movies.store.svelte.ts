@@ -1,3 +1,5 @@
+import { untrack } from 'svelte';
+
 import { createQuery, type FetchStatus, type QueryResult } from '$lib/query';
 import type { GroupMovieResponseDto } from '$lib/api/generated/types';
 import { BaseStore } from '$lib/stores/base.svelte';
@@ -60,17 +62,19 @@ class GroupMoviesStore extends BaseStore {
 	}
 
 	async fetchMovies(groupId: number): Promise<void> {
-		const key = ['group-movies', groupId];
+		return untrack(async () => {
+			const key = ['group-movies', groupId];
 
-		if (this._query.isCurrentKey(key) && (this.isLoaded || this.isFetching)) {
-			return;
-		}
+			if (this._query.isCurrentKey(key) && (this.isLoaded || this.isFetching)) {
+				return;
+			}
 
-		await this._query.revalidate(key, groupId);
+			await this._query.revalidate(key, groupId);
+		});
 	}
 
 	async fetch(): Promise<void> {
-		await this._query.fetch();
+		return untrack(() => this._query.fetch());
 	}
 
 	reset(): void {
