@@ -1,5 +1,6 @@
 export {
 	getGroupMovies,
+	getGroupMovie,
 	searchMovies,
 	addProviderMovie,
 	createCustomMovie,

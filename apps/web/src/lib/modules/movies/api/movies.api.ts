@@ -1,5 +1,6 @@
 import {
 	groupMoviesControllerFindAllV1,
+	groupMoviesControllerFindOneV1,
 	groupMoviesControllerAddProviderMovieV1,
 	groupMoviesControllerCreateCustomMovieV1,
 	groupMoviesControllerUpdateV1,
@@ -18,6 +19,14 @@ export const getGroupMovies = async (
 	signal?: AbortSignal
 ): Promise<GroupMovieResponseDto[]> => {
 	return groupMoviesControllerFindAllV1(groupId, undefined, { signal });
+};
+
+export const getGroupMovie = async (
+	groupId: number,
+	movieId: number,
+	signal?: AbortSignal
+): Promise<GroupMovieResponseDto> => {
+	return groupMoviesControllerFindOneV1(groupId, movieId, { signal });
 };
 
 export const searchMovies = async (query: string, signal?: AbortSignal) => {
