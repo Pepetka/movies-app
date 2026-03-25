@@ -36,7 +36,6 @@
 		if (groupId && movieId) {
 			void groupMovieDetailStore.fetchMovie(groupId, movieId);
 		}
-		return () => groupMovieDetailStore.reset();
 	});
 
 	const handleEditStatus = () => {

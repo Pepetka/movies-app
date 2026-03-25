@@ -70,6 +70,10 @@
 	color: var(--text-tertiary);
 }
 
+.form-divider {
+	margin-bottom: var(--space-3);
+}
+
 /* ========================================
    Form Fields
    ======================================== */
