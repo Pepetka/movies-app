@@ -14,7 +14,8 @@ import { BaseStore } from '$lib/stores/base.svelte';
 import {
 	createGroup as createGroupApi,
 	getGroup as getGroupApi,
-	updateGroup as updateGroupApi
+	updateGroup as updateGroupApi,
+	deleteGroup as deleteGroupApi
 } from '../api';
 
 class GroupStore extends BaseStore {
@@ -24,6 +25,7 @@ class GroupStore extends BaseStore {
 		GroupResponseDto,
 		{ id: number; data: GroupUpdateDto }
 	>;
+	private readonly _deleteMutation: MutationResult<void, number>;
 
 	constructor() {
 		super();
@@ -50,6 +52,13 @@ class GroupStore extends BaseStore {
 			tags: ['groups'],
 			mutator: ({ id, data }) => updateGroupApi(id, data),
 			invalidateKeys: (_, { id }) => [['group', id]],
+			debug: !__IS_PROD__
+		});
+
+		this._deleteMutation = createMutation<void, number>({
+			key: ['group', 'delete'],
+			tags: ['groups'],
+			mutator: (id) => deleteGroupApi(id),
 			debug: !__IS_PROD__
 		});
 	}
@@ -160,6 +169,33 @@ class GroupStore extends BaseStore {
 		this._updateMutation.reset();
 	}
 
+	// Delete mutation
+
+	get deleteStatus(): PostStatus {
+		return this._deleteMutation.status;
+	}
+
+	get deleteError(): string | null {
+		if (!this._deleteMutation.error) return null;
+		return this._extractErrorMessage(this._deleteMutation.error, 'Ошибка удаления группы');
+	}
+
+	get isDeleting(): boolean {
+		return this._deleteMutation.isSubmitting;
+	}
+
+	get isDeleteSuccess(): boolean {
+		return this._deleteMutation.isSuccess;
+	}
+
+	async deleteGroup(id: number): Promise<void> {
+		await untrack(() => this._deleteMutation.mutate(id));
+	}
+
+	resetDelete(): void {
+		this._deleteMutation.reset();
+	}
+
 	reset(): void {
 		this._query.reset();
 	}
@@ -167,6 +203,7 @@ class GroupStore extends BaseStore {
 	resetForm(): void {
 		this._createMutation.reset();
 		this._updateMutation.reset();
+		this._deleteMutation.reset();
 	}
 }
 

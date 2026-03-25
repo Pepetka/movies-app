@@ -1,1 +1,1 @@
-export { getGroups, getGroup, createGroup, updateGroup } from './groups.api';
+export { getGroups, getGroup, createGroup, updateGroup, deleteGroup } from './groups.api';
