@@ -1,5 +1,5 @@
 export {
-	customMovieSchema,
+	customMovieFormSchema,
 	EMPTY_CUSTOM_MOVIE_FORM,
 	validateCustomMovieForm,
 	customMovieFormToCreateDto,

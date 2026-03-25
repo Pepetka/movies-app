@@ -24,7 +24,9 @@ export {
 	validateMovieStatusForm,
 	movieStatusFormToUpdateDto,
 	movieStatusFormFromEntity,
+	EMPTY_CUSTOM_MOVIE_FORM,
 	EMPTY_STATUS_FORM,
+	type CustomMovieFormData,
 	type MovieStatusFormData
 } from './validation';
 
