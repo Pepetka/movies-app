@@ -1,5 +1,8 @@
 <script lang="ts">
+	import { Calendar } from '@lucide/svelte';
 	import { Card, Image } from '@repo/ui';
+
+	import { formatDate } from '$lib/utils';
 
 	import MovieStatusBadge from './MovieStatusBadge.svelte';
 	import type { IProps } from './MovieCard.types';
@@ -9,6 +12,11 @@
 	const yearDisplay = $derived(movie.releaseYear ? String(movie.releaseYear) : undefined);
 
 	const ratingDisplay = $derived(movie.rating ? movie.rating.toFixed(1) : undefined);
+
+	const dateDisplay = $derived.by(() => {
+		const dateStr = movie.plannedDate || movie.watchedDate;
+		return dateStr ? formatDate(dateStr, 'short') : null;
+	});
 </script>
 
 <Card variant="outlined" interactive={!!onclick} {onclick} {...restProps}>
@@ -30,6 +38,12 @@
 					<span class="movie-card__rating">★ {ratingDisplay}</span>
 				{/if}
 			</div>
+			{#if dateDisplay}
+				<div class="movie-card__date">
+					<Calendar size={12} />
+					<span>{dateDisplay}</span>
+				</div>
+			{/if}
 		</div>
 	</div>
 </Card>
@@ -85,5 +99,13 @@
 
 	.movie-card__rating {
 		color: var(--color-warning);
+	}
+
+	.movie-card__date {
+		display: flex;
+		align-items: center;
+		gap: var(--space-1);
+		font-size: var(--text-xs);
+		color: var(--text-tertiary);
 	}
 </style>
