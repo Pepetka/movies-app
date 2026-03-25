@@ -1,5 +1,15 @@
 <script lang="ts">
-	import { Input, Spinner, EmptyState, List, ListItem, Image, Badge, toast } from '@repo/ui';
+	import {
+		Input,
+		Spinner,
+		EmptyState,
+		List,
+		ListItem,
+		Image,
+		Badge,
+		toast,
+		Button
+	} from '@repo/ui';
 	import { Star, Search } from '@lucide/svelte';
 
 	import { moviesSearchStore, groupMovieStore } from '$lib/modules/movies';
@@ -119,6 +129,17 @@
 			<EmptyState title="Поиск фильмов" description="Введите название для поиска" />
 		{/if}
 	</div>
+
+	<div class="search-page__footer">
+		<p class="search-page__footer-text">Не нашли фильм?</p>
+		<Button
+			variant="ghost"
+			size="sm"
+			onclick={() => goto(resolve(ROUTES.GROUP_MOVIE_NEW(groupId)))}
+		>
+			Создайте свой
+		</Button>
+	</div>
 </div>
 
 <style>
@@ -151,5 +172,19 @@
 		display: flex;
 		justify-content: center;
 		padding: var(--space-8) 0;
+	}
+
+	.search-page__footer {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: var(--space-1);
+		padding: var(--space-4) 0 var(--space-6);
+	}
+
+	.search-page__footer-text {
+		font-size: var(--text-sm);
+		color: var(--text-tertiary);
+		margin: 0;
 	}
 </style>
