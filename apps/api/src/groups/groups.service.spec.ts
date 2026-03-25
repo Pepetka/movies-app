@@ -151,12 +151,19 @@ describe('GroupsService', () => {
   describe('findOne', () => {
     it('should return group for member', async () => {
       groupsRepository.findGroupById.mockResolvedValue(mockGroup);
-      groupsRepository.findMember.mockResolvedValue(mockGroupMember);
+      groupsRepository.getGroupWithMember.mockResolvedValue({
+        ...mockGroup,
+        member: mockGroupMember,
+      });
 
       const result = await service.findOne(1, 2);
 
-      expect(result).toEqual(mockGroup);
+      expect(result).toEqual({
+        ...mockGroup,
+        currentUserRole: mockGroupMember.role,
+      });
       expect(groupsRepository.findGroupById).toHaveBeenCalledWith(1);
+      expect(groupsRepository.getGroupWithMember).toHaveBeenCalledWith(1, 2);
     });
 
     it('should throw GroupNotFoundException for non-existent group', async () => {
@@ -169,7 +176,7 @@ describe('GroupsService', () => {
 
     it('should throw NotGroupMemberException for non-member', async () => {
       groupsRepository.findGroupById.mockResolvedValue(mockGroup);
-      groupsRepository.findMember.mockResolvedValue(null);
+      groupsRepository.getGroupWithMember.mockResolvedValue(null);
 
       await expect(service.findOne(1, 2)).rejects.toThrow(
         NotGroupMemberException,
