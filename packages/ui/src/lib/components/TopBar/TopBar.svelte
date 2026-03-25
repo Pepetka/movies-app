@@ -100,19 +100,19 @@
 	}
 
 	.ui-top-bar-inner.sm {
-		max-width: var(--container-sm-max-width);
+		max-width: min(100%, var(--container-sm-max-width));
 	}
 
 	.ui-top-bar-inner.md {
-		max-width: var(--container-md-max-width);
+		max-width: min(100%, var(--container-md-max-width));
 	}
 
 	.ui-top-bar-inner.lg {
-		max-width: var(--container-lg-max-width);
+		max-width: min(100%, var(--container-lg-max-width));
 	}
 
 	.ui-top-bar-inner.xl {
-		max-width: var(--container-xl-max-width);
+		max-width: min(100%, var(--container-xl-max-width));
 	}
 
 	.ui-top-bar-inner.full {
@@ -120,7 +120,7 @@
 	}
 
 	.ui-top-bar-title {
-		flex: 1 0 auto;
+		flex: 1;
 		min-width: 0;
 		font-size: var(--text-lg);
 		font-weight: var(--font-semibold);
