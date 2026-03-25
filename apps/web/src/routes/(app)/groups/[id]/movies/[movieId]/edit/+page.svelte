@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Button, Card, Spinner, toast } from '@repo/ui';
+	import { Button, Card, Modal, Spinner, toast } from '@repo/ui';
 	import { Trash2 } from '@lucide/svelte';
 	import { untrack } from 'svelte';
 
@@ -19,11 +19,13 @@
 	import { page } from '$app/state';
 
 	import '$lib/styles/page-states.css';
+	import '$lib/styles/danger-zone.css';
 
 	const groupId = $derived(Number(page.params.id));
 	const movieId = $derived(Number(page.params.movieId));
 
 	let form = $state<CustomMovieFormData>({ ...EMPTY_CUSTOM_MOVIE_FORM });
+	let showDeleteModal = $state(false);
 
 	$effect(() => {
 		topBarStore.configure({
@@ -41,6 +43,7 @@
 
 		return () => {
 			groupMovieStore.resetUpdate();
+			groupMovieStore.resetRemove();
 		};
 	});
 
@@ -80,6 +83,26 @@
 	const handleRetry = () => {
 		void groupMovieDetailStore.fetchMovie(groupId, movieId);
 	};
+
+	const handleDelete = async () => {
+		await groupMovieStore.removeMovie(groupId, movieId);
+
+		if (groupMovieStore.isRemoveSuccess) {
+			toast.success('Фильм удалён из группы');
+			await goto(resolve(ROUTES.GROUP_DETAIL(groupId)));
+		} else {
+			toast.error(groupMovieStore.removeError ?? 'Ошибка удаления');
+		}
+	};
+
+	const openDeleteModal = () => {
+		showDeleteModal = true;
+	};
+
+	const closeDeleteModal = () => {
+		showDeleteModal = false;
+		groupMovieStore.resetRemove();
+	};
 </script>
 
 <svelte:head>
@@ -113,13 +136,33 @@
 			{/snippet}
 
 			<div class="danger-zone__content">
-				<Button variant="danger" disabled fullWidth>
+				<Button variant="danger" fullWidth onclick={openDeleteModal}>
 					<Trash2 size={16} />
 					Удалить фильм из группы
 				</Button>
 			</div>
 		</Card>
 	</div>
+
+	<Modal bind:open={showDeleteModal} size="sm">
+		{#snippet header()}
+			<h2>Удалить фильм?</h2>
+		{/snippet}
+
+		<p class="modal-text">
+			Вы уверены, что хотите удалить фильм "{groupMovieDetailStore.movie?.title}" из группы? Это
+			действие нельзя отменить.
+		</p>
+
+		{#snippet footer()}
+			<Button variant="secondary" onclick={closeDeleteModal} disabled={groupMovieStore.isRemoving}>
+				Отмена
+			</Button>
+			<Button variant="danger" onclick={handleDelete} loading={groupMovieStore.isRemoving}>
+				Удалить
+			</Button>
+		{/snippet}
+	</Modal>
 {:else}
 	<div class="page-state">
 		<Spinner size="lg" />
@@ -133,31 +176,6 @@
 		gap: var(--space-6);
 		padding-block: var(--space-4);
 		align-items: center;
-	}
-
-	.danger-zone__header {
-		text-align: center;
-	}
-
-	.danger-zone__title {
-		font-size: var(--text-lg);
-		font-weight: var(--font-semibold);
-		color: var(--color-error);
-		margin-bottom: var(--space-1);
-	}
-
-	.danger-zone__subtitle {
-		font-size: var(--text-sm);
-		color: var(--text-tertiary);
-	}
-
-	.danger-zone__content {
-		padding-top: var(--space-2);
-	}
-
-	:global(.danger-zone-card) {
-		width: 100%;
-		max-width: 400px;
 	}
 
 	@media (min-width: 480px) {
