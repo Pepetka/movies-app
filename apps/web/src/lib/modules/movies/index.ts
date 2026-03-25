@@ -1,5 +1,10 @@
 // Stores
-export { groupMoviesStore, groupMovieStore, moviesSearchStore } from './stores';
+export {
+	groupMoviesStore,
+	groupMovieStore,
+	groupMovieDetailStore,
+	moviesSearchStore
+} from './stores';
 
 // Types
 export {
@@ -15,8 +20,13 @@ export {
 	validateCustomMovieForm,
 	customMovieFormToCreateDto,
 	customMovieFormToUpdateDto,
-	customMovieFormFromEntity
+	customMovieFormFromEntity,
+	validateMovieStatusForm,
+	movieStatusFormToUpdateDto,
+	movieStatusFormFromEntity,
+	EMPTY_STATUS_FORM,
+	type MovieStatusFormData
 } from './validation';
 
 // Components
-export { MovieCard, MovieGrid, MovieStatusBadge } from './components';
+export { MovieCard, MovieGrid, MovieStatusBadge, MovieStatusModal } from './components';

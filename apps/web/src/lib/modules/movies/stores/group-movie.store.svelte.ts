@@ -56,6 +56,7 @@ class GroupMovieStore extends BaseStore {
 			key: ['group-movies', 'update'],
 			tags: ['group-movies'],
 			mutator: ({ groupId, movieId, data }) => updateMovie(groupId, movieId, data),
+			invalidateKeys: (_, { groupId, movieId }) => [['group-movie', groupId, movieId]],
 			debug: !__IS_PROD__
 		});
 
