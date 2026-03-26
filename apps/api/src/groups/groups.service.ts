@@ -105,9 +105,14 @@ export class GroupsService {
       throw new NotGroupMemberException();
     }
 
+    const role = memberData.member.role;
+    if (!Object.values(GroupMemberRole).includes(role as GroupMemberRole)) {
+      throw new Error(`Invalid role value: ${role}`);
+    }
+
     return {
       ...group,
-      currentUserRole: memberData.member.role as GroupMemberRole,
+      currentUserRole: role as GroupMemberRole,
     };
   }
 
