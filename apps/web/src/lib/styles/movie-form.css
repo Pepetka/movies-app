@@ -1,0 +1,24 @@
+/* ========================================
+   Movie Forms - Movie-Specific Styles
+   ======================================== */
+
+@import './form-base.css';
+
+/* ========================================
+   Movie Form Poster Preview
+   ======================================== */
+
+.movie-form-poster-preview {
+	display: flex;
+	justify-content: center;
+	margin-bottom: var(--space-3);
+}
+
+.movie-form-poster-preview :global(.ui-image) {
+	width: 120px;
+	border-radius: var(--radius-lg);
+	overflow: hidden;
+	box-shadow:
+		0 8px 24px -4px color-mix(in srgb, var(--color-primary) 30%, transparent),
+		0 16px 48px -8px color-mix(in srgb, var(--color-primary) 15%, transparent);
+}

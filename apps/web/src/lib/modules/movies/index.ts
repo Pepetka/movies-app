@@ -31,4 +31,4 @@ export {
 } from './validation';
 
 // Components
-export { MovieCard, MovieGrid, MovieStatusBadge, MovieStatusModal } from './components';
+export { MovieCard, MovieForm, MovieGrid, MovieStatusBadge, MovieStatusModal } from './components';

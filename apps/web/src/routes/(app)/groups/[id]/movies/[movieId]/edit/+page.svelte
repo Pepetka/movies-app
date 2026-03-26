@@ -6,12 +6,12 @@
 	import {
 		groupMovieDetailStore,
 		groupMovieStore,
+		MovieForm,
 		EMPTY_CUSTOM_MOVIE_FORM,
 		customMovieFormFromEntity,
 		customMovieFormToUpdateDto,
 		type CustomMovieFormData
 	} from '$lib/modules/movies';
-	import MovieForm from '$lib/modules/movies/components/MovieForm.svelte';
 	import { topBarStore } from '$lib/stores';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';

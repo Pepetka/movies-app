@@ -11,7 +11,7 @@
 		type CustomMovieFormProps
 	} from '../validation';
 
-	import '$lib/styles/form-base.css';
+	import '$lib/styles/movie-form.css';
 
 	let {
 		mode = 'create',
@@ -61,7 +61,7 @@
 <div class="form-page">
 	<div class="form-branding">
 		{#if form.posterPath}
-			<div class="poster-preview">
+			<div class="movie-form-poster-preview">
 				<UIImage src={form.posterPath} alt="Превью постера" ratio="2/3" />
 			</div>
 		{/if}
@@ -153,20 +153,3 @@
 		</form>
 	</Card>
 </div>
-
-<style>
-	.poster-preview {
-		display: flex;
-		justify-content: center;
-		margin-bottom: var(--space-3);
-	}
-
-	.poster-preview :global(.ui-image) {
-		width: 120px;
-		border-radius: var(--radius-lg);
-		overflow: hidden;
-		box-shadow:
-			0 8px 24px -4px color-mix(in srgb, var(--color-primary) 30%, transparent),
-			0 16px 48px -8px color-mix(in srgb, var(--color-primary) 15%, transparent);
-	}
-</style>
