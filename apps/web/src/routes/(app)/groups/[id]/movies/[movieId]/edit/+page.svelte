@@ -26,6 +26,7 @@
 
 	let form = $state<CustomMovieFormData>({ ...EMPTY_CUSTOM_MOVIE_FORM });
 	let showDeleteModal = $state(false);
+	let hasRedirected = $state(false);
 
 	$effect(() => {
 		topBarStore.configure({
@@ -50,22 +51,15 @@
 	$effect(() => {
 		const rawMovie = groupMovieDetailStore.rawMovie;
 		if (groupMovieDetailStore.isLoaded && rawMovie && rawMovie.id === movieId) {
+			if (!groupMovieDetailStore.isModerator && !hasRedirected) {
+				hasRedirected = true;
+				toast.error('Редактирование доступно только модераторам');
+				void goto(resolve(ROUTES.GROUP_MOVIE_DETAIL(groupId, movieId)));
+				return;
+			}
 			untrack(() => {
 				form = customMovieFormFromEntity(rawMovie);
 			});
-		}
-	});
-
-	$effect(() => {
-		const rawMovie = groupMovieDetailStore.rawMovie;
-		if (
-			groupMovieDetailStore.isLoaded &&
-			rawMovie &&
-			rawMovie.id === movieId &&
-			!groupMovieDetailStore.isModerator
-		) {
-			toast.error('Редактирование доступно только модераторам');
-			void goto(resolve(ROUTES.GROUP_MOVIE_DETAIL(groupId, movieId)));
 		}
 	});
 

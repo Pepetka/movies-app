@@ -107,7 +107,12 @@
 						{/if}
 					</div>
 					{#if groupMovieDetailStore.isModerator}
-						<Button variant="ghost" size="sm" onclick={handleEditStatus}>
+						<Button
+							variant="ghost"
+							size="sm"
+							onclick={handleEditStatus}
+							aria-label="Изменить статус"
+						>
 							<Pencil size={14} />
 						</Button>
 					{/if}

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { Button, Card, Modal, Spinner, toast } from '@repo/ui';
 	import { Trash2 } from '@lucide/svelte';
+	import { untrack } from 'svelte';
 
 	import {
 		GroupForm,
@@ -23,6 +24,7 @@
 
 	let form = $state<GroupFormData>({ ...EMPTY_GROUP_FORM });
 	let showDeleteModal = $state(false);
+	let hasRedirected = $state(false);
 
 	$effect(() => {
 		topBarStore.configure({
@@ -45,14 +47,15 @@
 
 	$effect(() => {
 		if (groupStore.isLoaded && groupStore.currentGroup?.id === groupId) {
-			form = groupFormFromEntity(groupStore.currentGroup);
-		}
-	});
-
-	$effect(() => {
-		if (groupStore.isLoaded && groupStore.currentGroup?.id === groupId && !groupStore.isModerator) {
-			toast.error('Редактирование доступно только модераторам');
-			void goto(resolve(ROUTES.GROUP_DETAIL(groupId)));
+			if (!groupStore.isModerator && !hasRedirected) {
+				hasRedirected = true;
+				toast.error('Редактирование доступно только модераторам');
+				void goto(resolve(ROUTES.GROUP_DETAIL(groupId)));
+				return;
+			}
+			untrack(() => {
+				form = groupFormFromEntity(groupStore.currentGroup!);
+			});
 		}
 	});
 
