@@ -7,6 +7,10 @@ export {
 	createValidator,
 	createFormFieldValidator,
 	extractZodErrors,
+	trimString,
+	trimToUndefined,
+	zodTrim,
+	zodTrimOptional,
 	type FormStatus,
 	type ValidationResult
 } from './validation.svelte';
