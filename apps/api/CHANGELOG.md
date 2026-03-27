@@ -1,5 +1,14 @@
 # api
 
+## 0.6.0
+
+### Minor Changes
+
+- 7656a50: Added currentUserRole to group response for role-based permissions
+  - GroupsService.findOne() returns user's role in the group
+  - GroupResponseDto includes optional currentUserRole field
+  - Updated unit tests to use getGroupWithMember mock
+
 ## 0.5.0
 
 ### Minor Changes
