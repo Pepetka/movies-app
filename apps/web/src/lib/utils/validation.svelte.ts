@@ -11,6 +11,20 @@ export interface ValidationResult<T> {
 	errors: Record<string, string>;
 }
 
+export const trimString = (val: string | undefined | null): string => val?.trim() ?? '';
+
+export const trimToUndefined = (val: string | undefined | null): string | undefined => {
+	const trimmed = val?.trim();
+	return trimmed || undefined;
+};
+
+export const zodTrim = z.preprocess((val) => trimString(val as string), z.string());
+
+export const zodTrimOptional = z.preprocess(
+	(val) => trimToUndefined(val as string),
+	z.string().optional()
+);
+
 export const extractZodErrors = (error: z.ZodError): Record<string, string> => {
 	const errors = error.flatten().fieldErrors;
 	return Object.fromEntries(

@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 import type { AuthLoginDto, AuthRegisterDto } from '$lib/api/generated/types';
-import { createValidator } from '$lib/utils/validation.svelte';
+import { createValidator, trimString } from '$lib/utils/validation.svelte';
 
 export const PASSWORD_PATTERNS = {
 	lowercase: /[a-z]/,
@@ -19,7 +19,10 @@ export const checkPasswordStrength = (password: string) => ({
 });
 
 export const loginSchema = z.object({
-	email: z.string().min(1, 'Email обязателен').email('Некорректный формат email'),
+	email: z.preprocess(
+		(val) => trimString(val as string),
+		z.string().min(1, 'Email обязателен').email('Некорректный формат email')
+	),
 	password: z.string().min(1, 'Пароль обязателен')
 });
 
@@ -33,8 +36,14 @@ const passwordSchema = z
 
 export const registerSchema = z
 	.object({
-		name: z.string().min(2, 'Минимум 2 символа').max(256, 'Максимум 256 символов'),
-		email: z.string().min(1, 'Email обязателен').email('Некорректный формат email'),
+		name: z.preprocess(
+			(val) => trimString(val as string),
+			z.string().min(2, 'Минимум 2 символа').max(256, 'Максимум 256 символов')
+		),
+		email: z.preprocess(
+			(val) => trimString(val as string),
+			z.string().min(1, 'Email обязателен').email('Некорректный формат email')
+		),
 		password: passwordSchema,
 		confirmPassword: z.string().min(1, 'Подтвердите пароль')
 	})

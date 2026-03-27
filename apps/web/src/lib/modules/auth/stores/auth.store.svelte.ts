@@ -1,3 +1,5 @@
+import { untrack } from 'svelte';
+
 import {
 	createMutation,
 	createQuery,
@@ -95,7 +97,7 @@ class AuthStore extends BaseStore {
 	}
 
 	async login(data: AuthLoginDto): Promise<void> {
-		await this._loginMutation.mutate(data);
+		await untrack(() => this._loginMutation.mutate(data));
 	}
 
 	// === Register mutation ===
@@ -114,34 +116,38 @@ class AuthStore extends BaseStore {
 	}
 
 	async register(data: AuthRegisterDto): Promise<void> {
-		await this._registerMutation.mutate(data);
+		await untrack(() => this._registerMutation.mutate(data));
 	}
 
 	// === Logout ===
 
 	async logout(): Promise<void> {
-		try {
-			await apiLogout();
-		} catch (error) {
-			this._log('error', 'Logout failed', { error });
-			throw error;
-		} finally {
-			queryRegistry.resetAll();
-		}
+		await untrack(async () => {
+			try {
+				await apiLogout();
+			} catch (error) {
+				this._log('error', 'Logout failed', { error });
+				throw error;
+			} finally {
+				queryRegistry.resetAll();
+			}
+		});
 	}
 
 	// === Check Auth ===
 
 	async checkAuth(): Promise<void> {
-		if (this._checkAuthPromise) return this._checkAuthPromise;
-		if (this.user) return;
+		return untrack(async () => {
+			if (this._checkAuthPromise) return this._checkAuthPromise;
+			if (this.user) return;
 
-		this._checkAuthPromise = this._doCheckAuth();
-		try {
-			await this._checkAuthPromise;
-		} finally {
-			this._checkAuthPromise = null;
-		}
+			this._checkAuthPromise = this._doCheckAuth();
+			try {
+				await this._checkAuthPromise;
+			} finally {
+				this._checkAuthPromise = null;
+			}
+		});
 	}
 
 	private async _doCheckAuth(): Promise<void> {

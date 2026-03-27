@@ -1,3 +1,5 @@
+import { untrack } from 'svelte';
+
 import type { ToastItem, ToastOptions } from './Toast.types.svelte';
 
 class ToastStore {
@@ -21,22 +23,24 @@ class ToastStore {
 	}
 
 	add(options: ToastOptions): string {
-		const id = this._generateId();
-		const toast: ToastItem = {
-			id,
-			message: options.message,
-			type: options.type ?? 'info',
-			duration: options.duration ?? 4000,
-			dismissible: options.dismissible ?? true,
-			action: options.action
-		};
+		return untrack(() => {
+			const id = this._generateId();
+			const toast: ToastItem = {
+				id,
+				message: options.message,
+				type: options.type ?? 'info',
+				duration: options.duration ?? 4000,
+				dismissible: options.dismissible ?? true,
+				action: options.action
+			};
 
-		if (this._toasts.length >= this._maxToasts) {
-			this._toasts = this._toasts.slice(1);
-		}
+			if (this._toasts.length >= this._maxToasts) {
+				this._toasts = this._toasts.slice(1);
+			}
 
-		this._toasts = [...this._toasts, toast];
-		return id;
+			this._toasts = [...this._toasts, toast];
+			return id;
+		});
 	}
 
 	dismiss(id: string): void {

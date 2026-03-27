@@ -81,7 +81,7 @@
 					style="font-size: var(--text-sm); color: var(--text-tertiary); margin-bottom: 8px; display: block;"
 					>Error</span
 				>
-				<DatePicker label="Дата" errorMessage="Дата обязательна" error />
+				<DatePicker label="Дата" error="Дата обязательна" />
 			</div>
 			<div>
 				<span
@@ -240,6 +240,39 @@
 				clearable={false}
 				helper="Поле без возможности очистки"
 			/>
+		</div>
+	{/snippet}
+</Story>
+
+<Story name="Inline">
+	{#snippet template()}
+		<div style="display: flex; flex-direction: column; gap: 24px;">
+			<div>
+				<span
+					style="font-size: var(--text-sm); color: var(--text-tertiary); margin-bottom: 8px; display: block;"
+					>Inline mode</span
+				>
+				<DatePicker inline bind:value={selectedDate} />
+			</div>
+			<div>
+				<span
+					style="font-size: var(--text-sm); color: var(--text-tertiary); margin-bottom: 8px; display: block;"
+					>Inline with error</span
+				>
+				<DatePicker inline error="Дата обязательна" />
+			</div>
+			<div>
+				<span
+					style="font-size: var(--text-sm); color: var(--text-tertiary); margin-bottom: 8px; display: block;"
+					>Inline with disabled dates</span
+				>
+				<DatePicker
+					inline
+					value={new Date()}
+					disabledDaysOfWeek={[0, 6]}
+					helper="Выберите будний день"
+				/>
+			</div>
 		</div>
 	{/snippet}
 </Story>

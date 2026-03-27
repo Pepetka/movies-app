@@ -32,8 +32,15 @@ apps/web/src/lib/
 
 ```
 apps/web/src/routes/
-├── (app)/                      # Protected routes (TODO)
-├── (auth)/                     # Auth routes (TODO)
+├── (app)/                      # Protected routes (auth required)
+│   ├── groups/                 # Groups list, create, edit
+│   │   ├── [id]/              # Group detail, members, movies
+│   │   └── new/               # Create group form
+│   ├── profile/               # User profile
+│   └── +layout.svelte         # App layout with AuthGuard
+├── (auth)/                     # Auth routes (public)
+│   ├── login/                 # Login form
+│   └── register/              # Register form
 ├── +layout.svelte              # Root layout
 ├── +page.svelte                # Landing
 └── +error.svelte               # Error page
@@ -166,22 +173,8 @@ import type { GroupFormData } from '../validation/groups.validation.svelte';
 
 ## TODO
 
-### Modules to Implement
-
-| Module | Priority | Description |
-| ------ | -------- | ----------- |
-| auth | High | AuthStore, login/register forms, AuthGuard component |
-| groups | High | GroupsStore, group pages, member management |
-| movies | Medium | MoviesStore, movie cards, search |
-| profile | Medium | ProfileStore, profile page |
-
-### Routes to Implement
+### Future Improvements
 
 | Route | Priority | Description |
 | ----- | -------- | ----------- |
-| /(app)/ | High | Protected layout with AuthGuard |
-| /(auth)/ | High | Auth layout (login, register) |
-| /groups | High | Groups list page |
-| /groups/[id] | High | Group detail page |
-| /profile | Medium | Profile page |
 | /admin/* | Low | Admin panel (ADMIN only) |

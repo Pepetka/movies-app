@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { Avatar, Button, EmptyState, FAB, List, ListItem, Skeleton, Spinner } from '@repo/ui';
 	import { Plus, Users } from '@lucide/svelte';
-	import { untrack } from 'svelte';
 
 	import { groupsStore } from '$lib/modules/groups';
 	import { topBarStore } from '$lib/stores';
@@ -25,9 +24,7 @@
 	});
 
 	$effect(() => {
-		untrack(() => {
-			void groupsStore.fetchGroups();
-		});
+		void groupsStore.fetchGroups();
 	});
 </script>
 

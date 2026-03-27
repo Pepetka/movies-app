@@ -1,3 +1,5 @@
+import { untrack } from 'svelte';
+
 import type {
 	AddMovieDto,
 	CreateCustomMovieDto,
@@ -54,6 +56,7 @@ class GroupMovieStore extends BaseStore {
 			key: ['group-movies', 'update'],
 			tags: ['group-movies'],
 			mutator: ({ groupId, movieId, data }) => updateMovie(groupId, movieId, data),
+			invalidateKeys: (_, { groupId, movieId }) => [['group-movie', groupId, movieId]],
 			debug: !__IS_PROD__
 		});
 
@@ -85,7 +88,7 @@ class GroupMovieStore extends BaseStore {
 	}
 
 	async addMovie(groupId: number, data: AddMovieDto): Promise<GroupMovieResponseDto | null> {
-		return this._addProviderMutation.mutate({ groupId, data });
+		return untrack(() => this._addProviderMutation.mutate({ groupId, data }));
 	}
 
 	resetAdd(): void {
@@ -115,7 +118,7 @@ class GroupMovieStore extends BaseStore {
 		groupId: number,
 		data: CreateCustomMovieDto
 	): Promise<GroupMovieResponseDto | null> {
-		return this._createCustomMutation.mutate({ groupId, data });
+		return untrack(() => this._createCustomMutation.mutate({ groupId, data }));
 	}
 
 	resetCreate(): void {
@@ -146,7 +149,7 @@ class GroupMovieStore extends BaseStore {
 		movieId: number,
 		data: GroupMovieUpdateDto
 	): Promise<GroupMovieResponseDto | null> {
-		return this._updateMutation.mutate({ groupId, movieId, data });
+		return untrack(() => this._updateMutation.mutate({ groupId, movieId, data }));
 	}
 
 	resetUpdate(): void {
@@ -173,7 +176,7 @@ class GroupMovieStore extends BaseStore {
 	}
 
 	async removeMovie(groupId: number, movieId: number): Promise<void> {
-		await this._removeMutation.mutate({ groupId, movieId });
+		await untrack(() => this._removeMutation.mutate({ groupId, movieId }));
 	}
 
 	resetRemove(): void {

@@ -1,14 +1,13 @@
 import type { HTMLInputAttributes } from 'svelte/elements';
 
-export type DatePickerSize = 'sm' | 'md' | 'lg';
+export type DatePickerSize = 'sm' | 'md' | 'lg' | 'responsive';
 
 export interface IProps extends Omit<HTMLInputAttributes, 'size' | 'value' | 'type'> {
-	label: string;
+	label?: string;
 	value?: Date | null;
 	size?: DatePickerSize;
 	disabled?: boolean;
-	error?: boolean;
-	errorMessage?: string;
+	error?: string;
 	helper?: string;
 	minDate?: Date;
 	maxDate?: Date;
@@ -19,5 +18,6 @@ export interface IProps extends Omit<HTMLInputAttributes, 'size' | 'value' | 'ty
 	weekendDays?: number[];
 	clearable?: boolean;
 	placeholder?: string;
+	inline?: boolean;
 	onChange?: (value: Date | null) => void;
 }

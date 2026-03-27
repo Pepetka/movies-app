@@ -1,3 +1,5 @@
+import { untrack } from 'svelte';
+
 import type {
 	GroupMovieResponseDto,
 	ProviderSearchResult,
@@ -91,21 +93,25 @@ class MoviesSearchStore extends BaseStore {
 	}
 
 	search(groupId: number, query: string): void {
-		this._debouncedSearch(groupId, query);
+		untrack(() => this._debouncedSearch(groupId, query));
 	}
 
 	clear(): void {
-		this._debouncedSearch.cancel();
-		this._query.reset();
+		untrack(() => {
+			this._debouncedSearch.cancel();
+			this._query.reset();
+		});
 	}
 
 	cancel(): void {
-		this._debouncedSearch.cancel();
+		untrack(() => this._debouncedSearch.cancel());
 	}
 
 	reset(): void {
-		this._debouncedSearch.cancel();
-		this._query.reset();
+		untrack(() => {
+			this._debouncedSearch.cancel();
+			this._query.reset();
+		});
 	}
 }
 

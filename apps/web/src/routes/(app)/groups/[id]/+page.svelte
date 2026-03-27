@@ -1,25 +1,25 @@
 <script lang="ts">
 	import { FAB, Tabs, Avatar, Spinner } from '@repo/ui';
 	import { Plus, Pencil } from '@lucide/svelte';
-	import { untrack } from 'svelte';
 
 	import {
 		groupMoviesStore,
 		MovieGrid,
 		type MovieFilter,
-		type MovieStatus
+		type MovieStatus,
+		type UnifiedMovie
 	} from '$lib/modules/movies';
+	import { ROUTES, sortByDateField } from '$lib/utils';
 	import { groupStore } from '$lib/modules/groups';
 	import { PagePlaceholder } from '$lib/ui';
 	import { topBarStore } from '$lib/stores';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
-	import { ROUTES } from '$lib/utils';
 	import { page } from '$app/state';
 
 	const groupId = $derived(Number(page.params.id));
 
-	let activeFilter = $state<MovieFilter>('all');
+	let activeFilter = $state<MovieFilter>('planned');
 
 	const filterTabs = [
 		{ id: 'all', label: 'Все' },
@@ -34,7 +34,7 @@
 			title: group?.name ?? `Группа ${groupId}`,
 			showBack: true,
 			onBack: () => goto(resolve(ROUTES.GROUPS)),
-			trailingAction: group
+			trailingAction: groupStore.isModerator
 				? {
 						Icon: Pencil,
 						label: 'Редактировать',
@@ -47,16 +47,26 @@
 
 	$effect(() => {
 		if (groupId) {
-			untrack(() => {
-				void groupStore.fetchGroup(groupId);
-				void groupMoviesStore.fetchMovies(groupId);
-			});
+			void groupStore.fetchGroup(groupId);
+			void groupMoviesStore.fetchMovies(groupId);
 		}
 	});
 
 	const filteredMovies = $derived.by(() => {
-		if (activeFilter === 'all') return groupMoviesStore.movies;
-		return groupMoviesStore.getMoviesByStatus(activeFilter);
+		const movies =
+			activeFilter === 'all'
+				? groupMoviesStore.movies
+				: groupMoviesStore.getMoviesByStatus(activeFilter);
+
+		if (activeFilter === 'planned' && movies.length > 1) {
+			return sortByDateField(movies, 'plannedDate', 'asc');
+		}
+
+		if (activeFilter === 'watched' && movies.length > 1) {
+			return sortByDateField(movies, 'watchedDate', 'desc');
+		}
+
+		return movies;
 	});
 
 	const handleFilterChange = (tabId: string) => {
@@ -65,6 +75,10 @@
 
 	const handleAddMovie = () => {
 		void goto(resolve(ROUTES.GROUP_MOVIES_SEARCH(groupId)));
+	};
+
+	const handleMovieClick = (movie: UnifiedMovie) => {
+		void goto(resolve(ROUTES.GROUP_MOVIE_DETAIL(groupId, movie.id)));
 	};
 
 	const isLoading = $derived(groupStore.isLoading || groupMoviesStore.isLoading);
@@ -115,7 +129,11 @@
 			/>
 
 			<div class="group-page__movies">
-				<MovieGrid movies={filteredMovies} isLoading={groupMoviesStore.isFetching} />
+				<MovieGrid
+					movies={filteredMovies}
+					isLoading={groupMoviesStore.isFetching}
+					onMovieClick={handleMovieClick}
+				/>
 			</div>
 		</div>
 	</div>
@@ -139,11 +157,8 @@
 		display: flex;
 		flex-direction: column;
 		min-height: 100%;
-	}
-
-	.group-page__header {
-		padding: var(--space-4) 0;
-		border-bottom: 1px solid var(--border-primary);
+		padding-block: var(--space-4);
+		gap: var(--space-4);
 	}
 
 	.group-info {

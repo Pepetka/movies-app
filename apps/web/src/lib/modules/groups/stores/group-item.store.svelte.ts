@@ -1,3 +1,5 @@
+import { untrack } from 'svelte';
+
 import {
 	createMutation,
 	createQuery,
@@ -12,7 +14,8 @@ import { BaseStore } from '$lib/stores/base.svelte';
 import {
 	createGroup as createGroupApi,
 	getGroup as getGroupApi,
-	updateGroup as updateGroupApi
+	updateGroup as updateGroupApi,
+	deleteGroup as deleteGroupApi
 } from '../api';
 
 class GroupStore extends BaseStore {
@@ -22,6 +25,7 @@ class GroupStore extends BaseStore {
 		GroupResponseDto,
 		{ id: number; data: GroupUpdateDto }
 	>;
+	private readonly _deleteMutation: MutationResult<void, number>;
 
 	constructor() {
 		super();
@@ -50,10 +54,29 @@ class GroupStore extends BaseStore {
 			invalidateKeys: (_, { id }) => [['group', id]],
 			debug: !__IS_PROD__
 		});
+
+		this._deleteMutation = createMutation<void, number>({
+			key: ['group', 'delete'],
+			tags: ['groups'],
+			mutator: (id) => deleteGroupApi(id),
+			debug: !__IS_PROD__
+		});
 	}
 
 	get currentGroup(): GroupResponseDto | null {
 		return this._query.data ?? null;
+	}
+
+	get currentUserRole(): string | null {
+		return this._query.data?.currentUserRole ?? null;
+	}
+
+	get isAdmin(): boolean {
+		return this.currentUserRole === 'admin';
+	}
+
+	get isModerator(): boolean {
+		return this.currentUserRole === 'moderator' || this.currentUserRole === 'admin';
 	}
 
 	get status(): FetchStatus {
@@ -82,8 +105,10 @@ class GroupStore extends BaseStore {
 	}
 
 	async fetchGroup(id: number): Promise<void> {
-		if (this._query.isCurrentKey(['group', id]) && (this.isLoaded || this.isFetching)) return;
-		await this._query.revalidate(['group', id], id);
+		return untrack(async () => {
+			if (this._query.isCurrentKey(['group', id]) && (this.isLoaded || this.isFetching)) return;
+			await this._query.revalidate(['group', id], id);
+		});
 	}
 
 	// Create mutation
@@ -110,7 +135,7 @@ class GroupStore extends BaseStore {
 	}
 
 	async createGroup(data: GroupCreateDto): Promise<GroupResponseDto | null> {
-		return this._createMutation.mutate(data);
+		return untrack(() => this._createMutation.mutate(data));
 	}
 
 	resetCreate(): void {
@@ -137,11 +162,38 @@ class GroupStore extends BaseStore {
 	}
 
 	async updateGroup(id: number, data: GroupUpdateDto): Promise<GroupResponseDto | null> {
-		return this._updateMutation.mutate({ id, data });
+		return untrack(() => this._updateMutation.mutate({ id, data }));
 	}
 
 	resetUpdate(): void {
 		this._updateMutation.reset();
+	}
+
+	// Delete mutation
+
+	get deleteStatus(): PostStatus {
+		return this._deleteMutation.status;
+	}
+
+	get deleteError(): string | null {
+		if (!this._deleteMutation.error) return null;
+		return this._extractErrorMessage(this._deleteMutation.error, 'Ошибка удаления группы');
+	}
+
+	get isDeleting(): boolean {
+		return this._deleteMutation.isSubmitting;
+	}
+
+	get isDeleteSuccess(): boolean {
+		return this._deleteMutation.isSuccess;
+	}
+
+	async deleteGroup(id: number): Promise<void> {
+		await untrack(() => this._deleteMutation.mutate(id));
+	}
+
+	resetDelete(): void {
+		this._deleteMutation.reset();
 	}
 
 	reset(): void {
@@ -151,6 +203,7 @@ class GroupStore extends BaseStore {
 	resetForm(): void {
 		this._createMutation.reset();
 		this._updateMutation.reset();
+		this._deleteMutation.reset();
 	}
 }
 

@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { Spinner, toast } from '@repo/ui';
+	import { Button, Card, Modal, Spinner, toast } from '@repo/ui';
+	import { Trash2 } from '@lucide/svelte';
 	import { untrack } from 'svelte';
 
 	import {
@@ -17,11 +18,13 @@
 	import { page } from '$app/state';
 
 	import '$lib/styles/page-states.css';
+	import '$lib/styles/danger-zone.css';
 
 	const groupId = $derived(Number(page.params.id));
 
 	let form = $state<GroupFormData>({ ...EMPTY_GROUP_FORM });
-	let loadedGroup = $state<number | null>(null);
+	let showDeleteModal = $state(false);
+	let hasRedirected = $state(false);
 
 	$effect(() => {
 		topBarStore.configure({
@@ -33,20 +36,26 @@
 	});
 
 	$effect(() => {
-		untrack(() => {
+		if (groupId) {
 			void groupStore.fetchGroup(groupId);
-		});
+		}
 
 		return () => {
 			groupStore.resetForm();
-			loadedGroup = null;
 		};
 	});
 
 	$effect(() => {
-		if (groupStore.currentGroup && groupStore.currentGroup.id !== loadedGroup) {
-			form = groupFormFromEntity(groupStore.currentGroup);
-			loadedGroup = groupStore.currentGroup.id;
+		if (groupStore.isLoaded && groupStore.currentGroup?.id === groupId) {
+			if (!groupStore.isModerator && !hasRedirected) {
+				hasRedirected = true;
+				toast.error('Редактирование доступно только модераторам');
+				void goto(resolve(ROUTES.GROUP_DETAIL(groupId)));
+				return;
+			}
+			untrack(() => {
+				form = groupFormFromEntity(groupStore.currentGroup!);
+			});
 		}
 	});
 
@@ -64,7 +73,31 @@
 	const handleRetry = () => {
 		void groupStore.fetchGroup(groupId);
 	};
+
+	const handleDelete = async () => {
+		await groupStore.deleteGroup(groupId);
+
+		if (groupStore.isDeleteSuccess) {
+			toast.success('Группа удалена');
+			await goto(resolve(ROUTES.GROUPS));
+		} else {
+			toast.error(groupStore.deleteError ?? 'Ошибка удаления');
+		}
+	};
+
+	const openDeleteModal = () => {
+		showDeleteModal = true;
+	};
+
+	const closeDeleteModal = () => {
+		showDeleteModal = false;
+		groupStore.resetDelete();
+	};
 </script>
+
+<svelte:head>
+	<title>Редактирование группы | Movies App</title>
+</svelte:head>
 
 {#if groupStore.isLoading}
 	<div class="page-state">
@@ -75,6 +108,66 @@
 		<p class="page-state__error-message">{groupStore.error}</p>
 		<button class="page-state__retry-button" onclick={handleRetry}>Повторить</button>
 	</div>
+{:else if groupStore.currentGroup}
+	<div class="edit-page">
+		<GroupForm mode="edit" bind:form onSubmit={handleSubmit} isSubmitting={groupStore.isUpdating} />
+
+		{#if groupStore.isAdmin}
+			<Card variant="outlined" class="danger-zone-card">
+				{#snippet header()}
+					<div class="danger-zone__header">
+						<h2 class="danger-zone__title">Опасная зона</h2>
+						<p class="danger-zone__subtitle">Необратимые действия</p>
+					</div>
+				{/snippet}
+
+				<div class="danger-zone__content">
+					<Button variant="danger" fullWidth onclick={openDeleteModal}>
+						<Trash2 size={16} />
+						Удалить группу
+					</Button>
+				</div>
+			</Card>
+		{/if}
+	</div>
+
+	<Modal bind:open={showDeleteModal} size="sm">
+		{#snippet header()}
+			<h2>Удалить группу?</h2>
+		{/snippet}
+
+		<p class="modal-text">
+			Вы уверены, что хотите удалить группу "{groupStore.currentGroup?.name}"? Это действие нельзя
+			отменить.
+		</p>
+
+		{#snippet footer()}
+			<Button variant="secondary" onclick={closeDeleteModal} disabled={groupStore.isDeleting}>
+				Отмена
+			</Button>
+			<Button variant="danger" onclick={handleDelete} loading={groupStore.isDeleting}>
+				Удалить
+			</Button>
+		{/snippet}
+	</Modal>
 {:else}
-	<GroupForm mode="edit" bind:form onSubmit={handleSubmit} isSubmitting={groupStore.isUpdating} />
+	<div class="page-state">
+		<Spinner size="lg" />
+	</div>
 {/if}
+
+<style>
+	.edit-page {
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-6);
+		padding-block: var(--space-4);
+		align-items: center;
+	}
+
+	@media (min-width: 480px) {
+		.edit-page {
+			padding: var(--space-6) var(--space-6) var(--space-10);
+		}
+	}
+</style>

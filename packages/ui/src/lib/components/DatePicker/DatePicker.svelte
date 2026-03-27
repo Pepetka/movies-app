@@ -11,10 +11,9 @@
 	let {
 		label,
 		value = $bindable(null),
-		size = 'md',
+		size = 'responsive',
 		disabled = false,
-		error = false,
-		errorMessage,
+		error,
 		helper,
 		minDate,
 		maxDate,
@@ -25,6 +24,7 @@
 		weekendDays = [0, 6],
 		clearable = false,
 		placeholder = 'dd.mm.yyyy',
+		inline = false,
 		onChange,
 		class: className,
 		...restProps
@@ -37,6 +37,7 @@
 
 	let isOpen = $state(false);
 	let isFocused = $state(false);
+	let isInlineFocused = $state(false);
 	let isHovered = $state(false);
 	let containerRef = $state.raw<HTMLDivElement | null>(null);
 	let popoverRef = $state.raw<HTMLDivElement | null>(null);
@@ -88,11 +89,11 @@
 		if (calendarLogic.isDateDisabled(day)) return;
 		value = new Date(day);
 		onChange?.(value);
-		isOpen = false;
+		if (!inline) isOpen = false;
 	};
 
 	const { handleKeydown } = useKeyboardNavigation({
-		isOpen: () => isOpen,
+		isOpen: () => inline || isOpen,
 		focusedDate: () => focusedDate,
 		isDateDisabled: calendarLogic.isDateDisabled,
 		onSelect: selectDate,
@@ -106,7 +107,7 @@
 	});
 
 	const handleGlobalKeydown = (e: KeyboardEvent) => {
-		if (isFocused || isOpen) {
+		if (isFocused || isOpen || (inline && isInlineFocused)) {
 			handleKeydown(e);
 		}
 	};
@@ -170,112 +171,173 @@
 
 <svelte:window onkeydown={handleGlobalKeydown} />
 
-<div
-	bind:this={containerRef}
-	class={['ui-datepicker-wrapper', size, { error, disabled, open: isOpen }, className]}
->
+{#if inline}
 	<div
-		class="ui-datepicker-container"
-		role="presentation"
-		onmouseenter={() => (isHovered = true)}
-		onmouseleave={() => (isHovered = false)}
+		class={['ui-datepicker-inline', { error: !!error }, className]}
+		role="dialog"
+		aria-label="Date picker"
+		tabindex="0"
+		onfocus={() => (isInlineFocused = true)}
+		onblur={() => (isInlineFocused = false)}
 	>
-		<input
-			id={inputId}
-			readonly
-			value={formattedValue}
-			{placeholder}
-			{disabled}
-			aria-invalid={!!error}
-			aria-errormessage={errorId}
-			aria-describedby={helper ? helperId : undefined}
-			aria-expanded={isOpen}
-			aria-haspopup="dialog"
-			aria-controls={popoverId}
-			onclick={toggle}
-			onfocus={() => (isFocused = true)}
-			onblur={() => (isFocused = false)}
-			{...restProps}
+		<DatePickerNavigation
+			{monthTitle}
+			onPrevYear={prevYear}
+			onPrevMonth={prevMonth}
+			onNextMonth={nextMonth}
+			onNextYear={nextYear}
 		/>
-		<label
-			for={inputId}
-			class={[
-				'ui-datepicker-label',
-				{ floating: isLabelFloating, focused: isFocused || isOpen, error }
-			]}
-		>
-			{label}
-		</label>
-		<button
-			type="button"
-			class="ui-datepicker-icon"
-			class:clearable={showClearIcon}
-			onclick={showClearIcon ? clear : toggle}
-			aria-label={showClearIcon ? 'Clear date' : 'Open calendar'}
-			{disabled}
-			tabindex="-1"
-		>
-			{#if showClearIcon}
-				<X size={getIconSize(size)} />
-			{:else}
-				<Calendar size={getIconSize(size)} />
-			{/if}
-		</button>
+
+		<DatePickerGrid
+			{weekdays}
+			{weeks}
+			{currentMonth}
+			selectedDate={value}
+			{today}
+			{focusedDate}
+			{locale}
+			{weekendDays}
+			onSelectDate={selectDate}
+			isDateDisabled={calendarLogic.isDateDisabled}
+			isSameDay={calendarLogic.isSameDay}
+			isOtherMonth={calendarLogic.isOtherMonth}
+		/>
 	</div>
-
-	{#if error && errorMessage}
-		<div id={errorId} class="ui-datepicker-message error">
-			{errorMessage}
-		</div>
-	{:else if helper}
-		<div id={helperId} class="ui-datepicker-message">
-			{helper}
-		</div>
-	{/if}
-
-	{#if isOpen}
+	<div class="ui-datepicker-message" class:error={!!error}>
+		{error}
+	</div>
+{:else}
+	<div
+		bind:this={containerRef}
+		class={['ui-datepicker-wrapper', size, { error: !!error, disabled, open: isOpen }, className]}
+	>
 		<div
-			bind:this={popoverRef}
-			id={popoverId}
-			class="ui-datepicker-popover"
-			role="dialog"
-			aria-modal="true"
-			aria-label="Date picker"
-			tabindex="-1"
+			class="ui-datepicker-container"
+			role="presentation"
+			onmouseenter={() => (isHovered = true)}
+			onmouseleave={() => (isHovered = false)}
 		>
-			<DatePickerNavigation
-				{monthTitle}
-				onPrevYear={prevYear}
-				onPrevMonth={prevMonth}
-				onNextMonth={nextMonth}
-				onNextYear={nextYear}
+			<input
+				id={inputId}
+				readonly
+				value={formattedValue}
+				{placeholder}
+				{disabled}
+				aria-invalid={!!error}
+				aria-errormessage={errorId}
+				aria-describedby={helper ? helperId : undefined}
+				aria-expanded={isOpen}
+				aria-haspopup="dialog"
+				aria-controls={popoverId}
+				onclick={toggle}
+				onfocus={() => (isFocused = true)}
+				onblur={() => (isFocused = false)}
+				{...restProps}
 			/>
-
-			<DatePickerGrid
-				{weekdays}
-				{weeks}
-				{currentMonth}
-				selectedDate={value}
-				{today}
-				{focusedDate}
-				{locale}
-				{weekendDays}
-				onSelectDate={selectDate}
-				isDateDisabled={calendarLogic.isDateDisabled}
-				isSameDay={calendarLogic.isSameDay}
-				isOtherMonth={calendarLogic.isOtherMonth}
-			/>
+			<label
+				for={inputId}
+				class={[
+					'ui-datepicker-label',
+					{ floating: isLabelFloating, focused: isFocused || isOpen, error: !!error }
+				]}
+			>
+				{label}
+			</label>
+			<button
+				type="button"
+				class="ui-datepicker-icon"
+				class:clearable={showClearIcon}
+				onclick={showClearIcon ? clear : toggle}
+				aria-label={showClearIcon ? 'Clear date' : 'Open calendar'}
+				{disabled}
+				tabindex="-1"
+			>
+				{#if showClearIcon}
+					<X size={getIconSize(size)} />
+				{:else}
+					<Calendar size={getIconSize(size)} />
+				{/if}
+			</button>
 		</div>
-	{/if}
-</div>
+
+		{#if error}
+			<div id={errorId} class="ui-datepicker-message error">
+				{error}
+			</div>
+		{:else}
+			<div id={helperId} class="ui-datepicker-message" aria-hidden={!helper}>
+				{helper}
+			</div>
+		{/if}
+
+		{#if isOpen}
+			<div
+				bind:this={popoverRef}
+				id={popoverId}
+				class="ui-datepicker-popover"
+				role="dialog"
+				aria-modal="true"
+				aria-label="Date picker"
+				tabindex="-1"
+			>
+				<DatePickerNavigation
+					{monthTitle}
+					onPrevYear={prevYear}
+					onPrevMonth={prevMonth}
+					onNextMonth={nextMonth}
+					onNextYear={nextYear}
+				/>
+
+				<DatePickerGrid
+					{weekdays}
+					{weeks}
+					{currentMonth}
+					selectedDate={value}
+					{today}
+					{focusedDate}
+					{locale}
+					{weekendDays}
+					onSelectDate={selectDate}
+					isDateDisabled={calendarLogic.isDateDisabled}
+					isSameDay={calendarLogic.isSameDay}
+					isOtherMonth={calendarLogic.isOtherMonth}
+				/>
+			</div>
+		{/if}
+	</div>
+{/if}
 
 <style>
 	.ui-datepicker-wrapper {
 		display: flex;
 		flex-direction: column;
-		gap: 6px;
 		width: 100%;
 		position: relative;
+	}
+
+	/* Inline mode */
+	.ui-datepicker-inline {
+		display: flex;
+		flex-direction: column;
+		background-color: var(--bg-primary);
+		border: var(--border-width-thin) solid var(--border-primary);
+		border-radius: var(--radius-xl);
+		padding: calc(var(--space-2) - 1px);
+		width: var(--datepicker-width);
+	}
+
+	.ui-datepicker-inline.error {
+		border-color: var(--color-error);
+	}
+
+	.ui-datepicker-inline:focus {
+		outline: 2px solid var(--border-focus);
+		outline-offset: 2px;
+	}
+
+	.ui-datepicker-inline.error:focus {
+		border-color: var(--color-error);
+		outline-color: var(--color-error);
 	}
 
 	.ui-datepicker-container {
@@ -428,12 +490,25 @@
 	.ui-datepicker-message {
 		font-size: 13px;
 		line-height: 1.4;
+		min-height: 18px;
 		color: var(--text-tertiary);
 		padding-left: 4px;
 	}
 
 	.ui-datepicker-message.error {
 		color: var(--color-error);
+		animation: errorFadeIn 0.2s ease-out;
+	}
+
+	@keyframes errorFadeIn {
+		from {
+			opacity: 0;
+			transform: translateY(-4px);
+		}
+		to {
+			opacity: 1;
+			transform: translateY(0);
+		}
 	}
 
 	/* Error state */
@@ -456,7 +531,7 @@
 	/* Popover */
 	.ui-datepicker-popover {
 		position: absolute;
-		top: calc(100% + 8px);
+		top: calc(100% + 8px - 18px);
 		left: 50%;
 		transform: translateX(-50%);
 		width: var(--datepicker-width);
@@ -519,5 +594,76 @@
 		right: 12px;
 		width: 36px;
 		height: 36px;
+	}
+
+	/* Responsive size - sm on mobile, md on tablet, lg on desktop */
+	.ui-datepicker-wrapper.responsive .ui-datepicker-container input {
+		height: var(--input-sm-height);
+		padding: var(--input-sm-padding);
+		padding-right: 40px;
+		font-size: 14px;
+	}
+
+	.ui-datepicker-wrapper.responsive .ui-datepicker-label {
+		left: var(--input-sm-padding-x);
+		font-size: var(--text-base);
+	}
+
+	.ui-datepicker-wrapper.responsive .ui-datepicker-label.floating {
+		font-size: 12px;
+	}
+
+	.ui-datepicker-wrapper.responsive .ui-datepicker-icon {
+		right: 8px;
+		width: 28px;
+		height: 28px;
+	}
+
+	@media (min-width: 480px) {
+		.ui-datepicker-wrapper.responsive .ui-datepicker-container input {
+			height: var(--input-md-height);
+			padding: var(--input-md-padding);
+			padding-right: 44px;
+			font-size: var(--text-base);
+		}
+
+		.ui-datepicker-wrapper.responsive .ui-datepicker-label {
+			left: var(--input-md-padding-x);
+			font-size: 18px;
+		}
+
+		.ui-datepicker-wrapper.responsive .ui-datepicker-label.floating {
+			font-size: 13px;
+		}
+
+		.ui-datepicker-wrapper.responsive .ui-datepicker-icon {
+			right: var(--input-md-padding-x);
+			width: 32px;
+			height: 32px;
+		}
+	}
+
+	@media (min-width: 768px) {
+		.ui-datepicker-wrapper.responsive .ui-datepicker-container input {
+			height: var(--input-lg-height);
+			padding: var(--input-lg-padding);
+			padding-right: 52px;
+			font-size: 18px;
+		}
+
+		.ui-datepicker-wrapper.responsive .ui-datepicker-label {
+			left: var(--input-lg-padding-x);
+			font-size: 20px;
+		}
+
+		.ui-datepicker-wrapper.responsive .ui-datepicker-label.floating {
+			font-size: 14px;
+		}
+
+		.ui-datepicker-wrapper.responsive .ui-datepicker-icon {
+			right: 12px;
+			width: 36px;
+			height: 36px;
+		}
 	}
 </style>

@@ -2,22 +2,25 @@ import type { Icon } from '@lucide/svelte';
 import { z } from 'zod';
 
 import type { GroupCreateDto, GroupResponseDto, GroupUpdateDto } from '$lib/api/generated/types';
-import { createValidator } from '$lib/utils/validation.svelte';
+import { createValidator, trimString, trimToUndefined } from '$lib/utils/validation.svelte';
 
 // === Schema ===
 
 const optionalUrl = z.preprocess(
-	(val) => (val === '' ? undefined : val),
+	(val) => trimToUndefined(val as string),
 	z.string().url('Некорректный URL').optional()
 );
 
 const optionalString = z.preprocess(
-	(val) => (val === '' ? undefined : val),
+	(val) => trimToUndefined(val as string),
 	z.string().max(500, 'Максимум 500 символов').optional()
 );
 
 export const groupSchema = z.object({
-	name: z.string().min(1, 'Обязательное поле').max(100, 'Максимум 100 символов'),
+	name: z.preprocess(
+		(val) => trimString(val as string),
+		z.string().min(1, 'Обязательное поле').max(100, 'Максимум 100 символов')
+	),
 	description: optionalString,
 	avatarUrl: optionalUrl
 });
@@ -57,14 +60,14 @@ export const validateGroupForm = createValidator(groupSchema);
 
 export const groupFormToCreateDto = (form: GroupFormData): GroupCreateDto => ({
 	name: form.name,
-	description: form.description || undefined,
-	avatarUrl: form.avatarUrl || undefined
+	description: trimToUndefined(form.description),
+	avatarUrl: trimToUndefined(form.avatarUrl)
 });
 
 export const groupFormToUpdateDto = (form: GroupFormData): GroupUpdateDto => ({
 	name: form.name || undefined,
-	description: form.description || undefined,
-	avatarUrl: form.avatarUrl || undefined
+	description: trimToUndefined(form.description),
+	avatarUrl: trimToUndefined(form.avatarUrl)
 });
 
 export const groupFormFromEntity = (group: GroupResponseDto): GroupFormData => ({

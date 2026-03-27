@@ -75,11 +75,11 @@
 		const target = e.target as HTMLTextAreaElement;
 		value = target.value;
 		onChange?.(value);
-		autoResize();
 	};
 
 	$effect(() => {
 		if (autoGrow && textareaElement) {
+			void value.length;
 			autoResize();
 		}
 	});

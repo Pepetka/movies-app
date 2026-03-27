@@ -1,3 +1,5 @@
+import { untrack } from 'svelte';
+
 import { createQuery, type FetchStatus, type QueryResult } from '$lib/query';
 import type { GroupResponseDto } from '$lib/api/generated/types';
 import { BaseStore } from '$lib/stores/base.svelte';
@@ -51,12 +53,14 @@ class GroupsStore extends BaseStore {
 	}
 
 	async fetchGroups(): Promise<void> {
-		if (this.isLoaded || this.isFetching) return;
-		await this._query.fetch();
+		return untrack(async () => {
+			if (this.isLoaded || this.isFetching) return;
+			await this._query.fetch();
+		});
 	}
 
 	async fetch(): Promise<void> {
-		await this._query.fetch();
+		return untrack(() => this._query.fetch());
 	}
 
 	reset(): void {

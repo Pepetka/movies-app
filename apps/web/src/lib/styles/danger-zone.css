@@ -1,0 +1,35 @@
+/* Danger Zone Card - используется на edit страницах для необратимых действий */
+
+.danger-zone__header {
+	text-align: center;
+}
+
+.danger-zone__title {
+	font-size: var(--text-lg);
+	font-weight: var(--font-semibold);
+	color: var(--color-error);
+	margin-bottom: var(--space-1);
+}
+
+.danger-zone__subtitle {
+	font-size: var(--text-sm);
+	color: var(--text-tertiary);
+}
+
+.danger-zone__content {
+	padding-top: var(--space-2);
+}
+
+.danger-zone-card {
+	width: 100%;
+	max-width: 400px;
+}
+
+/* Modal text - для подтверждающих модалок */
+
+.modal-text {
+	font-size: var(--text-base);
+	color: var(--text-secondary);
+	line-height: 1.5;
+	margin: 0;
+}

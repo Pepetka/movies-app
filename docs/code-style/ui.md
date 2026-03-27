@@ -15,10 +15,9 @@
   let {
     label,
     value = $bindable(null),
-    size = 'md',
+    size = 'responsive',
     disabled = false,
-    error = false,
-    errorMessage,
+    error,
     helper,
     class: className,
     ...restProps
@@ -65,9 +64,9 @@
 ```typescript
 // Деструктуризация с defaults
 let {
-  label,                    // Обязательный
+  label,                    // Опциональный
   value = $bindable(null),  // Двусторонняя привязка
-  size = 'md',              // Default value
+  size = 'responsive',      // Default value
   disabled = false,
   class: className,         // Переименование
   ...restProps              // Остальные HTML атрибуты
@@ -78,14 +77,15 @@ let {
 
 ```typescript
 // Union types → type
-export type DatePickerSize = 'sm' | 'md' | 'lg';
+export type DatePickerSize = 'sm' | 'md' | 'lg' | 'responsive';
 
 // Props → interface с расширением HTML атрибутов
 export interface IProps extends Omit<HTMLInputAttributes, 'size' | 'value'> {
-  label: string;
+  label?: string;
   value?: Date | null;
   size?: DatePickerSize;
   disabled?: boolean;
+  error?: string;
   onChange?: (value: Date | null) => void;
 }
 ```
