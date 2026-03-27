@@ -128,6 +128,20 @@ export interface ValidationResult<T> {
 	errors: Record<string, string>;
 }
 
+// === Trim-утилиты ===
+
+// Тримит строку, возвращает '' для null/undefined
+export const trimString = (val: string | undefined | null): string;
+
+// Тримит строку, возвращает undefined для пустых значений (для API)
+export const trimToUndefined = (val: string | undefined | null): string | undefined;
+
+// Готовые Zod preprocess-схемы
+export const zodTrim: z.ZodEffects<z.ZodString>;          // трим + string
+export const zodTrimOptional: z.ZodEffects<z.ZodOptional<z.ZodString>>; // трим + optional
+
+// === Валидация ===
+
 // Создаёт валидатор из Zod-схемы
 export const createValidator = <T>(schema: z.ZodSchema<T>) => {
 	return (data: unknown): ValidationResult<T> => {
@@ -163,22 +177,25 @@ import type { Icon } from '@lucide/svelte';
 import { z } from 'zod';
 
 import type { GroupCreateDto, GroupResponseDto, GroupUpdateDto } from '$lib/api/generated/types';
-import { createValidator } from '$lib/utils/validation.svelte';
+import { createValidator, trimString, trimToUndefined } from '$lib/utils/validation.svelte';
 
 // === Schema ===
 
 const optionalUrl = z.preprocess(
-	(val) => (val === '' ? undefined : val),
+	(val) => trimToUndefined(val as string),
 	z.string().url('Некорректный URL').optional()
 );
 
 const optionalString = z.preprocess(
-	(val) => (val === '' ? undefined : val),
+	(val) => trimToUndefined(val as string),
 	z.string().max(500, 'Максимум 500 символов').optional()
 );
 
 export const groupSchema = z.object({
-	name: z.string().min(1, 'Обязательное поле').max(100, 'Максимум 100 символов'),
+	name: z.preprocess(
+		(val) => trimString(val as string),
+		z.string().min(1, 'Обязательное поле').max(100, 'Максимум 100 символов')
+	),
 	description: optionalString,
 	avatarUrl: optionalUrl
 });
@@ -218,14 +235,14 @@ export const validateGroupForm = createValidator(groupSchema);
 
 export const groupFormToCreateDto = (form: GroupFormData): GroupCreateDto => ({
 	name: form.name,
-	description: form.description || undefined,
-	avatarUrl: form.avatarUrl || undefined
+	description: trimToUndefined(form.description),
+	avatarUrl: trimToUndefined(form.avatarUrl)
 });
 
 export const groupFormToUpdateDto = (form: GroupFormData): GroupUpdateDto => ({
 	name: form.name || undefined,
-	description: form.description || undefined,
-	avatarUrl: form.avatarUrl || undefined
+	description: trimToUndefined(form.description),
+	avatarUrl: trimToUndefined(form.avatarUrl)
 });
 
 export const groupFormFromEntity = (group: GroupResponseDto): GroupFormData => ({
@@ -639,15 +656,16 @@ export const DEBOUNCE = {
 ### 1. validation.svelte.ts
 
 - [ ] Zod-схема с сообщениями об ошибках на русском
+- [ ] `trimString` / `trimToUndefined` для всех строковых полей (через `z.preprocess`)
 - [ ] `optionalUrl`, `optionalString` препроцессоры для опциональных полей
 - [ ] `FormData` тип через `z.infer`
 - [ ] `FormMode` тип (`'create' | 'edit'`)
 - [ ] `FormProps` интерфейс для компонента
-- [ ] `EMPTY_FORM` константа
+- [ ] `EMPTY_FORM` константа (все строковые поля — `''`, не `undefined`)
 - [ ] `validateForm` через `createValidator(schema)`
-- [ ] `formToCreateDto` трансформер
-- [ ] `formToUpdateDto` трансформер
-- [ ] `formFromEntity` трансформер
+- [ ] `formToCreateDto` трансформер (использует `trimToUndefined` для опциональных полей)
+- [ ] `formToUpdateDto` трансформер (использует `trimToUndefined` для опциональных полей)
+- [ ] `formFromEntity` трансформер (использует `?? ''` для строковых полей)
 
 ### 2. Компонент (для Component Form)
 
@@ -737,19 +755,29 @@ $effect(() => {
 });
 ```
 
-### ❌ Не преобразовывать пустые строки
+### ❌ Не тримить и не преобразовывать пустые строки
 
 ```typescript
-// НЕПРАВИЛЬНО — пустая строка уйдёт на backend
+// НЕПРАВИЛЬНО — пробелы и пустые строки уйдут на backend
 await store.createGroup(form);
 ```
 
 ```typescript
-// ПРАВИЛЬНО — преобразовать пустые строки в undefined
-await store.createGroup({
+// ПРАВИЛЬНО — использовать trimToUndefined в трансформерах
+export const groupFormToCreateDto = (form: GroupFormData): GroupCreateDto => ({
 	name: form.name,
-	description: form.description || undefined,
-	avatarUrl: form.avatarUrl || undefined
+	description: trimToUndefined(form.description),
+	avatarUrl: trimToUndefined(form.avatarUrl)
+});
+```
+
+```typescript
+// ПРАВИЛЬНО — использовать trimString в Zod-схеме
+const schema = z.object({
+	name: z.preprocess(
+		(val) => trimString(val as string),
+		z.string().min(1, 'Обязательное поле')
+	)
 });
 ```
 
