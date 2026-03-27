@@ -23,11 +23,21 @@
 
 	let imageLoaded = $state(false);
 	let imageError = $state(false);
+	let imgElement: HTMLImageElement | undefined = $state();
 
 	$effect(() => {
 		const _src = src;
 		imageLoaded = false;
 		imageError = false;
+	});
+
+	$effect(() => {
+		if (imgElement && src) {
+			if (imgElement.complete && imgElement.naturalHeight > 0) {
+				imageLoaded = true;
+				imageError = false;
+			}
+		}
 	});
 
 	const handleImageLoad = () => {
@@ -60,6 +70,7 @@
 >
 	{#if src}
 		<img
+			bind:this={imgElement}
 			{src}
 			{alt}
 			class={['ui-avatar-img', imageLoaded && 'loaded', imageError && 'error']}
