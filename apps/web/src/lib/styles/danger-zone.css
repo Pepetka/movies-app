@@ -20,7 +20,7 @@
 	padding-top: var(--space-2);
 }
 
-:global(.danger-zone-card) {
+.danger-zone-card {
 	width: 100%;
 	max-width: 400px;
 }
