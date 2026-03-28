@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Button, Card, Modal, Spinner, toast } from '@repo/ui';
+	import { Button, Modal, Spinner, toast } from '@repo/ui';
 	import { Trash2 } from '@lucide/svelte';
 	import { untrack } from 'svelte';
 
@@ -19,7 +19,6 @@
 	import { page } from '$app/state';
 
 	import '$lib/styles/page-states.css';
-	import '$lib/styles/danger-zone.css';
 
 	const groupId = $derived(Number(page.params.id));
 	const movieId = $derived(Number(page.params.movieId));
@@ -32,7 +31,14 @@
 		topBarStore.configure({
 			title: 'Редактирование',
 			showBack: true,
-			onBack: () => goto(resolve(ROUTES.GROUP_MOVIE_DETAIL(groupId, movieId)))
+			onBack: () => goto(resolve(ROUTES.GROUP_MOVIE_DETAIL(groupId, movieId))),
+			trailingAction: groupMovieDetailStore.isModerator
+				? {
+						Icon: Trash2,
+						label: 'Удалить фильм',
+						onclick: openDeleteModal
+					}
+				: undefined
 		});
 		return () => topBarStore.destroy();
 	});
@@ -120,22 +126,6 @@
 			onSubmit={handleSubmit}
 			isSubmitting={groupMovieStore.isUpdating}
 		/>
-
-		<Card variant="outlined" class="danger-zone-card">
-			{#snippet header()}
-				<div class="danger-zone__header">
-					<h2 class="danger-zone__title">Опасная зона</h2>
-					<p class="danger-zone__subtitle">Необратимые действия</p>
-				</div>
-			{/snippet}
-
-			<div class="danger-zone__content">
-				<Button variant="danger" fullWidth onclick={openDeleteModal}>
-					<Trash2 size={16} />
-					Удалить фильм из группы
-				</Button>
-			</div>
-		</Card>
 	</div>
 
 	<Modal bind:open={showDeleteModal} size="sm">
@@ -176,5 +166,12 @@
 		.edit-page {
 			padding: var(--space-6) var(--space-6) var(--space-10);
 		}
+	}
+
+	.modal-text {
+		font-size: var(--text-base);
+		color: var(--text-secondary);
+		line-height: 1.5;
+		margin: 0;
 	}
 </style>
