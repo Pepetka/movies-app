@@ -1,18 +1,8 @@
 <script lang="ts">
-	import {
-		Input,
-		Spinner,
-		EmptyState,
-		List,
-		ListItem,
-		Image,
-		Badge,
-		toast,
-		Button
-	} from '@repo/ui';
-	import { Star, Search } from '@lucide/svelte';
+	import { Input, Spinner, EmptyState, List, ListItem, Image, toast, Button } from '@repo/ui';
+	import { Search } from '@lucide/svelte';
 
-	import { moviesSearchStore, groupMovieStore } from '$lib/modules/movies';
+	import { moviesSearchStore, groupMovieStore, MovieRating } from '$lib/modules/movies';
 	import type { ProviderMovieSummary } from '$lib/api/generated/types';
 	import { topBarStore } from '$lib/stores';
 	import { goto } from '$app/navigation';
@@ -114,12 +104,7 @@
 						{/snippet}
 						{#snippet trailing()}
 							{#if movie.rating}
-								<Badge variant="primary">
-									<div class="search-page__badge-content">
-										<Star size={12} fill="currentColor" />
-										{movie.rating.toFixed(1)}
-									</div>
-								</Badge>
+								<MovieRating rating={movie.rating} size={12} />
 							{/if}
 						{/snippet}
 					</ListItem>
@@ -160,12 +145,6 @@
 	.search-page__results {
 		flex: 1;
 		padding: var(--space-4) 0;
-	}
-
-	.search-page__badge-content {
-		display: flex;
-		gap: 4px;
-		align-items: center;
 	}
 
 	.search-page__loading {

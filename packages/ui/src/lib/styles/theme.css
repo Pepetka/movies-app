@@ -96,6 +96,11 @@
 	--skeleton-bg: var(--bg-tertiary);
 	--skeleton-shimmer: var(--bg-primary);
 
+	/* Rating Colors */
+	--rating-gold: #d97706;
+	--rating-silver: #6b7280;
+	--rating-red: #dc2626;
+
 	/* Chip Colors */
 	--chip-default-bg: #f3f4f6;
 	--chip-default-text: #374151;
@@ -215,6 +220,11 @@
 	/* Skeleton */
 	--skeleton-bg: var(--bg-tertiary);
 	--skeleton-shimmer: var(--bg-primary);
+
+	/* Rating Colors */
+	--rating-gold: #fbbf24;
+	--rating-silver: #9ca3af;
+	--rating-red: #f87171;
 
 	/* Chip Colors */
 	--chip-default-bg: #374151;

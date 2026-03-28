@@ -1,8 +1,13 @@
 <script lang="ts">
-	import { Pencil, Calendar, Clock, Star } from '@lucide/svelte';
+	import { Pencil, Calendar, Clock } from '@lucide/svelte';
 	import { Button, Image, Spinner } from '@repo/ui';
 
-	import { groupMovieDetailStore, MovieStatusBadge, MovieStatusModal } from '$lib/modules/movies';
+	import {
+		groupMovieDetailStore,
+		MovieRating,
+		MovieStatusBadge,
+		MovieStatusModal
+	} from '$lib/modules/movies';
 	import { ROUTES, formatDate, formatRuntime } from '$lib/utils';
 	import { PagePlaceholder } from '$lib/ui';
 	import { topBarStore } from '$lib/stores';
@@ -13,14 +18,19 @@
 	const groupId = $derived(Number(page.params.id));
 	const movieId = $derived(Number(page.params.movieId));
 	const movie = $derived(groupMovieDetailStore.movie);
+	const isLoading = $derived(groupMovieDetailStore.isLoading);
 
 	let statusModalOpen = $state(false);
 
 	$effect(() => {
 		topBarStore.configure({
-			title: movie?.title ?? 'Фильм',
+			title: movie?.title ?? (isLoading ? '' : 'Фильм'),
 			showBack: true,
-			onBack: () => goto(resolve(ROUTES.GROUP_DETAIL(groupId))),
+			onBack: () => {
+				const tab = page.url.searchParams.get('tab');
+				const path = resolve(ROUTES.GROUP_DETAIL(groupId));
+				goto(tab ? `${path}?tab=${tab}` : path);
+			},
 			trailingAction: groupMovieDetailStore.isModerator
 				? {
 						Icon: Pencil,
@@ -41,8 +51,6 @@
 	const handleEditStatus = () => {
 		statusModalOpen = true;
 	};
-
-	const isLoading = $derived(groupMovieDetailStore.isLoading);
 </script>
 
 <svelte:head>
@@ -79,10 +87,7 @@
 							</span>
 						{/if}
 						{#if movie.rating}
-							<span class="movie-header__meta-item movie-header__rating">
-								<Star size={14} />
-								{movie.rating.toFixed(1)}
-							</span>
+							<MovieRating rating={movie.rating} />
 						{/if}
 					</div>
 				</div>
@@ -199,10 +204,6 @@
 		display: flex;
 		align-items: center;
 		gap: var(--space-1);
-	}
-
-	.movie-header__rating {
-		color: var(--color-warning);
 	}
 
 	.movie-header__status {
