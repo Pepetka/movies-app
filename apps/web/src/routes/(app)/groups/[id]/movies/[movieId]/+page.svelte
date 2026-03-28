@@ -29,13 +29,17 @@
 			onBack: () => {
 				const tab = page.url.searchParams.get('tab');
 				const path = resolve(ROUTES.GROUP_DETAIL(groupId));
-				goto(tab ? `${path}?tab=${tab}` : path);
+				void goto(tab ? `${path}?tab=${tab}` : path);
 			},
 			trailingAction: groupMovieDetailStore.isModerator
 				? {
 						Icon: Pencil,
 						label: 'Редактировать',
-						onclick: () => goto(resolve(ROUTES.GROUP_MOVIE_EDIT(groupId, movieId)))
+						onclick: () => {
+							const tab = page.url.searchParams.get('tab');
+							const path = resolve(ROUTES.GROUP_MOVIE_EDIT(groupId, movieId));
+							void goto(tab ? `${path}?tab=${tab}` : path);
+						}
 					}
 				: undefined
 		});

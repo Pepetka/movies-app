@@ -31,7 +31,11 @@
 		topBarStore.configure({
 			title: 'Редактирование',
 			showBack: true,
-			onBack: () => goto(resolve(ROUTES.GROUP_MOVIE_DETAIL(groupId, movieId))),
+			onBack: () => {
+				const tab = page.url.searchParams.get('tab');
+				const path = resolve(ROUTES.GROUP_MOVIE_DETAIL(groupId, movieId));
+				void goto(tab ? `${path}?tab=${tab}` : path);
+			},
 			trailingAction: groupMovieDetailStore.isModerator
 				? {
 						Icon: Trash2,
