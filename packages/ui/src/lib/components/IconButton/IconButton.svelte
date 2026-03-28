@@ -92,13 +92,6 @@
 		}
 	}
 
-	@media (min-width: 768px) {
-		.ui-icon-btn.responsive {
-			width: var(--space-12);
-			height: var(--space-12);
-		}
-	}
-
 	/* Ghost */
 	.ui-icon-btn.ghost {
 		color: var(--text-secondary);
