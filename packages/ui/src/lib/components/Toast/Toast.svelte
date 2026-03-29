@@ -148,7 +148,10 @@
 		let rafId: number;
 
 		const tick = (now: number) => {
-			if (isLeaving) return;
+			if (isLeaving) {
+				cancelAnimationFrame(rafId);
+				return;
+			}
 
 			if (isPaused) {
 				if (pausedAt === 0) pausedAt = now;
