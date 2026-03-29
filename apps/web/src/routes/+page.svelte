@@ -14,6 +14,10 @@
 	});
 </script>
 
+<svelte:head>
+	<title>Movies App</title>
+</svelte:head>
+
 <div class="landing">
 	<Container size="sm">
 		<div class="landing-content">

@@ -418,10 +418,8 @@
     - Удалить из группы
     - Передать владение (для owner)
 
-*Опасная зона:*
-- "Выйти из группы" (member/moderator)
-- "Удалить группу" (admin only, destructive color)
-- Подтверждение через modal/bottom sheet
+*TopBar:*
+- Кнопка удаления (иконка корзины, admin only) → подтверждение через modal
 
 **API:**
 - `PATCH /api/v1/groups/:id`

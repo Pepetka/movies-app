@@ -41,13 +41,16 @@
 		await authStore.login(loginFormToDto(form));
 
 		if (authStore.isLoginSuccess) {
-			toast.success('Добро пожаловать!');
 			await goto(resolve(ROUTES.GROUPS), { replaceState: true });
 		} else {
 			toast.error(authStore.loginError ?? 'Ошибка входа');
 		}
 	};
 </script>
+
+<svelte:head>
+	<title>Вход · Movies App</title>
+</svelte:head>
 
 <div class="form-page auth-page">
 	<div class="form-branding">

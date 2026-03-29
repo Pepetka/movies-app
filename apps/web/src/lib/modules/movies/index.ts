@@ -31,4 +31,11 @@ export {
 } from './validation';
 
 // Components
-export { MovieCard, MovieForm, MovieGrid, MovieStatusBadge, MovieStatusModal } from './components';
+export {
+	MovieCard,
+	MovieForm,
+	MovieGrid,
+	MovieRating,
+	MovieStatusBadge,
+	MovieStatusModal
+} from './components';

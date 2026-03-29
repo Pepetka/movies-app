@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Button, Card, Modal, Spinner, toast } from '@repo/ui';
+	import { Button, Modal, Spinner, toast } from '@repo/ui';
 	import { Trash2 } from '@lucide/svelte';
 	import { untrack } from 'svelte';
 
@@ -12,14 +12,13 @@
 		customMovieFormToUpdateDto,
 		type CustomMovieFormData
 	} from '$lib/modules/movies';
+	import { ROUTES, withTab } from '$lib/utils';
 	import { topBarStore } from '$lib/stores';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
-	import { ROUTES } from '$lib/utils';
 	import { page } from '$app/state';
 
 	import '$lib/styles/page-states.css';
-	import '$lib/styles/danger-zone.css';
 
 	const groupId = $derived(Number(page.params.id));
 	const movieId = $derived(Number(page.params.movieId));
@@ -28,11 +27,29 @@
 	let showDeleteModal = $state(false);
 	let hasRedirected = $state(false);
 
+	const openDeleteModal = () => {
+		showDeleteModal = true;
+	};
+
+	const closeDeleteModal = () => {
+		showDeleteModal = false;
+		groupMovieStore.resetRemove();
+	};
+
 	$effect(() => {
 		topBarStore.configure({
 			title: 'Редактирование',
 			showBack: true,
-			onBack: () => goto(resolve(ROUTES.GROUP_MOVIE_DETAIL(groupId, movieId)))
+			onBack: () => {
+				void goto(withTab(resolve(ROUTES.GROUP_MOVIE_DETAIL(groupId, movieId))));
+			},
+			trailingAction: groupMovieDetailStore.isModerator
+				? {
+						Icon: Trash2,
+						label: 'Удалить фильм',
+						onclick: openDeleteModal
+					}
+				: undefined
 		});
 		return () => topBarStore.destroy();
 	});
@@ -83,24 +100,15 @@
 
 		if (groupMovieStore.isRemoveSuccess) {
 			toast.success('Фильм удалён из группы');
-			await goto(resolve(ROUTES.GROUP_DETAIL(groupId)));
+			await goto(withTab(resolve(ROUTES.GROUP_DETAIL(groupId))));
 		} else {
 			toast.error(groupMovieStore.removeError ?? 'Ошибка удаления');
 		}
 	};
-
-	const openDeleteModal = () => {
-		showDeleteModal = true;
-	};
-
-	const closeDeleteModal = () => {
-		showDeleteModal = false;
-		groupMovieStore.resetRemove();
-	};
 </script>
 
 <svelte:head>
-	<title>Редактирование фильма | Movies App</title>
+	<title>Редактирование фильма · Movies App</title>
 </svelte:head>
 
 {#if groupMovieDetailStore.isLoading}
@@ -120,22 +128,6 @@
 			onSubmit={handleSubmit}
 			isSubmitting={groupMovieStore.isUpdating}
 		/>
-
-		<Card variant="outlined" class="danger-zone-card">
-			{#snippet header()}
-				<div class="danger-zone__header">
-					<h2 class="danger-zone__title">Опасная зона</h2>
-					<p class="danger-zone__subtitle">Необратимые действия</p>
-				</div>
-			{/snippet}
-
-			<div class="danger-zone__content">
-				<Button variant="danger" fullWidth onclick={openDeleteModal}>
-					<Trash2 size={16} />
-					Удалить фильм из группы
-				</Button>
-			</div>
-		</Card>
 	</div>
 
 	<Modal bind:open={showDeleteModal} size="sm">

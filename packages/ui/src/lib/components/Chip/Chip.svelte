@@ -143,15 +143,6 @@
 		}
 	}
 
-	@media (min-width: 768px) {
-		.ui-chip.responsive {
-			padding: var(--chip-lg-padding);
-			font-size: var(--chip-lg-font);
-			min-height: var(--chip-lg-height);
-			gap: var(--chip-lg-gap);
-		}
-	}
-
 	.ui-chip-icon {
 		display: flex;
 		align-items: center;

@@ -122,17 +122,6 @@
 		}
 	}
 
-	@media (min-width: 768px) {
-		.ui-card.responsive .ui-card-header,
-		.ui-card.responsive .ui-card-footer {
-			padding: var(--space-5) var(--space-8);
-		}
-
-		.ui-card.responsive .ui-card-body {
-			padding: var(--space-6) var(--space-8);
-		}
-	}
-
 	/* Sections */
 	.ui-card-header {
 		text-align: center;

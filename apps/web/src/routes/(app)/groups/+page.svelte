@@ -20,6 +20,7 @@
 		topBarStore.configure({
 			title: 'Мои группы'
 		});
+
 		return () => topBarStore.destroy();
 	});
 
@@ -27,6 +28,10 @@
 		void groupsStore.fetchGroups();
 	});
 </script>
+
+<svelte:head>
+	<title>Мои группы · Movies App</title>
+</svelte:head>
 
 <div class="groups-page">
 	<div class="groups-page__content" aria-busy={groupsStore.isLoading}>

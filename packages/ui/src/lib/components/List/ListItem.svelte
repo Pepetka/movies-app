@@ -150,14 +150,6 @@
 		}
 	}
 
-	@media (min-width: 768px) {
-		.ui-list-item.responsive {
-			padding: var(--space-4) var(--space-5);
-			gap: var(--space-4);
-			min-height: 56px;
-		}
-	}
-
 	/* Interactive button wrapper */
 	.ui-list-item-button {
 		display: flex;

@@ -9,7 +9,7 @@
 		type MovieStatus,
 		type UnifiedMovie
 	} from '$lib/modules/movies';
-	import { ROUTES, sortByDateField } from '$lib/utils';
+	import { ROUTES, sortByDateField, withTab } from '$lib/utils';
 	import { groupStore } from '$lib/modules/groups';
 	import { PagePlaceholder } from '$lib/ui';
 	import { topBarStore } from '$lib/stores';
@@ -19,7 +19,7 @@
 
 	const groupId = $derived(Number(page.params.id));
 
-	let activeFilter = $state<MovieFilter>('planned');
+	const isLoading = $derived(groupStore.isLoading || groupMoviesStore.isLoading);
 
 	const filterTabs = [
 		{ id: 'all', label: 'Все' },
@@ -28,10 +28,16 @@
 		{ id: 'watched', label: 'Смотрели' }
 	];
 
+	const validFilters = filterTabs.map((t) => t.id);
+	const activeFilter = $derived.by<MovieFilter>(() => {
+		const tab = page.url.searchParams.get('tab');
+		return tab && validFilters.includes(tab) ? (tab as MovieFilter) : 'all';
+	});
+
 	$effect(() => {
 		const group = groupStore.currentGroup;
 		topBarStore.configure({
-			title: group?.name ?? `Группа ${groupId}`,
+			title: group?.name ?? (isLoading ? '' : 'Группа'),
 			showBack: true,
 			onBack: () => goto(resolve(ROUTES.GROUPS)),
 			trailingAction: groupStore.isModerator
@@ -70,7 +76,11 @@
 	});
 
 	const handleFilterChange = (tabId: string) => {
-		activeFilter = tabId as MovieFilter;
+		void goto(`${page.url.pathname}${tabId === 'all' ? '' : `?tab=${tabId}`}`, {
+			replaceState: true,
+			keepFocus: true,
+			noScroll: true
+		});
 	};
 
 	const handleAddMovie = () => {
@@ -78,10 +88,8 @@
 	};
 
 	const handleMovieClick = (movie: UnifiedMovie) => {
-		void goto(resolve(ROUTES.GROUP_MOVIE_DETAIL(groupId, movie.id)));
+		void goto(withTab(resolve(ROUTES.GROUP_MOVIE_DETAIL(groupId, movie.id))));
 	};
-
-	const isLoading = $derived(groupStore.isLoading || groupMoviesStore.isLoading);
 
 	const getTabCount = (tabId: string): number => {
 		if (tabId === 'all') return groupMoviesStore.movies.length;
@@ -90,7 +98,7 @@
 </script>
 
 <svelte:head>
-	<title>{groupStore.currentGroup?.name ?? 'Группа'} | Movies App</title>
+	<title>{groupStore.currentGroup?.name ?? 'Группа'} · Movies App</title>
 </svelte:head>
 
 {#if isLoading}

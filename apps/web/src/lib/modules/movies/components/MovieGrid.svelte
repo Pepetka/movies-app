@@ -18,7 +18,7 @@
 
 <div class={['movie-grid', className]} {...restProps}>
 	{#if isLoading}
-		<Grid cols={[2, 3, 5]} gap="md">
+		<Grid cols={[2, 3, 4]} gap="md">
 			{#each Array.from({ length: skeletonCount }, (_, i) => i) as i (i)}
 				<div class="movie-grid__skeleton">
 					<div class="movie-grid__skeleton-poster">
@@ -34,7 +34,7 @@
 	{:else if movies.length === 0}
 		<EmptyState Icon={Film} title="Нет фильмов" description="Добавьте первый фильм в группу" />
 	{:else}
-		<Grid cols={[2, 3, 5]} gap="md">
+		<Grid cols={[2, 3, 4]} gap="md">
 			{#each movies as movie (movie.id)}
 				<MovieCard {movie} onclick={onMovieClick ? () => onMovieClick(movie) : undefined} />
 			{/each}

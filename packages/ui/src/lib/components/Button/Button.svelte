@@ -177,15 +177,6 @@
 		}
 	}
 
-	@media (min-width: 768px) {
-		.ui-btn.responsive {
-			padding: var(--btn-lg-padding);
-			font-size: var(--btn-lg-font);
-			min-height: var(--btn-lg-height);
-			gap: var(--space-3);
-		}
-	}
-
 	/* Primary */
 	.ui-btn.primary {
 		background-color: var(--color-primary);

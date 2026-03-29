@@ -6,12 +6,11 @@
 
 	import MovieStatusBadge from './MovieStatusBadge.svelte';
 	import type { IProps } from './MovieCard.types';
+	import MovieRating from './MovieRating.svelte';
 
 	let { movie, onclick, ...restProps }: IProps = $props();
 
 	const yearDisplay = $derived(movie.releaseYear ? String(movie.releaseYear) : undefined);
-
-	const ratingDisplay = $derived(movie.rating ? movie.rating.toFixed(1) : undefined);
 
 	const dateDisplay = $derived.by(() => {
 		const dateStr = movie.plannedDate || movie.watchedDate;
@@ -34,8 +33,8 @@
 				{#if yearDisplay}
 					<span class="movie-card__year">{yearDisplay}</span>
 				{/if}
-				{#if ratingDisplay}
-					<span class="movie-card__rating">★ {ratingDisplay}</span>
+				{#if movie.rating}
+					<MovieRating rating={movie.rating} size={12} />
 				{/if}
 			</div>
 			{#if dateDisplay}
@@ -95,10 +94,6 @@
 		gap: var(--space-2);
 		font-size: var(--text-xs);
 		color: var(--text-secondary);
-	}
-
-	.movie-card__rating {
-		color: var(--color-warning);
 	}
 
 	.movie-card__date {

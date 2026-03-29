@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Button, Card, Modal, Spinner, toast } from '@repo/ui';
+	import { Button, Modal, Spinner, toast } from '@repo/ui';
 	import { Trash2 } from '@lucide/svelte';
 	import { untrack } from 'svelte';
 
@@ -18,7 +18,6 @@
 	import { page } from '$app/state';
 
 	import '$lib/styles/page-states.css';
-	import '$lib/styles/danger-zone.css';
 
 	const groupId = $derived(Number(page.params.id));
 
@@ -26,11 +25,27 @@
 	let showDeleteModal = $state(false);
 	let hasRedirected = $state(false);
 
+	const openDeleteModal = () => {
+		showDeleteModal = true;
+	};
+
+	const closeDeleteModal = () => {
+		showDeleteModal = false;
+		groupStore.resetDelete();
+	};
+
 	$effect(() => {
 		topBarStore.configure({
 			title: 'Редактирование',
 			showBack: true,
-			onBack: () => goto(resolve(ROUTES.GROUP_DETAIL(groupId)))
+			onBack: () => goto(resolve(ROUTES.GROUP_DETAIL(groupId))),
+			trailingAction: groupStore.isAdmin
+				? {
+						Icon: Trash2,
+						label: 'Удалить группу',
+						onclick: openDeleteModal
+					}
+				: undefined
 		});
 		return () => topBarStore.destroy();
 	});
@@ -84,19 +99,10 @@
 			toast.error(groupStore.deleteError ?? 'Ошибка удаления');
 		}
 	};
-
-	const openDeleteModal = () => {
-		showDeleteModal = true;
-	};
-
-	const closeDeleteModal = () => {
-		showDeleteModal = false;
-		groupStore.resetDelete();
-	};
 </script>
 
 <svelte:head>
-	<title>Редактирование группы | Movies App</title>
+	<title>Редактирование группы · Movies App</title>
 </svelte:head>
 
 {#if groupStore.isLoading}
@@ -111,24 +117,6 @@
 {:else if groupStore.currentGroup}
 	<div class="edit-page">
 		<GroupForm mode="edit" bind:form onSubmit={handleSubmit} isSubmitting={groupStore.isUpdating} />
-
-		{#if groupStore.isAdmin}
-			<Card variant="outlined" class="danger-zone-card">
-				{#snippet header()}
-					<div class="danger-zone__header">
-						<h2 class="danger-zone__title">Опасная зона</h2>
-						<p class="danger-zone__subtitle">Необратимые действия</p>
-					</div>
-				{/snippet}
-
-				<div class="danger-zone__content">
-					<Button variant="danger" fullWidth onclick={openDeleteModal}>
-						<Trash2 size={16} />
-						Удалить группу
-					</Button>
-				</div>
-			</Card>
-		{/if}
 	</div>
 
 	<Modal bind:open={showDeleteModal} size="sm">

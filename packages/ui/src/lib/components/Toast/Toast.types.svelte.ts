@@ -36,5 +36,6 @@ export interface ToastContainerProps {
 export interface IProps extends Omit<HTMLAttributes<HTMLDivElement>, 'id'> {
 	toast: ToastItem;
 	onDismiss: (id: string) => void;
+	isTop?: boolean;
 	class?: string;
 }
