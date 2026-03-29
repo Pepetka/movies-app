@@ -17,7 +17,7 @@
 	const displayValue = $derived(rating.toFixed(1));
 </script>
 
-<span class="movie-rating" style="color: {color}">
+<span class="movie-rating" style="color: {color}" aria-label="Рейтинг: {displayValue}">
 	<Star {size} fill="currentColor" />
 	{#if showValue}
 		{displayValue}
