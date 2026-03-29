@@ -1,5 +1,13 @@
 # @repo/ui
 
+## 0.8.0
+
+### Minor Changes
+
+- 3413244: Enhanced toast notifications with richer interaction
+  - Added progress bar, vertical swipe-to-dismiss, and pause-on-hover to toast
+  - Fixed pending requestAnimationFrame cancellation on toast dismiss
+
 ## 0.7.3
 
 ### Patch Changes
