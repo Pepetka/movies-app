@@ -158,11 +158,4 @@
 			padding: var(--space-6) var(--space-6) var(--space-10);
 		}
 	}
-
-	.modal-text {
-		font-size: var(--text-base);
-		color: var(--text-secondary);
-		line-height: 1.5;
-		margin: 0;
-	}
 </style>

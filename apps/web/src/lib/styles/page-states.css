@@ -36,3 +36,10 @@
 		background-color: var(--color-primary-hover);
 	}
 }
+
+.modal-text {
+	font-size: var(--text-base);
+	color: var(--text-secondary);
+	line-height: 1.5;
+	margin: 0;
+}

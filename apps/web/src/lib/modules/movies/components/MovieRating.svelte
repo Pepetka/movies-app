@@ -5,9 +5,12 @@
 
 	let { rating, size = 14, showValue = true }: IProps = $props();
 
+	const RATING_GOLD = 8;
+	const RATING_SILVER = 6;
+
 	const color = $derived.by(() => {
-		if (rating >= 8) return 'var(--rating-gold)';
-		if (rating >= 6) return 'var(--rating-silver)';
+		if (rating >= RATING_GOLD) return 'var(--rating-gold)';
+		if (rating >= RATING_SILVER) return 'var(--rating-silver)';
 		return 'var(--rating-red)';
 	});
 
