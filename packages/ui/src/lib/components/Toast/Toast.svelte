@@ -74,7 +74,7 @@
 
 		if (dragAxis === 'x' && Math.abs(currentX - startX) > DISMISS_X_THRESHOLD) {
 			shouldDismiss = true;
-			leaveTransform = 'translateX(100%)';
+			leaveTransform = currentX > startX ? 'translateX(100%)' : 'translateX(-100%)';
 		} else if (dragAxis === 'y' && Math.abs(finalY) > DISMISS_Y_THRESHOLD) {
 			shouldDismiss = true;
 			leaveTransform = isTop ? 'translateY(-100%)' : 'translateY(100%)';
