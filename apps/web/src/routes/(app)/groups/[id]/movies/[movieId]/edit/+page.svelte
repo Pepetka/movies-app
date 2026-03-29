@@ -93,7 +93,9 @@
 
 		if (groupMovieStore.isRemoveSuccess) {
 			toast.success('Фильм удалён из группы');
-			await goto(resolve(ROUTES.GROUP_DETAIL(groupId)));
+			const tab = page.url.searchParams.get('tab');
+			const path = resolve(ROUTES.GROUP_DETAIL(groupId));
+			await goto(tab ? `${path}?tab=${tab}` : path);
 		} else {
 			toast.error(groupMovieStore.removeError ?? 'Ошибка удаления');
 		}
