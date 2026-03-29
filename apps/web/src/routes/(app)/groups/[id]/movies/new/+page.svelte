@@ -43,7 +43,7 @@
 </script>
 
 <svelte:head>
-	<title>Новый фильм | Movies App</title>
+	<title>Новый фильм · Movies App</title>
 </svelte:head>
 
 <MovieForm

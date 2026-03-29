@@ -58,7 +58,7 @@
 </script>
 
 <svelte:head>
-	<title>{movie?.title ?? 'Фильм'} | Movies App</title>
+	<title>{movie?.title ?? 'Фильм'} · Movies App</title>
 </svelte:head>
 
 {#if isLoading}

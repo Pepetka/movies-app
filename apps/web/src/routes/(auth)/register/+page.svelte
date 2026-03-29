@@ -54,6 +54,10 @@
 	};
 </script>
 
+<svelte:head>
+	<title>Регистрация · Movies App</title>
+</svelte:head>
+
 <div class="form-page auth-page">
 	<div class="form-branding">
 		<a href={ROUTES.HOME} class="auth-logo-link">

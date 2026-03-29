@@ -11,19 +11,23 @@
 		topBarStore.configure({
 			title: 'Настройки'
 		});
+
 		return () => topBarStore.destroy();
 	});
 
 	const handleLogout = async () => {
 		try {
 			await authStore.logout();
-			toast.success('Вы вышли из аккаунта');
 		} catch {
 			toast.error('Ошибка выхода');
 		}
 		await goto(resolve(ROUTES.HOME), { replaceState: true });
 	};
 </script>
+
+<svelte:head>
+	<title>Настройки · Movies App</title>
+</svelte:head>
 
 <div class="settings-page">
 	<div class="settings-section">

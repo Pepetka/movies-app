@@ -102,7 +102,7 @@
 </script>
 
 <svelte:head>
-	<title>Редактирование группы | Movies App</title>
+	<title>Редактирование группы · Movies App</title>
 </svelte:head>
 
 {#if groupStore.isLoading}

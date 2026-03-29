@@ -54,7 +54,7 @@
 </script>
 
 <svelte:head>
-	<title>Добавить фильм | Movies App</title>
+	<title>Добавить фильм · Movies App</title>
 </svelte:head>
 
 <div class="search-page">

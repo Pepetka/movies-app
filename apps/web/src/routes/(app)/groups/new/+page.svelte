@@ -21,6 +21,7 @@
 			showBack: true,
 			onBack: () => goto(resolve(ROUTES.GROUPS))
 		});
+
 		return () => {
 			topBarStore.destroy();
 			groupStore.resetForm();
@@ -38,5 +39,9 @@
 		}
 	};
 </script>
+
+<svelte:head>
+	<title>Новая группа · Movies App</title>
+</svelte:head>
 
 <GroupForm mode="create" bind:form onSubmit={handleSubmit} isSubmitting={groupStore.isCreating} />

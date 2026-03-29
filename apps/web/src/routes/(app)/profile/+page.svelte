@@ -8,9 +8,14 @@
 		topBarStore.configure({
 			title: 'Профиль'
 		});
+
 		return () => topBarStore.destroy();
 	});
 </script>
+
+<svelte:head>
+	<title>Профиль · Movies App</title>
+</svelte:head>
 
 <div class="profile-page">
 	{#if authStore.user}

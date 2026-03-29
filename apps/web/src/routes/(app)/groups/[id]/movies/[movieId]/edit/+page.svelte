@@ -110,7 +110,7 @@
 </script>
 
 <svelte:head>
-	<title>Редактирование фильма | Movies App</title>
+	<title>Редактирование фильма · Movies App</title>
 </svelte:head>
 
 {#if groupMovieDetailStore.isLoading}

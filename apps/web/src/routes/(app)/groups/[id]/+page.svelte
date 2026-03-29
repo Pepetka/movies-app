@@ -100,7 +100,7 @@
 </script>
 
 <svelte:head>
-	<title>{groupStore.currentGroup?.name ?? 'Группа'} | Movies App</title>
+	<title>{groupStore.currentGroup?.name ?? 'Группа'} · Movies App</title>
 </svelte:head>
 
 {#if isLoading}
