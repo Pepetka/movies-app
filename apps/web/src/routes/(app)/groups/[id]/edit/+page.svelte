@@ -25,6 +25,15 @@
 	let showDeleteModal = $state(false);
 	let hasRedirected = $state(false);
 
+	const openDeleteModal = () => {
+		showDeleteModal = true;
+	};
+
+	const closeDeleteModal = () => {
+		showDeleteModal = false;
+		groupStore.resetDelete();
+	};
+
 	$effect(() => {
 		topBarStore.configure({
 			title: 'Редактирование',
@@ -89,15 +98,6 @@
 		} else {
 			toast.error(groupStore.deleteError ?? 'Ошибка удаления');
 		}
-	};
-
-	const openDeleteModal = () => {
-		showDeleteModal = true;
-	};
-
-	const closeDeleteModal = () => {
-		showDeleteModal = false;
-		groupStore.resetDelete();
 	};
 </script>
 

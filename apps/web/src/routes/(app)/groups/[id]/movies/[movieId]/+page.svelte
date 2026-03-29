@@ -8,7 +8,7 @@
 		MovieStatusBadge,
 		MovieStatusModal
 	} from '$lib/modules/movies';
-	import { ROUTES, formatDate, formatRuntime } from '$lib/utils';
+	import { ROUTES, formatDate, formatRuntime, withTab } from '$lib/utils';
 	import { PagePlaceholder } from '$lib/ui';
 	import { topBarStore } from '$lib/stores';
 	import { goto } from '$app/navigation';
@@ -27,18 +27,14 @@
 			title: movie?.title ?? (isLoading ? '' : 'Фильм'),
 			showBack: true,
 			onBack: () => {
-				const tab = page.url.searchParams.get('tab');
-				const path = resolve(ROUTES.GROUP_DETAIL(groupId));
-				void goto(tab ? `${path}?tab=${tab}` : path);
+				void goto(withTab(resolve(ROUTES.GROUP_DETAIL(groupId))));
 			},
 			trailingAction: groupMovieDetailStore.isModerator
 				? {
 						Icon: Pencil,
 						label: 'Редактировать',
 						onclick: () => {
-							const tab = page.url.searchParams.get('tab');
-							const path = resolve(ROUTES.GROUP_MOVIE_EDIT(groupId, movieId));
-							void goto(tab ? `${path}?tab=${tab}` : path);
+							void goto(withTab(resolve(ROUTES.GROUP_MOVIE_EDIT(groupId, movieId))));
 						}
 					}
 				: undefined

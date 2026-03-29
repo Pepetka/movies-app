@@ -3,6 +3,7 @@ export { ROUTES } from './routes';
 export { debounce } from './debounce';
 export { DEBOUNCE } from './config';
 export { formatDate, formatRuntime, sortByDateField } from './format';
+export { withTab } from './navigation';
 export {
 	createValidator,
 	createFormFieldValidator,

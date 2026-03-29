@@ -9,7 +9,7 @@
 		type MovieStatus,
 		type UnifiedMovie
 	} from '$lib/modules/movies';
-	import { ROUTES, sortByDateField } from '$lib/utils';
+	import { ROUTES, sortByDateField, withTab } from '$lib/utils';
 	import { groupStore } from '$lib/modules/groups';
 	import { PagePlaceholder } from '$lib/ui';
 	import { topBarStore } from '$lib/stores';
@@ -88,9 +88,7 @@
 	};
 
 	const handleMovieClick = (movie: UnifiedMovie) => {
-		const tab = page.url.searchParams.get('tab');
-		const path = resolve(ROUTES.GROUP_MOVIE_DETAIL(groupId, movie.id));
-		void goto(tab ? `${path}?tab=${tab}` : path);
+		void goto(withTab(resolve(ROUTES.GROUP_MOVIE_DETAIL(groupId, movie.id))));
 	};
 
 	const getTabCount = (tabId: string): number => {

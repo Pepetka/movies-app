@@ -12,10 +12,10 @@
 		customMovieFormToUpdateDto,
 		type CustomMovieFormData
 	} from '$lib/modules/movies';
+	import { ROUTES, withTab } from '$lib/utils';
 	import { topBarStore } from '$lib/stores';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
-	import { ROUTES } from '$lib/utils';
 	import { page } from '$app/state';
 
 	import '$lib/styles/page-states.css';
@@ -27,14 +27,21 @@
 	let showDeleteModal = $state(false);
 	let hasRedirected = $state(false);
 
+	const openDeleteModal = () => {
+		showDeleteModal = true;
+	};
+
+	const closeDeleteModal = () => {
+		showDeleteModal = false;
+		groupMovieStore.resetRemove();
+	};
+
 	$effect(() => {
 		topBarStore.configure({
 			title: 'Редактирование',
 			showBack: true,
 			onBack: () => {
-				const tab = page.url.searchParams.get('tab');
-				const path = resolve(ROUTES.GROUP_MOVIE_DETAIL(groupId, movieId));
-				void goto(tab ? `${path}?tab=${tab}` : path);
+				void goto(withTab(resolve(ROUTES.GROUP_MOVIE_DETAIL(groupId, movieId))));
 			},
 			trailingAction: groupMovieDetailStore.isModerator
 				? {
@@ -93,21 +100,10 @@
 
 		if (groupMovieStore.isRemoveSuccess) {
 			toast.success('Фильм удалён из группы');
-			const tab = page.url.searchParams.get('tab');
-			const path = resolve(ROUTES.GROUP_DETAIL(groupId));
-			await goto(tab ? `${path}?tab=${tab}` : path);
+			await goto(withTab(resolve(ROUTES.GROUP_DETAIL(groupId))));
 		} else {
 			toast.error(groupMovieStore.removeError ?? 'Ошибка удаления');
 		}
-	};
-
-	const openDeleteModal = () => {
-		showDeleteModal = true;
-	};
-
-	const closeDeleteModal = () => {
-		showDeleteModal = false;
-		groupMovieStore.resetRemove();
 	};
 </script>
 
