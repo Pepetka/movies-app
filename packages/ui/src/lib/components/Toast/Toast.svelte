@@ -3,49 +3,99 @@
 
 	import type { IProps } from './Toast.types.svelte';
 
-	const { toast, onDismiss, class: className, ...restProps }: IProps = $props();
+	const { toast, onDismiss, isTop = false, class: className, ...restProps }: IProps = $props();
+
+	const AXIS_LOCK_THRESHOLD = 5;
+	const DISMISS_X_THRESHOLD = 100;
+	const DISMISS_Y_THRESHOLD = 20;
+	const OPACITY_DRAG_DISTANCE = 200;
 
 	let startX = $state(0);
+	let startY = $state(0);
 	let currentX = $state(0);
+	let currentY = $state(0);
 	let isDragging = $state(false);
 	let isLeaving = $state(false);
+	let isHovered = $state(false);
+	let dragAxis = $state<'x' | 'y' | null>(null);
+	let leaveTransform = $state('translateX(100%)');
 
-	const translateX = $derived(isDragging ? currentX - startX : 0);
-	const opacity = $derived(isLeaving ? 0 : isDragging ? 1 - Math.abs(translateX) / 200 : 1);
+	let progress = $state(0);
+	let isPaused = $derived(isDragging || isHovered);
 
-	const handleDragStart = (clientX: number) => {
-		startX = clientX;
-		currentX = clientX;
-		isDragging = true;
+	const constrainY = (y: number) => {
+		const diff = y - startY;
+		return isTop ? Math.min(0, diff) : Math.max(0, diff);
 	};
 
-	const handleDragMove = (clientX: number) => {
+	const translateX = $derived.by(() => {
+		if (!isDragging || dragAxis !== 'x') return 0;
+		return currentX - startX;
+	});
+	const translateY = $derived.by(() => {
+		if (!isDragging || dragAxis !== 'y') return 0;
+		return constrainY(currentY);
+	});
+	const dragDistance = $derived(
+		isDragging && dragAxis === 'y' ? Math.abs(translateY) : Math.abs(translateX)
+	);
+	const opacity = $derived(
+		isLeaving ? 0 : isDragging ? 1 - dragDistance / OPACITY_DRAG_DISTANCE : 1
+	);
+
+	const handleDragStart = (clientX: number, clientY: number) => {
+		startX = clientX;
+		startY = clientY;
+		currentX = clientX;
+		currentY = clientY;
+		isDragging = true;
+		dragAxis = null;
+	};
+
+	const handleDragMove = (clientX: number, clientY: number) => {
 		if (!isDragging) return;
 		currentX = clientX;
+		currentY = clientY;
+
+		if (dragAxis === null) {
+			const dx = Math.abs(clientX - startX);
+			const dy = Math.abs(clientY - startY);
+			if (dx > AXIS_LOCK_THRESHOLD || dy > AXIS_LOCK_THRESHOLD) {
+				dragAxis = dx >= dy ? 'x' : 'y';
+			}
+		}
 	};
 
 	const handleDragEnd = () => {
 		if (!isDragging) return;
-		const diff = currentX - startX;
-		const threshold = 100;
 
-		if (Math.abs(diff) > threshold) {
+		let shouldDismiss = false;
+		const finalY = constrainY(currentY);
+
+		if (dragAxis === 'x' && Math.abs(currentX - startX) > DISMISS_X_THRESHOLD) {
+			shouldDismiss = true;
+			leaveTransform = 'translateX(100%)';
+		} else if (dragAxis === 'y' && Math.abs(finalY) > DISMISS_Y_THRESHOLD) {
+			shouldDismiss = true;
+			leaveTransform = isTop ? 'translateY(-100%)' : 'translateY(100%)';
+		}
+
+		if (shouldDismiss) {
 			dismiss();
-		} else {
-			currentX = startX;
 		}
 		isDragging = false;
+		dragAxis = null;
 	};
 
 	const handleTouchStart = (e: TouchEvent) => {
 		const target = e.target as HTMLElement;
 		if (target.closest('.ui-toast-actions')) return;
-		handleDragStart(e.touches[0].clientX);
+		handleDragStart(e.touches[0].clientX, e.touches[0].clientY);
 	};
 
 	const handleTouchMove = (e: TouchEvent) => {
 		if (!isDragging) return;
-		handleDragMove(e.touches[0].clientX);
+		handleDragMove(e.touches[0].clientX, e.touches[0].clientY);
 	};
 
 	const handleTouchEnd = () => {
@@ -55,19 +105,24 @@
 	const handleMouseDown = (e: MouseEvent) => {
 		const target = e.target as HTMLElement;
 		if (target.closest('.ui-toast-actions')) return;
-		handleDragStart(e.clientX);
+		handleDragStart(e.clientX, e.clientY);
 	};
 
 	const handleMouseMove = (e: MouseEvent) => {
 		if (!isDragging) return;
-		handleDragMove(e.clientX);
+		handleDragMove(e.clientX, e.clientY);
 	};
 
 	const handleMouseUp = () => {
 		handleDragEnd();
 	};
 
+	const handleMouseEnter = () => {
+		isHovered = true;
+	};
+
 	const handleMouseLeave = () => {
+		isHovered = false;
 		if (isDragging) {
 			handleDragEnd();
 		}
@@ -85,10 +140,40 @@
 	};
 
 	$effect(() => {
-		if (toast.duration > 0) {
-			const timer = setTimeout(dismiss, toast.duration);
-			return () => clearTimeout(timer);
-		}
+		if (toast.duration <= 0) return;
+
+		let startTime = performance.now();
+		let pausedAt = 0;
+		let totalPaused = 0;
+		let rafId: number;
+
+		const tick = (now: number) => {
+			if (isLeaving) return;
+
+			if (isPaused) {
+				if (pausedAt === 0) pausedAt = now;
+				rafId = requestAnimationFrame(tick);
+				return;
+			}
+
+			if (pausedAt !== 0) {
+				totalPaused += now - pausedAt;
+				pausedAt = 0;
+			}
+
+			const elapsed = now - startTime - totalPaused;
+			progress = Math.min(elapsed / toast.duration, 1);
+
+			if (progress >= 1) {
+				dismiss();
+				return;
+			}
+
+			rafId = requestAnimationFrame(tick);
+		};
+
+		rafId = requestAnimationFrame(tick);
+		return () => cancelAnimationFrame(rafId);
 	});
 
 	const isAlert = $derived(toast.type === 'error' || toast.type === 'warning');
@@ -109,8 +194,10 @@
 	onmousedown={handleMouseDown}
 	onmousemove={handleMouseMove}
 	onmouseup={handleMouseUp}
+	onmouseenter={handleMouseEnter}
 	onmouseleave={handleMouseLeave}
-	style="--translate-x: {translateX}px; --opacity: {opacity};"
+	style="--translate-x: {translateX}px; --translate-y: {translateY}px; --opacity: {opacity}; --leave-transform: {leaveTransform}; --progress: {1 -
+		progress};"
 	{...restProps}
 >
 	{#if toast.type === 'success'}
@@ -151,10 +238,18 @@
 			</button>
 		{/if}
 	</div>
+
+	{#if toast.duration > 0}
+		<div class="ui-toast-progress">
+			<div class="ui-toast-progress-bar"></div>
+		</div>
+	{/if}
 </div>
 
 <style>
 	.ui-toast {
+		position: relative;
+		overflow: hidden;
 		display: flex;
 		align-items: center;
 		gap: var(--space-3);
@@ -163,12 +258,13 @@
 		padding: var(--toast-padding);
 		border-radius: var(--toast-border-radius);
 		box-shadow: var(--shadow-lg);
-		transform: translateX(var(--translate-x, 0));
+		transform: translate(var(--translate-x, 0), var(--translate-y, 0));
 		opacity: var(--opacity, 1);
 		transition:
 			opacity var(--transition-fast) var(--ease-out),
 			transform var(--transition-base) var(--ease-out);
 		user-select: none;
+		touch-action: none;
 	}
 
 	.ui-toast.dragging {
@@ -193,7 +289,7 @@
 	@keyframes toast-leave {
 		to {
 			opacity: 0;
-			transform: translateX(100%);
+			transform: var(--leave-transform, translateX(100%));
 		}
 	}
 
@@ -288,5 +384,23 @@
 	.ui-toast-close:focus-visible {
 		outline: 2px solid currentColor;
 		outline-offset: 2px;
+	}
+
+	/* Progress bar */
+	.ui-toast-progress {
+		position: absolute;
+		bottom: 0;
+		left: 0;
+		right: 0;
+		height: 3px;
+	}
+
+	.ui-toast-progress-bar {
+		width: 100%;
+		height: 100%;
+		transform-origin: left;
+		transform: scaleX(var(--progress, 1));
+		background: currentColor;
+		opacity: 0.25;
 	}
 </style>

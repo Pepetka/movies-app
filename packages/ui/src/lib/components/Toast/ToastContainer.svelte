@@ -25,11 +25,13 @@
 		};
 		return positions[position];
 	});
+
+	const isTop = $derived(position.startsWith('top'));
 </script>
 
 <div class={['ui-toast-container', positionClasses, className]} {...restProps}>
 	{#each toast.toasts as item (item.id)}
-		<Toast toast={item} onDismiss={(id) => toast.dismiss(id as string)} />
+		<Toast toast={item} onDismiss={(id) => toast.dismiss(id as string)} {isTop} />
 	{/each}
 </div>
 
