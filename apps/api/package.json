@@ -71,7 +71,7 @@
     "@types/supertest": "^7.2.0",
     "drizzle-kit": "^0.31.10",
     "eslint": "catalog:",
-    "fastify": "^5.8.2",
+    "fastify": "^5.8.4",
     "jest": "^30.3.0",
     "prettier": "catalog:",
     "source-map-support": "^0.5.21",
