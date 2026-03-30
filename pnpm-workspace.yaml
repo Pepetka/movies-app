@@ -19,7 +19,7 @@ catalog:
   prettier-plugin-svelte: "^3.5.1"
   svelte-check: "^4.4.5"
   vite: "^8.0.2"
-  "@lucide/svelte": "^0.577.0"
+  "@lucide/svelte": "^1.7.0"
 
   # Storybook
   storybook: "^10.3.1"
