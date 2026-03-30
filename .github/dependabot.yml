@@ -52,15 +52,9 @@ updates:
           - "minor"
           - "patch"
 
-      nestjs-stack:
+      nestjs-fastify-stack:
         patterns:
           - "@nestjs/*"
-        update-types:
-          - "minor"
-          - "patch"
-
-      fastify-stack:
-        patterns:
           - "fastify"
           - "@fastify/*"
         update-types:
