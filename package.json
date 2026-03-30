@@ -31,7 +31,7 @@
     "prettier-plugin-svelte": "catalog:",
     "syncpack": "14.3.0",
     "typescript": "catalog:",
-    "turbo": "^2.8.21"
+    "turbo": "^2.9.0"
   },
   "packageManager": "pnpm@10.29.3",
   "engines": {
