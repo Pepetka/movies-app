@@ -182,7 +182,10 @@ export class GroupsRepository {
       .select({ count: count() })
       .from(groupMembers)
       .where(
-        and(eq(groupMembers.groupId, groupId), eq(groupMembers.role, 'admin')),
+        and(
+          eq(groupMembers.groupId, groupId),
+          eq(groupMembers.role, GroupMemberRole.ADMIN),
+        ),
       );
     return result.count;
   }
@@ -200,7 +203,7 @@ export class GroupsRepository {
           .where(
             and(
               eq(groupMembers.groupId, groupId),
-              eq(groupMembers.role, 'admin'),
+              eq(groupMembers.role, GroupMemberRole.ADMIN),
             ),
           );
 
@@ -228,7 +231,10 @@ export class GroupsRepository {
       .select()
       .from(groupMembers)
       .where(
-        and(eq(groupMembers.groupId, groupId), eq(groupMembers.role, 'admin')),
+        and(
+          eq(groupMembers.groupId, groupId),
+          eq(groupMembers.role, GroupMemberRole.ADMIN),
+        ),
       )
       .limit(1);
     return result ?? null;

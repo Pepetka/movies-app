@@ -26,10 +26,12 @@ export abstract class BaseGroupGuard implements CanActivate {
       throw new ForbiddenException('Group ID required');
     }
 
-    const member = await this.groupsRepository.findMember(
-      Number(groupId),
-      userId,
-    );
+    const parsedId = Number(groupId);
+    if (!Number.isFinite(parsedId)) {
+      throw new ForbiddenException('Invalid Group ID');
+    }
+
+    const member = await this.groupsRepository.findMember(parsedId, userId);
 
     if (!member) {
       throw new ForbiddenException('You are not a member of this group');

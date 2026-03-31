@@ -360,6 +360,15 @@ describe('GroupsService', () => {
         service.removeMember(1, 3, mockModeratorMember),
       ).rejects.toThrow(NotGroupAdminException);
     });
+
+    it('should throw TargetNotGroupMemberException when target is not a member', async () => {
+      groupsRepository.findGroupById.mockResolvedValue(mockGroup);
+      groupsRepository.findMember.mockResolvedValue(null);
+
+      await expect(
+        service.removeMember(1, 999, mockAdminMember),
+      ).rejects.toThrow(TargetNotGroupMemberException);
+    });
   });
 
   describe('updateMemberRole', () => {
@@ -605,21 +614,17 @@ describe('GroupsService', () => {
       });
     });
 
-    it('should throw UserAlreadyMemberException on unique violation', async () => {
+    it('should throw UserAlreadyMemberException when already a member', async () => {
       const groupWithToken = { ...mockGroup, inviteToken: 'valid-token' };
       groupsRepository.findGroupByInviteToken.mockResolvedValue(groupWithToken);
-      const error: { code: string; message: string } = {
-        code: '23505',
-        message: 'unique violation',
-      };
-      groupsRepository.addMember.mockRejectedValue(error);
+      groupsRepository.findMember.mockResolvedValue(mockGroupMember);
 
       await expect(service.acceptInvite('valid-token', 2)).rejects.toThrow(
         UserAlreadyMemberException,
       );
     });
 
-    it('should rethrow non-unique database errors', async () => {
+    it('should propagate unexpected errors from repository', async () => {
       const groupWithToken = { ...mockGroup, inviteToken: 'valid-token' };
       groupsRepository.findGroupByInviteToken.mockResolvedValue(groupWithToken);
       groupsRepository.addMember.mockRejectedValue(

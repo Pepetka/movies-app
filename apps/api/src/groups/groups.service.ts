@@ -157,13 +157,17 @@ export class GroupsService {
       memberUserId,
     );
 
-    if (target?.role === GroupMemberRole.ADMIN) {
+    if (!target) {
+      throw new TargetNotGroupMemberException();
+    }
+
+    if (target.role === GroupMemberRole.ADMIN) {
       throw new CannotRemoveGroupAdminException();
     }
 
     const isAdmin = member.role === GroupMemberRole.ADMIN;
 
-    if (!isAdmin && target?.role === GroupMemberRole.MODERATOR) {
+    if (!isAdmin && target.role === GroupMemberRole.MODERATOR) {
       throw new NotGroupAdminException();
     }
 
@@ -231,11 +235,18 @@ export class GroupsService {
     );
   }
 
-  async getMembers(groupId: number) {
+  async getMembers(
+    groupId: number,
+  ): Promise<
+    Awaited<ReturnType<GroupsRepository['findMembersByGroupWithUsers']>>
+  > {
     return this.groupsRepository.findMembersByGroupWithUsers(groupId);
   }
 
-  async getMemberMe(groupId: number, member: GroupMember) {
+  async getMemberMe(
+    groupId: number,
+    member: GroupMember,
+  ): Promise<Awaited<ReturnType<GroupsRepository['findMemberWithUser']>>> {
     return this.groupsRepository.findMemberWithUser(groupId, member.userId);
   }
 
@@ -289,7 +300,13 @@ export class GroupsService {
     return { inviteToken: token };
   }
 
-  async getInviteInfo(token: string) {
+  async getInviteInfo(token: string): Promise<{
+    id: number;
+    name: string;
+    description: string | null;
+    avatarUrl: string | null;
+    memberCount: number;
+  }> {
     const group = await this._getGroupByInviteTokenOrThrow(token);
     const memberCount = await this.groupsRepository.countMembers(group.id);
 
@@ -308,23 +325,19 @@ export class GroupsService {
   ): Promise<{ groupId: number }> {
     const group = await this._getGroupByInviteTokenOrThrow(token);
 
-    try {
-      await this.groupsRepository.addMember({
-        groupId: group.id,
-        userId,
-        role: GroupMemberRole.MEMBER,
-      });
-    } catch (e: unknown) {
-      if (
-        typeof e === 'object' &&
-        e !== null &&
-        'code' in e &&
-        e.code === '23505'
-      ) {
-        throw new UserAlreadyMemberException();
-      }
-      throw e;
+    const existingMember = await this.groupsRepository.findMember(
+      group.id,
+      userId,
+    );
+    if (existingMember) {
+      throw new UserAlreadyMemberException();
     }
+
+    await this.groupsRepository.addMember({
+      groupId: group.id,
+      userId,
+      role: GroupMemberRole.MEMBER,
+    });
 
     this._logger.log(`User ${userId} joined group ${group.id} via invite link`);
     return { groupId: group.id };
