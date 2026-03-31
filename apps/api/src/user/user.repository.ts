@@ -44,7 +44,7 @@ export class UserRepository {
   async update(id: number, data: Partial<NewUser>): Promise<User> {
     const [result] = await this.db
       .update(users)
-      .set({ ...data, updatedAt: new Date() })
+      .set({ ...data })
       .where(eq(users.id, id))
       .returning();
     return result;
@@ -62,7 +62,7 @@ export class UserRepository {
   async updateRefreshTokenHash(id: number, hash: string | null): Promise<void> {
     await this.db
       .update(users)
-      .set({ refreshTokenHash: hash, updatedAt: new Date() })
+      .set({ refreshTokenHash: hash })
       .where(eq(users.id, id));
   }
 }

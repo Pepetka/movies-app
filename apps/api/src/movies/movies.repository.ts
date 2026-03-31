@@ -53,7 +53,7 @@ export class MoviesRepository {
   async update(id: number, data: Partial<NewMovie>): Promise<Movie> {
     const [result] = await this.db
       .update(movies)
-      .set({ ...data, updatedAt: new Date() })
+      .set({ ...data })
       .where(eq(movies.id, id))
       .returning();
     return result;
