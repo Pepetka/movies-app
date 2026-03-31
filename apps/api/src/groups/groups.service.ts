@@ -37,11 +37,14 @@ export class GroupsService {
       avatarUrl: dto.avatarUrl ?? null,
     });
 
-    await this.groupsRepository.addMember({
+    const added = await this.groupsRepository.addMemberIfNotExists({
       groupId: group.id,
       userId,
       role: GroupMemberRole.ADMIN,
     });
+    if (!added) {
+      throw new UserAlreadyMemberException();
+    }
 
     this._logger.log(`Group ${group.id} created by user ${userId}`);
     return group;
@@ -63,11 +66,7 @@ export class GroupsService {
     id: number,
     member: GroupMember,
   ): Promise<Group & { currentUserRole: GroupMemberRole }> {
-    const group = await this.groupsRepository.findGroupById(id);
-
-    if (!group) {
-      throw new GroupNotFoundException(id);
-    }
+    const group = await this._getGroupOrThrow(id);
 
     return {
       ...group,
@@ -80,11 +79,7 @@ export class GroupsService {
     member: GroupMember,
     dto: GroupUpdateDto,
   ): Promise<Group> {
-    const group = await this.groupsRepository.findGroupById(id);
-
-    if (!group) {
-      throw new GroupNotFoundException(id);
-    }
+    await this._getGroupOrThrow(id);
 
     const updateData: Partial<Record<string, unknown>> = {};
     if (dto.name !== undefined) updateData.name = dto.name;
@@ -100,11 +95,7 @@ export class GroupsService {
   }
 
   async remove(id: number, member: GroupMember): Promise<void> {
-    const group = await this.groupsRepository.findGroupById(id);
-
-    if (!group) {
-      throw new GroupNotFoundException(id);
-    }
+    await this._getGroupOrThrow(id);
 
     await this.groupsRepository.deleteGroup(id);
     this._logger.log(`Group ${id} deleted by user ${member.userId}`);
@@ -115,26 +106,16 @@ export class GroupsService {
     dto: GroupMemberAddDto,
     member: GroupMember,
   ): Promise<void> {
-    const group = await this.groupsRepository.findGroupById(groupId);
+    await this._getGroupOrThrow(groupId);
 
-    if (!group) {
-      throw new GroupNotFoundException(groupId);
-    }
-
-    const existingMember = await this.groupsRepository.findMember(
-      groupId,
-      dto.userId,
-    );
-
-    if (existingMember) {
-      throw new UserAlreadyMemberException();
-    }
-
-    await this.groupsRepository.addMember({
+    const added = await this.groupsRepository.addMemberIfNotExists({
       groupId,
       userId: dto.userId,
       role: dto.role ?? GroupMemberRole.MEMBER,
     });
+    if (!added) {
+      throw new UserAlreadyMemberException();
+    }
 
     this._logger.log(
       `User ${dto.userId} added to group ${groupId} by user ${member.userId}`,
@@ -146,11 +127,7 @@ export class GroupsService {
     memberUserId: number,
     member: GroupMember,
   ): Promise<void> {
-    const group = await this.groupsRepository.findGroupById(groupId);
-
-    if (!group) {
-      throw new GroupNotFoundException(groupId);
-    }
+    await this._getGroupOrThrow(groupId);
 
     const target = await this.groupsRepository.findMember(
       groupId,
@@ -183,11 +160,7 @@ export class GroupsService {
     dto: GroupMemberRoleUpdateDto,
     member: GroupMember,
   ): Promise<void> {
-    const group = await this.groupsRepository.findGroupById(groupId);
-
-    if (!group) {
-      throw new GroupNotFoundException(groupId);
-    }
+    await this._getGroupOrThrow(groupId);
 
     const result = await this.groupsRepository.setAdminRoleInTransaction(
       groupId,
@@ -209,11 +182,7 @@ export class GroupsService {
     targetUserId: number,
     member: GroupMember,
   ): Promise<void> {
-    const group = await this.groupsRepository.findGroupById(groupId);
-
-    if (!group) {
-      throw new GroupNotFoundException(groupId);
-    }
+    await this._getGroupOrThrow(groupId);
 
     if (targetUserId === member.userId) {
       throw new CannotTransferToSelfException();
@@ -256,11 +225,7 @@ export class GroupsService {
   }
 
   async leaveGroup(groupId: number, userId: number): Promise<void> {
-    const group = await this.groupsRepository.findGroupById(groupId);
-
-    if (!group) {
-      throw new GroupNotFoundException(groupId);
-    }
+    await this._getGroupOrThrow(groupId);
 
     const member = await this.groupsRepository.findMember(groupId, userId);
 
@@ -283,11 +248,7 @@ export class GroupsService {
     groupId: number,
     member: GroupMember,
   ): Promise<{ inviteToken: string }> {
-    const group = await this.groupsRepository.findGroupById(groupId);
-
-    if (!group) {
-      throw new GroupNotFoundException(groupId);
-    }
+    await this._getGroupOrThrow(groupId);
 
     const token = crypto
       .randomBytes(GroupsService.INVITE_TOKEN_BYTES)
@@ -325,29 +286,34 @@ export class GroupsService {
   ): Promise<{ groupId: number }> {
     const group = await this._getGroupByInviteTokenOrThrow(token);
 
-    const existingMember = await this.groupsRepository.findMember(
-      group.id,
-      userId,
-    );
-    if (existingMember) {
-      throw new UserAlreadyMemberException();
-    }
-
-    await this.groupsRepository.addMember({
+    const added = await this.groupsRepository.addMemberIfNotExists({
       groupId: group.id,
       userId,
       role: GroupMemberRole.MEMBER,
     });
+    if (!added) {
+      throw new UserAlreadyMemberException();
+    }
 
     this._logger.log(`User ${userId} joined group ${group.id} via invite link`);
     return { groupId: group.id };
   }
 
-  private async _getGroupByInviteTokenOrThrow(token: string) {
+  private async _getGroupByInviteTokenOrThrow(token: string): Promise<Group> {
     const group = await this.groupsRepository.findGroupByInviteToken(token);
 
     if (!group) {
       throw new InviteNotFoundException();
+    }
+
+    return group;
+  }
+
+  private async _getGroupOrThrow(id: number): Promise<Group> {
+    const group = await this.groupsRepository.findGroupById(id);
+
+    if (!group) {
+      throw new GroupNotFoundException(id);
     }
 
     return group;

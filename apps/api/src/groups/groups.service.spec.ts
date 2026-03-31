@@ -76,7 +76,7 @@ const createMockGroupsRepository = () => ({
   findGroupsByUserId: jest.fn(),
   updateGroup: jest.fn(),
   deleteGroup: jest.fn(),
-  addMember: jest.fn(),
+  addMemberIfNotExists: jest.fn(),
   findMember: jest.fn(),
   findMembersByGroupWithUsers: jest.fn(),
   findMemberWithUser: jest.fn(),
@@ -124,7 +124,7 @@ describe('GroupsService', () => {
 
     it('should create group and add user as admin', async () => {
       groupsRepository.createGroup.mockResolvedValue(mockGroup);
-      groupsRepository.addMember.mockResolvedValue(mockGroupMember);
+      groupsRepository.addMemberIfNotExists.mockResolvedValue(mockGroupMember);
 
       const result = await service.create(1, createDto);
 
@@ -134,7 +134,7 @@ describe('GroupsService', () => {
         description: createDto.description,
         avatarUrl: createDto.avatarUrl,
       });
-      expect(groupsRepository.addMember).toHaveBeenCalledWith({
+      expect(groupsRepository.addMemberIfNotExists).toHaveBeenCalledWith({
         groupId: mockGroup.id,
         userId: 1,
         role: GroupMemberRole.ADMIN,
@@ -259,12 +259,11 @@ describe('GroupsService', () => {
   describe('addMember', () => {
     it('should add member as moderator', async () => {
       groupsRepository.findGroupById.mockResolvedValue(mockGroup);
-      groupsRepository.findMember.mockResolvedValue(null);
-      groupsRepository.addMember.mockResolvedValue(mockGroupMember);
+      groupsRepository.addMemberIfNotExists.mockResolvedValue(mockGroupMember);
 
       await service.addMember(1, { userId: 3 }, mockModeratorMember);
 
-      expect(groupsRepository.addMember).toHaveBeenCalledWith({
+      expect(groupsRepository.addMemberIfNotExists).toHaveBeenCalledWith({
         groupId: 1,
         userId: 3,
         role: GroupMemberRole.MEMBER,
@@ -273,8 +272,7 @@ describe('GroupsService', () => {
 
     it('should add member with specified role', async () => {
       groupsRepository.findGroupById.mockResolvedValue(mockGroup);
-      groupsRepository.findMember.mockResolvedValue(null);
-      groupsRepository.addMember.mockResolvedValue(mockGroupMember);
+      groupsRepository.addMemberIfNotExists.mockResolvedValue(mockGroupMember);
 
       await service.addMember(
         1,
@@ -282,7 +280,7 @@ describe('GroupsService', () => {
         mockAdminMember,
       );
 
-      expect(groupsRepository.addMember).toHaveBeenCalledWith({
+      expect(groupsRepository.addMemberIfNotExists).toHaveBeenCalledWith({
         groupId: 1,
         userId: 3,
         role: GroupMemberRole.MODERATOR,
@@ -299,7 +297,7 @@ describe('GroupsService', () => {
 
     it('should throw UserAlreadyMemberException for existing member', async () => {
       groupsRepository.findGroupById.mockResolvedValue(mockGroup);
-      groupsRepository.findMember.mockResolvedValue(mockGroupMember);
+      groupsRepository.addMemberIfNotExists.mockResolvedValue(null);
 
       await expect(
         service.addMember(1, { userId: 2 }, mockAdminMember),
@@ -602,12 +600,12 @@ describe('GroupsService', () => {
     it('should add user as member and return groupId', async () => {
       const groupWithToken = { ...mockGroup, inviteToken: 'valid-token' };
       groupsRepository.findGroupByInviteToken.mockResolvedValue(groupWithToken);
-      groupsRepository.addMember.mockResolvedValue(mockGroupMember);
+      groupsRepository.addMemberIfNotExists.mockResolvedValue(mockGroupMember);
 
       const result = await service.acceptInvite('valid-token', 3);
 
       expect(result).toEqual({ groupId: groupWithToken.id });
-      expect(groupsRepository.addMember).toHaveBeenCalledWith({
+      expect(groupsRepository.addMemberIfNotExists).toHaveBeenCalledWith({
         groupId: groupWithToken.id,
         userId: 3,
         role: GroupMemberRole.MEMBER,
@@ -617,7 +615,7 @@ describe('GroupsService', () => {
     it('should throw UserAlreadyMemberException when already a member', async () => {
       const groupWithToken = { ...mockGroup, inviteToken: 'valid-token' };
       groupsRepository.findGroupByInviteToken.mockResolvedValue(groupWithToken);
-      groupsRepository.findMember.mockResolvedValue(mockGroupMember);
+      groupsRepository.addMemberIfNotExists.mockResolvedValue(null);
 
       await expect(service.acceptInvite('valid-token', 2)).rejects.toThrow(
         UserAlreadyMemberException,
@@ -627,7 +625,7 @@ describe('GroupsService', () => {
     it('should propagate unexpected errors from repository', async () => {
       const groupWithToken = { ...mockGroup, inviteToken: 'valid-token' };
       groupsRepository.findGroupByInviteToken.mockResolvedValue(groupWithToken);
-      groupsRepository.addMember.mockRejectedValue(
+      groupsRepository.addMemberIfNotExists.mockRejectedValue(
         new Error('connection lost'),
       );
 
