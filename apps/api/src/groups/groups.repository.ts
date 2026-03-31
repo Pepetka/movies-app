@@ -43,6 +43,7 @@ export class GroupsRepository {
         name: groups.name,
         description: groups.description,
         avatarUrl: groups.avatarUrl,
+        inviteToken: groups.inviteToken,
         createdAt: groups.createdAt,
         updatedAt: groups.updatedAt,
       })
@@ -51,7 +52,7 @@ export class GroupsRepository {
       .where(eq(groupMembers.userId, userId))
       .orderBy(groupMembers.createdAt);
 
-    return result as unknown as Group[];
+    return result;
   }
 
   async updateGroup(id: number, data: Partial<NewGroup>): Promise<Group> {
@@ -67,12 +68,17 @@ export class GroupsRepository {
     await this.db.delete(groups).where(eq(groups.id, id));
   }
 
-  async addMember(data: NewGroupMember): Promise<GroupMember> {
+  async addMemberIfNotExists(
+    data: NewGroupMember,
+  ): Promise<GroupMember | null> {
     const [result] = await this.db
       .insert(groupMembers)
       .values(data)
+      .onConflictDoNothing({
+        target: [groupMembers.groupId, groupMembers.userId],
+      })
       .returning();
-    return result;
+    return result ?? null;
   }
 
   async findMember(

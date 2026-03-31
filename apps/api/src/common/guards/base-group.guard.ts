@@ -6,6 +6,7 @@ import {
 
 import type { UserRequest } from '$src/auth/types/user-request.type';
 import { GroupsRepository } from '$src/groups/groups.repository';
+import { NotGroupMemberException } from '$common/exceptions';
 import type { GroupMember } from '$db/schemas';
 
 export abstract class BaseGroupGuard implements CanActivate {
@@ -27,14 +28,14 @@ export abstract class BaseGroupGuard implements CanActivate {
     }
 
     const parsedId = Number(groupId);
-    if (!Number.isFinite(parsedId)) {
+    if (!Number.isInteger(parsedId)) {
       throw new ForbiddenException('Invalid Group ID');
     }
 
     const member = await this.groupsRepository.findMember(parsedId, userId);
 
     if (!member) {
-      throw new ForbiddenException('You are not a member of this group');
+      throw new NotGroupMemberException();
     }
 
     request.groupMember = member;
