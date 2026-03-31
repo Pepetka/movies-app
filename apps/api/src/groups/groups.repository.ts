@@ -57,7 +57,7 @@ export class GroupsRepository {
   async updateGroup(id: number, data: Partial<NewGroup>): Promise<Group> {
     const [result] = await this.db
       .update(groups)
-      .set({ ...data, updatedAt: new Date() })
+      .set({ ...data })
       .where(eq(groups.id, id))
       .returning();
     return result;
@@ -161,7 +161,7 @@ export class GroupsRepository {
   ): Promise<GroupMember> {
     const [result] = await this.db
       .update(groupMembers)
-      .set({ role, updatedAt: new Date() })
+      .set({ role })
       .where(
         and(eq(groupMembers.groupId, groupId), eq(groupMembers.userId, userId)),
       )
@@ -187,6 +187,7 @@ export class GroupsRepository {
         groupName: groups.name,
         groupDescription: groups.description,
         groupAvatarUrl: groups.avatarUrl,
+        groupInviteToken: groups.inviteToken,
         groupCreatedAt: groups.createdAt,
         groupUpdatedAt: groups.updatedAt,
         memberId: groupMembers.id,
@@ -234,6 +235,7 @@ export class GroupsRepository {
         name: row.groupName,
         description: row.groupDescription,
         avatarUrl: row.groupAvatarUrl,
+        inviteToken: row.groupInviteToken,
         createdAt: row.groupCreatedAt,
         updatedAt: row.groupUpdatedAt,
       },
@@ -275,7 +277,7 @@ export class GroupsRepository {
 
       await tx
         .update(groupMembers)
-        .set({ role, updatedAt: new Date() })
+        .set({ role })
         .where(
           and(
             eq(groupMembers.groupId, groupId),
@@ -306,7 +308,7 @@ export class GroupsRepository {
     await this.db.transaction(async (tx) => {
       await tx
         .update(groupMembers)
-        .set({ role: GroupMemberRole.MODERATOR, updatedAt: new Date() })
+        .set({ role: GroupMemberRole.MODERATOR })
         .where(
           and(
             eq(groupMembers.groupId, groupId),
@@ -316,7 +318,7 @@ export class GroupsRepository {
 
       await tx
         .update(groupMembers)
-        .set({ role: GroupMemberRole.ADMIN, updatedAt: new Date() })
+        .set({ role: GroupMemberRole.ADMIN })
         .where(
           and(
             eq(groupMembers.groupId, groupId),
@@ -324,5 +326,34 @@ export class GroupsRepository {
           ),
         );
     });
+  }
+
+  async findGroupByInviteToken(token: string): Promise<Group | null> {
+    const [result] = await this.db
+      .select()
+      .from(groups)
+      .where(eq(groups.inviteToken, token))
+      .limit(1);
+    return result ?? null;
+  }
+
+  async updateInviteToken(
+    groupId: number,
+    token: string | null,
+  ): Promise<Group> {
+    const [result] = await this.db
+      .update(groups)
+      .set({ inviteToken: token })
+      .where(eq(groups.id, groupId))
+      .returning();
+    return result;
+  }
+
+  async countMembers(groupId: number): Promise<number> {
+    const [result] = await this.db
+      .select({ count: count() })
+      .from(groupMembers)
+      .where(eq(groupMembers.groupId, groupId));
+    return result.count;
   }
 }

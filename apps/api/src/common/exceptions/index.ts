@@ -16,3 +16,4 @@ export * from './user-already-member.exception';
 export * from './movie-already-exists.exception';
 export * from './movie-already-in-group.exception';
 export * from './insufficient-role.exception';
+export * from './invite-not-found.exception';

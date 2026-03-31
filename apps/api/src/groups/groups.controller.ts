@@ -37,6 +37,7 @@ import {
   GroupMemberRoleUpdateDto,
   GroupMemberResponseDto,
   TransferOwnershipDto,
+  InviteTokenResponseDto,
 } from './dto';
 import { GroupsService } from './groups.service';
 
@@ -115,6 +116,30 @@ export class GroupsController {
   })
   create(@User('id') userId: number, @Body() dto: GroupCreateDto) {
     return this.groupsService.create(userId, dto);
+  }
+
+  @Post(':id/invite')
+  @UseGuards(GroupModeratorGuard)
+  @SerializeOptions({ type: InviteTokenResponseDto })
+  @ApiOperation({
+    summary: 'Generate or regenerate invite link (Group moderators only)',
+  })
+  @ApiParam({ name: 'id', description: 'Group ID' })
+  @ApiResponse({
+    status: 201,
+    description: 'Invite token generated',
+    type: InviteTokenResponseDto,
+  })
+  @ApiResponse({ status: 404, description: 'Group not found' })
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden - Insufficient permissions',
+  })
+  generateInvite(
+    @Param('id', ParseIntPipe) id: number,
+    @User('id') userId: number,
+  ) {
+    return this.groupsService.generateInviteToken(id, userId);
   }
 
   @Patch(':id')

@@ -1,9 +1,11 @@
 import { Injectable, Logger } from '@nestjs/common';
+import crypto from 'crypto';
 
 import {
   CannotRemoveGroupAdminException,
   CannotTransferToSelfException,
   GroupNotFoundException,
+  InviteNotFoundException,
   NotGroupAdminException,
   NotGroupMemberException,
   NotGroupModeratorException,
@@ -418,17 +420,6 @@ export class GroupsService {
   }
 
   /**
-   * Checks if user is a group moderator
-   * @param groupId - Group ID
-   * @param userId - User ID
-   * @returns true if user is a moderator
-   */
-  async isModerator(groupId: number, userId: number): Promise<boolean> {
-    const member = await this.groupsRepository.findMember(groupId, userId);
-    return member?.role === GroupMemberRole.MODERATOR;
-  }
-
-  /**
    * Removes user from group (leave action)
    * @param groupId - Group ID
    * @param userId - User ID leaving the group
@@ -475,5 +466,95 @@ export class GroupsService {
 
     const role = data.member?.role;
     return role === GroupMemberRole.ADMIN || role === GroupMemberRole.MODERATOR;
+  }
+
+  /**
+   * Generates or regenerates invite token for group
+   * @param groupId - Group ID
+   * @param userId - User ID (must be moderator+)
+   * @returns Object with generated invite token
+   */
+  async generateInviteToken(
+    groupId: number,
+    userId: number,
+  ): Promise<{ inviteToken: string }> {
+    const group = await this.groupsRepository.findGroupById(groupId);
+
+    if (!group) {
+      throw new GroupNotFoundException(groupId);
+    }
+
+    const canModerate = await this.canModerate(groupId, userId);
+
+    if (!canModerate) {
+      throw new NotGroupModeratorException();
+    }
+
+    const token = crypto.randomBytes(16).toString('hex');
+    await this.groupsRepository.updateInviteToken(groupId, token);
+
+    this._logger.log(
+      `Invite token generated for group ${groupId} by user ${userId}`,
+    );
+    return { inviteToken: token };
+  }
+
+  /**
+   * Returns group info by invite token (public)
+   * @param token - Invite token
+   * @returns Group info with member count
+   */
+  async getInviteInfo(token: string) {
+    const group = await this._getGroupByInviteTokenOrThrow(token);
+    const memberCount = await this.groupsRepository.countMembers(group.id);
+
+    return {
+      id: group.id,
+      name: group.name,
+      description: group.description,
+      avatarUrl: group.avatarUrl,
+      memberCount,
+    };
+  }
+
+  /**
+   * Accepts invite and adds user to group as member
+   * @param token - Invite token
+   * @param userId - User ID accepting the invite
+   * @returns Object with group ID
+   */
+  async acceptInvite(
+    token: string,
+    userId: number,
+  ): Promise<{ groupId: number }> {
+    const group = await this._getGroupByInviteTokenOrThrow(token);
+
+    const existingMember = await this.groupsRepository.findMember(
+      group.id,
+      userId,
+    );
+
+    if (existingMember) {
+      throw new UserAlreadyMemberException();
+    }
+
+    await this.groupsRepository.addMember({
+      groupId: group.id,
+      userId,
+      role: GroupMemberRole.MEMBER,
+    });
+
+    this._logger.log(`User ${userId} joined group ${group.id} via invite link`);
+    return { groupId: group.id };
+  }
+
+  private async _getGroupByInviteTokenOrThrow(token: string) {
+    const group = await this.groupsRepository.findGroupByInviteToken(token);
+
+    if (!group) {
+      throw new InviteNotFoundException();
+    }
+
+    return group;
   }
 }
