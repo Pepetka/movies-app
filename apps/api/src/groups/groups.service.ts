@@ -26,6 +26,7 @@ import { GroupsRepository } from './groups.repository';
 @Injectable()
 export class GroupsService {
   private readonly _logger = new Logger(GroupsService.name);
+  private static readonly INVITE_TOKEN_BYTES = 16;
 
   constructor(private readonly groupsRepository: GroupsRepository) {}
 
@@ -277,7 +278,9 @@ export class GroupsService {
       throw new GroupNotFoundException(groupId);
     }
 
-    const token = crypto.randomBytes(16).toString('hex');
+    const token = crypto
+      .randomBytes(GroupsService.INVITE_TOKEN_BYTES)
+      .toString('hex');
     await this.groupsRepository.updateInviteToken(groupId, token);
 
     this._logger.log(
@@ -305,20 +308,23 @@ export class GroupsService {
   ): Promise<{ groupId: number }> {
     const group = await this._getGroupByInviteTokenOrThrow(token);
 
-    const existingMember = await this.groupsRepository.findMember(
-      group.id,
-      userId,
-    );
-
-    if (existingMember) {
-      throw new UserAlreadyMemberException();
+    try {
+      await this.groupsRepository.addMember({
+        groupId: group.id,
+        userId,
+        role: GroupMemberRole.MEMBER,
+      });
+    } catch (e: unknown) {
+      if (
+        typeof e === 'object' &&
+        e !== null &&
+        'code' in e &&
+        e.code === '23505'
+      ) {
+        throw new UserAlreadyMemberException();
+      }
+      throw e;
     }
-
-    await this.groupsRepository.addMember({
-      groupId: group.id,
-      userId,
-      role: GroupMemberRole.MEMBER,
-    });
 
     this._logger.log(`User ${userId} joined group ${group.id} via invite link`);
     return { groupId: group.id };

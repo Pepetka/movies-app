@@ -593,7 +593,6 @@ describe('GroupsService', () => {
     it('should add user as member and return groupId', async () => {
       const groupWithToken = { ...mockGroup, inviteToken: 'valid-token' };
       groupsRepository.findGroupByInviteToken.mockResolvedValue(groupWithToken);
-      groupsRepository.findMember.mockResolvedValue(null);
       groupsRepository.addMember.mockResolvedValue(mockGroupMember);
 
       const result = await service.acceptInvite('valid-token', 3);
@@ -606,13 +605,29 @@ describe('GroupsService', () => {
       });
     });
 
-    it('should throw UserAlreadyMemberException if already member', async () => {
+    it('should throw UserAlreadyMemberException on unique violation', async () => {
       const groupWithToken = { ...mockGroup, inviteToken: 'valid-token' };
       groupsRepository.findGroupByInviteToken.mockResolvedValue(groupWithToken);
-      groupsRepository.findMember.mockResolvedValue(mockGroupMember);
+      const error: { code: string; message: string } = {
+        code: '23505',
+        message: 'unique violation',
+      };
+      groupsRepository.addMember.mockRejectedValue(error);
 
       await expect(service.acceptInvite('valid-token', 2)).rejects.toThrow(
         UserAlreadyMemberException,
+      );
+    });
+
+    it('should rethrow non-unique database errors', async () => {
+      const groupWithToken = { ...mockGroup, inviteToken: 'valid-token' };
+      groupsRepository.findGroupByInviteToken.mockResolvedValue(groupWithToken);
+      groupsRepository.addMember.mockRejectedValue(
+        new Error('connection lost'),
+      );
+
+      await expect(service.acceptInvite('valid-token', 2)).rejects.toThrow(
+        'connection lost',
       );
     });
   });
