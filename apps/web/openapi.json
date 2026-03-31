@@ -611,6 +611,35 @@
 				"tags": ["Groups"]
 			}
 		},
+		"/api/v1/groups/{id}/invite": {
+			"post": {
+				"operationId": "GroupsController_generateInvite_v1",
+				"parameters": [
+					{
+						"name": "id",
+						"required": true,
+						"in": "path",
+						"description": "Group ID",
+						"schema": { "type": "number" }
+					}
+				],
+				"responses": {
+					"201": {
+						"description": "Invite token generated",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InviteTokenResponseDto" }
+							}
+						}
+					},
+					"403": { "description": "Forbidden - Insufficient permissions" },
+					"404": { "description": "Group not found" }
+				},
+				"security": [{ "access-token": [] }],
+				"summary": "Generate or regenerate invite link (Group moderators only)",
+				"tags": ["Groups"]
+			}
+		},
 		"/api/v1/groups/{id}/members": {
 			"get": {
 				"operationId": "GroupsController_getMembers_v1",
@@ -811,6 +840,63 @@
 				"security": [{ "access-token": [] }],
 				"summary": "Transfer group admin rights (Group admin only)",
 				"tags": ["Groups"]
+			}
+		},
+		"/api/v1/invites/{token}": {
+			"get": {
+				"operationId": "InvitesController_getInviteInfo_v1",
+				"parameters": [
+					{
+						"name": "token",
+						"required": true,
+						"in": "path",
+						"description": "Invite token",
+						"schema": { "type": "string" }
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Invite info",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InviteInfoResponseDto" }
+							}
+						}
+					},
+					"404": { "description": "Invite not found" }
+				},
+				"summary": "Get invite info by token (Public)",
+				"tags": ["Invites"]
+			}
+		},
+		"/api/v1/invites/{token}/accept": {
+			"post": {
+				"operationId": "InvitesController_acceptInvite_v1",
+				"parameters": [
+					{
+						"name": "token",
+						"required": true,
+						"in": "path",
+						"description": "Invite token",
+						"schema": { "type": "string" }
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Invite accepted",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/AcceptInviteResponseDto" }
+							}
+						}
+					},
+					"401": { "description": "Unauthorized" },
+					"404": { "description": "Invite not found" },
+					"409": { "description": "User already a member" }
+				},
+				"security": [{ "access-token": [] }],
+				"summary": "Accept group invite",
+				"tags": ["Invites"]
 			}
 		},
 		"/api/v1/groups/{groupId}/movies/search": {
@@ -1276,6 +1362,13 @@
 				},
 				"required": ["name"]
 			},
+			"InviteTokenResponseDto": {
+				"type": "object",
+				"properties": {
+					"inviteToken": { "type": "string", "example": "a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4" }
+				},
+				"required": ["inviteToken"]
+			},
 			"GroupUpdateDto": {
 				"type": "object",
 				"properties": {
@@ -1336,6 +1429,22 @@
 					}
 				},
 				"required": ["targetUserId"]
+			},
+			"InviteInfoResponseDto": {
+				"type": "object",
+				"properties": {
+					"id": { "type": "number" },
+					"name": { "type": "string" },
+					"description": { "type": "string", "nullable": true },
+					"avatarUrl": { "type": "string", "nullable": true },
+					"memberCount": { "type": "number" }
+				},
+				"required": ["id", "name", "description", "avatarUrl", "memberCount"]
+			},
+			"AcceptInviteResponseDto": {
+				"type": "object",
+				"properties": { "groupId": { "type": "number" } },
+				"required": ["groupId"]
 			},
 			"GroupMovieResponseDto": {
 				"type": "object",
