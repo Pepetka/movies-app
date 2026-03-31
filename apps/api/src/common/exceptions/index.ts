@@ -8,8 +8,6 @@ export * from './email-already-in-use.exception';
 export * from './group-not-found.exception';
 export * from './not-group-member.exception';
 export * from './not-group-admin.exception';
-export * from './not-group-moderator.exception';
-export * from './only-admin-can-transfer.exception';
 export * from './only-one-admin.exception';
 export * from './target-not-group-member.exception';
 export * from './user-already-member.exception';

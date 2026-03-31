@@ -1,5 +1,6 @@
 export * from './auth.guard';
 export * from './author.guard';
+export * from './base-group.guard';
 export * from './roles.guard';
 export * from './csrf.guard';
 export * from './group-admin.guard';

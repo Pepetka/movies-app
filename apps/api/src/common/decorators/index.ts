@@ -1,4 +1,5 @@
 export * from './author.decorator';
+export * from './group-member.decorator';
 export * from './public.decorator';
 export * from './roles.decorator';
 export * from './user.decorator';

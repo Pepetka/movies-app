@@ -1,6 +1,10 @@
 import { Module } from '@nestjs/common';
 
-import { GroupMemberGuard, GroupModeratorGuard } from '$common/guards';
+import {
+  GroupAdminGuard,
+  GroupMemberGuard,
+  GroupModeratorGuard,
+} from '$common/guards';
 import { DbModule } from '$db/db.module';
 
 import { InvitesController } from './invites.controller';
@@ -16,6 +20,7 @@ import { GroupsService } from './groups.service';
     GroupsRepository,
     GroupMemberGuard,
     GroupModeratorGuard,
+    GroupAdminGuard,
   ],
   exports: [GroupsService, GroupsRepository],
 })

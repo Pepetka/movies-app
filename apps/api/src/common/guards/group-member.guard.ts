@@ -1,42 +1,16 @@
-import {
-  CanActivate,
-  ExecutionContext,
-  Injectable,
-  ForbiddenException,
-} from '@nestjs/common';
-import { ModuleRef } from '@nestjs/core';
+import { ExecutionContext, Injectable } from '@nestjs/common';
 
-import type { UserRequest } from '$src/auth/types/user-request.type';
-import { GroupsService } from '$src/groups/groups.service';
+import { GroupsRepository } from '$src/groups/groups.repository';
+
+import { BaseGroupGuard } from './base-group.guard';
 
 @Injectable()
-export class GroupMemberGuard implements CanActivate {
-  constructor(private readonly moduleRef: ModuleRef) {}
-
+export class GroupMemberGuard extends BaseGroupGuard {
+  constructor(groupsRepository: GroupsRepository) {
+    super(groupsRepository);
+  }
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const request = context.switchToHttp().getRequest<UserRequest>();
-    const user = request.user;
-    const userId = user?.id;
-
-    if (!userId) {
-      throw new ForbiddenException('Access denied');
-    }
-
-    const params = request.params as { id?: string; groupId?: string };
-    const groupId = params.groupId || params.id;
-
-    if (!groupId) {
-      throw new ForbiddenException('Group ID required');
-    }
-
-    const groupsService = this.moduleRef.get(GroupsService, { strict: false });
-
-    const isMember = await groupsService.isMember(Number(groupId), userId);
-
-    if (!isMember) {
-      throw new ForbiddenException('You are not a member of this group');
-    }
-
+    await this.getMember(context);
     return true;
   }
 }
