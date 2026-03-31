@@ -145,6 +145,7 @@ describe('Invites E2E', () => {
 
       expect(response.inviteToken).toBeDefined();
       expect(typeof response.inviteToken).toBe('string');
+      expect(response.inviteToken).toHaveLength(32);
     });
 
     it('should generate invite as group moderator', async () => {
@@ -217,9 +218,9 @@ describe('Invites E2E', () => {
       });
     });
 
-    it('should return 404 for invalid token', async () => {
+    it('should return 404 for non-existent token', async () => {
       await request(app.getHttpServer())
-        .get('/invites/doesnotexist')
+        .get('/invites/a'.repeat(32))
         .expect(404);
     });
   });
@@ -263,11 +264,11 @@ describe('Invites E2E', () => {
         .expect(401);
     });
 
-    it('should return 404 for invalid token on accept', async () => {
+    it('should return 404 for non-existent token on accept', async () => {
       const { accessToken } = await registerUser(app, 'badtoken@example.com');
 
       await request(app.getHttpServer())
-        .post('/invites/invalid/accept')
+        .post(`/invites/${'b'.repeat(32)}/accept`)
         .set('Authorization', `Bearer ${accessToken}`)
         .expect(404);
     });
