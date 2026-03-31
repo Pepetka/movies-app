@@ -82,19 +82,26 @@ users ──┬── group_members ──> groups ──┬── group_movies 
 
 Группы пользователей для совместного просмотра фильмов.
 
-| Поле        | Тип                                | Описание             |
-| ----------- | ---------------------------------- | -------------------- |
-| **id**      | serial, PK                         |                      |
-| name        | varchar(256), NOT NULL             | Название группы      |
-| description | text                               | Описание             |
-| avatar_url  | varchar(512)                       | URL аватара группы   |
-| owner_id    | int, FK → users.id, NOT NULL       | Создатель / владелец |
-| created_at  | timestamp, NOT NULL, default now() |                      |
-| updated_at  | timestamp, NOT NULL, default now() |                      |
+| Поле          | Тип                                | Описание                           |
+| ------------- | ---------------------------------- | ---------------------------------- |
+| **id**        | serial, PK                         |                                    |
+| name          | varchar(256), NOT NULL             | Название группы                    |
+| description   | text                               | Описание                           |
+| avatar_url    | varchar(512)                       | URL аватара группы                 |
+| owner_id      | int, FK → users.id, NOT NULL       | Создатель / владелец               |
+| invite_token  | varchar(32), UNIQUE                | Токен пригласительной ссылки (32 hex символа) |
+| created_at    | timestamp, NOT NULL, default now() |                                    |
+| updated_at    | timestamp, NOT NULL, default now() |                                    |
 
 **Индексы:**
 
 - `INDEX` на `owner_id`
+- `UNIQUE INDEX` на `invite_token`
+
+**Примечания:**
+
+- Один токен на группу, перегенерируется при каждом запросе (старый инвалидируется)
+- Токен генерируется через `crypto.randomBytes(16).toString('hex')` (128 бит энтропии)
 
 ---
 
@@ -173,25 +180,6 @@ users ──┬── group_members ──> groups ──┬── group_movies 
 ---
 
 ## Планируемые таблицы (согласно product-roadmap.md)
-
-### invitations
-
-Пригласительные ссылки в группу (Этап 2).
-
-| Поле       | Тип                                | Описание                              |
-| ---------- | ---------------------------------- | ------------------------------------- |
-| **id**     | uuid, PK                           |                                       |
-| group_id   | int, FK → groups.id, NOT NULL      |                                       |
-| created_by | int, FK → users.id, NOT NULL       | Кто создал ссылку                     |
-| code       | varchar(64), NOT NULL, UNIQUE      | Уникальный код                        |
-| max_uses   | int                                | Макс. использований (NULL = безлимит) |
-| use_count  | int, NOT NULL, default 0           | Сколько использована                  |
-| expires_at | timestamp                          | Когда истекает (NULL = бессрочно)     |
-| is_active  | boolean, NOT NULL, default true    | Активна ли                            |
-| created_at | timestamp, NOT NULL, default now() |                                       |
-| updated_at | timestamp, NOT NULL, default now() |                                       |
-
----
 
 ### reviews
 
@@ -278,8 +266,7 @@ OAuth провайдеры (Этап 6).
 
 | Этап            | Новые таблицы                                                     | Изменения в существующих                     |
 | --------------- | ----------------------------------------------------------------- | -------------------------------------------- |
-| **Реализовано** | users, movies, groups, group_members, group_movies, custom_movies | movies расширена для Kinopoisk               |
-| **Этап 2**      | invitations                                                       | —                                            |
+| **Реализовано** | users, movies, groups, group_members, group_movies, custom_movies | movies расширена для Kinopoisk; groups: добавлен invite_token |
 | **Этап 3**      | —                                                                 | — (роли уже в group_members)                 |
 | **Этап 4**      | reviews                                                           | —                                            |
 | **Этап 5**      | telegram_bindings                                                 | —                                            |
