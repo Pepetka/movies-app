@@ -851,7 +851,7 @@
 						"required": true,
 						"in": "path",
 						"description": "Invite token",
-						"schema": { "type": "string" }
+						"schema": {}
 					}
 				],
 				"responses": {
@@ -878,7 +878,7 @@
 						"required": true,
 						"in": "path",
 						"description": "Invite token",
-						"schema": { "type": "string" }
+						"schema": {}
 					}
 				],
 				"responses": {
