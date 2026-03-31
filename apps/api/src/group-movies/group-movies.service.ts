@@ -1,6 +1,7 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 
 import { MovieAlreadyInGroupException } from '$common/exceptions';
+import { GroupMemberRole } from '$common/enums';
 
 import { AddMovieDto, CreateCustomMovieDto, GroupMovieUpdateDto } from './dto';
 import { GroupMoviesRepository } from './group-movies.repository';
@@ -160,25 +161,20 @@ export class GroupMoviesService {
    * Gets a single movie from group with current user's role
    * @param groupId - Group ID
    * @param id - Group movie ID
-   * @param userId - Current user ID
+   * @param currentUserRole - Current user's role in the group
    * @returns Group movie with current user role
    * @throws NotFoundException if movie not found
    */
   async findOne(
     groupId: number,
     id: number,
-    userId: number,
-  ): Promise<GroupMovie & { currentUserRole: string }> {
+    currentUserRole: GroupMemberRole,
+  ): Promise<GroupMovie & { currentUserRole: GroupMemberRole }> {
     const groupMovie = await this._findOneOrThrow(groupId, id);
-
-    const memberData = await this.groupsRepository.getGroupWithMember(
-      groupId,
-      userId,
-    );
 
     return {
       ...groupMovie,
-      currentUserRole: memberData?.member?.role ?? 'member',
+      currentUserRole,
     };
   }
 
