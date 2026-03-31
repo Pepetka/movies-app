@@ -17,7 +17,11 @@ import {
 
 import { Public, User } from '$common/decorators';
 
-import { InviteInfoResponseDto, AcceptInviteResponseDto } from './dto';
+import {
+  InviteInfoResponseDto,
+  AcceptInviteResponseDto,
+  InviteTokenParamDto,
+} from './dto';
 import { GroupsService } from './groups.service';
 
 @ApiTags('Invites')
@@ -36,7 +40,7 @@ export class InvitesController {
     type: InviteInfoResponseDto,
   })
   @ApiResponse({ status: 404, description: 'Invite not found' })
-  getInviteInfo(@Param('token') token: string) {
+  getInviteInfo(@Param() { token }: InviteTokenParamDto) {
     return this.groupsService.getInviteInfo(token);
   }
 
@@ -54,7 +58,10 @@ export class InvitesController {
   @ApiResponse({ status: 404, description: 'Invite not found' })
   @ApiResponse({ status: 409, description: 'User already a member' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  acceptInvite(@Param('token') token: string, @User('id') userId: number) {
+  acceptInvite(
+    @Param() { token }: InviteTokenParamDto,
+    @User('id') userId: number,
+  ) {
     return this.groupsService.acceptInvite(token, userId);
   }
 }

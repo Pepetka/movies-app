@@ -6,7 +6,6 @@ import { GroupMemberRole } from '$common/enums';
 
 import { GroupMoviesRepository } from './group-movies.repository';
 import { MoviesRepository } from '../movies/movies.repository';
-import { GroupsRepository } from '../groups/groups.repository';
 import { MovieProvidersService } from '../movies/providers';
 import { GroupMoviesService } from './group-movies.service';
 import { AddMovieDto, GroupMovieStatus } from './dto';
@@ -67,7 +66,6 @@ const createMockRepositories = () => ({
   movieProvidersService: {
     getProvider: jest.fn(),
   },
-  groupsRepository: {},
 });
 
 describe('GroupMoviesService', () => {
@@ -91,10 +89,6 @@ describe('GroupMoviesService', () => {
         {
           provide: MovieProvidersService,
           useValue: mocks.movieProvidersService,
-        },
-        {
-          provide: GroupsRepository,
-          useValue: mocks.groupsRepository,
         },
       ],
     }).compile();

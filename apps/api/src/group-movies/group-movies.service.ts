@@ -6,7 +6,6 @@ import { GroupMemberRole } from '$common/enums';
 import { AddMovieDto, CreateCustomMovieDto, GroupMovieUpdateDto } from './dto';
 import { GroupMoviesRepository } from './group-movies.repository';
 import { GroupMovie, Movie, NewGroupMovie } from '../db/schemas';
-import { GroupsRepository } from '../groups/groups.repository';
 import { MoviesRepository } from '../movies/movies.repository';
 import { DEFAULT_PROVIDER } from '../movies/movies.constants';
 import { MovieProvidersService } from '../movies/providers';
@@ -20,7 +19,6 @@ export class GroupMoviesService {
     private readonly groupMoviesRepository: GroupMoviesRepository,
     private readonly moviesRepository: MoviesRepository,
     private readonly movieProvidersService: MovieProvidersService,
-    private readonly groupsRepository: GroupsRepository,
   ) {}
 
   /**
