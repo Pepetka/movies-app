@@ -66,6 +66,8 @@ findOne(
 
 ## DTO
 
+### Request DTO
+
 ```typescript
 export class GroupCreateDto {
   @ApiProperty({ example: 'Movie Club', description: 'Group name' })
@@ -83,6 +85,31 @@ export class GroupCreateDto {
   @IsUrl()
   @MaxLength(512)
   avatarUrl?: string;
+}
+```
+
+### Response DTO
+
+`ClassSerializerInterceptor` настроен с `excludeExtraneousValues: true` — в ответ попадают только поля с `@Expose()`. Каждое поле response DTO **обязано** иметь `@Expose()`, иначе оно будет молча удалено из ответа.
+
+```typescript
+import { Expose } from 'class-transformer';
+
+export class GroupResponseDto {
+  @Expose()
+  @ApiProperty()
+  id: number;
+
+  @Expose()
+  @ApiProperty()
+  name: string;
+
+  @Expose()
+  @ApiProperty({ type: String, nullable: true })
+  description: string | null;
+
+  // Без @Expose() — поле не попадёт в ответ
+  inviteToken: string;
 }
 ```
 
@@ -159,6 +186,9 @@ export const groups = pgTable('groups', {
 // timestamps.ts
 export const timestamps = {
   createdAt: timestamp().notNull().defaultNow(),
-  updatedAt: timestamp().notNull().defaultNow(),
+  updatedAt: timestamp()
+    .notNull()
+    .defaultNow()
+    .$onUpdate(() => new Date()),
 };
 ```

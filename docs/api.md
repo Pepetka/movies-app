@@ -96,6 +96,15 @@ New accessToken returned, retry original request
 | GET    | /:id                  | Member      | Group details |
 | PATCH  | /:id                  | Moderator+  | Update group |
 | DELETE | /:id                  | Group Admin | Delete group |
+| POST   | /:id/invite-token     | Moderator+  | Generate invite token |
+| DELETE | /:id/invite-token     | Moderator+  | Regenerate invite token |
+
+### Invites (`/invites`)
+
+| Method | Endpoint        | Access  | Description |
+| ------ | --------------- | ------- | ----------- |
+| GET    | /:token         | Public  | Invite info (group name, member count) |
+| POST   | /:token/accept  | Auth    | Accept invite, join group |
 
 ### Group Members (`/groups/:id/members`)
 
@@ -162,3 +171,8 @@ curl http://localhost:8080/api/v1/users/me \
 | `@UserId()` | Get current user id |
 | `@Cookies()` | Get cookies |
 | `@Author()` | Set author for audit |
+| `@GroupMember()` | Get group member from request (set by group guards) |
+
+## Serialization
+
+Response DTOs use `ClassSerializerInterceptor` with `excludeExtraneousValues: true`. Only fields decorated with `@Expose()` are included in API responses. Every response DTO field must have `@Expose()` — fields without it are silently stripped.
