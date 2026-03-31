@@ -36,14 +36,13 @@ export class GroupsRepository {
     return this.db.select().from(groups).orderBy(groups.createdAt);
   }
 
-  async findGroupsByUserId(userId: number): Promise<Group[]> {
-    const result = this.db
+  async findGroupsByUserId(userId: number) {
+    return this.db
       .select({
         id: groups.id,
         name: groups.name,
         description: groups.description,
         avatarUrl: groups.avatarUrl,
-        inviteToken: groups.inviteToken,
         createdAt: groups.createdAt,
         updatedAt: groups.updatedAt,
       })
@@ -51,8 +50,6 @@ export class GroupsRepository {
       .innerJoin(groupMembers, eq(groups.id, groupMembers.groupId))
       .where(eq(groupMembers.userId, userId))
       .orderBy(groupMembers.createdAt);
-
-    return result;
   }
 
   async updateGroup(id: number, data: Partial<NewGroup>): Promise<Group> {

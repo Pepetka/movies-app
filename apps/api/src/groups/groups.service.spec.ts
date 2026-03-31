@@ -460,6 +460,7 @@ describe('GroupsService', () => {
   describe('getMembers', () => {
     it('should return members', async () => {
       const mockMembers = [mockGroupMember];
+      groupsRepository.findGroupById.mockResolvedValue(mockGroup);
       groupsRepository.findMembersByGroupWithUsers.mockResolvedValue(
         mockMembers,
       );
@@ -475,6 +476,7 @@ describe('GroupsService', () => {
 
   describe('getMemberMe', () => {
     it('should return member info for group member', async () => {
+      groupsRepository.findGroupById.mockResolvedValue(mockGroup);
       groupsRepository.findMemberWithUser.mockResolvedValue(mockGroupMember);
 
       const result = await service.getMemberMe(1, mockRegularMember);

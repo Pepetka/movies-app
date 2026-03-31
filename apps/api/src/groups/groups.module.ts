@@ -22,6 +22,12 @@ import { GroupsService } from './groups.service';
     GroupModeratorGuard,
     GroupAdminGuard,
   ],
-  exports: [GroupsService, GroupsRepository],
+  exports: [
+    GroupsService,
+    GroupsRepository,
+    GroupMemberGuard,
+    GroupModeratorGuard,
+    GroupAdminGuard,
+  ],
 })
 export class GroupsModule {}

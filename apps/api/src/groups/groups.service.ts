@@ -21,12 +21,12 @@ import {
   GroupMemberRoleUpdateDto,
   GroupUpdateDto,
 } from './dto';
+import { INVITE_TOKEN_BYTES } from './invite-token.constants';
 import { GroupsRepository } from './groups.repository';
 
 @Injectable()
 export class GroupsService {
   private readonly _logger = new Logger(GroupsService.name);
-  private static readonly INVITE_TOKEN_BYTES = 16;
 
   constructor(private readonly groupsRepository: GroupsRepository) {}
 
@@ -50,7 +50,7 @@ export class GroupsService {
     return group;
   }
 
-  async findUserGroups(userId: number): Promise<Group[]> {
+  async findUserGroups(userId: number) {
     return this.groupsRepository.findGroupsByUserId(userId);
   }
 
@@ -58,7 +58,7 @@ export class GroupsService {
     return this.groupsRepository.findAllGroups();
   }
 
-  findUserGroupsByAdmin(userId: number): Promise<Group[]> {
+  findUserGroupsByAdmin(userId: number) {
     return this.groupsRepository.findGroupsByUserId(userId);
   }
 
@@ -209,6 +209,7 @@ export class GroupsService {
   ): Promise<
     Awaited<ReturnType<GroupsRepository['findMembersByGroupWithUsers']>>
   > {
+    await this._getGroupOrThrow(groupId);
     return this.groupsRepository.findMembersByGroupWithUsers(groupId);
   }
 
@@ -216,6 +217,7 @@ export class GroupsService {
     groupId: number,
     member: GroupMember,
   ): Promise<Awaited<ReturnType<GroupsRepository['findMemberWithUser']>>> {
+    await this._getGroupOrThrow(groupId);
     return this.groupsRepository.findMemberWithUser(groupId, member.userId);
   }
 
@@ -250,9 +252,7 @@ export class GroupsService {
   ): Promise<{ inviteToken: string }> {
     await this._getGroupOrThrow(groupId);
 
-    const token = crypto
-      .randomBytes(GroupsService.INVITE_TOKEN_BYTES)
-      .toString('hex');
+    const token = crypto.randomBytes(INVITE_TOKEN_BYTES).toString('hex');
     await this.groupsRepository.updateInviteToken(groupId, token);
 
     this._logger.log(
