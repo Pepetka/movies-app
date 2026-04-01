@@ -25,11 +25,6 @@ export class GroupsService {
 
   constructor(private readonly groupsRepository: GroupsRepository) {}
 
-  /**
-   * JSDoc для публичных методов
-   * @param userId - User ID who will become owner
-   * @returns Created group
-   */
   async create(userId: number, dto: GroupCreateDto): Promise<Group> {
     const group = await this.groupsRepository.createGroup({
       name: dto.name,
@@ -51,7 +46,7 @@ export class GroupsService {
 Порядок декораторов:
 
 ```typescript
-@Get(':id')                                    // 1. HTTP метод
+@Get(':id')                                    // 1. HTTP-метод
 @UseGuards(GroupMemberGuard)                   // 2. Guards
 @SerializeOptions({ type: GroupResponseDto })  // 3. SerializeOptions
 @ApiOperation({ summary: 'Get group by id' })  // 4. ApiOperation
@@ -90,7 +85,7 @@ export class GroupCreateDto {
 
 ### Response DTO
 
-`ClassSerializerInterceptor` настроен с `excludeExtraneousValues: true` — в ответ попадают только поля с `@Expose()`. Каждое поле response DTO **обязано** иметь `@Expose()`, иначе оно будет молча удалено из ответа.
+`ClassSerializerInterceptor` настроен с `excludeExtraneousValues: true` — в ответ попадают только поля с `@Expose()`. Каждое поле response DTO обязано иметь `@Expose()`, иначе оно будет молча удалено из ответа.
 
 ```typescript
 import { Expose } from 'class-transformer';
@@ -180,6 +175,7 @@ export const groups = pgTable('groups', {
   name: varchar({ length: 256 }).notNull(),
   description: text(),
   avatarUrl: varchar({ length: 512 }),
+  inviteToken: varchar({ length: 32 }),
   ...timestamps,
 });
 
