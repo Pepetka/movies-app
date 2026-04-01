@@ -1,15 +1,15 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 
 import { MovieAlreadyInGroupException } from '$common/exceptions';
+import { MoviesRepository } from '$src/movies/movies.repository';
+import { DEFAULT_PROVIDER } from '$src/movies/movies.constants';
+import { GroupMovie, Movie, NewGroupMovie } from '$db/schemas';
+import { MovieProvidersService } from '$src/movies/providers';
+import type { MovieProvider } from '$src/movies/providers';
 import { GroupMemberRole } from '$common/enums';
 
 import { AddMovieDto, CreateCustomMovieDto, GroupMovieUpdateDto } from './dto';
 import { GroupMoviesRepository } from './group-movies.repository';
-import { GroupMovie, Movie, NewGroupMovie } from '../db/schemas';
-import { MoviesRepository } from '../movies/movies.repository';
-import { DEFAULT_PROVIDER } from '../movies/movies.constants';
-import { MovieProvidersService } from '../movies/providers';
-import type { MovieProvider } from '../movies/providers';
 
 @Injectable()
 export class GroupMoviesService {
@@ -21,14 +21,6 @@ export class GroupMoviesService {
     private readonly movieProvidersService: MovieProvidersService,
   ) {}
 
-  /**
-   * Adds a provider movie to a group (creates copy in group_movies)
-   * @param groupId - Group ID
-   * @param dto - Movie identification data (imdbId or externalId)
-   * @param addedBy - User ID who adds the movie
-   * @returns Created group movie
-   * @throws MovieAlreadyInGroupException if movie already in group
-   */
   async addProviderMovie(
     groupId: number,
     dto: AddMovieDto,
@@ -61,13 +53,6 @@ export class GroupMoviesService {
     return groupMovie;
   }
 
-  /**
-   * Creates a custom movie in a group
-   * @param groupId - Group ID
-   * @param dto - Custom movie creation data
-   * @param createdById - User ID who creates the movie
-   * @returns Created group movie
-   */
   async createCustomMovie(
     groupId: number,
     dto: CreateCustomMovieDto,
@@ -95,11 +80,6 @@ export class GroupMoviesService {
     return groupMovie;
   }
 
-  /**
-   * Finds movie in database or imports from provider
-   * @param dto - Movie identification data (imdbId or externalId)
-   * @returns Found or created movie
-   */
   async findOrCreateMovie(dto: AddMovieDto): Promise<Movie> {
     const provider = this.movieProvidersService.getProvider(DEFAULT_PROVIDER);
 
@@ -119,12 +99,6 @@ export class GroupMoviesService {
     return this.importMovie(dto, provider);
   }
 
-  /**
-   * Imports movie from provider
-   * @param dto - Movie identification data
-   * @param provider - Movie provider instance
-   * @returns Imported movie
-   */
   private async importMovie(
     dto: AddMovieDto,
     provider: MovieProvider,
@@ -140,13 +114,6 @@ export class GroupMoviesService {
     return movie;
   }
 
-  /**
-   * Gets all movies for a group (unified list)
-   * @param groupId - Group ID
-   * @param status - Optional status filter
-   * @param query - Optional search query
-   * @returns Array of group movies
-   */
   async findByGroup(
     groupId: number,
     status?: string,
@@ -155,14 +122,6 @@ export class GroupMoviesService {
     return this.groupMoviesRepository.findByGroup(groupId, status, query);
   }
 
-  /**
-   * Gets a single movie from group with current user's role
-   * @param groupId - Group ID
-   * @param id - Group movie ID
-   * @param currentUserRole - Current user's role in the group
-   * @returns Group movie with current user role
-   * @throws NotFoundException if movie not found
-   */
   async findOne(
     groupId: number,
     id: number,
@@ -176,24 +135,10 @@ export class GroupMoviesService {
     };
   }
 
-  /**
-   * Gets a single movie from group (for internal use)
-   * @param groupId - Group ID
-   * @param id - Group movie ID
-   * @returns Group movie
-   * @throws NotFoundException if movie not found
-   */
   async findById(groupId: number, id: number): Promise<GroupMovie> {
     return this._findOneOrThrow(groupId, id);
   }
 
-  /**
-   * Finds group movie or throws NotFoundException
-   * @param groupId - Group ID
-   * @param id - Group movie ID
-   * @returns Group movie
-   * @throws NotFoundException if movie not found
-   */
   private async _findOneOrThrow(
     groupId: number,
     id: number,
@@ -207,14 +152,6 @@ export class GroupMoviesService {
     return groupMovie;
   }
 
-  /**
-   * Updates movie in group (status and/or data)
-   * @param groupId - Group ID
-   * @param id - Group movie ID
-   * @param dto - Update data
-   * @returns Updated group movie
-   * @throws NotFoundException if movie not found
-   */
   async update(
     groupId: number,
     id: number,
@@ -250,12 +187,6 @@ export class GroupMoviesService {
     return updated;
   }
 
-  /**
-   * Removes movie from group
-   * @param groupId - Group ID
-   * @param id - Group movie ID
-   * @throws NotFoundException if movie not found
-   */
   async remove(groupId: number, id: number): Promise<void> {
     await this._findOneOrThrow(groupId, id);
     await this.groupMoviesRepository.delete(groupId, id);
