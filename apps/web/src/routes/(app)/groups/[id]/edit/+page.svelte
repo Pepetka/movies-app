@@ -13,7 +13,6 @@
 	} from '$lib/modules/groups';
 	import { topBarStore } from '$lib/stores';
 	import { goto } from '$app/navigation';
-	import { resolve } from '$app/paths';
 	import { ROUTES } from '$lib/utils';
 	import { page } from '$app/state';
 
@@ -38,7 +37,7 @@
 		topBarStore.configure({
 			title: 'Редактирование',
 			showBack: true,
-			onBack: () => goto(resolve(ROUTES.GROUP_DETAIL(groupId))),
+			onBack: () => goto(ROUTES.GROUP_DETAIL(groupId)),
 			trailingAction: groupStore.isAdmin
 				? {
 						Icon: Trash2,
@@ -65,7 +64,7 @@
 			if (!groupStore.isModerator && !hasRedirected) {
 				hasRedirected = true;
 				toast.error('Редактирование доступно только модераторам');
-				void goto(resolve(ROUTES.GROUP_DETAIL(groupId)));
+				void goto(ROUTES.GROUP_DETAIL(groupId));
 				return;
 			}
 			untrack(() => {
@@ -79,7 +78,7 @@
 
 		if (groupStore.isUpdateSuccess) {
 			toast.success('Группа обновлена');
-			await goto(resolve(ROUTES.GROUP_DETAIL(groupId)));
+			await goto(ROUTES.GROUP_DETAIL(groupId));
 		} else {
 			toast.error(groupStore.updateError ?? 'Ошибка обновления');
 		}
@@ -94,7 +93,7 @@
 
 		if (groupStore.isDeleteSuccess) {
 			toast.success('Группа удалена');
-			await goto(resolve(ROUTES.GROUPS));
+			await goto(ROUTES.GROUPS);
 		} else {
 			toast.error(groupStore.deleteError ?? 'Ошибка удаления');
 		}

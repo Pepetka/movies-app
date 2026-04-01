@@ -10,9 +10,8 @@
 		EMPTY_LOGIN_FORM,
 		loginFormToDto
 	} from '$lib/modules/auth';
+	import { ROUTES, withCurrentQuery, getSafeRedirect } from '$lib/utils';
 	import { goto } from '$app/navigation';
-	import { resolve } from '$app/paths';
-	import { ROUTES } from '$lib/utils';
 
 	import '$lib/styles/auth.css';
 
@@ -20,6 +19,8 @@
 	let showPassword = $state(false);
 
 	const fieldValidator = createFormFieldValidator(validateLoginForm);
+
+	const registerHref = $derived(withCurrentQuery(ROUTES.REGISTER, ['redirect']));
 
 	$effect(() => {
 		return () => {
@@ -41,7 +42,7 @@
 		await authStore.login(loginFormToDto(form));
 
 		if (authStore.isLoginSuccess) {
-			await goto(resolve(ROUTES.GROUPS), { replaceState: true });
+			await goto(getSafeRedirect(), { replaceState: true });
 		} else {
 			toast.error(authStore.loginError ?? 'Ошибка входа');
 		}
@@ -105,7 +106,7 @@
 		{#snippet footer()}
 			<div class="form-footer">
 				<p>
-					Нет аккаунта? <a href={ROUTES.REGISTER}>Зарегистрироваться</a>
+					Нет аккаунта? <a href={registerHref}>Зарегистрироваться</a>
 				</p>
 			</div>
 		{/snippet}

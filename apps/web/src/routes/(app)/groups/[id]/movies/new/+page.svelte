@@ -10,7 +10,6 @@
 	} from '$lib/modules/movies';
 	import { topBarStore } from '$lib/stores';
 	import { goto } from '$app/navigation';
-	import { resolve } from '$app/paths';
 	import { ROUTES } from '$lib/utils';
 	import { page } from '$app/state';
 
@@ -22,7 +21,7 @@
 		topBarStore.configure({
 			title: 'Новый фильм',
 			showBack: true,
-			onBack: () => goto(resolve(ROUTES.GROUP_MOVIES_SEARCH(groupId)))
+			onBack: () => goto(ROUTES.GROUP_MOVIES_SEARCH(groupId))
 		});
 		return () => {
 			topBarStore.destroy();
@@ -35,7 +34,7 @@
 
 		if (groupMovieStore.isCreateSuccess) {
 			toast.success('Фильм создан');
-			await goto(resolve(ROUTES.GROUP_DETAIL(groupId)));
+			await goto(ROUTES.GROUP_DETAIL(groupId));
 		} else {
 			toast.error(groupMovieStore.createError ?? 'Не удалось создать фильм');
 		}

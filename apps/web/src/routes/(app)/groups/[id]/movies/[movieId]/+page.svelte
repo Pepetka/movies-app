@@ -8,11 +8,10 @@
 		MovieStatusBadge,
 		MovieStatusModal
 	} from '$lib/modules/movies';
-	import { ROUTES, formatDate, formatRuntime, withTab } from '$lib/utils';
+	import { ROUTES, formatDate, formatRuntime, withCurrentQuery } from '$lib/utils';
 	import { PagePlaceholder } from '$lib/ui';
 	import { topBarStore } from '$lib/stores';
 	import { goto } from '$app/navigation';
-	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
 
 	const groupId = $derived(Number(page.params.id));
@@ -27,14 +26,14 @@
 			title: movie?.title ?? (isLoading ? '' : 'Фильм'),
 			showBack: true,
 			onBack: () => {
-				void goto(withTab(resolve(ROUTES.GROUP_DETAIL(groupId))));
+				void goto(withCurrentQuery(ROUTES.GROUP_DETAIL(groupId), ['tab']));
 			},
 			trailingAction: groupMovieDetailStore.isModerator
 				? {
 						Icon: Pencil,
 						label: 'Редактировать',
 						onclick: () => {
-							void goto(withTab(resolve(ROUTES.GROUP_MOVIE_EDIT(groupId, movieId))));
+							void goto(withCurrentQuery(ROUTES.GROUP_MOVIE_EDIT(groupId, movieId), ['tab']));
 						}
 					}
 				: undefined

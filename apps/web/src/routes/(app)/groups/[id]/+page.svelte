@@ -9,12 +9,17 @@
 		type MovieStatus,
 		type UnifiedMovie
 	} from '$lib/modules/movies';
-	import { ROUTES, sortByDateField, withTab } from '$lib/utils';
+	import {
+		ROUTES,
+		sortByDateField,
+		withCurrentQuery,
+		buildPath,
+		type RouteValue
+	} from '$lib/utils';
 	import { groupStore } from '$lib/modules/groups';
 	import { PagePlaceholder } from '$lib/ui';
 	import { topBarStore } from '$lib/stores';
 	import { goto } from '$app/navigation';
-	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
 
 	const groupId = $derived(Number(page.params.id));
@@ -39,12 +44,12 @@
 		topBarStore.configure({
 			title: group?.name ?? (isLoading ? '' : 'Группа'),
 			showBack: true,
-			onBack: () => goto(resolve(ROUTES.GROUPS)),
+			onBack: () => goto(ROUTES.GROUPS),
 			trailingAction: groupStore.isModerator
 				? {
 						Icon: Pencil,
 						label: 'Редактировать',
-						onclick: () => goto(resolve(ROUTES.GROUP_EDIT(groupId)))
+						onclick: () => goto(ROUTES.GROUP_EDIT(groupId))
 					}
 				: undefined
 		});
@@ -76,7 +81,11 @@
 	});
 
 	const handleFilterChange = (tabId: string) => {
-		void goto(`${page.url.pathname}${tabId === 'all' ? '' : `?tab=${tabId}`}`, {
+		const path =
+			tabId === 'all'
+				? page.url.pathname
+				: buildPath(page.url.pathname as RouteValue, { tab: tabId });
+		void goto(path, {
 			replaceState: true,
 			keepFocus: true,
 			noScroll: true
@@ -84,11 +93,11 @@
 	};
 
 	const handleAddMovie = () => {
-		void goto(resolve(ROUTES.GROUP_MOVIES_SEARCH(groupId)));
+		void goto(ROUTES.GROUP_MOVIES_SEARCH(groupId));
 	};
 
 	const handleMovieClick = (movie: UnifiedMovie) => {
-		void goto(withTab(resolve(ROUTES.GROUP_MOVIE_DETAIL(groupId, movie.id))));
+		void goto(withCurrentQuery(ROUTES.GROUP_MOVIE_DETAIL(groupId, movie.id), ['tab']));
 	};
 
 	const getTabCount = (tabId: string): number => {

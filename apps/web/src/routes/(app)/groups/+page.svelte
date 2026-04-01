@@ -5,15 +5,14 @@
 	import { groupsStore } from '$lib/modules/groups';
 	import { topBarStore } from '$lib/stores';
 	import { goto } from '$app/navigation';
-	import { resolve } from '$app/paths';
 	import { ROUTES } from '$lib/utils';
 
 	const handleCreateGroup = () => {
-		void goto(resolve(ROUTES.GROUPS_NEW));
+		void goto(ROUTES.GROUPS_NEW);
 	};
 
 	const handleGroupClick = (groupId: number) => {
-		void goto(resolve(ROUTES.GROUP_DETAIL(groupId)));
+		void goto(ROUTES.GROUP_DETAIL(groupId));
 	};
 
 	$effect(() => {

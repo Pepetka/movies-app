@@ -6,7 +6,6 @@
 	import type { ProviderMovieSummary } from '$lib/api/generated/types';
 	import { topBarStore } from '$lib/stores';
 	import { goto } from '$app/navigation';
-	import { resolve } from '$app/paths';
 	import { ROUTES } from '$lib/utils';
 	import { page } from '$app/state';
 
@@ -17,7 +16,7 @@
 		topBarStore.configure({
 			title: 'Добавить фильм',
 			showBack: true,
-			onBack: () => goto(resolve(ROUTES.GROUP_DETAIL(groupId)))
+			onBack: () => goto(ROUTES.GROUP_DETAIL(groupId))
 		});
 		return () => {
 			topBarStore.destroy();
@@ -46,7 +45,7 @@
 
 		if (groupMovieStore.isAddSuccess) {
 			toast.success('Фильм добавлен');
-			await goto(resolve(ROUTES.GROUP_DETAIL(groupId)));
+			await goto(ROUTES.GROUP_DETAIL(groupId));
 		} else {
 			toast.error(groupMovieStore.addError ?? 'Ошибка добавления');
 		}
@@ -117,11 +116,7 @@
 
 	<div class="search-page__footer">
 		<p class="search-page__footer-text">Не нашли фильм?</p>
-		<Button
-			variant="ghost"
-			size="sm"
-			onclick={() => goto(resolve(ROUTES.GROUP_MOVIE_NEW(groupId)))}
-		>
+		<Button variant="ghost" size="sm" onclick={() => goto(ROUTES.GROUP_MOVIE_NEW(groupId))}>
 			Создайте свой
 		</Button>
 	</div>

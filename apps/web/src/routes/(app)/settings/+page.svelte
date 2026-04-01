@@ -4,7 +4,6 @@
 	import { authStore } from '$lib/modules/auth';
 	import { topBarStore } from '$lib/stores';
 	import { goto } from '$app/navigation';
-	import { resolve } from '$app/paths';
 	import { ROUTES } from '$lib/utils';
 
 	$effect(() => {
@@ -21,7 +20,7 @@
 		} catch {
 			toast.error('Ошибка выхода');
 		}
-		await goto(resolve(ROUTES.HOME), { replaceState: true });
+		await goto(ROUTES.HOME, { replaceState: true });
 	};
 </script>
 
