@@ -14,8 +14,10 @@ import {
   ApiParam,
   ApiBearerAuth,
 } from '@nestjs/swagger';
+import { Throttle } from '@nestjs/throttler';
 
 import { Public, User } from '$common/decorators';
+import { THROTTLE } from '$common/configs';
 
 import {
   InviteInfoResponseDto,
@@ -31,6 +33,7 @@ export class InvitesController {
 
   @Public()
   @Get(':token')
+  @Throttle(THROTTLE.invites.info)
   @SerializeOptions({ type: InviteInfoResponseDto })
   @ApiOperation({ summary: 'Get invite info by token (Public)' })
   @ApiParam({ name: 'token', description: 'Invite token' })
@@ -45,6 +48,7 @@ export class InvitesController {
   }
 
   @Post(':token/accept')
+  @Throttle(THROTTLE.invites.accept)
   @ApiBearerAuth('access-token')
   @HttpCode(HttpStatus.OK)
   @SerializeOptions({ type: AcceptInviteResponseDto })

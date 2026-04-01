@@ -59,7 +59,7 @@ export class GroupsService {
   }
 
   findUserGroupsByAdmin(userId: number) {
-    return this.groupsRepository.findGroupsByUserId(userId);
+    return this.findUserGroups(userId);
   }
 
   async findOne(
