@@ -9,6 +9,7 @@ export * from './group-not-found.exception';
 export * from './not-group-member.exception';
 export * from './not-group-admin.exception';
 export * from './only-one-admin.exception';
+export * from './cannot-set-admin-role.exception';
 export * from './target-not-group-member.exception';
 export * from './user-already-member.exception';
 export * from './movie-already-exists.exception';

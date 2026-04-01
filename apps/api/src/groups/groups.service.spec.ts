@@ -8,6 +8,7 @@ import {
   NotGroupAdminException,
   NotGroupMemberException,
   OnlyOneAdminException,
+  CannotSetAdminRoleException,
   TargetNotGroupMemberException,
   UserAlreadyMemberException,
 } from '$common/exceptions';
@@ -81,7 +82,6 @@ const createMockGroupsRepository = () => ({
   findMembersByGroupWithUsers: jest.fn(),
   findMemberWithUser: jest.fn(),
   updateMemberRole: jest.fn(),
-  setAdminRoleInTransaction: jest.fn(),
   removeMember: jest.fn(),
   countAdmins: jest.fn(),
   transferOwnership: jest.fn(),
@@ -166,18 +166,6 @@ describe('GroupsService', () => {
     });
   });
 
-  describe('findUserGroupsByAdmin', () => {
-    it('should return groups where user is admin', async () => {
-      const mockGroups = [mockGroup];
-      groupsRepository.findGroupsByUserId.mockResolvedValue(mockGroups);
-
-      const result = await service.findUserGroupsByAdmin(1);
-
-      expect(result).toEqual(mockGroups);
-      expect(groupsRepository.findGroupsByUserId).toHaveBeenCalledWith(1);
-    });
-  });
-
   describe('findOne', () => {
     it('should return group for member', async () => {
       groupsRepository.findGroupById.mockResolvedValue(mockGroup);
@@ -207,7 +195,6 @@ describe('GroupsService', () => {
     };
 
     it('should update group as moderator', async () => {
-      groupsRepository.findGroupById.mockResolvedValue(mockGroup);
       groupsRepository.updateGroup.mockResolvedValue(mockGroup);
 
       const result = await service.update(1, mockModeratorMember, updateDto);
@@ -220,45 +207,26 @@ describe('GroupsService', () => {
     });
 
     it('should update group as admin', async () => {
-      groupsRepository.findGroupById.mockResolvedValue(mockGroup);
       groupsRepository.updateGroup.mockResolvedValue(mockGroup);
 
       await service.update(1, mockAdminMember, updateDto);
 
       expect(groupsRepository.updateGroup).toHaveBeenCalled();
     });
-
-    it('should throw GroupNotFoundException for non-existent group', async () => {
-      groupsRepository.findGroupById.mockResolvedValue(null);
-
-      await expect(
-        service.update(999, mockModeratorMember, updateDto),
-      ).rejects.toThrow(GroupNotFoundException);
-    });
   });
 
   describe('remove', () => {
     it('should delete group as admin', async () => {
-      groupsRepository.findGroupById.mockResolvedValue(mockGroup);
       groupsRepository.deleteGroup.mockResolvedValue(undefined);
 
       await service.remove(1, mockAdminMember);
 
       expect(groupsRepository.deleteGroup).toHaveBeenCalledWith(1);
     });
-
-    it('should throw GroupNotFoundException for non-existent group', async () => {
-      groupsRepository.findGroupById.mockResolvedValue(null);
-
-      await expect(service.remove(999, mockAdminMember)).rejects.toThrow(
-        GroupNotFoundException,
-      );
-    });
   });
 
   describe('addMember', () => {
     it('should add member as moderator', async () => {
-      groupsRepository.findGroupById.mockResolvedValue(mockGroup);
       groupsRepository.addMemberIfNotExists.mockResolvedValue(mockGroupMember);
 
       await service.addMember(1, { userId: 3 }, mockModeratorMember);
@@ -271,7 +239,6 @@ describe('GroupsService', () => {
     });
 
     it('should add member with specified role', async () => {
-      groupsRepository.findGroupById.mockResolvedValue(mockGroup);
       groupsRepository.addMemberIfNotExists.mockResolvedValue(mockGroupMember);
 
       await service.addMember(
@@ -287,16 +254,7 @@ describe('GroupsService', () => {
       });
     });
 
-    it('should throw GroupNotFoundException for non-existent group', async () => {
-      groupsRepository.findGroupById.mockResolvedValue(null);
-
-      await expect(
-        service.addMember(999, { userId: 3 }, mockModeratorMember),
-      ).rejects.toThrow(GroupNotFoundException);
-    });
-
     it('should throw UserAlreadyMemberException for existing member', async () => {
-      groupsRepository.findGroupById.mockResolvedValue(mockGroup);
       groupsRepository.addMemberIfNotExists.mockResolvedValue(null);
 
       await expect(
@@ -307,7 +265,6 @@ describe('GroupsService', () => {
 
   describe('removeMember', () => {
     it('should remove regular member as admin', async () => {
-      groupsRepository.findGroupById.mockResolvedValue(mockGroup);
       groupsRepository.findMember.mockResolvedValue({
         ...mockGroupMember,
         userId: 3,
@@ -321,7 +278,6 @@ describe('GroupsService', () => {
     });
 
     it('should remove regular member as moderator', async () => {
-      groupsRepository.findGroupById.mockResolvedValue(mockGroup);
       groupsRepository.findMember.mockResolvedValue({
         ...mockGroupMember,
         userId: 3,
@@ -335,7 +291,6 @@ describe('GroupsService', () => {
     });
 
     it('should throw CannotRemoveGroupAdminException when trying to remove admin', async () => {
-      groupsRepository.findGroupById.mockResolvedValue(mockGroup);
       groupsRepository.findMember.mockResolvedValue({
         ...mockGroupMember,
         role: GroupMemberRole.ADMIN,
@@ -347,7 +302,6 @@ describe('GroupsService', () => {
     });
 
     it('should throw NotGroupAdminException when moderator tries to remove moderator', async () => {
-      groupsRepository.findGroupById.mockResolvedValue(mockGroup);
       groupsRepository.findMember.mockResolvedValue({
         ...mockGroupMember,
         userId: 3,
@@ -360,7 +314,6 @@ describe('GroupsService', () => {
     });
 
     it('should throw TargetNotGroupMemberException when target is not a member', async () => {
-      groupsRepository.findGroupById.mockResolvedValue(mockGroup);
       groupsRepository.findMember.mockResolvedValue(null);
 
       await expect(
@@ -371,9 +324,9 @@ describe('GroupsService', () => {
 
   describe('updateMemberRole', () => {
     it('should update role to moderator as admin', async () => {
-      groupsRepository.findGroupById.mockResolvedValue(mockGroup);
-      groupsRepository.setAdminRoleInTransaction.mockResolvedValue({
-        success: true,
+      groupsRepository.updateMemberRole.mockResolvedValue({
+        ...mockRegularMember,
+        role: GroupMemberRole.MODERATOR,
       });
 
       await service.updateMemberRole(
@@ -383,32 +336,14 @@ describe('GroupsService', () => {
         mockAdminMember,
       );
 
-      expect(groupsRepository.setAdminRoleInTransaction).toHaveBeenCalledWith(
+      expect(groupsRepository.updateMemberRole).toHaveBeenCalledWith(
         1,
         2,
         GroupMemberRole.MODERATOR,
       );
     });
 
-    it('should throw GroupNotFoundException for non-existent group', async () => {
-      groupsRepository.findGroupById.mockResolvedValue(null);
-
-      await expect(
-        service.updateMemberRole(
-          1,
-          2,
-          { role: GroupMemberRole.MODERATOR },
-          mockAdminMember,
-        ),
-      ).rejects.toThrow(GroupNotFoundException);
-    });
-
-    it('should throw OnlyOneAdminException when promoting to admin with existing admin', async () => {
-      groupsRepository.findGroupById.mockResolvedValue(mockGroup);
-      groupsRepository.setAdminRoleInTransaction.mockResolvedValue({
-        success: false,
-      });
-
+    it('should throw CannotSetAdminRoleException when promoting to admin', async () => {
       await expect(
         service.updateMemberRole(
           1,
@@ -416,13 +351,12 @@ describe('GroupsService', () => {
           { role: GroupMemberRole.ADMIN },
           mockAdminMember,
         ),
-      ).rejects.toThrow(OnlyOneAdminException);
+      ).rejects.toThrow(CannotSetAdminRoleException);
     });
   });
 
   describe('transferOwnership', () => {
     it('should transfer ownership as admin', async () => {
-      groupsRepository.findGroupById.mockResolvedValue(mockGroup);
       groupsRepository.findMember.mockResolvedValue(mockRegularMember);
       groupsRepository.transferOwnership.mockResolvedValue(undefined);
 
@@ -431,24 +365,13 @@ describe('GroupsService', () => {
       expect(groupsRepository.transferOwnership).toHaveBeenCalledWith(1, 1, 3);
     });
 
-    it('should throw GroupNotFoundException for non-existent group', async () => {
-      groupsRepository.findGroupById.mockResolvedValue(null);
-
-      await expect(
-        service.transferOwnership(1, 3, mockAdminMember),
-      ).rejects.toThrow(GroupNotFoundException);
-    });
-
     it('should throw CannotTransferToSelfException when transferring to self', async () => {
-      groupsRepository.findGroupById.mockResolvedValue(mockGroup);
-
       await expect(
         service.transferOwnership(1, mockAdminMember.userId, mockAdminMember),
       ).rejects.toThrow(CannotTransferToSelfException);
     });
 
     it('should throw TargetNotGroupMemberException when target is not a member', async () => {
-      groupsRepository.findGroupById.mockResolvedValue(mockGroup);
       groupsRepository.findMember.mockResolvedValue(null);
 
       await expect(
@@ -460,7 +383,6 @@ describe('GroupsService', () => {
   describe('getMembers', () => {
     it('should return members', async () => {
       const mockMembers = [mockGroupMember];
-      groupsRepository.findGroupById.mockResolvedValue(mockGroup);
       groupsRepository.findMembersByGroupWithUsers.mockResolvedValue(
         mockMembers,
       );
@@ -476,7 +398,6 @@ describe('GroupsService', () => {
 
   describe('getMemberMe', () => {
     it('should return member info for group member', async () => {
-      groupsRepository.findGroupById.mockResolvedValue(mockGroup);
       groupsRepository.findMemberWithUser.mockResolvedValue(mockGroupMember);
 
       const result = await service.getMemberMe(1, mockRegularMember);
@@ -493,7 +414,6 @@ describe('GroupsService', () => {
         ...mockGroupMember,
         role: GroupMemberRole.MEMBER,
       });
-      groupsRepository.countAdmins.mockResolvedValue(2);
       groupsRepository.removeMember.mockResolvedValue(undefined);
 
       await service.leaveGroup(1, 2);
@@ -548,7 +468,6 @@ describe('GroupsService', () => {
 
   describe('generateInviteToken', () => {
     it('should generate token and save it to group', async () => {
-      groupsRepository.findGroupById.mockResolvedValue(mockGroup);
       groupsRepository.updateInviteToken.mockResolvedValue({
         ...mockGroup,
         inviteToken: 'new-token',
@@ -561,14 +480,6 @@ describe('GroupsService', () => {
         1,
         expect.any(String),
       );
-    });
-
-    it('should throw GroupNotFoundException for non-existent group', async () => {
-      groupsRepository.findGroupById.mockResolvedValue(null);
-
-      await expect(
-        service.generateInviteToken(999, mockModeratorMember),
-      ).rejects.toThrow(GroupNotFoundException);
     });
   });
 

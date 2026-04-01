@@ -88,7 +88,7 @@ export class GroupsController {
   })
   @ApiResponse({ status: 403, description: 'Forbidden - Admin only' })
   findUserGroupsByAdmin(@Param('userId', ParseIntPipe) userId: number) {
-    return this.groupsService.findUserGroupsByAdmin(userId);
+    return this.groupsService.findUserGroups(userId);
   }
 
   @Get(':id')

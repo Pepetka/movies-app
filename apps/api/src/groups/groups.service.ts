@@ -9,10 +9,11 @@ import {
   NotGroupAdminException,
   NotGroupMemberException,
   OnlyOneAdminException,
+  CannotSetAdminRoleException,
   TargetNotGroupMemberException,
   UserAlreadyMemberException,
 } from '$common/exceptions';
-import type { Group, GroupMember } from '$db/schemas';
+import type { Group, GroupMember, NewGroup } from '$db/schemas';
 import { GroupMemberRole } from '$common/enums';
 
 import {
@@ -58,10 +59,6 @@ export class GroupsService {
     return this.groupsRepository.findAllGroups();
   }
 
-  findUserGroupsByAdmin(userId: number) {
-    return this.findUserGroups(userId);
-  }
-
   async findOne(
     id: number,
     member: GroupMember,
@@ -79,9 +76,7 @@ export class GroupsService {
     member: GroupMember,
     dto: GroupUpdateDto,
   ): Promise<Group> {
-    await this._getGroupOrThrow(id);
-
-    const updateData: Partial<Record<string, unknown>> = {};
+    const updateData: Partial<NewGroup> = {};
     if (dto.name !== undefined) updateData.name = dto.name;
     if (dto.description !== undefined) updateData.description = dto.description;
     if (dto.avatarUrl !== undefined) updateData.avatarUrl = dto.avatarUrl;
@@ -95,8 +90,6 @@ export class GroupsService {
   }
 
   async remove(id: number, member: GroupMember): Promise<void> {
-    await this._getGroupOrThrow(id);
-
     await this.groupsRepository.deleteGroup(id);
     this._logger.log(`Group ${id} deleted by user ${member.userId}`);
   }
@@ -106,8 +99,6 @@ export class GroupsService {
     dto: GroupMemberAddDto,
     member: GroupMember,
   ): Promise<void> {
-    await this._getGroupOrThrow(groupId);
-
     const added = await this.groupsRepository.addMemberIfNotExists({
       groupId,
       userId: dto.userId,
@@ -127,8 +118,6 @@ export class GroupsService {
     memberUserId: number,
     member: GroupMember,
   ): Promise<void> {
-    await this._getGroupOrThrow(groupId);
-
     const target = await this.groupsRepository.findMember(
       groupId,
       memberUserId,
@@ -160,17 +149,15 @@ export class GroupsService {
     dto: GroupMemberRoleUpdateDto,
     member: GroupMember,
   ): Promise<void> {
-    await this._getGroupOrThrow(groupId);
+    if (dto.role === GroupMemberRole.ADMIN) {
+      throw new CannotSetAdminRoleException();
+    }
 
-    const result = await this.groupsRepository.setAdminRoleInTransaction(
+    await this.groupsRepository.updateMemberRole(
       groupId,
       memberUserId,
       dto.role,
     );
-
-    if (!result.success) {
-      throw new OnlyOneAdminException();
-    }
 
     this._logger.log(
       `User ${memberUserId} role updated to ${dto.role} in group ${groupId} by user ${member.userId}`,
@@ -182,8 +169,6 @@ export class GroupsService {
     targetUserId: number,
     member: GroupMember,
   ): Promise<void> {
-    await this._getGroupOrThrow(groupId);
-
     if (targetUserId === member.userId) {
       throw new CannotTransferToSelfException();
     }
@@ -209,7 +194,6 @@ export class GroupsService {
   ): Promise<
     Awaited<ReturnType<GroupsRepository['findMembersByGroupWithUsers']>>
   > {
-    await this._getGroupOrThrow(groupId);
     return this.groupsRepository.findMembersByGroupWithUsers(groupId);
   }
 
@@ -217,7 +201,6 @@ export class GroupsService {
     groupId: number,
     member: GroupMember,
   ): Promise<Awaited<ReturnType<GroupsRepository['findMemberWithUser']>>> {
-    await this._getGroupOrThrow(groupId);
     return this.groupsRepository.findMemberWithUser(groupId, member.userId);
   }
 
@@ -250,8 +233,6 @@ export class GroupsService {
     groupId: number,
     member: GroupMember,
   ): Promise<{ inviteToken: string }> {
-    await this._getGroupOrThrow(groupId);
-
     const token = crypto.randomBytes(INVITE_TOKEN_BYTES).toString('hex');
     await this.groupsRepository.updateInviteToken(groupId, token);
 

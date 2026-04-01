@@ -193,56 +193,6 @@ export class GroupsRepository {
     return result.count;
   }
 
-  async setAdminRoleInTransaction(
-    groupId: number,
-    userId: number,
-    role: GroupMemberRole,
-  ): Promise<{ success: boolean }> {
-    return this.db.transaction(async (tx) => {
-      if (role === GroupMemberRole.ADMIN) {
-        const [result] = await tx
-          .select({ count: count() })
-          .from(groupMembers)
-          .where(
-            and(
-              eq(groupMembers.groupId, groupId),
-              eq(groupMembers.role, GroupMemberRole.ADMIN),
-            ),
-          );
-
-        if (result.count > 0) {
-          return { success: false };
-        }
-      }
-
-      await tx
-        .update(groupMembers)
-        .set({ role })
-        .where(
-          and(
-            eq(groupMembers.groupId, groupId),
-            eq(groupMembers.userId, userId),
-          ),
-        );
-
-      return { success: true };
-    });
-  }
-
-  async findAdminByGroup(groupId: number): Promise<GroupMember | null> {
-    const [result] = await this.db
-      .select()
-      .from(groupMembers)
-      .where(
-        and(
-          eq(groupMembers.groupId, groupId),
-          eq(groupMembers.role, GroupMemberRole.ADMIN),
-        ),
-      )
-      .limit(1);
-    return result ?? null;
-  }
-
   async transferOwnership(
     groupId: number,
     currentAdminId: number,
