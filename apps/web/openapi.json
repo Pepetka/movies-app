@@ -878,7 +878,12 @@
 						"required": true,
 						"in": "path",
 						"description": "Invite token",
-						"schema": {}
+						"schema": {
+							"type": "string",
+							"minLength": 32,
+							"maxLength": 32,
+							"pattern": "^[0-9a-f]+$"
+						}
 					}
 				],
 				"responses": {
@@ -905,7 +910,12 @@
 						"required": true,
 						"in": "path",
 						"description": "Invite token",
-						"schema": {}
+						"schema": {
+							"type": "string",
+							"minLength": 32,
+							"maxLength": 32,
+							"pattern": "^[0-9a-f]+$"
+						}
 					}
 				],
 				"responses": {
@@ -1404,12 +1414,8 @@
 			},
 			"GroupMemberUserDto": {
 				"type": "object",
-				"properties": {
-					"id": { "type": "number" },
-					"name": { "type": "string" },
-					"email": { "type": "string" }
-				},
-				"required": ["id", "name", "email"]
+				"properties": { "id": { "type": "number" }, "name": { "type": "string" } },
+				"required": ["id", "name"]
 			},
 			"GroupMemberResponseDto": {
 				"type": "object",

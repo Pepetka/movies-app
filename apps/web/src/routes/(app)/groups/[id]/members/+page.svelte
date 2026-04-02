@@ -46,7 +46,7 @@
 	});
 
 	$effect(() => {
-		if (groupId && groupStore.isModerator) {
+		if (groupId && groupStore.isLoaded && groupStore.isModerator) {
 			void inviteStore.fetchInviteToken(groupId);
 		}
 		return () => {
@@ -172,7 +172,6 @@
 								<span class="member-item__you">(вы)</span>
 							{/if}
 						</span>
-						<span class="member-item__email">{user.email}</span>
 					</div>
 					<Badge variant={roleBadgeVariant(member.role)} size="sm">
 						{roleLabel(member.role)}
@@ -276,13 +275,5 @@
 	.member-item__you {
 		color: var(--text-secondary);
 		font-weight: var(--font-normal);
-	}
-
-	.member-item__email {
-		font-size: var(--text-xs);
-		color: var(--text-secondary);
-		white-space: nowrap;
-		overflow: hidden;
-		text-overflow: ellipsis;
 	}
 </style>

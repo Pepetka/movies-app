@@ -28,7 +28,7 @@
 	});
 
 	$effect(() => {
-		if (!groupStore.isModerator && !hasRedirected) {
+		if (groupStore.isLoaded && !groupStore.isModerator && !hasRedirected) {
 			hasRedirected = true;
 			toast.error('Добавление фильмов доступно только модераторам');
 			void goto(ROUTES.GROUP_DETAIL(groupId));

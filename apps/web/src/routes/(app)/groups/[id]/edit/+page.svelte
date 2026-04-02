@@ -54,7 +54,7 @@
 	});
 
 	$effect(() => {
-		if (!groupStore.isModerator && !hasRedirected) {
+		if (groupStore.isLoaded && !groupStore.isModerator && !hasRedirected) {
 			hasRedirected = true;
 			toast.error('Редактирование доступно только модераторам');
 			void goto(ROUTES.GROUP_DETAIL(groupId));
