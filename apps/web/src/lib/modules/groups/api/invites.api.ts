@@ -6,6 +6,7 @@ import {
 } from '$lib/api/generated/api';
 import type {
 	AcceptInviteResponseDto,
+	GeneratedInviteTokenResponseDto,
 	InviteInfoResponseDto,
 	InviteTokenResponseDto
 } from '$lib/api/generated/types';
@@ -28,6 +29,6 @@ export const getInviteToken = (
 	return groupsControllerGetInviteTokenV1(groupId, { signal });
 };
 
-export const generateInviteToken = (groupId: number): Promise<InviteTokenResponseDto> => {
+export const generateInviteToken = (groupId: number): Promise<GeneratedInviteTokenResponseDto> => {
 	return groupsControllerGenerateInviteV1(groupId);
 };

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { Avatar, Badge, Button, Card, IconButton, Input, Modal, Spinner, toast } from '@repo/ui';
 	import { Check, Copy, MoreVertical, RefreshCw } from '@lucide/svelte';
+	import type { BadgeVariant } from '@repo/ui';
 
 	import { groupStore, inviteStore, membersStore } from '$lib/modules/groups';
 	import type { GroupMemberResponseDtoRole } from '$lib/api/generated/types';
@@ -34,6 +35,11 @@
 		});
 		return () => {
 			topBarStore.destroy();
+		};
+	});
+
+	$effect(() => {
+		return () => {
 			if (copyTimeoutId) clearTimeout(copyTimeoutId);
 			isCopied = false;
 		};
@@ -61,16 +67,16 @@
 		}
 	});
 
-	const roleBadgeVariant = (role: GroupMemberResponseDtoRole) => {
-		if (role === 'admin') return 'warning';
-		if (role === 'moderator') return 'primary';
-		return 'default';
+	const ROLE_BADGE_VARIANT: Record<GroupMemberResponseDtoRole, BadgeVariant> = {
+		admin: 'warning',
+		moderator: 'primary',
+		member: 'default'
 	};
 
-	const roleLabel = (role: GroupMemberResponseDtoRole) => {
-		if (role === 'admin') return 'Админ';
-		if (role === 'moderator') return 'Модератор';
-		return 'Участник';
+	const ROLE_LABEL: Record<GroupMemberResponseDtoRole, string> = {
+		admin: 'Админ',
+		moderator: 'Модератор',
+		member: 'Участник'
 	};
 
 	const canManageMember = (memberRole: GroupMemberResponseDtoRole): boolean => {
@@ -173,8 +179,8 @@
 							{/if}
 						</span>
 					</div>
-					<Badge variant={roleBadgeVariant(member.role)} size="sm">
-						{roleLabel(member.role)}
+					<Badge variant={ROLE_BADGE_VARIANT[member.role]} size="sm">
+						{ROLE_LABEL[member.role]}
 					</Badge>
 					{#if canManageMember(member.role)}
 						<IconButton

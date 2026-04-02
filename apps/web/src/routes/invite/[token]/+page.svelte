@@ -62,14 +62,14 @@
 	</div>
 
 	{#if inviteStore.isLoading}
-		<div class="invite-loading">
+		<div class="invite__loading">
 			<Spinner size="lg" />
 		</div>
 	{:else if inviteStore.isTokenNotFound}
 		<Card variant="outlined" size="responsive" class="form-card">
 			{#snippet header()}
 				<div class="form-card-header">
-					<div class="invite-error-icon">
+					<div class="invite__error-icon">
 						<AlertCircle size={40} />
 					</div>
 					<h2 class="form-card-title">Приглашение не найдено</h2>
@@ -77,7 +77,7 @@
 				</div>
 			{/snippet}
 
-			<div class="invite-actions">
+			<div class="invite__actions">
 				<Button variant="primary" fullWidth href={ROUTES.HOME}>На главную</Button>
 			</div>
 		</Card>
@@ -90,18 +90,18 @@
 				</div>
 			{/snippet}
 
-			<div class="invite-group-info">
+			<div class="invite__group-info">
 				<Avatar
 					src={inviteStore.inviteInfo?.avatarUrl}
 					name={inviteStore.inviteInfo?.name}
 					size="lg"
 				/>
-				<div class="invite-group-details">
-					<h3 class="invite-group-name">{inviteStore.inviteInfo?.name}</h3>
+				<div class="invite__group-details">
+					<h3 class="invite__group-name">{inviteStore.inviteInfo?.name}</h3>
 					{#if inviteStore.inviteInfo?.description}
-						<p class="invite-group-desc">{inviteStore.inviteInfo.description}</p>
+						<p class="invite__group-desc">{inviteStore.inviteInfo.description}</p>
 					{/if}
-					<span class="invite-member-count">
+					<span class="invite__member-count">
 						<Users size={14} />
 						{inviteStore.inviteInfo?.memberCount ?? 0} участников
 					</span>
@@ -109,8 +109,8 @@
 			</div>
 
 			{#if inviteStore.isAlreadyMember}
-				<div class="invite-status">
-					<p class="invite-status-text">Вы уже участник этой группы</p>
+				<div class="invite__status">
+					<p class="invite__status-text">Вы уже участник этой группы</p>
 					<Button
 						variant="primary"
 						fullWidth
@@ -122,15 +122,15 @@
 					</Button>
 				</div>
 			{:else if isNotLoggedIn}
-				<div class="invite-actions">
+				<div class="invite__actions">
 					<Button variant="primary" fullWidth onclick={handleLogin}>
 						<LogIn size={18} />
 						Войти, чтобы присоединиться
 					</Button>
 				</div>
 			{:else if inviteStore.isAcceptSuccess}
-				<div class="invite-status">
-					<p class="invite-status-text invite-status-success">Вы присоединились!</p>
+				<div class="invite__status">
+					<p class="invite__status-text invite__status-text--success">Вы присоединились!</p>
 					<Button
 						variant="primary"
 						fullWidth
@@ -142,7 +142,7 @@
 					</Button>
 				</div>
 			{:else}
-				<div class="invite-actions">
+				<div class="invite__actions">
 					<Button
 						variant="primary"
 						fullWidth
@@ -163,7 +163,7 @@
 				</div>
 			{/snippet}
 
-			<div class="invite-actions">
+			<div class="invite__actions">
 				<Button
 					variant="primary"
 					fullWidth
@@ -175,32 +175,32 @@
 </div>
 
 <style>
-	.invite-loading {
+	.invite__loading {
 		display: flex;
 		justify-content: center;
 		padding: var(--space-8, 2rem) 0;
 	}
 
-	.invite-error-icon {
+	.invite__error-icon {
 		color: var(--color-error, #e5484d);
 		margin-bottom: var(--space-2, 0.5rem);
 	}
 
-	.invite-group-info {
+	.invite__group-info {
 		display: flex;
 		align-items: center;
 		gap: var(--space-4, 1rem);
 		padding: var(--space-3, 0.75rem) 0;
 	}
 
-	.invite-group-details {
+	.invite__group-details {
 		display: flex;
 		flex-direction: column;
 		gap: var(--space-1, 0.25rem);
 		min-width: 0;
 	}
 
-	.invite-group-name {
+	.invite__group-name {
 		font-size: var(--text-lg, 1.125rem);
 		font-weight: 600;
 		margin: 0;
@@ -209,7 +209,7 @@
 		white-space: nowrap;
 	}
 
-	.invite-group-desc {
+	.invite__group-desc {
 		font-size: var(--text-sm, 0.875rem);
 		color: var(--text-secondary, #888);
 		margin: 0;
@@ -220,7 +220,7 @@
 		overflow: hidden;
 	}
 
-	.invite-member-count {
+	.invite__member-count {
 		display: inline-flex;
 		align-items: center;
 		gap: var(--space-1, 0.25rem);
@@ -228,14 +228,14 @@
 		color: var(--text-secondary, #888);
 	}
 
-	.invite-actions {
+	.invite__actions {
 		display: flex;
 		flex-direction: column;
 		gap: var(--space-2, 0.5rem);
 		padding-top: var(--space-2, 0.5rem);
 	}
 
-	.invite-status {
+	.invite__status {
 		display: flex;
 		flex-direction: column;
 		align-items: center;
@@ -243,13 +243,13 @@
 		padding: var(--space-3, 0.75rem) 0;
 	}
 
-	.invite-status-text {
+	.invite__status-text {
 		font-size: var(--text-sm, 0.875rem);
 		color: var(--text-secondary, #888);
 		margin: 0;
 	}
 
-	.invite-status-success {
+	.invite__status-text--success {
 		color: var(--color-success, #30a46c);
 		font-weight: 600;
 	}

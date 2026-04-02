@@ -1,5 +1,11 @@
 import { untrack } from 'svelte';
 
+import type {
+	AcceptInviteResponseDto,
+	GeneratedInviteTokenResponseDto,
+	InviteInfoResponseDto,
+	InviteTokenResponseDto
+} from '$lib/api/generated/types';
 import {
 	createMutation,
 	createQuery,
@@ -8,11 +14,6 @@ import {
 	type PostStatus,
 	type QueryResult
 } from '$lib/query';
-import type {
-	AcceptInviteResponseDto,
-	InviteInfoResponseDto,
-	InviteTokenResponseDto
-} from '$lib/api/generated/types';
 import { BaseStore } from '$lib/stores/base.svelte';
 import { HttpError } from '$lib/api/errors';
 
@@ -27,7 +28,7 @@ class InviteStore extends BaseStore {
 	private readonly _query: QueryResult<InviteInfoResponseDto, string>;
 	private readonly _tokenQuery: QueryResult<InviteTokenResponseDto, number>;
 	private readonly _acceptMutation: MutationResult<AcceptInviteResponseDto, string>;
-	private readonly _generateMutation: MutationResult<InviteTokenResponseDto, number>;
+	private readonly _generateMutation: MutationResult<GeneratedInviteTokenResponseDto, number>;
 
 	constructor() {
 		super();
@@ -60,7 +61,7 @@ class InviteStore extends BaseStore {
 			debug: !__IS_PROD__
 		});
 
-		this._generateMutation = createMutation<InviteTokenResponseDto, number>({
+		this._generateMutation = createMutation<GeneratedInviteTokenResponseDto, number>({
 			key: ['invite', 'generate'],
 			tags: ['invite-token'],
 			mutator: (groupId) => generateInviteTokenApi(groupId),
@@ -203,7 +204,7 @@ class InviteStore extends BaseStore {
 		return this._generateMutation.isSubmitting;
 	}
 
-	async generateInvite(groupId: number): Promise<InviteTokenResponseDto | null> {
+	async generateInvite(groupId: number): Promise<GeneratedInviteTokenResponseDto | null> {
 		return untrack(() => this._generateMutation.mutate(groupId));
 	}
 

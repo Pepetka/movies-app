@@ -21,6 +21,7 @@
 	let form = $state<GroupFormData>({ ...EMPTY_GROUP_FORM });
 	let showDeleteModal = $state(false);
 	let hasRedirected = $state(false);
+	let isFormInitialized = $state(false);
 
 	const openDeleteModal = () => {
 		showDeleteModal = true;
@@ -62,9 +63,10 @@
 	});
 
 	$effect(() => {
-		if (groupStore.currentGroup) {
+		if (groupStore.currentGroup && !groupStore.updateError && !isFormInitialized) {
 			untrack(() => {
 				form = groupFormFromEntity(groupStore.currentGroup!);
+				isFormInitialized = true;
 			});
 		}
 	});
