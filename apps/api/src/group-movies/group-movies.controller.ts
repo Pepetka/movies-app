@@ -48,10 +48,10 @@ export class GroupMoviesController {
   ) {}
 
   @Get('search')
-  @UseGuards(GroupMemberGuard)
+  @UseGuards(GroupModeratorGuard)
   @SerializeOptions({ type: SearchInGroupResponseDto })
   @ApiOperation({
-    summary: 'Search movies in group context (Group members only)',
+    summary: 'Search movies in group context (Group moderators only)',
   })
   @ApiParam({ name: 'groupId', description: 'Group ID' })
   @ApiQuery({ name: 'query', required: true, example: 'матрица' })
@@ -61,7 +61,10 @@ export class GroupMoviesController {
     description: 'Search results with provider and group movies',
     type: SearchInGroupResponseDto,
   })
-  @ApiResponse({ status: 403, description: 'Forbidden - Not a group member' })
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden - Not a group moderator',
+  })
   async searchInGroup(
     @Param('groupId', ParseIntPipe) groupId: number,
     @Query() dto: MovieSearchGroupDto,
