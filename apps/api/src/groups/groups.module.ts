@@ -1,21 +1,33 @@
 import { Module } from '@nestjs/common';
 
-import { GroupMemberGuard, GroupModeratorGuard } from '$common/guards';
 import { DbModule } from '$db/db.module';
 
+import {
+  GroupAdminGuard,
+  GroupMemberGuard,
+  GroupModeratorGuard,
+} from './guards';
+import { InvitesController } from './invites.controller';
 import { GroupsController } from './groups.controller';
 import { GroupsRepository } from './groups.repository';
 import { GroupsService } from './groups.service';
 
 @Module({
   imports: [DbModule],
-  controllers: [GroupsController],
+  controllers: [GroupsController, InvitesController],
   providers: [
     GroupsService,
     GroupsRepository,
     GroupMemberGuard,
     GroupModeratorGuard,
+    GroupAdminGuard,
   ],
-  exports: [GroupsService, GroupsRepository],
+  exports: [
+    GroupsService,
+    GroupsRepository,
+    GroupMemberGuard,
+    GroupModeratorGuard,
+    GroupAdminGuard,
+  ],
 })
 export class GroupsModule {}

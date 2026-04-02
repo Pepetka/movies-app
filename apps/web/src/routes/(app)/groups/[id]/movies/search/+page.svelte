@@ -4,26 +4,35 @@
 
 	import { moviesSearchStore, groupMovieStore, MovieRating } from '$lib/modules/movies';
 	import type { ProviderMovieSummary } from '$lib/api/generated/types';
+	import { groupStore } from '$lib/modules/groups';
 	import { topBarStore } from '$lib/stores';
 	import { goto } from '$app/navigation';
-	import { resolve } from '$app/paths';
 	import { ROUTES } from '$lib/utils';
 	import { page } from '$app/state';
 
 	const groupId = $derived(Number(page.params.id));
 	let inputValue = $state('');
+	let hasRedirected = $state(false);
 
 	$effect(() => {
 		topBarStore.configure({
 			title: 'Добавить фильм',
 			showBack: true,
-			onBack: () => goto(resolve(ROUTES.GROUP_DETAIL(groupId)))
+			onBack: () => goto(ROUTES.GROUP_DETAIL(groupId))
 		});
 		return () => {
 			topBarStore.destroy();
 			moviesSearchStore.cancel();
 			moviesSearchStore.clear();
 		};
+	});
+
+	$effect(() => {
+		if (groupStore.isLoaded && !groupStore.isModerator && !hasRedirected) {
+			hasRedirected = true;
+			toast.error('Добавление фильмов доступно только модераторам');
+			void goto(ROUTES.GROUP_DETAIL(groupId));
+		}
 	});
 
 	const handleClear = () => {
@@ -46,7 +55,7 @@
 
 		if (groupMovieStore.isAddSuccess) {
 			toast.success('Фильм добавлен');
-			await goto(resolve(ROUTES.GROUP_DETAIL(groupId)));
+			await goto(ROUTES.GROUP_DETAIL(groupId));
 		} else {
 			toast.error(groupMovieStore.addError ?? 'Ошибка добавления');
 		}
@@ -63,6 +72,7 @@
 			bind:value={inputValue}
 			label="Поиск фильма"
 			placeholder="Введите название..."
+			hideMessage
 			Icon={Search}
 			iconAction={inputValue ? handleClear : undefined}
 			iconLabel={inputValue ? 'Очистить' : undefined}
@@ -117,11 +127,7 @@
 
 	<div class="search-page__footer">
 		<p class="search-page__footer-text">Не нашли фильм?</p>
-		<Button
-			variant="ghost"
-			size="sm"
-			onclick={() => goto(resolve(ROUTES.GROUP_MOVIE_NEW(groupId)))}
-		>
+		<Button variant="ghost" size="sm" onclick={() => goto(ROUTES.GROUP_MOVIE_NEW(groupId))}>
 			Создайте свой
 		</Button>
 	</div>
@@ -136,10 +142,6 @@
 
 	.search-page__input {
 		padding: var(--space-4) 0;
-	}
-
-	.search-page__input :global(.ui-input-message) {
-		display: none;
 	}
 
 	.search-page__results {

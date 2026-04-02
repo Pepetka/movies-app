@@ -77,7 +77,7 @@ export class GroupMoviesRepository {
   ): Promise<GroupMovie> {
     const [result] = await this.db
       .update(groupMovies)
-      .set({ ...data, updatedAt: new Date() })
+      .set({ ...data })
       .where(and(eq(groupMovies.groupId, groupId), eq(groupMovies.id, id)))
       .returning();
     return result;

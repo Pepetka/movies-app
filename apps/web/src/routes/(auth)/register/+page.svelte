@@ -12,9 +12,8 @@
 		EMPTY_REGISTER_FORM,
 		registerFormToDto
 	} from '$lib/modules/auth';
+	import { ROUTES, withCurrentQuery, getSafeRedirect } from '$lib/utils';
 	import { goto } from '$app/navigation';
-	import { resolve } from '$app/paths';
-	import { ROUTES } from '$lib/utils';
 
 	import '$lib/styles/auth.css';
 
@@ -25,6 +24,8 @@
 
 	const fieldValidator = createFormFieldValidator(validateRegisterForm);
 	const passwordChecks = $derived(checkPasswordStrength(form.password));
+
+	const loginHref = $derived(withCurrentQuery(ROUTES.LOGIN, ['redirect']));
 
 	$effect(() => {
 		return () => {
@@ -47,7 +48,7 @@
 
 		if (authStore.isRegisterSuccess) {
 			toast.success('Регистрация успешна!');
-			await goto(resolve(ROUTES.GROUPS), { replaceState: true });
+			await goto(getSafeRedirect(), { replaceState: true });
 		} else {
 			toast.error(authStore.registerError ?? 'Ошибка регистрации');
 		}
@@ -160,7 +161,7 @@
 		{#snippet footer()}
 			<div class="form-footer">
 				<p>
-					Уже есть аккаунт? <a href={ROUTES.LOGIN}>Войти</a>
+					Уже есть аккаунт? <a href={loginHref}>Войти</a>
 				</p>
 			</div>
 		{/snippet}

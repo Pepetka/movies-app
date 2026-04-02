@@ -13,5 +13,6 @@ export interface IProps extends Omit<HTMLInputAttributes, 'size'> {
 	iconAction?: () => void;
 	iconLabel?: string;
 	onChange?: (value: string) => void;
+	hideMessage?: boolean;
 	class?: string;
 }

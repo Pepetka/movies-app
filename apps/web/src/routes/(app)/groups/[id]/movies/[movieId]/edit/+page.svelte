@@ -12,10 +12,9 @@
 		customMovieFormToUpdateDto,
 		type CustomMovieFormData
 	} from '$lib/modules/movies';
-	import { ROUTES, withTab } from '$lib/utils';
+	import { ROUTES, withCurrentQuery } from '$lib/utils';
 	import { topBarStore } from '$lib/stores';
 	import { goto } from '$app/navigation';
-	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
 
 	import '$lib/styles/page-states.css';
@@ -41,7 +40,7 @@
 			title: 'Редактирование',
 			showBack: true,
 			onBack: () => {
-				void goto(withTab(resolve(ROUTES.GROUP_MOVIE_DETAIL(groupId, movieId))));
+				void goto(withCurrentQuery(ROUTES.GROUP_MOVIE_DETAIL(groupId, movieId), ['tab']));
 			},
 			trailingAction: groupMovieDetailStore.isModerator
 				? {
@@ -71,7 +70,7 @@
 			if (!groupMovieDetailStore.isModerator && !hasRedirected) {
 				hasRedirected = true;
 				toast.error('Редактирование доступно только модераторам');
-				void goto(resolve(ROUTES.GROUP_MOVIE_DETAIL(groupId, movieId)));
+				void goto(ROUTES.GROUP_MOVIE_DETAIL(groupId, movieId));
 				return;
 			}
 			untrack(() => {
@@ -85,7 +84,7 @@
 
 		if (groupMovieStore.isUpdateSuccess) {
 			toast.success('Фильм обновлён');
-			await goto(resolve(ROUTES.GROUP_MOVIE_DETAIL(groupId, movieId)));
+			await goto(ROUTES.GROUP_MOVIE_DETAIL(groupId, movieId));
 		} else {
 			toast.error(groupMovieStore.updateError ?? 'Ошибка обновления');
 		}
@@ -100,7 +99,7 @@
 
 		if (groupMovieStore.isRemoveSuccess) {
 			toast.success('Фильм удалён из группы');
-			await goto(withTab(resolve(ROUTES.GROUP_DETAIL(groupId))));
+			await goto(withCurrentQuery(ROUTES.GROUP_DETAIL(groupId), ['tab']));
 		} else {
 			toast.error(groupMovieStore.removeError ?? 'Ошибка удаления');
 		}

@@ -10,7 +10,6 @@
 	} from '$lib/modules/groups';
 	import { topBarStore } from '$lib/stores';
 	import { goto } from '$app/navigation';
-	import { resolve } from '$app/paths';
 	import { ROUTES } from '$lib/utils';
 
 	let form = $state<GroupFormData>({ ...EMPTY_GROUP_FORM });
@@ -19,7 +18,7 @@
 		topBarStore.configure({
 			title: 'Новая группа',
 			showBack: true,
-			onBack: () => goto(resolve(ROUTES.GROUPS))
+			onBack: () => goto(ROUTES.GROUPS)
 		});
 
 		return () => {
@@ -33,7 +32,7 @@
 
 		if (groupStore.isCreateSuccess && groupStore.createdGroup) {
 			toast.success('Группа создана');
-			await goto(resolve(ROUTES.GROUP_DETAIL(groupStore.createdGroup.id)));
+			await goto(ROUTES.GROUP_DETAIL(groupStore.createdGroup.id));
 		} else {
 			toast.error(groupStore.createError ?? 'Не удалось создать группу');
 		}

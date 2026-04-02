@@ -20,14 +20,10 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 
-import {
-  GroupAdminGuard,
-  GroupMemberGuard,
-  GroupModeratorGuard,
-  RolesGuard,
-} from '$common/guards';
+import type { GroupMember as GroupMemberType } from '$db/schemas';
+import { User, Roles, GroupMember } from '$common/decorators';
 import { UserRole } from '$common/enums/user-role.enum';
-import { User, Roles } from '$common/decorators';
+import { RolesGuard } from '$common/guards';
 
 import {
   GroupCreateDto,
@@ -37,7 +33,14 @@ import {
   GroupMemberRoleUpdateDto,
   GroupMemberResponseDto,
   TransferOwnershipDto,
+  InviteTokenResponseDto,
+  GeneratedInviteTokenResponseDto,
 } from './dto';
+import {
+  GroupAdminGuard,
+  GroupMemberGuard,
+  GroupModeratorGuard,
+} from './guards';
 import { GroupsService } from './groups.service';
 
 @ApiTags('Groups')
@@ -86,7 +89,7 @@ export class GroupsController {
   })
   @ApiResponse({ status: 403, description: 'Forbidden - Admin only' })
   findUserGroupsByAdmin(@Param('userId', ParseIntPipe) userId: number) {
-    return this.groupsService.findUserGroupsByAdmin(userId);
+    return this.groupsService.findUserGroups(userId);
   }
 
   @Get(':id')
@@ -101,8 +104,11 @@ export class GroupsController {
   })
   @ApiResponse({ status: 404, description: 'Group not found' })
   @ApiResponse({ status: 403, description: 'Forbidden - Not a group member' })
-  findOne(@Param('id', ParseIntPipe) id: number, @User('id') userId: number) {
-    return this.groupsService.findOne(id, userId);
+  findOne(
+    @Param('id', ParseIntPipe) id: number,
+    @GroupMember() member: GroupMemberType,
+  ) {
+    return this.groupsService.findOne(id, member);
   }
 
   @Post()
@@ -115,6 +121,51 @@ export class GroupsController {
   })
   create(@User('id') userId: number, @Body() dto: GroupCreateDto) {
     return this.groupsService.create(userId, dto);
+  }
+
+  @Get(':id/invite')
+  @UseGuards(GroupModeratorGuard)
+  @SerializeOptions({ type: InviteTokenResponseDto })
+  @ApiOperation({
+    summary: 'Get existing invite token (Group moderators only)',
+  })
+  @ApiParam({ name: 'id', description: 'Group ID' })
+  @ApiResponse({
+    status: 200,
+    description: 'Invite token',
+    type: InviteTokenResponseDto,
+  })
+  @ApiResponse({ status: 404, description: 'Group not found' })
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden - Insufficient permissions',
+  })
+  getInviteToken(@Param('id', ParseIntPipe) id: number) {
+    return this.groupsService.getInviteToken(id);
+  }
+
+  @Post(':id/invite')
+  @UseGuards(GroupModeratorGuard)
+  @SerializeOptions({ type: GeneratedInviteTokenResponseDto })
+  @ApiOperation({
+    summary: 'Generate or regenerate invite link (Group moderators only)',
+  })
+  @ApiParam({ name: 'id', description: 'Group ID' })
+  @ApiResponse({
+    status: 201,
+    description: 'Invite token generated',
+    type: GeneratedInviteTokenResponseDto,
+  })
+  @ApiResponse({ status: 404, description: 'Group not found' })
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden - Insufficient permissions',
+  })
+  generateInvite(
+    @Param('id', ParseIntPipe) id: number,
+    @GroupMember() member: GroupMemberType,
+  ) {
+    return this.groupsService.generateInviteToken(id, member);
   }
 
   @Patch(':id')
@@ -134,10 +185,10 @@ export class GroupsController {
   })
   update(
     @Param('id', ParseIntPipe) id: number,
-    @User('id') userId: number,
+    @GroupMember() member: GroupMemberType,
     @Body() dto: GroupUpdateDto,
   ) {
-    return this.groupsService.update(id, userId, dto);
+    return this.groupsService.update(id, member, dto);
   }
 
   @Delete(':id')
@@ -148,8 +199,11 @@ export class GroupsController {
   @ApiResponse({ status: 204, description: 'Group deleted' })
   @ApiResponse({ status: 404, description: 'Group not found' })
   @ApiResponse({ status: 403, description: 'Forbidden - Not the group admin' })
-  remove(@Param('id', ParseIntPipe) id: number, @User('id') userId: number) {
-    return this.groupsService.remove(id, userId);
+  remove(
+    @Param('id', ParseIntPipe) id: number,
+    @GroupMember() member: GroupMemberType,
+  ) {
+    return this.groupsService.remove(id, member);
   }
 
   @Get(':id/members')
@@ -164,11 +218,8 @@ export class GroupsController {
   })
   @ApiResponse({ status: 404, description: 'Group not found' })
   @ApiResponse({ status: 403, description: 'Forbidden - Not a group member' })
-  getMembers(
-    @Param('id', ParseIntPipe) id: number,
-    @User('id') userId: number,
-  ) {
-    return this.groupsService.getMembers(id, userId);
+  getMembers(@Param('id', ParseIntPipe) id: number) {
+    return this.groupsService.getMembers(id);
   }
 
   @Get(':id/members/me')
@@ -187,9 +238,9 @@ export class GroupsController {
   @ApiResponse({ status: 403, description: 'Forbidden - Not a group member' })
   getMemberMe(
     @Param('id', ParseIntPipe) id: number,
-    @User('id') userId: number,
+    @GroupMember() member: GroupMemberType,
   ) {
-    return this.groupsService.getMemberMe(id, userId);
+    return this.groupsService.getMemberMe(id, member);
   }
 
   @Post(':id/members')
@@ -206,10 +257,10 @@ export class GroupsController {
   @ApiResponse({ status: 409, description: 'User already a member' })
   addMember(
     @Param('id', ParseIntPipe) id: number,
-    @User('id') userId: number,
+    @GroupMember() member: GroupMemberType,
     @Body() dto: GroupMemberAddDto,
   ) {
-    return this.groupsService.addMember(id, dto, userId);
+    return this.groupsService.addMember(id, dto, member);
   }
 
   @Patch(':id/members/:userId')
@@ -229,10 +280,10 @@ export class GroupsController {
   updateMemberRole(
     @Param('id', ParseIntPipe) id: number,
     @Param('userId', ParseIntPipe) memberUserId: number,
-    @User('id') userId: number,
+    @GroupMember() member: GroupMemberType,
     @Body() dto: GroupMemberRoleUpdateDto,
   ) {
-    return this.groupsService.updateMemberRole(id, memberUserId, dto, userId);
+    return this.groupsService.updateMemberRole(id, memberUserId, dto, member);
   }
 
   @Delete(':id/members/me')
@@ -269,9 +320,9 @@ export class GroupsController {
   removeMember(
     @Param('id', ParseIntPipe) id: number,
     @Param('userId', ParseIntPipe) memberUserId: number,
-    @User('id') userId: number,
+    @GroupMember() member: GroupMemberType,
   ) {
-    return this.groupsService.removeMember(id, memberUserId, userId);
+    return this.groupsService.removeMember(id, memberUserId, member);
   }
 
   @Post(':id/transfer-ownership')
@@ -289,9 +340,9 @@ export class GroupsController {
   })
   transferOwnership(
     @Param('id', ParseIntPipe) id: number,
-    @User('id') userId: number,
+    @GroupMember() member: GroupMemberType,
     @Body() dto: TransferOwnershipDto,
   ) {
-    return this.groupsService.transferOwnership(id, dto.targetUserId, userId);
+    return this.groupsService.transferOwnership(id, dto.targetUserId, member);
   }
 }

@@ -8,21 +8,22 @@
 		customMovieFormToCreateDto,
 		type CustomMovieFormData
 	} from '$lib/modules/movies';
+	import { groupStore } from '$lib/modules/groups';
 	import { topBarStore } from '$lib/stores';
 	import { goto } from '$app/navigation';
-	import { resolve } from '$app/paths';
 	import { ROUTES } from '$lib/utils';
 	import { page } from '$app/state';
 
 	const groupId = $derived(Number(page.params.id));
 
 	let form = $state<CustomMovieFormData>({ ...EMPTY_CUSTOM_MOVIE_FORM });
+	let hasRedirected = $state(false);
 
 	$effect(() => {
 		topBarStore.configure({
 			title: 'Новый фильм',
 			showBack: true,
-			onBack: () => goto(resolve(ROUTES.GROUP_MOVIES_SEARCH(groupId)))
+			onBack: () => goto(ROUTES.GROUP_MOVIES_SEARCH(groupId))
 		});
 		return () => {
 			topBarStore.destroy();
@@ -30,12 +31,20 @@
 		};
 	});
 
+	$effect(() => {
+		if (groupStore.isLoaded && !groupStore.isModerator && !hasRedirected) {
+			hasRedirected = true;
+			toast.error('Добавление фильмов доступно только модераторам');
+			void goto(ROUTES.GROUP_DETAIL(groupId));
+		}
+	});
+
 	const handleSubmit = async () => {
 		await groupMovieStore.createMovie(groupId, customMovieFormToCreateDto(form));
 
 		if (groupMovieStore.isCreateSuccess) {
 			toast.success('Фильм создан');
-			await goto(resolve(ROUTES.GROUP_DETAIL(groupId)));
+			await goto(ROUTES.GROUP_DETAIL(groupId));
 		} else {
 			toast.error(groupMovieStore.createError ?? 'Не удалось создать фильм');
 		}

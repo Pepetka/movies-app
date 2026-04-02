@@ -1,5 +1,5 @@
 // Stores
-export { groupsStore, groupStore } from './stores';
+export { groupsStore, groupStore, inviteStore, membersStore } from './stores';
 
 // Validation
 export {

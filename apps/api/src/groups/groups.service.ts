@@ -1,19 +1,20 @@
 import { Injectable, Logger } from '@nestjs/common';
+import crypto from 'crypto';
 
 import {
   CannotRemoveGroupAdminException,
   CannotTransferToSelfException,
   GroupNotFoundException,
+  InviteNotFoundException,
   NotGroupAdminException,
   NotGroupMemberException,
-  NotGroupModeratorException,
-  OnlyAdminCanTransferException,
   OnlyOneAdminException,
+  CannotSetAdminRoleException,
   TargetNotGroupMemberException,
   UserAlreadyMemberException,
 } from '$common/exceptions';
+import type { Group, GroupMember, NewGroup } from '$db/schemas';
 import { GroupMemberRole } from '$common/enums';
-import type { Group } from '$db/schemas';
 
 import {
   GroupCreateDto,
@@ -21,7 +22,11 @@ import {
   GroupMemberRoleUpdateDto,
   GroupUpdateDto,
 } from './dto';
-import { GroupsRepository } from './groups.repository';
+import {
+  GroupsRepository,
+  type GroupMemberWithUser,
+} from './groups.repository';
+import { INVITE_TOKEN_BYTES } from './invite-token.constants';
 
 @Injectable()
 export class GroupsService {
@@ -29,118 +34,49 @@ export class GroupsService {
 
   constructor(private readonly groupsRepository: GroupsRepository) {}
 
-  /**
-   * Creates a new group and makes the user admin
-   * @param userId - User ID who will become owner
-   * @param dto - Group creation data
-   * @returns Created group
-   */
   async create(userId: number, dto: GroupCreateDto): Promise<Group> {
-    const group = await this.groupsRepository.createGroup({
-      name: dto.name,
-      description: dto.description ?? null,
-      avatarUrl: dto.avatarUrl ?? null,
-    });
-
-    await this.groupsRepository.addMember({
-      groupId: group.id,
-      userId,
-      role: GroupMemberRole.ADMIN,
-    });
+    const group = await this.groupsRepository.createGroupWithAdmin(
+      {
+        name: dto.name,
+        description: dto.description ?? null,
+        avatarUrl: dto.avatarUrl ?? null,
+      },
+      {
+        userId,
+        role: GroupMemberRole.ADMIN,
+      },
+    );
 
     this._logger.log(`Group ${group.id} created by user ${userId}`);
     return group;
   }
 
-  /**
-   * Gets all groups where user is a member
-   * @param userId - User ID
-   * @returns Array of groups
-   */
-  async findUserGroups(userId: number): Promise<Group[]> {
+  async findUserGroups(userId: number) {
     return this.groupsRepository.findGroupsByUserId(userId);
   }
 
-  /**
-   * Gets all groups (admin endpoint)
-   * @returns Array of all groups
-   */
   findAllGroups(): Promise<Group[]> {
     return this.groupsRepository.findAllGroups();
   }
 
-  /**
-   * Gets user's groups where user is admin
-   * @param userId - User ID
-   * @returns Array of groups where user is admin
-   */
-  findUserGroupsByAdmin(userId: number): Promise<Group[]> {
-    return this.groupsRepository.findGroupsByUserId(userId);
-  }
-
-  /**
-   * Gets a single group by ID with current user's role
-   * @param id - Group ID
-   * @param userId - User ID for membership check
-   * @returns Group with current user role
-   * @throws GroupNotFoundException if group not found
-   * @throws NotGroupMemberException if user not member
-   */
   async findOne(
     id: number,
-    userId: number,
+    member: GroupMember,
   ): Promise<Group & { currentUserRole: GroupMemberRole }> {
-    const group = await this.groupsRepository.findGroupById(id);
-
-    if (!group) {
-      throw new GroupNotFoundException(id);
-    }
-
-    const memberData = await this.groupsRepository.getGroupWithMember(
-      id,
-      userId,
-    );
-
-    if (!memberData?.member) {
-      throw new NotGroupMemberException();
-    }
-
-    const role = memberData.member.role;
-    if (!Object.values(GroupMemberRole).includes(role as GroupMemberRole)) {
-      throw new Error(`Invalid role value: ${role}`);
-    }
+    const group = await this._getGroupOrThrow(id);
 
     return {
       ...group,
-      currentUserRole: role as GroupMemberRole,
+      currentUserRole: member.role as GroupMemberRole,
     };
   }
 
-  /**
-   * Updates group information
-   * @param id - Group ID
-   * @param userId - User ID making the request
-   * @param dto - Update data
-   * @returns Updated group
-   */
   async update(
     id: number,
-    userId: number,
+    member: GroupMember,
     dto: GroupUpdateDto,
   ): Promise<Group> {
-    const group = await this.groupsRepository.findGroupById(id);
-
-    if (!group) {
-      throw new GroupNotFoundException(id);
-    }
-
-    const canModerate = await this.canModerate(id, userId);
-
-    if (!canModerate) {
-      throw new NotGroupModeratorException();
-    }
-
-    const updateData: Partial<Record<string, unknown>> = {};
+    const updateData: Partial<NewGroup> = {};
     if (dto.name !== undefined) updateData.name = dto.name;
     if (dto.description !== undefined) updateData.description = dto.description;
     if (dto.avatarUrl !== undefined) updateData.avatarUrl = dto.avatarUrl;
@@ -149,186 +85,91 @@ export class GroupsService {
       id,
       updateData,
     );
-    this._logger.log(`Group ${id} updated by user ${userId}`);
+    this._logger.log(`Group ${id} updated by user ${member.userId}`);
     return updatedGroup;
   }
 
-  /**
-   * Deletes a group (admin only)
-   * @param id - Group ID
-   * @param userId - User ID making the request
-   */
-  async remove(id: number, userId: number): Promise<void> {
-    const group = await this.groupsRepository.findGroupById(id);
-
-    if (!group) {
-      throw new GroupNotFoundException(id);
-    }
-
-    const isAdmin = await this.isAdmin(id, userId);
-
-    if (!isAdmin) {
-      throw new NotGroupAdminException();
-    }
-
+  async remove(id: number, member: GroupMember): Promise<void> {
     await this.groupsRepository.deleteGroup(id);
-    this._logger.log(`Group ${id} deleted by user ${userId}`);
+    this._logger.log(`Group ${id} deleted by user ${member.userId}`);
   }
 
-  /**
-   * Adds a member to group (moderator+ only)
-   * @param groupId - Group ID
-   * @param dto - Member addition data
-   * @param requesterId - User ID making the request
-   */
   async addMember(
     groupId: number,
     dto: GroupMemberAddDto,
-    requesterId: number,
+    member: GroupMember,
   ): Promise<void> {
-    const group = await this.groupsRepository.findGroupById(groupId);
-
-    if (!group) {
-      throw new GroupNotFoundException(groupId);
-    }
-
-    const canModerate = await this.canModerate(groupId, requesterId);
-
-    if (!canModerate) {
-      throw new NotGroupModeratorException();
-    }
-
-    const existingMember = await this.groupsRepository.findMember(
-      groupId,
-      dto.userId,
-    );
-
-    if (existingMember) {
-      throw new UserAlreadyMemberException();
-    }
-
-    await this.groupsRepository.addMember({
+    const added = await this.groupsRepository.addMemberIfNotExists({
       groupId,
       userId: dto.userId,
       role: dto.role ?? GroupMemberRole.MEMBER,
     });
+    if (!added) {
+      throw new UserAlreadyMemberException();
+    }
 
     this._logger.log(
-      `User ${dto.userId} added to group ${groupId} by user ${requesterId}`,
+      `User ${dto.userId} added to group ${groupId} by user ${member.userId}`,
     );
   }
 
-  /**
-   * Removes a member from group
-   * @param groupId - Group ID
-   * @param memberUserId - User ID to remove
-   * @param requesterId - User ID making the request
-   */
   async removeMember(
     groupId: number,
     memberUserId: number,
-    requesterId: number,
+    member: GroupMember,
   ): Promise<void> {
-    const group = await this.groupsRepository.findGroupById(groupId);
-
-    if (!group) {
-      throw new GroupNotFoundException(groupId);
-    }
-
-    const member = await this.groupsRepository.findMember(
+    const target = await this.groupsRepository.findMember(
       groupId,
       memberUserId,
     );
 
-    if (member?.role === GroupMemberRole.ADMIN) {
+    if (!target) {
+      throw new TargetNotGroupMemberException();
+    }
+
+    if (target.role === GroupMemberRole.ADMIN) {
       throw new CannotRemoveGroupAdminException();
     }
 
-    const requester = await this.groupsRepository.findMember(
-      groupId,
-      requesterId,
-    );
+    const isAdmin = member.role === GroupMemberRole.ADMIN;
 
-    if (!requester) {
-      throw new NotGroupMemberException();
-    }
-
-    const isAdmin = requester.role === GroupMemberRole.ADMIN;
-
-    if (!isAdmin && member?.role === GroupMemberRole.MODERATOR) {
+    if (!isAdmin && target.role === GroupMemberRole.MODERATOR) {
       throw new NotGroupAdminException();
     }
 
     await this.groupsRepository.removeMember(groupId, memberUserId);
     this._logger.log(
-      `User ${memberUserId} removed from group ${groupId} by user ${requesterId}`,
+      `User ${memberUserId} removed from group ${groupId} by user ${member.userId}`,
     );
   }
 
-  /**
-   * Updates member role (admin only)
-   * @param groupId - Group ID
-   * @param memberUserId - User ID to update
-   * @param dto - Role update data
-   * @param requesterId - User ID making the request
-   */
   async updateMemberRole(
     groupId: number,
     memberUserId: number,
     dto: GroupMemberRoleUpdateDto,
-    requesterId: number,
+    member: GroupMember,
   ): Promise<void> {
-    const group = await this.groupsRepository.findGroupById(groupId);
-
-    if (!group) {
-      throw new GroupNotFoundException(groupId);
+    if (dto.role === GroupMemberRole.ADMIN) {
+      throw new CannotSetAdminRoleException();
     }
 
-    const isAdmin = await this.isAdmin(groupId, requesterId);
-
-    if (!isAdmin) {
-      throw new NotGroupAdminException();
-    }
-
-    const result = await this.groupsRepository.setAdminRoleInTransaction(
+    await this.groupsRepository.updateMemberRole(
       groupId,
       memberUserId,
       dto.role,
     );
 
-    if (!result.success) {
-      throw new OnlyOneAdminException();
-    }
-
     this._logger.log(
-      `User ${memberUserId} role updated to ${dto.role} in group ${groupId} by user ${requesterId}`,
+      `User ${memberUserId} role updated to ${dto.role} in group ${groupId} by user ${member.userId}`,
     );
   }
 
-  /**
-   * Transfers group ownership to another member (admin only)
-   * @param groupId - Group ID
-   * @param targetUserId - User ID to become new owner
-   * @param requesterId - Current owner user ID
-   */
   async transferOwnership(
     groupId: number,
     targetUserId: number,
-    requesterId: number,
+    member: GroupMember,
   ): Promise<void> {
-    const group = await this.groupsRepository.findGroupById(groupId);
-
-    if (!group) {
-      throw new GroupNotFoundException(groupId);
-    }
-
-    const isAdmin = await this.isAdmin(groupId, requesterId);
-
-    if (!isAdmin) {
-      throw new OnlyAdminCanTransferException();
-    }
-
-    if (targetUserId === requesterId) {
+    if (targetUserId === member.userId) {
       throw new CannotTransferToSelfException();
     }
 
@@ -340,105 +181,32 @@ export class GroupsService {
 
     await this.groupsRepository.transferOwnership(
       groupId,
-      requesterId,
+      member.userId,
       targetUserId,
     );
     this._logger.log(
-      `Ownership of group ${groupId} transferred from user ${requesterId} to user ${targetUserId}`,
+      `Ownership of group ${groupId} transferred from user ${member.userId} to user ${targetUserId}`,
     );
   }
 
-  /**
-   * Gets all members of a group
-   * @param groupId - Group ID
-   * @param userId - User ID for membership check
-   * @returns Array of group members with user data
-   */
-  async getMembers(groupId: number, userId: number) {
-    const group = await this.groupsRepository.findGroupById(groupId);
-
-    if (!group) {
-      throw new GroupNotFoundException(groupId);
-    }
-
-    const isMember = await this.isMember(groupId, userId);
-
-    if (!isMember) {
-      throw new NotGroupMemberException();
-    }
-
+  async getMembers(groupId: number): Promise<GroupMemberWithUser[]> {
     return this.groupsRepository.findMembersByGroupWithUsers(groupId);
   }
 
-  /**
-   * Gets current user's membership in a group
-   * @param groupId - Group ID
-   * @param userId - User ID
-   * @returns User's group member data
-   */
-  async getMemberMe(groupId: number, userId: number) {
-    const group = await this.groupsRepository.findGroupById(groupId);
-
-    if (!group) {
-      throw new GroupNotFoundException(groupId);
-    }
-
-    const member = await this.groupsRepository.findMemberWithUser(
-      groupId,
-      userId,
-    );
-
-    if (!member) {
-      throw new NotGroupMemberException();
-    }
-
-    return member;
+  async getMemberMe(
+    groupId: number,
+    member: GroupMember,
+  ): Promise<GroupMemberWithUser | null> {
+    return this.groupsRepository.findMemberWithUser(groupId, member.userId);
   }
 
-  /**
-   * Checks if user is a group member
-   * @param groupId - Group ID
-   * @param userId - User ID
-   * @returns true if user is a member
-   */
   async isMember(groupId: number, userId: number): Promise<boolean> {
     const member = await this.groupsRepository.findMember(groupId, userId);
     return !!member;
   }
 
-  /**
-   * Checks if user is a group admin
-   * @param groupId - Group ID
-   * @param userId - User ID
-   * @returns true if user is an admin
-   */
-  async isAdmin(groupId: number, userId: number): Promise<boolean> {
-    const member = await this.groupsRepository.findMember(groupId, userId);
-    return member?.role === GroupMemberRole.ADMIN;
-  }
-
-  /**
-   * Checks if user is a group moderator
-   * @param groupId - Group ID
-   * @param userId - User ID
-   * @returns true if user is a moderator
-   */
-  async isModerator(groupId: number, userId: number): Promise<boolean> {
-    const member = await this.groupsRepository.findMember(groupId, userId);
-    return member?.role === GroupMemberRole.MODERATOR;
-  }
-
-  /**
-   * Removes user from group (leave action)
-   * @param groupId - Group ID
-   * @param userId - User ID leaving the group
-   */
   async leaveGroup(groupId: number, userId: number): Promise<void> {
-    const group = await this.groupsRepository.findGroupById(groupId);
-
-    if (!group) {
-      throw new GroupNotFoundException(groupId);
-    }
+    await this._getGroupOrThrow(groupId);
 
     const member = await this.groupsRepository.findMember(groupId, userId);
 
@@ -457,23 +225,84 @@ export class GroupsService {
     this._logger.log(`User ${userId} left group ${groupId}`);
   }
 
-  /**
-   * Checks if user can moderate group (admin or moderator)
-   * @param groupId - Group ID
-   * @param userId - User ID
-   * @returns true if user can moderate
-   */
-  async canModerate(groupId: number, userId: number): Promise<boolean> {
-    const data = await this.groupsRepository.getGroupWithMember(
-      groupId,
+  async getInviteToken(
+    groupId: number,
+  ): Promise<{ inviteToken: string | null }> {
+    const group = await this._getGroupOrThrow(groupId);
+    return { inviteToken: group.inviteToken };
+  }
+
+  async generateInviteToken(
+    groupId: number,
+    member: GroupMember,
+  ): Promise<{ inviteToken: string }> {
+    const token = crypto.randomBytes(INVITE_TOKEN_BYTES).toString('hex');
+    await this.groupsRepository.updateInviteToken(groupId, token);
+
+    this._logger.log(
+      `Invite token generated for group ${groupId} by user ${member.userId}`,
+    );
+    return { inviteToken: token };
+  }
+
+  async getInviteInfo(token: string): Promise<{
+    id: number;
+    name: string;
+    description: string | null;
+    avatarUrl: string | null;
+    memberCount: number;
+  }> {
+    const group = await this._getGroupByInviteTokenOrThrow(token);
+    const memberCount = await this.groupsRepository.countMembers(group.id);
+
+    return {
+      id: group.id,
+      name: group.name,
+      description: group.description,
+      avatarUrl: group.avatarUrl,
+      memberCount,
+    };
+  }
+
+  async acceptInvite(
+    token: string,
+    userId: number,
+  ): Promise<{ groupId: number }> {
+    const result = await this.groupsRepository.addMemberToGroupByInvite(
+      token,
       userId,
+      GroupMemberRole.MEMBER,
     );
 
-    if (!data) {
-      return false;
+    if (!result.ok) {
+      if (result.reason === 'invalid_token')
+        throw new InviteNotFoundException();
+      throw new UserAlreadyMemberException();
     }
 
-    const role = data.member?.role;
-    return role === GroupMemberRole.ADMIN || role === GroupMemberRole.MODERATOR;
+    this._logger.log(
+      `User ${userId} joined group ${result.group.id} via invite link`,
+    );
+    return { groupId: result.group.id };
+  }
+
+  private async _getGroupByInviteTokenOrThrow(token: string): Promise<Group> {
+    const group = await this.groupsRepository.findGroupByInviteToken(token);
+
+    if (!group) {
+      throw new InviteNotFoundException();
+    }
+
+    return group;
+  }
+
+  private async _getGroupOrThrow(id: number): Promise<Group> {
+    const group = await this.groupsRepository.findGroupById(id);
+
+    if (!group) {
+      throw new GroupNotFoundException(id);
+    }
+
+    return group;
   }
 }

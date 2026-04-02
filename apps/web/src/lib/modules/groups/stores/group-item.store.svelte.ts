@@ -8,7 +8,12 @@ import {
 	type PostStatus,
 	type QueryResult
 } from '$lib/query';
-import type { GroupCreateDto, GroupResponseDto, GroupUpdateDto } from '$lib/api/generated/types';
+import type {
+	GroupCreateDto,
+	GroupResponseDto,
+	GroupResponseDtoCurrentUserRole,
+	GroupUpdateDto
+} from '$lib/api/generated/types';
 import { BaseStore } from '$lib/stores/base.svelte';
 
 import {
@@ -67,7 +72,7 @@ class GroupStore extends BaseStore {
 		return this._query.data ?? null;
 	}
 
-	get currentUserRole(): string | null {
+	get currentUserRole(): GroupResponseDtoCurrentUserRole | null {
 		return this._query.data?.currentUserRole ?? null;
 	}
 
@@ -102,6 +107,10 @@ class GroupStore extends BaseStore {
 	get error(): string | null {
 		if (!this._query.error) return null;
 		return this._extractErrorMessage(this._query.error, 'Ошибка загрузки группы');
+	}
+
+	get isForbidden(): boolean {
+		return this._isForbidden(this._query);
 	}
 
 	async fetchGroup(id: number): Promise<void> {

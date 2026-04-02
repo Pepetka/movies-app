@@ -33,6 +33,10 @@ export const config = [
       "@typescript-eslint/no-unsafe-argument": "warn",
       "@typescript-eslint/no-unused-vars": "off",
       "@typescript-eslint/no-unsafe-assignment": "off",
+    },
+  },
+  {
+    rules: {
       "svelte/no-navigation-without-resolve": "off",
     },
   },

@@ -2,10 +2,10 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { NotFoundException } from '@nestjs/common';
 
 import { MovieAlreadyInGroupException } from '$common/exceptions';
+import { GroupMemberRole } from '$common/enums';
 
 import { GroupMoviesRepository } from './group-movies.repository';
 import { MoviesRepository } from '../movies/movies.repository';
-import { GroupsRepository } from '../groups/groups.repository';
 import { MovieProvidersService } from '../movies/providers';
 import { GroupMoviesService } from './group-movies.service';
 import { AddMovieDto, GroupMovieStatus } from './dto';
@@ -66,9 +66,6 @@ const createMockRepositories = () => ({
   movieProvidersService: {
     getProvider: jest.fn(),
   },
-  groupsRepository: {
-    getGroupWithMember: jest.fn(),
-  },
 });
 
 describe('GroupMoviesService', () => {
@@ -92,10 +89,6 @@ describe('GroupMoviesService', () => {
         {
           provide: MovieProvidersService,
           useValue: mocks.movieProvidersService,
-        },
-        {
-          provide: GroupsRepository,
-          useValue: mocks.groupsRepository,
         },
       ],
     }).compile();
@@ -470,31 +463,30 @@ describe('GroupMoviesService', () => {
   describe('findOne', () => {
     it('should return group movie with user role', async () => {
       mocks.groupMoviesRepository.findOne.mockResolvedValue(mockGroupMovie);
-      mocks.groupsRepository.getGroupWithMember.mockResolvedValue({
-        member: { role: 'admin' },
+
+      const result = await service.findOne(1, 100, GroupMemberRole.ADMIN);
+
+      expect(result).toEqual({
+        ...mockGroupMovie,
+        currentUserRole: GroupMemberRole.ADMIN,
       });
-
-      const result = await service.findOne(1, 100, 1);
-
-      expect(result).toEqual({ ...mockGroupMovie, currentUserRole: 'admin' });
       expect(mocks.groupMoviesRepository.findOne).toHaveBeenCalledWith(1, 100);
     });
 
     it('should return default role for non-member', async () => {
       mocks.groupMoviesRepository.findOne.mockResolvedValue(mockGroupMovie);
-      mocks.groupsRepository.getGroupWithMember.mockResolvedValue(null);
 
-      const result = await service.findOne(1, 100, 1);
+      const result = await service.findOne(1, 100, GroupMemberRole.MEMBER);
 
-      expect(result.currentUserRole).toBe('member');
+      expect(result.currentUserRole).toBe(GroupMemberRole.MEMBER);
     });
 
     it('should throw NotFoundException if not found', async () => {
       mocks.groupMoviesRepository.findOne.mockResolvedValue(null);
 
-      await expect(service.findOne(1, 999, 1)).rejects.toThrow(
-        NotFoundException,
-      );
+      await expect(
+        service.findOne(1, 999, GroupMemberRole.MEMBER),
+      ).rejects.toThrow(NotFoundException);
     });
   });
 

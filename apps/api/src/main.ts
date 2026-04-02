@@ -50,7 +50,11 @@ async function bootstrap() {
       forbidNonWhitelisted: true,
     }),
   );
-  app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
+  app.useGlobalInterceptors(
+    new ClassSerializerInterceptor(app.get(Reflector), {
+      excludeExtraneousValues: true,
+    }),
+  );
 
   const secret = configService.getOrThrow<string>('COOKIE_SECRET');
   const env = configService.getOrThrow<Environment>('NODE_ENV');

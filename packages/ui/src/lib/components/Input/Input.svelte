@@ -15,6 +15,7 @@
 		iconAction,
 		iconLabel,
 		onChange,
+		hideMessage,
 		class: className,
 		...restProps
 	}: IProps = $props();
@@ -90,14 +91,16 @@
 			{/if}
 		{/if}
 	</div>
-	{#if error}
-		<div id={errorId} class="ui-input-message error">
-			{error}
-		</div>
-	{:else}
-		<div id={helperId} class="ui-input-message" aria-hidden={!helper}>
-			{helper}
-		</div>
+	{#if !hideMessage}
+		{#if error}
+			<div id={errorId} class="ui-input-message error">
+				{error}
+			</div>
+		{:else}
+			<div id={helperId} class="ui-input-message" aria-hidden={!helper}>
+				{helper}
+			</div>
+		{/if}
 	{/if}
 </div>
 

@@ -22,8 +22,10 @@ import {
   ApiQuery,
 } from '@nestjs/swagger';
 
-import { GroupMemberGuard, GroupModeratorGuard } from '$common/guards';
-import { User } from '$common/decorators';
+import { GroupMemberGuard, GroupModeratorGuard } from '$src/groups/guards';
+import type { GroupMember as GroupMemberType } from '$db/schemas';
+import { GroupMember } from '$common/decorators';
+import { GroupMemberRole } from '$common/enums';
 
 import {
   AddMovieDto,
@@ -46,10 +48,10 @@ export class GroupMoviesController {
   ) {}
 
   @Get('search')
-  @UseGuards(GroupMemberGuard)
+  @UseGuards(GroupModeratorGuard)
   @SerializeOptions({ type: SearchInGroupResponseDto })
   @ApiOperation({
-    summary: 'Search movies in group context (Group members only)',
+    summary: 'Search movies in group context (Group moderators only)',
   })
   @ApiParam({ name: 'groupId', description: 'Group ID' })
   @ApiQuery({ name: 'query', required: true, example: 'матрица' })
@@ -59,7 +61,10 @@ export class GroupMoviesController {
     description: 'Search results with provider and group movies',
     type: SearchInGroupResponseDto,
   })
-  @ApiResponse({ status: 403, description: 'Forbidden - Not a group member' })
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden - Not a group moderator',
+  })
   async searchInGroup(
     @Param('groupId', ParseIntPipe) groupId: number,
     @Query() dto: MovieSearchGroupDto,
@@ -128,9 +133,13 @@ export class GroupMoviesController {
   addProviderMovie(
     @Param('groupId', ParseIntPipe) groupId: number,
     @Body() dto: AddMovieDto,
-    @User('id') userId: number,
+    @GroupMember() member: GroupMemberType,
   ) {
-    return this.groupMoviesService.addProviderMovie(groupId, dto, userId);
+    return this.groupMoviesService.addProviderMovie(
+      groupId,
+      dto,
+      member.userId,
+    );
   }
 
   @Post('custom')
@@ -152,9 +161,13 @@ export class GroupMoviesController {
   createCustomMovie(
     @Param('groupId', ParseIntPipe) groupId: number,
     @Body() dto: CreateCustomMovieDto,
-    @User('id') userId: number,
+    @GroupMember() member: GroupMemberType,
   ) {
-    return this.groupMoviesService.createCustomMovie(groupId, dto, userId);
+    return this.groupMoviesService.createCustomMovie(
+      groupId,
+      dto,
+      member.userId,
+    );
   }
 
   @Get(':id')
@@ -173,9 +186,13 @@ export class GroupMoviesController {
   findOne(
     @Param('groupId', ParseIntPipe) groupId: number,
     @Param('id', ParseIntPipe) id: number,
-    @User('id') userId: number,
+    @GroupMember() member: GroupMemberType,
   ) {
-    return this.groupMoviesService.findOne(groupId, id, userId);
+    return this.groupMoviesService.findOne(
+      groupId,
+      id,
+      member.role as GroupMemberRole,
+    );
   }
 
   @Patch(':id')

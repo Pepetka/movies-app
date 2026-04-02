@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { FAB, Tabs, Avatar, Spinner } from '@repo/ui';
-	import { Plus, Pencil } from '@lucide/svelte';
+	import { FAB, Tabs, Avatar, IconButton } from '@repo/ui';
+	import { Plus, Pencil, Users } from '@lucide/svelte';
 
 	import {
 		groupMoviesStore,
@@ -9,17 +9,19 @@
 		type MovieStatus,
 		type UnifiedMovie
 	} from '$lib/modules/movies';
-	import { ROUTES, sortByDateField, withTab } from '$lib/utils';
+	import {
+		ROUTES,
+		sortByDateField,
+		withCurrentQuery,
+		buildPath,
+		type RouteValue
+	} from '$lib/utils';
 	import { groupStore } from '$lib/modules/groups';
-	import { PagePlaceholder } from '$lib/ui';
 	import { topBarStore } from '$lib/stores';
 	import { goto } from '$app/navigation';
-	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
 
 	const groupId = $derived(Number(page.params.id));
-
-	const isLoading = $derived(groupStore.isLoading || groupMoviesStore.isLoading);
 
 	const filterTabs = [
 		{ id: 'all', label: 'Все' },
@@ -35,16 +37,15 @@
 	});
 
 	$effect(() => {
-		const group = groupStore.currentGroup;
 		topBarStore.configure({
-			title: group?.name ?? (isLoading ? '' : 'Группа'),
+			title: groupStore.currentGroup?.name ?? 'Группа',
 			showBack: true,
-			onBack: () => goto(resolve(ROUTES.GROUPS)),
+			onBack: () => goto(ROUTES.GROUPS),
 			trailingAction: groupStore.isModerator
 				? {
 						Icon: Pencil,
 						label: 'Редактировать',
-						onclick: () => goto(resolve(ROUTES.GROUP_EDIT(groupId)))
+						onclick: () => goto(ROUTES.GROUP_EDIT(groupId))
 					}
 				: undefined
 		});
@@ -53,7 +54,6 @@
 
 	$effect(() => {
 		if (groupId) {
-			void groupStore.fetchGroup(groupId);
 			void groupMoviesStore.fetchMovies(groupId);
 		}
 	});
@@ -76,19 +76,27 @@
 	});
 
 	const handleFilterChange = (tabId: string) => {
-		void goto(`${page.url.pathname}${tabId === 'all' ? '' : `?tab=${tabId}`}`, {
+		const path =
+			tabId === 'all'
+				? page.url.pathname
+				: buildPath(page.url.pathname as RouteValue, { tab: tabId });
+		void goto(path, {
 			replaceState: true,
 			keepFocus: true,
 			noScroll: true
 		});
 	};
 
+	const handleMembersClick = () => {
+		void goto(ROUTES.GROUP_MEMBERS(groupId));
+	};
+
 	const handleAddMovie = () => {
-		void goto(resolve(ROUTES.GROUP_MOVIES_SEARCH(groupId)));
+		void goto(ROUTES.GROUP_MOVIES_SEARCH(groupId));
 	};
 
 	const handleMovieClick = (movie: UnifiedMovie) => {
-		void goto(withTab(resolve(ROUTES.GROUP_MOVIE_DETAIL(groupId, movie.id))));
+		void goto(withCurrentQuery(ROUTES.GROUP_MOVIE_DETAIL(groupId, movie.id), ['tab']));
 	};
 
 	const getTabCount = (tabId: string): number => {
@@ -101,66 +109,52 @@
 	<title>{groupStore.currentGroup?.name ?? 'Группа'} · Movies App</title>
 </svelte:head>
 
-{#if isLoading}
-	<div class="loading-state">
-		<Spinner size="lg" />
-	</div>
-{:else if groupStore.isError}
-	<PagePlaceholder title="Ошибка" hint={groupStore.error ?? 'Не удалось загрузить группу'} />
-{:else if groupStore.currentGroup}
-	<div class="group-page">
-		<div class="group-page__header">
-			<div class="group-info">
-				<Avatar
-					src={groupStore.currentGroup.avatarUrl}
-					name={groupStore.currentGroup.name}
-					alt={groupStore.currentGroup.name}
-					size="xl"
-				/>
-				<div class="group-info__content">
-					<h1 class="group-info__title">{groupStore.currentGroup.name}</h1>
-					{#if groupStore.currentGroup.description}
-						<p class="group-info__description">{groupStore.currentGroup.description}</p>
-					{/if}
-				</div>
-			</div>
-		</div>
-
-		<div class="group-page__content">
-			<Tabs
-				tabs={filterTabs.map((tab) => ({
-					...tab,
-					count: getTabCount(tab.id)
-				}))}
-				value={activeFilter}
-				onChange={handleFilterChange}
+<div class="group-page">
+	<div class="group-page__header">
+		<div class="group-info">
+			<Avatar
+				src={groupStore.currentGroup?.avatarUrl}
+				name={groupStore.currentGroup?.name}
+				alt={groupStore.currentGroup?.name}
+				size="xl"
 			/>
-
-			<div class="group-page__movies">
-				<MovieGrid
-					movies={filteredMovies}
-					isLoading={groupMoviesStore.isFetching}
-					onMovieClick={handleMovieClick}
-				/>
+			<div class="group-info__content">
+				<h1 class="group-info__title">{groupStore.currentGroup?.name}</h1>
+				{#if groupStore.currentGroup?.description}
+					<p class="group-info__description">{groupStore.currentGroup?.description}</p>
+				{/if}
 			</div>
+			<IconButton Icon={Users} variant="ghost" label="Участники" onclick={handleMembersClick} />
 		</div>
 	</div>
 
+	<div class="group-page__content">
+		<Tabs
+			tabs={filterTabs.map((tab) => ({
+				...tab,
+				count: getTabCount(tab.id)
+			}))}
+			value={activeFilter}
+			onChange={handleFilterChange}
+		/>
+
+		<div class="group-page__movies">
+			<MovieGrid
+				movies={filteredMovies}
+				isLoading={groupMoviesStore.isFetching}
+				onMovieClick={handleMovieClick}
+			/>
+		</div>
+	</div>
+</div>
+
+{#if groupStore.isModerator}
 	<FAB label="Добавить фильм" onclick={handleAddMovie} offset="above-bottom-nav" variant="ghost">
 		<Plus size={20} />
 	</FAB>
-{:else}
-	<PagePlaceholder title="Группа не найдена" hint="Возможно, она была удалена" />
 {/if}
 
 <style>
-	.loading-state {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		min-height: 50vh;
-	}
-
 	.group-page {
 		display: flex;
 		flex-direction: column;

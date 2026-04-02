@@ -611,6 +611,62 @@
 				"tags": ["Groups"]
 			}
 		},
+		"/api/v1/groups/{id}/invite": {
+			"get": {
+				"operationId": "GroupsController_getInviteToken_v1",
+				"parameters": [
+					{
+						"name": "id",
+						"required": true,
+						"in": "path",
+						"description": "Group ID",
+						"schema": { "type": "number" }
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Invite token",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InviteTokenResponseDto" }
+							}
+						}
+					},
+					"403": { "description": "Forbidden - Insufficient permissions" },
+					"404": { "description": "Group not found" }
+				},
+				"security": [{ "access-token": [] }],
+				"summary": "Get existing invite token (Group moderators only)",
+				"tags": ["Groups"]
+			},
+			"post": {
+				"operationId": "GroupsController_generateInvite_v1",
+				"parameters": [
+					{
+						"name": "id",
+						"required": true,
+						"in": "path",
+						"description": "Group ID",
+						"schema": { "type": "number" }
+					}
+				],
+				"responses": {
+					"201": {
+						"description": "Invite token generated",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/GeneratedInviteTokenResponseDto" }
+							}
+						}
+					},
+					"403": { "description": "Forbidden - Insufficient permissions" },
+					"404": { "description": "Group not found" }
+				},
+				"security": [{ "access-token": [] }],
+				"summary": "Generate or regenerate invite link (Group moderators only)",
+				"tags": ["Groups"]
+			}
+		},
 		"/api/v1/groups/{id}/members": {
 			"get": {
 				"operationId": "GroupsController_getMembers_v1",
@@ -813,6 +869,63 @@
 				"tags": ["Groups"]
 			}
 		},
+		"/api/v1/invites/{token}": {
+			"get": {
+				"operationId": "InvitesController_getInviteInfo_v1",
+				"parameters": [
+					{
+						"name": "token",
+						"required": true,
+						"in": "path",
+						"description": "Invite token",
+						"schema": { "minLength": 32, "maxLength": 32, "type": "string" }
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Invite info",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InviteInfoResponseDto" }
+							}
+						}
+					},
+					"404": { "description": "Invite not found" }
+				},
+				"summary": "Get invite info by token (Public)",
+				"tags": ["Invites"]
+			}
+		},
+		"/api/v1/invites/{token}/accept": {
+			"post": {
+				"operationId": "InvitesController_acceptInvite_v1",
+				"parameters": [
+					{
+						"name": "token",
+						"required": true,
+						"in": "path",
+						"description": "Invite token",
+						"schema": { "minLength": 32, "maxLength": 32, "type": "string" }
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Invite accepted",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/AcceptInviteResponseDto" }
+							}
+						}
+					},
+					"401": { "description": "Unauthorized" },
+					"404": { "description": "Invite not found" },
+					"409": { "description": "User already a member" }
+				},
+				"security": [{ "access-token": [] }],
+				"summary": "Accept group invite",
+				"tags": ["Invites"]
+			}
+		},
 		"/api/v1/groups/{groupId}/movies/search": {
 			"get": {
 				"operationId": "GroupMoviesController_searchInGroup_v1",
@@ -848,10 +961,10 @@
 							}
 						}
 					},
-					"403": { "description": "Forbidden - Not a group member" }
+					"403": { "description": "Forbidden - Not a group moderator" }
 				},
 				"security": [{ "access-token": [] }],
-				"summary": "Search movies in group context (Group members only)",
+				"summary": "Search movies in group context (Group moderators only)",
 				"tags": ["Groups / Movies"]
 			}
 		},
@@ -1276,6 +1389,16 @@
 				},
 				"required": ["name"]
 			},
+			"InviteTokenResponseDto": {
+				"type": "object",
+				"properties": { "inviteToken": { "type": "string", "nullable": true } },
+				"required": ["inviteToken"]
+			},
+			"GeneratedInviteTokenResponseDto": {
+				"type": "object",
+				"properties": { "inviteToken": { "type": "string" } },
+				"required": ["inviteToken"]
+			},
 			"GroupUpdateDto": {
 				"type": "object",
 				"properties": {
@@ -1283,6 +1406,11 @@
 					"description": { "type": "string", "example": "Weekly movie nights" },
 					"avatarUrl": { "type": "string", "example": "https://example.com/avatar.jpg" }
 				}
+			},
+			"GroupMemberUserDto": {
+				"type": "object",
+				"properties": { "id": { "type": "number" }, "name": { "type": "string" } },
+				"required": ["id", "name"]
 			},
 			"GroupMemberResponseDto": {
 				"type": "object",
@@ -1293,9 +1421,9 @@
 					"role": { "type": "string", "enum": ["admin", "moderator", "member"] },
 					"createdAt": { "format": "date-time", "type": "string" },
 					"updatedAt": { "format": "date-time", "type": "string" },
-					"user": { "type": "object" }
+					"user": { "$ref": "#/components/schemas/GroupMemberUserDto" }
 				},
-				"required": ["id", "groupId", "userId", "role", "createdAt", "updatedAt"]
+				"required": ["id", "groupId", "userId", "role", "createdAt", "updatedAt", "user"]
 			},
 			"GroupMemberAddDto": {
 				"type": "object",
@@ -1308,8 +1436,8 @@
 					"role": {
 						"type": "string",
 						"example": "member",
-						"description": "Role in the group",
-						"enum": ["admin", "moderator", "member"]
+						"description": "Role in the group (member or moderator)",
+						"enum": ["member", "moderator"]
 					}
 				},
 				"required": ["userId"]
@@ -1336,6 +1464,22 @@
 					}
 				},
 				"required": ["targetUserId"]
+			},
+			"InviteInfoResponseDto": {
+				"type": "object",
+				"properties": {
+					"id": { "type": "number" },
+					"name": { "type": "string" },
+					"description": { "type": "string", "nullable": true },
+					"avatarUrl": { "type": "string", "nullable": true },
+					"memberCount": { "type": "number" }
+				},
+				"required": ["id", "name", "description", "avatarUrl", "memberCount"]
+			},
+			"AcceptInviteResponseDto": {
+				"type": "object",
+				"properties": { "groupId": { "type": "number" } },
+				"required": ["groupId"]
 			},
 			"GroupMovieResponseDto": {
 				"type": "object",
