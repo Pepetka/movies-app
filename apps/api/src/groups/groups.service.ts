@@ -22,8 +22,11 @@ import {
   GroupMemberRoleUpdateDto,
   GroupUpdateDto,
 } from './dto';
+import {
+  GroupsRepository,
+  type GroupMemberWithUser,
+} from './groups.repository';
 import { INVITE_TOKEN_BYTES } from './invite-token.constants';
-import { GroupsRepository } from './groups.repository';
 
 @Injectable()
 export class GroupsService {
@@ -186,18 +189,14 @@ export class GroupsService {
     );
   }
 
-  async getMembers(
-    groupId: number,
-  ): Promise<
-    Awaited<ReturnType<GroupsRepository['findMembersByGroupWithUsers']>>
-  > {
+  async getMembers(groupId: number): Promise<GroupMemberWithUser[]> {
     return this.groupsRepository.findMembersByGroupWithUsers(groupId);
   }
 
   async getMemberMe(
     groupId: number,
     member: GroupMember,
-  ): Promise<Awaited<ReturnType<GroupsRepository['findMemberWithUser']>>> {
+  ): Promise<GroupMemberWithUser | null> {
     return this.groupsRepository.findMemberWithUser(groupId, member.userId);
   }
 
@@ -230,7 +229,7 @@ export class GroupsService {
     groupId: number,
   ): Promise<{ inviteToken: string | null }> {
     const group = await this._getGroupOrThrow(groupId);
-    return { inviteToken: group.inviteToken ?? null };
+    return { inviteToken: group.inviteToken };
   }
 
   async generateInviteToken(

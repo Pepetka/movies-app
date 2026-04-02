@@ -12,6 +12,16 @@ import {
 } from '$db/schemas';
 import { DrizzleDb } from '$db/types/drizzle.types';
 import { GroupMemberRole } from '$common/enums';
+
+export type GroupMemberWithUser = {
+  id: number;
+  groupId: number;
+  userId: number;
+  role: GroupMember['role'];
+  createdAt: Date;
+  updatedAt: Date;
+  user: { id: number; name: string };
+};
 import { DRIZZLE } from '$db/db.module';
 
 @Injectable()
@@ -118,7 +128,9 @@ export class GroupsRepository {
       .orderBy(groupMembers.createdAt);
   }
 
-  async findMembersByGroupWithUsers(groupId: number) {
+  async findMembersByGroupWithUsers(
+    groupId: number,
+  ): Promise<GroupMemberWithUser[]> {
     return this.db
       .select({
         id: groupMembers.id,
@@ -141,15 +153,7 @@ export class GroupsRepository {
   async findMemberWithUser(
     groupId: number,
     userId: number,
-  ): Promise<{
-    id: number;
-    groupId: number;
-    userId: number;
-    role: string;
-    createdAt: Date;
-    updatedAt: Date;
-    user: { id: number; name: string };
-  } | null> {
+  ): Promise<GroupMemberWithUser | null> {
     const [result] = await this.db
       .select({
         id: groupMembers.id,
