@@ -1,4 +1,8 @@
-import { createParamDecorator, ExecutionContext } from '@nestjs/common';
+import {
+  createParamDecorator,
+  ExecutionContext,
+  InternalServerErrorException,
+} from '@nestjs/common';
 
 import type { GroupMember as GroupMemberType } from '$db/schemas';
 
@@ -7,7 +11,9 @@ export const GroupMember = createParamDecorator(
     const request = ctx.switchToHttp().getRequest();
     const member = request.groupMember as GroupMemberType | undefined;
     if (!member) {
-      return undefined;
+      throw new InternalServerErrorException(
+        'GroupMember decorator used without group guard',
+      );
     }
     return data ? member[data] : member;
   },
