@@ -11,10 +11,6 @@ export class GroupMemberUserDto {
   @Expose()
   @ApiProperty()
   name: string;
-
-  @Expose()
-  @ApiProperty()
-  email: string;
 }
 
 export class GroupMemberResponseDto {

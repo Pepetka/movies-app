@@ -23,6 +23,24 @@ export class GroupsRepository {
     return result;
   }
 
+  async createGroupWithAdmin(
+    groupData: NewGroup,
+    adminData: { userId: number; role: GroupMemberRole },
+  ): Promise<Group> {
+    const [group] = await this.db.transaction(async (tx) => {
+      const [newGroup] = await tx.insert(groups).values(groupData).returning();
+
+      await tx.insert(groupMembers).values({
+        groupId: newGroup.id,
+        userId: adminData.userId,
+        role: adminData.role,
+      });
+
+      return [newGroup] as const;
+    });
+    return group;
+  }
+
   async findGroupById(id: number): Promise<Group | null> {
     const [result] = await this.db
       .select()
@@ -112,7 +130,6 @@ export class GroupsRepository {
         user: {
           id: users.id,
           name: users.name,
-          email: users.email,
         },
       })
       .from(groupMembers)
@@ -131,7 +148,7 @@ export class GroupsRepository {
     role: string;
     createdAt: Date;
     updatedAt: Date;
-    user: { id: number; name: string; email: string };
+    user: { id: number; name: string };
   } | null> {
     const [result] = await this.db
       .select({
@@ -144,7 +161,6 @@ export class GroupsRepository {
         user: {
           id: users.id,
           name: users.name,
-          email: users.email,
         },
       })
       .from(groupMembers)
@@ -218,6 +234,40 @@ export class GroupsRepository {
             eq(groupMembers.userId, targetUserId),
           ),
         );
+    });
+  }
+
+  async addMemberToGroupByInvite(
+    token: string,
+    userId: number,
+    role: GroupMemberRole,
+  ): Promise<
+    | { ok: true; group: Group }
+    | { ok: false; reason: 'invalid_token' | 'already_member' }
+  > {
+    return this.db.transaction(async (tx) => {
+      const [group] = await tx
+        .select()
+        .from(groups)
+        .where(eq(groups.inviteToken, token))
+        .limit(1);
+
+      if (!group)
+        return { ok: false as const, reason: 'invalid_token' as const };
+
+      const [inserted] = await tx
+        .insert(groupMembers)
+        .values({ groupId: group.id, userId, role })
+        .onConflictDoNothing({
+          target: [groupMembers.groupId, groupMembers.userId],
+        })
+        .returning();
+
+      if (!inserted) {
+        return { ok: false as const, reason: 'already_member' as const };
+      }
+
+      return { ok: true as const, group };
     });
   }
 

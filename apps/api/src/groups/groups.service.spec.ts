@@ -39,7 +39,6 @@ const mockGroupMember = {
   user: {
     id: 2,
     name: 'Test User',
-    email: 'test@example.com',
   },
 };
 
@@ -72,12 +71,14 @@ const mockRegularMember: GroupMember = {
 
 const createMockGroupsRepository = () => ({
   createGroup: jest.fn(),
+  createGroupWithAdmin: jest.fn(),
   findGroupById: jest.fn(),
   findAllGroups: jest.fn(),
   findGroupsByUserId: jest.fn(),
   updateGroup: jest.fn(),
   deleteGroup: jest.fn(),
   addMemberIfNotExists: jest.fn(),
+  addMemberToGroupByInvite: jest.fn(),
   findMember: jest.fn(),
   findMembersByGroupWithUsers: jest.fn(),
   findMemberWithUser: jest.fn(),
@@ -123,22 +124,22 @@ describe('GroupsService', () => {
     };
 
     it('should create group and add user as admin', async () => {
-      groupsRepository.createGroup.mockResolvedValue(mockGroup);
-      groupsRepository.addMemberIfNotExists.mockResolvedValue(mockGroupMember);
+      groupsRepository.createGroupWithAdmin.mockResolvedValue(mockGroup);
 
       const result = await service.create(1, createDto);
 
       expect(result).toEqual(mockGroup);
-      expect(groupsRepository.createGroup).toHaveBeenCalledWith({
-        name: createDto.name,
-        description: createDto.description,
-        avatarUrl: createDto.avatarUrl,
-      });
-      expect(groupsRepository.addMemberIfNotExists).toHaveBeenCalledWith({
-        groupId: mockGroup.id,
-        userId: 1,
-        role: GroupMemberRole.ADMIN,
-      });
+      expect(groupsRepository.createGroupWithAdmin).toHaveBeenCalledWith(
+        {
+          name: createDto.name,
+          description: createDto.description,
+          avatarUrl: createDto.avatarUrl,
+        },
+        {
+          userId: 1,
+          role: GroupMemberRole.ADMIN,
+        },
+      );
     });
   });
 
@@ -542,38 +543,40 @@ describe('GroupsService', () => {
   describe('acceptInvite', () => {
     it('should add user as member and return groupId', async () => {
       const groupWithToken = { ...mockGroup, inviteToken: 'valid-token' };
-      groupsRepository.findGroupByInviteToken.mockResolvedValue(groupWithToken);
-      groupsRepository.addMemberIfNotExists.mockResolvedValue(mockGroupMember);
+      groupsRepository.addMemberToGroupByInvite.mockResolvedValue({
+        ok: true,
+        group: groupWithToken,
+      });
 
       const result = await service.acceptInvite('valid-token', 3);
 
       expect(result).toEqual({ groupId: groupWithToken.id });
-      expect(groupsRepository.addMemberIfNotExists).toHaveBeenCalledWith({
-        groupId: groupWithToken.id,
-        userId: 3,
-        role: GroupMemberRole.MEMBER,
-      });
+      expect(groupsRepository.addMemberToGroupByInvite).toHaveBeenCalledWith(
+        'valid-token',
+        3,
+        GroupMemberRole.MEMBER,
+      );
     });
 
     it('should throw UserAlreadyMemberException when already a member', async () => {
-      const groupWithToken = { ...mockGroup, inviteToken: 'valid-token' };
-      groupsRepository.findGroupByInviteToken.mockResolvedValue(groupWithToken);
-      groupsRepository.addMemberIfNotExists.mockResolvedValue(null);
+      groupsRepository.addMemberToGroupByInvite.mockResolvedValue({
+        ok: false,
+        reason: 'already_member',
+      });
 
       await expect(service.acceptInvite('valid-token', 2)).rejects.toThrow(
         UserAlreadyMemberException,
       );
     });
 
-    it('should propagate unexpected errors from repository', async () => {
-      const groupWithToken = { ...mockGroup, inviteToken: 'valid-token' };
-      groupsRepository.findGroupByInviteToken.mockResolvedValue(groupWithToken);
-      groupsRepository.addMemberIfNotExists.mockRejectedValue(
-        new Error('connection lost'),
-      );
+    it('should throw InviteNotFoundException when token is invalid', async () => {
+      groupsRepository.addMemberToGroupByInvite.mockResolvedValue({
+        ok: false,
+        reason: 'invalid_token',
+      });
 
-      await expect(service.acceptInvite('valid-token', 2)).rejects.toThrow(
-        'connection lost',
+      await expect(service.acceptInvite('invalid-token', 2)).rejects.toThrow(
+        InviteNotFoundException,
       );
     });
   });

@@ -32,20 +32,17 @@ export class GroupsService {
   constructor(private readonly groupsRepository: GroupsRepository) {}
 
   async create(userId: number, dto: GroupCreateDto): Promise<Group> {
-    const group = await this.groupsRepository.createGroup({
-      name: dto.name,
-      description: dto.description ?? null,
-      avatarUrl: dto.avatarUrl ?? null,
-    });
-
-    const added = await this.groupsRepository.addMemberIfNotExists({
-      groupId: group.id,
-      userId,
-      role: GroupMemberRole.ADMIN,
-    });
-    if (!added) {
-      throw new UserAlreadyMemberException();
-    }
+    const group = await this.groupsRepository.createGroupWithAdmin(
+      {
+        name: dto.name,
+        description: dto.description ?? null,
+        avatarUrl: dto.avatarUrl ?? null,
+      },
+      {
+        userId,
+        role: GroupMemberRole.ADMIN,
+      },
+    );
 
     this._logger.log(`Group ${group.id} created by user ${userId}`);
     return group;
@@ -272,19 +269,22 @@ export class GroupsService {
     token: string,
     userId: number,
   ): Promise<{ groupId: number }> {
-    const group = await this._getGroupByInviteTokenOrThrow(token);
-
-    const added = await this.groupsRepository.addMemberIfNotExists({
-      groupId: group.id,
+    const result = await this.groupsRepository.addMemberToGroupByInvite(
+      token,
       userId,
-      role: GroupMemberRole.MEMBER,
-    });
-    if (!added) {
+      GroupMemberRole.MEMBER,
+    );
+
+    if (!result.ok) {
+      if (result.reason === 'invalid_token')
+        throw new InviteNotFoundException();
       throw new UserAlreadyMemberException();
     }
 
-    this._logger.log(`User ${userId} joined group ${group.id} via invite link`);
-    return { groupId: group.id };
+    this._logger.log(
+      `User ${userId} joined group ${result.group.id} via invite link`,
+    );
+    return { groupId: result.group.id };
   }
 
   private async _getGroupByInviteTokenOrThrow(token: string): Promise<Group> {
