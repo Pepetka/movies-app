@@ -106,6 +106,7 @@ API-запрос с заголовком Authorization
 | GET   | /user/:userId         | Admin        | Группы пользователя (по ID)        |
 | POST  | /                     | Auth         | Создать группу                     |
 | GET   | /:id                  | Member       | Детали группы                      |
+| GET   | /:id/invite           | Moderator+   | Получить invite-токен              |
 | POST  | /:id/invite           | Moderator+   | Сгенерировать invite-токен         |
 | PATCH | /:id                  | Moderator+   | Обновить группу                    |
 | DELETE| /:id                  | Group Admin  | Удалить группу                     |
