@@ -12,6 +12,7 @@ import {
 } from '$db/schemas';
 import { DrizzleDb } from '$db/types/drizzle.types';
 import { GroupMemberRole } from '$common/enums';
+import { DRIZZLE } from '$db/db.module';
 
 export type GroupMemberWithUser = {
   id: number;
@@ -22,7 +23,6 @@ export type GroupMemberWithUser = {
   updatedAt: Date;
   user: { id: number; name: string };
 };
-import { DRIZZLE } from '$db/db.module';
 
 @Injectable()
 export class GroupsRepository {

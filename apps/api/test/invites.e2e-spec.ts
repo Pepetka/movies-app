@@ -15,6 +15,7 @@ import postgres from 'postgres';
 import { users, groups, groupMembers } from '$db/schemas';
 import { GroupMemberRole } from '$common/enums';
 
+import { INVITE_TOKEN_BYTES } from '../src/groups/invite-token.constants';
 import { AppModule } from '../src/app.module';
 
 describe('Invites E2E', () => {
@@ -145,7 +146,7 @@ describe('Invites E2E', () => {
 
       expect(response.inviteToken).toBeDefined();
       expect(typeof response.inviteToken).toBe('string');
-      expect(response.inviteToken).toHaveLength(32);
+      expect(response.inviteToken).toHaveLength(INVITE_TOKEN_BYTES * 2);
     });
 
     it('should generate invite as group moderator', async () => {
