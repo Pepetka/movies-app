@@ -8,7 +8,12 @@ import {
 	type PostStatus,
 	type QueryResult
 } from '$lib/query';
-import type { GroupCreateDto, GroupResponseDto, GroupUpdateDto } from '$lib/api/generated/types';
+import type {
+	GroupCreateDto,
+	GroupResponseDto,
+	GroupResponseDtoCurrentUserRole,
+	GroupUpdateDto
+} from '$lib/api/generated/types';
 import { BaseStore } from '$lib/stores/base.svelte';
 
 import {
@@ -67,7 +72,7 @@ class GroupStore extends BaseStore {
 		return this._query.data ?? null;
 	}
 
-	get currentUserRole(): string | null {
+	get currentUserRole(): GroupResponseDtoCurrentUserRole | null {
 		return this._query.data?.currentUserRole ?? null;
 	}
 

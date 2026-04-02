@@ -116,10 +116,6 @@ class InviteStore extends BaseStore {
 
 	// === Token query getters ===
 
-	get isTokenLoading(): boolean {
-		return this._tokenQuery.isLoading;
-	}
-
 	get isTokenLoaded(): boolean {
 		return this._tokenQuery.isLoaded;
 	}

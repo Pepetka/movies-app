@@ -15,7 +15,7 @@
 	const groupId = $derived(Number(page.params.id));
 
 	const isLoading = $derived(membersStore.isLoading);
-	const isInviteLoading = $derived(inviteStore.isGenerating || inviteStore.isTokenLoading);
+	const isInviteLoading = $derived(inviteStore.isGenerating || inviteStore.isTokenFetching);
 
 	const inviteLink = $derived.by(() => {
 		const token = inviteStore.inviteToken;
