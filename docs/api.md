@@ -134,7 +134,7 @@ API-запрос с заголовком Authorization
 | Метод | Endpoint              | Доступ       | Описание                          |
 | ----- | --------------------- | ------------ | --------------------------------- |
 | GET   | /                     | Member       | Список фильмов группы             |
-| GET   | /search               | Member       | Поиск (Kinopoisk + группа)        |
+| GET   | /search               | Moderator+   | Поиск (Kinopoisk + группа)        |
 | POST  | /                     | Moderator+   | Добавить фильм из провайдера      |
 | POST  | /custom               | Moderator+   | Создать кастомный фильм           |
 | GET   | /:id                  | Member       | Детали фильма                     |
