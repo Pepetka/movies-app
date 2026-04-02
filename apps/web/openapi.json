@@ -961,10 +961,10 @@
 							}
 						}
 					},
-					"403": { "description": "Forbidden - Not a group member" }
+					"403": { "description": "Forbidden - Not a group moderator" }
 				},
 				"security": [{ "access-token": [] }],
-				"summary": "Search movies in group context (Group members only)",
+				"summary": "Search movies in group context (Group moderators only)",
 				"tags": ["Groups / Movies"]
 			}
 		},
