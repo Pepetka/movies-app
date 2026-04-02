@@ -466,6 +466,36 @@ describe('GroupsService', () => {
     });
   });
 
+  describe('getInviteToken', () => {
+    it('should return invite token for group', async () => {
+      groupsRepository.findGroupById.mockResolvedValue({
+        ...mockGroup,
+        inviteToken: 'existing-token',
+      });
+
+      const result = await service.getInviteToken(1);
+
+      expect(result).toEqual({ inviteToken: 'existing-token' });
+      expect(groupsRepository.findGroupById).toHaveBeenCalledWith(1);
+    });
+
+    it('should return null when no token exists', async () => {
+      groupsRepository.findGroupById.mockResolvedValue(mockGroup);
+
+      const result = await service.getInviteToken(1);
+
+      expect(result).toEqual({ inviteToken: null });
+    });
+
+    it('should throw GroupNotFoundException for non-existent group', async () => {
+      groupsRepository.findGroupById.mockResolvedValue(null);
+
+      await expect(service.getInviteToken(999)).rejects.toThrow(
+        GroupNotFoundException,
+      );
+    });
+  });
+
   describe('generateInviteToken', () => {
     it('should generate token and save it to group', async () => {
       groupsRepository.updateInviteToken.mockResolvedValue({

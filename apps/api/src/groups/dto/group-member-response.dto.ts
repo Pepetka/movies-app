@@ -1,7 +1,21 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty } from '@nestjs/swagger';
 import { Expose } from 'class-transformer';
 
 import { GroupMemberRole } from '$common/enums';
+
+export class GroupMemberUserDto {
+  @Expose()
+  @ApiProperty()
+  id: number;
+
+  @Expose()
+  @ApiProperty()
+  name: string;
+
+  @Expose()
+  @ApiProperty()
+  email: string;
+}
 
 export class GroupMemberResponseDto {
   @Expose()
@@ -29,10 +43,6 @@ export class GroupMemberResponseDto {
   updatedAt: Date;
 
   @Expose()
-  @ApiPropertyOptional()
-  user?: {
-    id: number;
-    name: string;
-    email: string;
-  };
+  @ApiProperty({ type: GroupMemberUserDto })
+  user: GroupMemberUserDto;
 }

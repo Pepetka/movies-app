@@ -4,7 +4,8 @@ import { Expose } from 'class-transformer';
 export class InviteTokenResponseDto {
   @Expose()
   @ApiProperty({
-    example: 'a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4',
+    type: String,
+    nullable: true,
   })
-  inviteToken: string;
+  inviteToken: string | null;
 }

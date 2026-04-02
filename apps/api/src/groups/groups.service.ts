@@ -229,6 +229,13 @@ export class GroupsService {
     this._logger.log(`User ${userId} left group ${groupId}`);
   }
 
+  async getInviteToken(
+    groupId: number,
+  ): Promise<{ inviteToken: string | null }> {
+    const group = await this._getGroupOrThrow(groupId);
+    return { inviteToken: group.inviteToken ?? null };
+  }
+
   async generateInviteToken(
     groupId: number,
     member: GroupMember,

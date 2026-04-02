@@ -122,6 +122,27 @@ export class GroupsController {
     return this.groupsService.create(userId, dto);
   }
 
+  @Get(':id/invite')
+  @UseGuards(GroupModeratorGuard)
+  @SerializeOptions({ type: InviteTokenResponseDto })
+  @ApiOperation({
+    summary: 'Get existing invite token (Group moderators only)',
+  })
+  @ApiParam({ name: 'id', description: 'Group ID' })
+  @ApiResponse({
+    status: 200,
+    description: 'Invite token',
+    type: InviteTokenResponseDto,
+  })
+  @ApiResponse({ status: 404, description: 'Group not found' })
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden - Insufficient permissions',
+  })
+  getInviteToken(@Param('id', ParseIntPipe) id: number) {
+    return this.groupsService.getInviteToken(id);
+  }
+
   @Post(':id/invite')
   @UseGuards(GroupModeratorGuard)
   @SerializeOptions({ type: InviteTokenResponseDto })
