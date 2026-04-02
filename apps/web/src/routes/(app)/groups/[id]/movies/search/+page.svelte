@@ -62,6 +62,7 @@
 			bind:value={inputValue}
 			label="Поиск фильма"
 			placeholder="Введите название..."
+			hideMessage
 			Icon={Search}
 			iconAction={inputValue ? handleClear : undefined}
 			iconLabel={inputValue ? 'Очистить' : undefined}
@@ -131,10 +132,6 @@
 
 	.search-page__input {
 		padding: var(--space-4) 0;
-	}
-
-	.search-page__input :global(.ui-input-message) {
-		display: none;
 	}
 
 	.search-page__results {

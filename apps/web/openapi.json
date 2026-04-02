@@ -612,6 +612,33 @@
 			}
 		},
 		"/api/v1/groups/{id}/invite": {
+			"get": {
+				"operationId": "GroupsController_getInviteToken_v1",
+				"parameters": [
+					{
+						"name": "id",
+						"required": true,
+						"in": "path",
+						"description": "Group ID",
+						"schema": { "type": "number" }
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Invite token",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InviteTokenResponseDto" }
+							}
+						}
+					},
+					"403": { "description": "Forbidden - Insufficient permissions" },
+					"404": { "description": "Group not found" }
+				},
+				"security": [{ "access-token": [] }],
+				"summary": "Get existing invite token (Group moderators only)",
+				"tags": ["Groups"]
+			},
 			"post": {
 				"operationId": "GroupsController_generateInvite_v1",
 				"parameters": [
@@ -1364,9 +1391,7 @@
 			},
 			"InviteTokenResponseDto": {
 				"type": "object",
-				"properties": {
-					"inviteToken": { "type": "string", "example": "a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4" }
-				},
+				"properties": { "inviteToken": { "type": "string", "nullable": true } },
 				"required": ["inviteToken"]
 			},
 			"GroupUpdateDto": {
@@ -1377,6 +1402,15 @@
 					"avatarUrl": { "type": "string", "example": "https://example.com/avatar.jpg" }
 				}
 			},
+			"GroupMemberUserDto": {
+				"type": "object",
+				"properties": {
+					"id": { "type": "number" },
+					"name": { "type": "string" },
+					"email": { "type": "string" }
+				},
+				"required": ["id", "name", "email"]
+			},
 			"GroupMemberResponseDto": {
 				"type": "object",
 				"properties": {
@@ -1386,9 +1420,9 @@
 					"role": { "type": "string", "enum": ["admin", "moderator", "member"] },
 					"createdAt": { "format": "date-time", "type": "string" },
 					"updatedAt": { "format": "date-time", "type": "string" },
-					"user": { "type": "object" }
+					"user": { "$ref": "#/components/schemas/GroupMemberUserDto" }
 				},
-				"required": ["id", "groupId", "userId", "role", "createdAt", "updatedAt"]
+				"required": ["id", "groupId", "userId", "role", "createdAt", "updatedAt", "user"]
 			},
 			"GroupMemberAddDto": {
 				"type": "object",
@@ -1401,8 +1435,8 @@
 					"role": {
 						"type": "string",
 						"example": "member",
-						"description": "Role in the group",
-						"enum": ["admin", "moderator", "member"]
+						"description": "Role in the group (member or moderator)",
+						"enum": ["member", "moderator"]
 					}
 				},
 				"required": ["userId"]

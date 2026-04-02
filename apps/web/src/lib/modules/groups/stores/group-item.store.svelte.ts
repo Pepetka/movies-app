@@ -104,6 +104,10 @@ class GroupStore extends BaseStore {
 		return this._extractErrorMessage(this._query.error, 'Ошибка загрузки группы');
 	}
 
+	get isForbidden(): boolean {
+		return this._isForbidden(this._query);
+	}
+
 	async fetchGroup(id: number): Promise<void> {
 		return untrack(async () => {
 			if (this._query.isCurrentKey(['group', id]) && (this.isLoaded || this.isFetching)) return;

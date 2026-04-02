@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { FAB, Tabs, Avatar, Spinner } from '@repo/ui';
-	import { Plus, Pencil } from '@lucide/svelte';
+	import { FAB, Tabs, Avatar, Spinner, IconButton } from '@repo/ui';
+	import { Plus, Pencil, Users } from '@lucide/svelte';
 
 	import {
 		groupMoviesStore,
@@ -92,6 +92,10 @@
 		});
 	};
 
+	const handleMembersClick = () => {
+		void goto(ROUTES.GROUP_MEMBERS(groupId));
+	};
+
 	const handleAddMovie = () => {
 		void goto(ROUTES.GROUP_MOVIES_SEARCH(groupId));
 	};
@@ -132,6 +136,7 @@
 						<p class="group-info__description">{groupStore.currentGroup.description}</p>
 					{/if}
 				</div>
+				<IconButton Icon={Users} variant="ghost" label="Участники" onclick={handleMembersClick} />
 			</div>
 		</div>
 

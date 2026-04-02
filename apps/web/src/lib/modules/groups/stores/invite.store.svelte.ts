@@ -19,11 +19,13 @@ import { HttpError } from '$lib/api/errors';
 import {
 	acceptInvite as acceptInviteApi,
 	getInviteInfo as getInviteInfoApi,
+	getInviteToken as getInviteTokenApi,
 	generateInviteToken as generateInviteTokenApi
 } from '../api';
 
 class InviteStore extends BaseStore {
 	private readonly _query: QueryResult<InviteInfoResponseDto, string>;
+	private readonly _tokenQuery: QueryResult<InviteTokenResponseDto, number>;
 	private readonly _acceptMutation: MutationResult<AcceptInviteResponseDto, string>;
 	private readonly _generateMutation: MutationResult<InviteTokenResponseDto, number>;
 
@@ -40,9 +42,19 @@ class InviteStore extends BaseStore {
 			debug: !__IS_PROD__
 		});
 
+		this._tokenQuery = createQuery<InviteTokenResponseDto, number>({
+			key: ['invite-token'],
+			tags: ['invite-token'],
+			fetcher: (signal, groupId) => {
+				if (!groupId) throw new Error('No group id');
+				return getInviteTokenApi(groupId, signal);
+			},
+			debug: !__IS_PROD__
+		});
+
 		this._acceptMutation = createMutation<AcceptInviteResponseDto, string>({
 			key: ['invite', 'accept'],
-			tags: ['groups'],
+			tags: ['groups', 'group-members'],
 			mutator: (token) => acceptInviteApi(token),
 			invalidateKeys: (data) => (data ? [['invite'], ['group', data.groupId]] : [['invite']]),
 			debug: !__IS_PROD__
@@ -50,7 +62,7 @@ class InviteStore extends BaseStore {
 
 		this._generateMutation = createMutation<InviteTokenResponseDto, number>({
 			key: ['invite', 'generate'],
-			tags: ['invite'],
+			tags: ['invite-token'],
 			mutator: (groupId) => generateInviteTokenApi(groupId),
 			debug: !__IS_PROD__
 		});
@@ -101,6 +113,37 @@ class InviteStore extends BaseStore {
 		});
 	}
 
+	// === Token query getters ===
+
+	get isTokenLoading(): boolean {
+		return this._tokenQuery.isLoading;
+	}
+
+	get isTokenLoaded(): boolean {
+		return this._tokenQuery.isLoaded;
+	}
+
+	get isTokenFetching(): boolean {
+		return this._tokenQuery.isFetching;
+	}
+
+	get isTokenError(): boolean {
+		return this._tokenQuery.isError;
+	}
+
+	// === Token query methods ===
+
+	async fetchInviteToken(groupId: number): Promise<void> {
+		return untrack(async () => {
+			if (
+				this._tokenQuery.isCurrentKey(['invite-token', groupId]) &&
+				(this.isTokenLoaded || this._tokenQuery.isFetching)
+			)
+				return;
+			await this._tokenQuery.revalidate(['invite-token', groupId], groupId);
+		});
+	}
+
 	// === Accept mutation ===
 
 	get acceptStatus(): PostStatus {
@@ -143,10 +186,6 @@ class InviteStore extends BaseStore {
 		return this._generateMutation.status;
 	}
 
-	get isGenerating(): boolean {
-		return this._generateMutation.isSubmitting;
-	}
-
 	get isGenerateSuccess(): boolean {
 		return this._generateMutation.isSuccess;
 	}
@@ -157,7 +196,11 @@ class InviteStore extends BaseStore {
 	}
 
 	get inviteToken(): string | null {
-		return this._generateMutation.data?.inviteToken ?? null;
+		return this._tokenQuery.data?.inviteToken ?? null;
+	}
+
+	get isGenerating(): boolean {
+		return this._generateMutation.isSubmitting;
 	}
 
 	async generateInvite(groupId: number): Promise<InviteTokenResponseDto | null> {
@@ -172,6 +215,7 @@ class InviteStore extends BaseStore {
 
 	reset(): void {
 		this._query.reset();
+		this._tokenQuery.reset();
 	}
 
 	resetForm(): void {

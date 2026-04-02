@@ -1,4 +1,5 @@
 import { HttpError, NetworkError, RetryError } from '$lib/api/errors';
+import type { QueryResult } from '$lib/query';
 import { logger } from '$lib/utils/logger';
 
 export class BaseStore {
@@ -22,5 +23,9 @@ export class BaseStore {
 			return error.message;
 		}
 		return fallback;
+	}
+
+	protected _isForbidden<T, P>(query: QueryResult<T, P>): boolean {
+		return query.error instanceof HttpError && query.error.status === 403;
 	}
 }
