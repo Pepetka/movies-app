@@ -20,15 +20,10 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 
-import {
-  GroupAdminGuard,
-  GroupMemberGuard,
-  GroupModeratorGuard,
-  RolesGuard,
-} from '$common/guards';
 import type { GroupMember as GroupMemberType } from '$db/schemas';
 import { User, Roles, GroupMember } from '$common/decorators';
 import { UserRole } from '$common/enums/user-role.enum';
+import { RolesGuard } from '$common/guards';
 
 import {
   GroupCreateDto,
@@ -40,6 +35,11 @@ import {
   TransferOwnershipDto,
   InviteTokenResponseDto,
 } from './dto';
+import {
+  GroupAdminGuard,
+  GroupMemberGuard,
+  GroupModeratorGuard,
+} from './guards';
 import { GroupsService } from './groups.service';
 
 @ApiTags('Groups')

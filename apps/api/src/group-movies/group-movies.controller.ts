@@ -22,7 +22,7 @@ import {
   ApiQuery,
 } from '@nestjs/swagger';
 
-import { GroupMemberGuard, GroupModeratorGuard } from '$common/guards';
+import { GroupMemberGuard, GroupModeratorGuard } from '$src/groups/guards';
 import type { GroupMember as GroupMemberType } from '$db/schemas';
 import { GroupMember } from '$common/decorators';
 import { GroupMemberRole } from '$common/enums';

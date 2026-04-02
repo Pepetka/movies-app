@@ -1,12 +1,12 @@
 import { Module } from '@nestjs/common';
 
+import { DbModule } from '$db/db.module';
+
 import {
   GroupAdminGuard,
   GroupMemberGuard,
   GroupModeratorGuard,
-} from '$common/guards';
-import { DbModule } from '$db/db.module';
-
+} from './guards';
 import { InvitesController } from './invites.controller';
 import { GroupsController } from './groups.controller';
 import { GroupsRepository } from './groups.repository';
