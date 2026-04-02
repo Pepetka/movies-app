@@ -34,6 +34,7 @@ import {
   GroupMemberResponseDto,
   TransferOwnershipDto,
   InviteTokenResponseDto,
+  GeneratedInviteTokenResponseDto,
 } from './dto';
 import {
   GroupAdminGuard,
@@ -145,7 +146,7 @@ export class GroupsController {
 
   @Post(':id/invite')
   @UseGuards(GroupModeratorGuard)
-  @SerializeOptions({ type: InviteTokenResponseDto })
+  @SerializeOptions({ type: GeneratedInviteTokenResponseDto })
   @ApiOperation({
     summary: 'Generate or regenerate invite link (Group moderators only)',
   })
@@ -153,7 +154,7 @@ export class GroupsController {
   @ApiResponse({
     status: 201,
     description: 'Invite token generated',
-    type: InviteTokenResponseDto,
+    type: GeneratedInviteTokenResponseDto,
   })
   @ApiResponse({ status: 404, description: 'Group not found' })
   @ApiResponse({

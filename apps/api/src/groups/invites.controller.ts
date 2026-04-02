@@ -36,16 +36,7 @@ export class InvitesController {
   @Throttle(THROTTLE.invites.info)
   @SerializeOptions({ type: InviteInfoResponseDto })
   @ApiOperation({ summary: 'Get invite info by token (Public)' })
-  @ApiParam({
-    name: 'token',
-    description: 'Invite token',
-    schema: {
-      type: 'string',
-      minLength: 32,
-      maxLength: 32,
-      pattern: '^[0-9a-f]+$',
-    },
-  })
+  @ApiParam({ name: 'token', description: 'Invite token' })
   @ApiResponse({
     status: 200,
     description: 'Invite info',
@@ -62,16 +53,7 @@ export class InvitesController {
   @HttpCode(HttpStatus.OK)
   @SerializeOptions({ type: AcceptInviteResponseDto })
   @ApiOperation({ summary: 'Accept group invite' })
-  @ApiParam({
-    name: 'token',
-    description: 'Invite token',
-    schema: {
-      type: 'string',
-      minLength: 32,
-      maxLength: 32,
-      pattern: '^[0-9a-f]+$',
-    },
-  })
+  @ApiParam({ name: 'token', description: 'Invite token' })
   @ApiResponse({
     status: 200,
     description: 'Invite accepted',

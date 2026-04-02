@@ -6,6 +6,7 @@ export * from './group-member-role-update.dto';
 export * from './group-member-response.dto';
 export * from './transfer-ownership.dto';
 export * from './invite-token-response.dto';
+export * from './generated-invite-token-response.dto';
 export * from './invite-info-response.dto';
 export * from './accept-invite-response.dto';
 export * from './invite-token-param.dto';
