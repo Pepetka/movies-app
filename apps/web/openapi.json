@@ -655,7 +655,7 @@
 						"description": "Invite token generated",
 						"content": {
 							"application/json": {
-								"schema": { "$ref": "#/components/schemas/InviteTokenResponseDto" }
+								"schema": { "$ref": "#/components/schemas/GeneratedInviteTokenResponseDto" }
 							}
 						}
 					},
@@ -878,12 +878,7 @@
 						"required": true,
 						"in": "path",
 						"description": "Invite token",
-						"schema": {
-							"type": "string",
-							"minLength": 32,
-							"maxLength": 32,
-							"pattern": "^[0-9a-f]+$"
-						}
+						"schema": { "minLength": 32, "maxLength": 32, "type": "string" }
 					}
 				],
 				"responses": {
@@ -910,12 +905,7 @@
 						"required": true,
 						"in": "path",
 						"description": "Invite token",
-						"schema": {
-							"type": "string",
-							"minLength": 32,
-							"maxLength": 32,
-							"pattern": "^[0-9a-f]+$"
-						}
+						"schema": { "minLength": 32, "maxLength": 32, "type": "string" }
 					}
 				],
 				"responses": {
@@ -1402,6 +1392,11 @@
 			"InviteTokenResponseDto": {
 				"type": "object",
 				"properties": { "inviteToken": { "type": "string", "nullable": true } },
+				"required": ["inviteToken"]
+			},
+			"GeneratedInviteTokenResponseDto": {
+				"type": "object",
+				"properties": { "inviteToken": { "type": "string" } },
 				"required": ["inviteToken"]
 			},
 			"GroupUpdateDto": {
