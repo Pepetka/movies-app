@@ -13,7 +13,7 @@
 
 	const groupId = $derived(Number(page.params.id));
 
-	const isLoading = $derived(groupStore.isLoading || membersStore.isLoading);
+	const isLoading = $derived(membersStore.isLoading);
 	const isInviteLoading = $derived(inviteStore.isGenerating || inviteStore.isTokenLoading);
 
 	const inviteLink = $derived.by(() => {
@@ -41,7 +41,6 @@
 
 	$effect(() => {
 		if (groupId) {
-			void groupStore.fetchGroup(groupId);
 			void membersStore.fetchMembers(groupId);
 		}
 	});
@@ -57,7 +56,7 @@
 	});
 
 	$effect(() => {
-		if (groupStore.isForbidden || membersStore.isForbidden) {
+		if (membersStore.isForbidden) {
 			void goto(ROUTES.GROUPS);
 		}
 	});
@@ -126,12 +125,9 @@
 	<div class="loading-state">
 		<Spinner size="lg" />
 	</div>
-{:else if groupStore.isError || membersStore.isError}
-	<PagePlaceholder
-		title="Ошибка"
-		hint={groupStore.error ?? membersStore.error ?? 'Не удалось загрузить'}
-	/>
-{:else if groupStore.currentGroup}
+{:else if membersStore.isError}
+	<PagePlaceholder title="Ошибка" hint={membersStore.error ?? 'Не удалось загрузить участников'} />
+{:else}
 	<div class="members-page">
 		{#if groupStore.isModerator}
 			<Card variant="outlined" size="sm">
@@ -193,8 +189,6 @@
 			{/each}
 		</ul>
 	</div>
-{:else}
-	<PagePlaceholder title="Группа не найдена" hint="Возможно, она была удалена" />
 {/if}
 
 <Modal open={showConfirmRegenerate} size="sm" onClose={() => (showConfirmRegenerate = false)}>

@@ -8,6 +8,7 @@
 		customMovieFormToCreateDto,
 		type CustomMovieFormData
 	} from '$lib/modules/movies';
+	import { groupStore } from '$lib/modules/groups';
 	import { topBarStore } from '$lib/stores';
 	import { goto } from '$app/navigation';
 	import { ROUTES } from '$lib/utils';
@@ -16,6 +17,7 @@
 	const groupId = $derived(Number(page.params.id));
 
 	let form = $state<CustomMovieFormData>({ ...EMPTY_CUSTOM_MOVIE_FORM });
+	let hasRedirected = $state(false);
 
 	$effect(() => {
 		topBarStore.configure({
@@ -27,6 +29,14 @@
 			topBarStore.destroy();
 			groupMovieStore.resetCreate();
 		};
+	});
+
+	$effect(() => {
+		if (!groupStore.isModerator && !hasRedirected) {
+			hasRedirected = true;
+			toast.error('Добавление фильмов доступно только модераторам');
+			void goto(ROUTES.GROUP_DETAIL(groupId));
+		}
 	});
 
 	const handleSubmit = async () => {

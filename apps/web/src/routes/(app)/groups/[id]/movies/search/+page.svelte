@@ -4,6 +4,7 @@
 
 	import { moviesSearchStore, groupMovieStore, MovieRating } from '$lib/modules/movies';
 	import type { ProviderMovieSummary } from '$lib/api/generated/types';
+	import { groupStore } from '$lib/modules/groups';
 	import { topBarStore } from '$lib/stores';
 	import { goto } from '$app/navigation';
 	import { ROUTES } from '$lib/utils';
@@ -11,6 +12,7 @@
 
 	const groupId = $derived(Number(page.params.id));
 	let inputValue = $state('');
+	let hasRedirected = $state(false);
 
 	$effect(() => {
 		topBarStore.configure({
@@ -23,6 +25,14 @@
 			moviesSearchStore.cancel();
 			moviesSearchStore.clear();
 		};
+	});
+
+	$effect(() => {
+		if (!groupStore.isModerator && !hasRedirected) {
+			hasRedirected = true;
+			toast.error('Добавление фильмов доступно только модераторам');
+			void goto(ROUTES.GROUP_DETAIL(groupId));
+		}
 	});
 
 	const handleClear = () => {
