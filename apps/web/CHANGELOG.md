@@ -1,5 +1,21 @@
 # web
 
+## 0.14.0
+
+### Minor Changes
+
+- d0811bb: Group members page with invite token management
+  - Add members page with invite token generation and display
+  - Add group invite acceptance flow
+  - Extract group layout with moderator route guards
+  - Add isLoaded guard and update invite types
+  - Remove resolve() pattern and update navigation
+
+### Patch Changes
+
+- Updated dependencies [d0811bb]
+  - @repo/ui@0.8.1
+
 ## 0.13.0
 
 ### Minor Changes

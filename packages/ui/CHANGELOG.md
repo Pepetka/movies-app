@@ -1,5 +1,11 @@
 # @repo/ui
 
+## 0.8.1
+
+### Patch Changes
+
+- d0811bb: Add hideMessage prop to Input component
+
 ## 0.8.0
 
 ### Minor Changes

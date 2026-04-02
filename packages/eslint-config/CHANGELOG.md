@@ -1,5 +1,11 @@
 # @repo/eslint-config
 
+## 0.2.1
+
+### Patch Changes
+
+- d0811bb: Disable svelte/no-navigation-without-resolve rule
+
 ## 0.2.0
 
 ### Minor Changes
