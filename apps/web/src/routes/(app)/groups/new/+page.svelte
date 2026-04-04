@@ -8,9 +8,9 @@
 		groupFormToCreateDto,
 		type GroupFormData
 	} from '$lib/modules/groups';
+	import { goBack, ROUTES } from '$lib/utils';
 	import { topBarStore } from '$lib/stores';
 	import { goto } from '$app/navigation';
-	import { ROUTES } from '$lib/utils';
 
 	let form = $state<GroupFormData>({ ...EMPTY_GROUP_FORM });
 
@@ -18,7 +18,7 @@
 		topBarStore.configure({
 			title: 'Новая группа',
 			showBack: true,
-			onBack: () => goto(ROUTES.GROUPS)
+			onBack: () => goBack(ROUTES.GROUPS)
 		});
 
 		return () => {

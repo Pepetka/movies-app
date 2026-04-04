@@ -1,8 +1,17 @@
 import { SvelteURLSearchParams } from 'svelte/reactivity';
 
+import { goto } from '$app/navigation';
 import { page } from '$app/state';
 
 import { ROUTES, type Route, type RouteValue } from './routes';
+
+export const goBack = (fallback: Route): void => {
+	if (window.history.length > 1) {
+		history.back();
+	} else {
+		goto(fallback);
+	}
+};
 
 export const getSafeRedirect = (fallback: RouteValue = ROUTES.GROUPS): Route => {
 	const redirect = page.url.searchParams.get('redirect');

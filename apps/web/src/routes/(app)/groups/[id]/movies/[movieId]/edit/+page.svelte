@@ -12,7 +12,7 @@
 		customMovieFormToUpdateDto,
 		type CustomMovieFormData
 	} from '$lib/modules/movies';
-	import { ROUTES, withCurrentQuery } from '$lib/utils';
+	import { ROUTES, withCurrentQuery, goBack } from '$lib/utils';
 	import { topBarStore } from '$lib/stores';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
@@ -39,9 +39,7 @@
 		topBarStore.configure({
 			title: 'Редактирование',
 			showBack: true,
-			onBack: () => {
-				void goto(withCurrentQuery(ROUTES.GROUP_MOVIE_DETAIL(groupId, movieId), ['tab']));
-			},
+			onBack: () => goBack(withCurrentQuery(ROUTES.GROUP_MOVIE_DETAIL(groupId, movieId), ['tab'])),
 			trailingAction: groupMovieDetailStore.isModerator
 				? {
 						Icon: Trash2,
