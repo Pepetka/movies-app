@@ -17,12 +17,12 @@ export const movieStatusSchema = z
 		status: z.enum(['tracking', 'planned', 'watched']),
 		watchDate: z.date().nullable()
 	})
-	.refine((data) => data.status !== 'planned' || data.watchDate, {
+	.refine((data) => !['planned', 'watched'].includes(data.status) || data.watchDate, {
 		message: 'Укажите дату просмотра',
 		path: ['watchDate']
 	})
-	.refine((data) => data.status !== 'watched' || data.watchDate, {
-		message: 'Укажите дату просмотра',
+	.refine((data) => data.status !== 'tracking' || !data.watchDate, {
+		message: 'Статус "К просмотру" не может иметь дату',
 		path: ['watchDate']
 	});
 
@@ -38,8 +38,10 @@ export const validateMovieStatusForm = createValidator(movieStatusSchema);
 export const movieStatusFormToUpdateDto = (form: MovieStatusFormData): GroupMovieUpdateDto => {
 	const dto: GroupMovieUpdateDto = { status: form.status };
 
-	if ((form.status === 'planned' || form.status === 'watched') && form.watchDate) {
+	if (form.watchDate) {
 		dto.watchDate = form.watchDate.toISOString();
+	} else {
+		dto.watchDate = null;
 	}
 
 	return dto;
