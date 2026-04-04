@@ -12,9 +12,7 @@
 
 	const yearDisplay = $derived(movie.releaseYear ? String(movie.releaseYear) : undefined);
 
-	const dateDisplay = $derived.by(() => {
-		return movie.watchDate ? formatDate(movie.watchDate, 'short') : null;
-	});
+	const dateDisplay = $derived(movie.watchDate ? formatDate(movie.watchDate, 'short') : null);
 </script>
 
 <Card variant="outlined" interactive={!!onclick} {onclick} {...restProps}>
