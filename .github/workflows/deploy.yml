@@ -168,8 +168,7 @@ jobs:
             }
 
             echo "Restarting services with new images..."
-            docker compose up -d --remove-orphans
-            docker compose up -d --force-recreate nginx
+            docker compose up -d --remove-orphans --force-recreate
 
             echo "Waiting for services to be healthy..."
             sleep 15
