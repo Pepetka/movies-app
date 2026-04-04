@@ -66,11 +66,7 @@ export class GroupMovieResponseDto {
 
   @Expose()
   @ApiProperty({ type: Date, nullable: true })
-  plannedDate: Date | null;
-
-  @Expose()
-  @ApiProperty({ type: Date, nullable: true })
-  watchedDate: Date | null;
+  watchDate: Date | null;
 
   @Expose()
   @ApiProperty()

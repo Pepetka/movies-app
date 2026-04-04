@@ -1496,8 +1496,7 @@
 					"rating": { "type": "string", "nullable": true },
 					"addedBy": { "type": "number" },
 					"status": { "type": "string", "enum": ["tracking", "planned", "watched"] },
-					"plannedDate": { "format": "date-time", "type": "string", "nullable": true },
-					"watchedDate": { "format": "date-time", "type": "string", "nullable": true },
+					"watchDate": { "format": "date-time", "type": "string", "nullable": true },
 					"createdAt": { "format": "date-time", "type": "string" },
 					"updatedAt": { "format": "date-time", "type": "string" },
 					"currentUserRole": { "type": "string", "enum": ["admin", "moderator", "member"] }
@@ -1515,8 +1514,7 @@
 					"rating",
 					"addedBy",
 					"status",
-					"plannedDate",
-					"watchedDate",
+					"watchDate",
 					"createdAt",
 					"updatedAt"
 				]
@@ -1561,15 +1559,10 @@
 						"enum": ["tracking", "planned", "watched"],
 						"default": "tracking"
 					},
-					"plannedDate": {
+					"watchDate": {
 						"type": "string",
-						"description": "Planned watch date",
+						"description": "Watch date (planned or actual, depending on status)",
 						"example": "2024-12-31T20:00:00Z"
-					},
-					"watchedDate": {
-						"type": "string",
-						"description": "Watched date",
-						"example": "2024-12-25T20:00:00Z"
 					}
 				},
 				"required": ["title"]
@@ -1582,15 +1575,10 @@
 						"description": "Movie status in group",
 						"enum": ["tracking", "planned", "watched"]
 					},
-					"plannedDate": {
+					"watchDate": {
 						"type": "string",
-						"description": "Planned watch date",
+						"description": "Watch date (planned or actual, depending on status)",
 						"example": "2024-12-31T20:00:00Z"
-					},
-					"watchedDate": {
-						"type": "string",
-						"description": "Watched date",
-						"example": "2024-12-25T20:00:00Z"
 					},
 					"title": { "type": "string", "description": "Movie title" },
 					"posterPath": { "type": "string", "description": "Poster path" },

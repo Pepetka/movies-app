@@ -23,8 +23,7 @@ const mockGroupMovie = {
   rating: '8.5',
   addedBy: 1,
   status: GroupMovieStatus.TRACKING,
-  plannedDate: null,
-  watchedDate: null,
+  watchDate: null,
   createdAt: new Date(),
   updatedAt: new Date(),
 };
@@ -273,7 +272,7 @@ describe('GroupMoviesService', () => {
         releaseYear: 2023,
         runtime: 150,
         status: GroupMovieStatus.PLANNED,
-        plannedDate: new Date('2024-06-01'),
+        watchDate: new Date('2024-06-01'),
       };
       mocks.groupMoviesRepository.create.mockResolvedValue(fullCustomMovie);
 
@@ -285,7 +284,7 @@ describe('GroupMoviesService', () => {
           releaseYear: 2023,
           runtime: 150,
           status: GroupMovieStatus.PLANNED,
-          plannedDate: '2024-06-01T00:00:00Z',
+          watchDate: '2024-06-01T00:00:00Z',
         },
         1,
       );
@@ -512,14 +511,14 @@ describe('GroupMoviesService', () => {
       const updatedGroupMovie = {
         ...mockGroupMovie,
         status: GroupMovieStatus.WATCHED,
-        watchedDate: new Date('2024-12-25'),
+        watchDate: new Date('2024-12-25'),
       };
       mocks.groupMoviesRepository.findOne.mockResolvedValue(mockGroupMovie);
       mocks.groupMoviesRepository.update.mockResolvedValue(updatedGroupMovie);
 
       const result = await service.update(1, 100, {
         status: GroupMovieStatus.WATCHED,
-        watchedDate: '2024-12-25T20:00:00Z',
+        watchDate: '2024-12-25T20:00:00Z',
       });
 
       expect(result).toEqual(updatedGroupMovie);
@@ -528,7 +527,7 @@ describe('GroupMoviesService', () => {
         100,
         expect.objectContaining({
           status: GroupMovieStatus.WATCHED,
-          watchedDate: expect.any(Date),
+          watchDate: expect.any(Date),
         }),
       );
     });

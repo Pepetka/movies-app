@@ -70,8 +70,7 @@ export class GroupMoviesService {
       rating: null,
       addedBy: createdById,
       status: dto.status ?? 'tracking',
-      plannedDate: dto.plannedDate ? new Date(dto.plannedDate) : null,
-      watchedDate: dto.watchedDate ? new Date(dto.watchedDate) : null,
+      watchDate: dto.watchDate ? new Date(dto.watchDate) : null,
     });
 
     this._logger.log(
@@ -162,14 +161,8 @@ export class GroupMoviesService {
     const updateData: Partial<NewGroupMovie> = {};
 
     if (dto.status !== undefined) updateData.status = dto.status;
-    if (dto.plannedDate !== undefined)
-      updateData.plannedDate = dto.plannedDate
-        ? new Date(dto.plannedDate)
-        : null;
-    if (dto.watchedDate !== undefined)
-      updateData.watchedDate = dto.watchedDate
-        ? new Date(dto.watchedDate)
-        : null;
+    if (dto.watchDate !== undefined)
+      updateData.watchDate = dto.watchDate ? new Date(dto.watchDate) : null;
 
     if (dto.title !== undefined) updateData.title = dto.title;
     if (dto.posterPath !== undefined) updateData.posterPath = dto.posterPath;

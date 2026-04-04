@@ -152,7 +152,7 @@ describe('Group Movies E2E', () => {
       const updateRes = await request(app.getHttpServer())
         .patch(`/groups/${group.id}/movies/${groupMovieId}`)
         .set('Authorization', `Bearer ${accessToken}`)
-        .send({ status: 'watched', watchedDate: '2024-12-25T20:00:00Z' })
+        .send({ status: 'watched', watchDate: '2024-12-25T20:00:00Z' })
         .expect(200);
 
       expect(updateRes.body.status).toBe('watched');
@@ -241,7 +241,7 @@ describe('Group Movies E2E', () => {
           releaseYear: 2024,
           runtime: 90,
           status: 'planned',
-          plannedDate: '2024-12-31T20:00:00Z',
+          watchDate: '2024-12-31T20:00:00Z',
         })
         .expect(201);
 

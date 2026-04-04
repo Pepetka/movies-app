@@ -13,8 +13,7 @@
 	const yearDisplay = $derived(movie.releaseYear ? String(movie.releaseYear) : undefined);
 
 	const dateDisplay = $derived.by(() => {
-		const dateStr = movie.plannedDate || movie.watchedDate;
-		return dateStr ? formatDate(dateStr, 'short') : null;
+		return movie.watchDate ? formatDate(movie.watchDate, 'short') : null;
 	});
 </script>
 

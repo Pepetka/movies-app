@@ -55,20 +55,12 @@ export class CreateCustomMovieDto {
   status?: MovieStatus;
 
   @ApiPropertyOptional({
-    description: 'Planned watch date',
+    description: 'Watch date (planned or actual, depending on status)',
     example: '2024-12-31T20:00:00Z',
   })
   @IsOptional()
   @IsDateString()
-  plannedDate?: string;
-
-  @ApiPropertyOptional({
-    description: 'Watched date',
-    example: '2024-12-25T20:00:00Z',
-  })
-  @IsOptional()
-  @IsDateString()
-  watchedDate?: string;
+  watchDate?: string;
 
   @IsValidMovieStatus()
   validateStatus?() {}

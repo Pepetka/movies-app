@@ -98,15 +98,10 @@
 							<MovieStatusBadge status={movie.status} />
 						</div>
 
-						{#if movie.plannedDate || movie.watchedDate}
+						{#if movie.watchDate}
 							<div class="movie-header__date">
 								<Calendar size={14} />
-								{#if movie.plannedDate}
-									<span>{formatDate(movie.plannedDate)}</span>
-								{/if}
-								{#if movie.watchedDate}
-									<span>{formatDate(movie.watchedDate)}</span>
-								{/if}
+								<span>{formatDate(movie.watchDate)}</span>
 							</div>
 						{/if}
 					</div>
