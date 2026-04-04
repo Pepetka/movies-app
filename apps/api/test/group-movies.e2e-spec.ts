@@ -290,6 +290,123 @@ describe('Group Movies E2E', () => {
     });
   });
 
+  describe('Status/date validation', () => {
+    it('should reject custom movie with tracking status and watchDate', async () => {
+      const { accessToken } = await registerUserViaApi(
+        app,
+        'trackdate@example.com',
+      );
+      const group = await createGroup(app, accessToken, 'Tracking Date Group');
+
+      await request(app.getHttpServer())
+        .post(`/groups/${group.id}/movies/custom`)
+        .set('Authorization', `Bearer ${accessToken}`)
+        .send({
+          title: 'Bad Movie',
+          status: 'tracking',
+          watchDate: '2024-12-25T20:00:00Z',
+        })
+        .expect(400);
+    });
+
+    it('should reject update to tracking with watchDate', async () => {
+      const { accessToken, userId } = await registerUserViaApi(
+        app,
+        'updtrack@example.com',
+      );
+      const group = await createGroup(app, accessToken, 'Update Track Group');
+
+      const [groupMovie] = await drizzleDb
+        .insert(groupMovies)
+        .values({
+          groupId: group.id,
+          source: 'provider',
+          movieId: seededMovie.id,
+          title: seededMovie.title,
+          addedBy: userId,
+          status: 'watched',
+          watchDate: new Date('2024-06-01'),
+        })
+        .returning();
+
+      await request(app.getHttpServer())
+        .patch(`/groups/${group.id}/movies/${groupMovie.id}`)
+        .set('Authorization', `Bearer ${accessToken}`)
+        .send({ status: 'tracking', watchDate: '2024-12-25T20:00:00Z' })
+        .expect(400);
+    });
+
+    it('should reject planned status without watchDate', async () => {
+      const { accessToken } = await registerUserViaApi(
+        app,
+        'nodate@example.com',
+      );
+      const group = await createGroup(app, accessToken, 'No Date Group');
+
+      await request(app.getHttpServer())
+        .post(`/groups/${group.id}/movies/custom`)
+        .set('Authorization', `Bearer ${accessToken}`)
+        .send({ title: 'No Date Movie', status: 'planned' })
+        .expect(400);
+    });
+
+    it('should reject watched status without watchDate', async () => {
+      const { accessToken, userId } = await registerUserViaApi(
+        app,
+        'nowatchdate@example.com',
+      );
+      const group = await createGroup(app, accessToken, 'No Watch Date Group');
+
+      const [groupMovie] = await drizzleDb
+        .insert(groupMovies)
+        .values({
+          groupId: group.id,
+          source: 'provider',
+          movieId: seededMovie.id,
+          title: seededMovie.title,
+          addedBy: userId,
+          status: 'tracking',
+        })
+        .returning();
+
+      await request(app.getHttpServer())
+        .patch(`/groups/${group.id}/movies/${groupMovie.id}`)
+        .set('Authorization', `Bearer ${accessToken}`)
+        .send({ status: 'watched' })
+        .expect(400);
+    });
+
+    it('should allow clearing watchDate when switching to tracking', async () => {
+      const { accessToken, userId } = await registerUserViaApi(
+        app,
+        'cleardate@example.com',
+      );
+      const group = await createGroup(app, accessToken, 'Clear Date Group');
+
+      const [groupMovie] = await drizzleDb
+        .insert(groupMovies)
+        .values({
+          groupId: group.id,
+          source: 'provider',
+          movieId: seededMovie.id,
+          title: seededMovie.title,
+          addedBy: userId,
+          status: 'watched',
+          watchDate: new Date('2024-06-01'),
+        })
+        .returning();
+
+      const res = await request(app.getHttpServer())
+        .patch(`/groups/${group.id}/movies/${groupMovie.id}`)
+        .set('Authorization', `Bearer ${accessToken}`)
+        .send({ status: 'tracking', watchDate: null })
+        .expect(200);
+
+      expect(res.body.status).toBe('tracking');
+      expect(res.body.watchDate).toBeNull();
+    });
+  });
+
   describe('Error handling', () => {
     it('should return 404 for non-existent movie in group', async () => {
       const { accessToken } = await registerUserViaApi(
