@@ -219,6 +219,10 @@
         "watched_requires_watch_date": {
           "name": "watched_requires_watch_date",
           "value": "(\"group_movies\".\"status\" != 'watched' OR \"group_movies\".\"watch_date\" IS NOT NULL)"
+        },
+        "tracking_forbids_watch_date": {
+          "name": "tracking_forbids_watch_date",
+          "value": "(\"group_movies\".\"status\" != 'tracking' OR \"group_movies\".\"watch_date\" IS NULL)"
         }
       },
       "isRLSEnabled": false,

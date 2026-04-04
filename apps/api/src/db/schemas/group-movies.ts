@@ -65,5 +65,9 @@ export const groupMovies = pgTable(
       'watched_requires_watch_date',
       sql`(${table.status} != 'watched' OR ${table.watchDate} IS NOT NULL)`,
     ),
+    check(
+      'tracking_forbids_watch_date',
+      sql`(${table.status} != 'tracking' OR ${table.watchDate} IS NULL)`,
+    ),
   ],
 );

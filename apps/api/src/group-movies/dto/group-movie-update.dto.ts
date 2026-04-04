@@ -25,12 +25,14 @@ export class GroupMovieUpdateDto {
   status?: GroupMovieStatus;
 
   @ApiPropertyOptional({
+    type: String,
+    nullable: true,
     description: 'Watch date (planned or actual, depending on status)',
     example: '2024-12-31T20:00:00Z',
   })
   @IsOptional()
   @IsDateString()
-  watchDate?: string;
+  watchDate?: string | null;
 
   // Movie data fields (for editing)
   @ApiPropertyOptional({ description: 'Movie title' })
