@@ -51,6 +51,11 @@ export const groupMovies = pgTable(
   (table) => [
     index('group_movies_group_id_idx').on(table.groupId),
     index('group_movies_group_status_idx').on(table.groupId, table.status),
+    index('group_movies_group_status_date_idx').on(
+      table.groupId,
+      table.status,
+      table.watchDate,
+    ),
     index('group_movies_movie_id_idx').on(table.movieId),
     unique().on(table.groupId, table.movieId),
     check(
