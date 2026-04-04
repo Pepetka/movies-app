@@ -1,5 +1,13 @@
 # api
 
+## 0.8.0
+
+### Minor Changes
+
+- 354709b: Consolidate movie date tracking with improved sorting and validation
+  - Merged plannedDate and watchedDate into a single watchDate field with a constraint that forbids dates on movies with "tracking" status
+  - Added composite database index to optimize group movies sorting
+
 ## 0.7.0
 
 ### Minor Changes
