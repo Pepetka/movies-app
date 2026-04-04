@@ -22,15 +22,15 @@ export class IsValidMovieStatusConstraint implements ValidatorConstraintInterfac
 
     const { status, watchDate } = object;
 
-    if (!status) {
-      return true;
-    }
-
     if ((status === 'planned' || status === 'watched') && !watchDate) {
       return false;
     }
 
     if (status === 'tracking' && watchDate) {
+      return false;
+    }
+
+    if (!status && watchDate) {
       return false;
     }
 
