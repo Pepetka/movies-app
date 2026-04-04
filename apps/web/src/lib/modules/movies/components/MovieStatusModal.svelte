@@ -45,8 +45,7 @@
 	});
 
 	const handleStatusChange = () => {
-		if (form.status !== 'planned') form.plannedDate = null;
-		if (form.status !== 'watched') form.watchedDate = null;
+		if (form.status === 'tracking') form.watchDate = null;
 	};
 
 	const handleSubmit = async (e: Event) => {
@@ -92,29 +91,15 @@
 			{#if form.status === 'planned' || form.status === 'watched'}
 				<Divider label="Дата просмотра" class="status-form__divider" />
 
-				{#if form.status === 'planned'}
-					<DatePicker
-						label="Дата просмотра"
-						bind:value={form.plannedDate}
-						error={fieldValidator.errors.plannedDate}
-						disabled={groupMovieStore.isUpdating}
-						clearable
-						onChange={() => fieldValidator.handleFieldChange(form, 'plannedDate')}
-						inline
-					/>
-				{/if}
-
-				{#if form.status === 'watched'}
-					<DatePicker
-						label="Дата просмотра"
-						bind:value={form.watchedDate}
-						error={fieldValidator.errors.watchedDate}
-						disabled={groupMovieStore.isUpdating}
-						clearable
-						onChange={() => fieldValidator.handleFieldChange(form, 'watchedDate')}
-						inline
-					/>
-				{/if}
+				<DatePicker
+					label="Дата просмотра"
+					bind:value={form.watchDate}
+					error={fieldValidator.errors.watchDate}
+					disabled={groupMovieStore.isUpdating}
+					clearable
+					onChange={() => fieldValidator.handleFieldChange(form, 'watchDate')}
+					inline
+				/>
 			{/if}
 		</div>
 

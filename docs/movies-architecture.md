@@ -63,8 +63,7 @@ group_movies
   runtime             integer
   rating              decimal(3,1)
   status              enum('tracking', 'planned', 'watched') DEFAULT 'tracking'
-  plannedDate         timestamp
-  watchedDate         timestamp
+  watchDate           timestamp
   addedBy             integer REFERENCES users(id) ON DELETE RESTRICT
   createdAt           timestamp
   updatedAt           timestamp
@@ -137,9 +136,9 @@ UNIQUE(groupId, movieId)  -- только для provider фильмов (movieI
 ┌────────────────────────────────────────────────────────────────────────┐
 │  UPDATE                                                                │
 │  PATCH /groups/:id/movies/:id                                          │
-│  { title: "Новое название", status: "watched", watchedDate: "..." }   │
+│  { title: "Новое название", status: "watched", watchDate: "..." }      │
 │                                                                        │
-│  → group_movies.update({ title, status, watchedDate })                 │
+│  → group_movies.update({ title, status, watchDate })                  │
 │                                                                        │
 │  Работает одинаково для provider и custom фильмов                      │
 └────────────────────────────────────────────────────────────────────────┘
@@ -282,9 +281,9 @@ enum GroupMovieStatus {
 ```
 
 **Правила валидации:**
-- `tracking` — даты не требуются и не допускаются
-- `planned` — требуется `plannedDate`
-- `watched` — требуется `watchedDate`
+- `tracking` — дата не требуется и не допускается
+- `planned` — требуется `watchDate`
+- `watched` — требуется `watchDate`
 
 ### AddMovieDto (добавление провайдерского фильма)
 
@@ -310,8 +309,7 @@ enum GroupMovieStatus {
   releaseYear?: number;
   runtime?: number;
   status?: GroupMovieStatus;  // default: 'tracking'
-  plannedDate?: string;       // ISO 8601, требуется если status='planned'
-  watchedDate?: string;       // ISO 8601, требуется если status='watched'
+  watchDate?: string;          // ISO 8601, требуется если status='planned' или 'watched'
 }
 ```
 
@@ -319,10 +317,9 @@ enum GroupMovieStatus {
 
 ```typescript
 {
-  // Статус и даты
+  // Статус и дата
   status?: GroupMovieStatus;
-  plannedDate?: string;   // ISO 8601
-  watchedDate?: string;   // ISO 8601
+  watchDate?: string;    // ISO 8601, для planned/watched
 
   // Данные фильма (для редактирования)
   title?: string;
@@ -395,8 +392,7 @@ interface UnifiedMovie {
   runtime?: number;
   rating?: number;      // parseFloat(dto.rating) для provider, undefined для custom
   status: MovieStatus;  // 'tracking' | 'planned' | 'watched'
-  plannedDate?: string;
-  watchedDate?: string;
+  watchDate?: string;   // ISO 8601, дата просмотра (плановая или фактическая)
   createdAt: string;
   updatedAt: string;
 }
@@ -418,8 +414,7 @@ export const mapToUnified = (movie: GroupMovieResponseDto): UnifiedMovie => ({
   runtime: movie.runtime ?? undefined,
   rating: movie.rating ? parseFloat(movie.rating) : undefined,
   status: movie.status,
-  plannedDate: movie.plannedDate ?? undefined,
-  watchedDate: movie.watchedDate ?? undefined,
+  watchDate: movie.watchDate ?? undefined,
   createdAt: movie.createdAt,
   updatedAt: movie.updatedAt
 });

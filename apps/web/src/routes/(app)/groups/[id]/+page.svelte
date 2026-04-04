@@ -65,11 +65,11 @@
 				: groupMoviesStore.getMoviesByStatus(activeFilter);
 
 		if (activeFilter === 'planned' && movies.length > 1) {
-			return sortByDateField(movies, 'plannedDate', 'asc');
+			return sortByDateField(movies, 'watchDate', 'asc');
 		}
 
 		if (activeFilter === 'watched' && movies.length > 1) {
-			return sortByDateField(movies, 'watchedDate', 'desc');
+			return sortByDateField(movies, 'watchDate', 'desc');
 		}
 
 		return movies;

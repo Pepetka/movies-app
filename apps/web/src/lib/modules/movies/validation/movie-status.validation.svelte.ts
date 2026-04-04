@@ -15,24 +15,22 @@ export const MOVIE_STATUS_OPTIONS: { value: MovieStatus; label: string }[] = [
 export const movieStatusSchema = z
 	.object({
 		status: z.enum(['tracking', 'planned', 'watched']),
-		plannedDate: z.date().nullable(),
-		watchedDate: z.date().nullable()
+		watchDate: z.date().nullable()
 	})
-	.refine((data) => data.status !== 'planned' || data.plannedDate, {
+	.refine((data) => !['planned', 'watched'].includes(data.status) || data.watchDate, {
 		message: 'Укажите дату просмотра',
-		path: ['plannedDate']
+		path: ['watchDate']
 	})
-	.refine((data) => data.status !== 'watched' || data.watchedDate, {
-		message: 'Укажите дату просмотра',
-		path: ['watchedDate']
+	.refine((data) => data.status !== 'tracking' || !data.watchDate, {
+		message: 'Статус "К просмотру" не может иметь дату',
+		path: ['watchDate']
 	});
 
 export type MovieStatusFormData = z.infer<typeof movieStatusSchema>;
 
 export const EMPTY_STATUS_FORM: MovieStatusFormData = {
 	status: 'tracking',
-	plannedDate: null,
-	watchedDate: null
+	watchDate: null
 };
 
 export const validateMovieStatusForm = createValidator(movieStatusSchema);
@@ -40,11 +38,10 @@ export const validateMovieStatusForm = createValidator(movieStatusSchema);
 export const movieStatusFormToUpdateDto = (form: MovieStatusFormData): GroupMovieUpdateDto => {
 	const dto: GroupMovieUpdateDto = { status: form.status };
 
-	if (form.status === 'planned' && form.plannedDate) {
-		dto.plannedDate = form.plannedDate.toISOString();
-	}
-	if (form.status === 'watched' && form.watchedDate) {
-		dto.watchedDate = form.watchedDate.toISOString();
+	if (form.watchDate) {
+		dto.watchDate = form.watchDate.toISOString();
+	} else {
+		dto.watchDate = null;
 	}
 
 	return dto;
@@ -52,10 +49,8 @@ export const movieStatusFormToUpdateDto = (form: MovieStatusFormData): GroupMovi
 
 export const movieStatusFormFromEntity = (movie: {
 	status: MovieStatus;
-	plannedDate?: string;
-	watchedDate?: string;
+	watchDate?: string;
 }): MovieStatusFormData => ({
 	status: movie.status,
-	plannedDate: movie.plannedDate ? new SvelteDate(movie.plannedDate) : null,
-	watchedDate: movie.watchedDate ? new SvelteDate(movie.watchedDate) : null
+	watchDate: movie.watchDate ? new SvelteDate(movie.watchDate) : null
 });

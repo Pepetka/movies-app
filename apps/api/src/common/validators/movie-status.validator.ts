@@ -8,8 +8,7 @@ import {
 
 interface MovieStatusDto {
   status?: string;
-  plannedDate?: string;
-  watchedDate?: string;
+  watchDate?: string;
 }
 
 @ValidatorConstraint({ name: 'isValidMovieStatus', async: false })
@@ -21,21 +20,17 @@ export class IsValidMovieStatusConstraint implements ValidatorConstraintInterfac
       return true;
     }
 
-    const { status, plannedDate, watchedDate } = object;
+    const { status, watchDate } = object;
 
-    if (!status) {
-      return true;
-    }
-
-    if (status === 'planned' && !plannedDate) {
+    if ((status === 'planned' || status === 'watched') && !watchDate) {
       return false;
     }
 
-    if (status === 'watched' && !watchedDate) {
+    if (status === 'tracking' && watchDate) {
       return false;
     }
 
-    if (status === 'tracking' && (plannedDate || watchedDate)) {
+    if (!status && watchDate) {
       return false;
     }
 
@@ -43,7 +38,7 @@ export class IsValidMovieStatusConstraint implements ValidatorConstraintInterfac
   }
 
   defaultMessage(): string {
-    return 'Invalid status and dates combination: planned requires plannedDate, watched requires watchedDate, tracking cannot have dates';
+    return 'Invalid status/date combination: planned and watched require watchDate, tracking cannot have a date';
   }
 }
 

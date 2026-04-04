@@ -42,8 +42,7 @@ export const groupMovies = pgTable(
     runtime: integer(),
     rating: decimal({ precision: 3, scale: 1 }),
     status: groupMovieStatusEnum('status').notNull().default('tracking'),
-    plannedDate: timestamp(),
-    watchedDate: timestamp(),
+    watchDate: timestamp(),
     addedBy: integer()
       .references(() => users.id, { onDelete: 'restrict' })
       .notNull(),
@@ -52,6 +51,11 @@ export const groupMovies = pgTable(
   (table) => [
     index('group_movies_group_id_idx').on(table.groupId),
     index('group_movies_group_status_idx').on(table.groupId, table.status),
+    index('group_movies_group_status_date_idx').on(
+      table.groupId,
+      table.status,
+      table.watchDate,
+    ),
     index('group_movies_movie_id_idx').on(table.movieId),
     unique().on(table.groupId, table.movieId),
     check(
@@ -59,12 +63,16 @@ export const groupMovies = pgTable(
       sql`((${table.source} = 'provider' AND ${table.movieId} IS NOT NULL) OR (${table.source} = 'custom' AND ${table.movieId} IS NULL))`,
     ),
     check(
-      'planned_requires_planned_date',
-      sql`(${table.status} != 'planned' OR ${table.plannedDate} IS NOT NULL)`,
+      'planned_requires_watch_date',
+      sql`(${table.status} != 'planned' OR ${table.watchDate} IS NOT NULL)`,
     ),
     check(
-      'watched_requires_watched_date',
-      sql`(${table.status} != 'watched' OR ${table.watchedDate} IS NOT NULL)`,
+      'watched_requires_watch_date',
+      sql`(${table.status} != 'watched' OR ${table.watchDate} IS NOT NULL)`,
+    ),
+    check(
+      'tracking_forbids_watch_date',
+      sql`(${table.status} != 'tracking' OR ${table.watchDate} IS NULL)`,
     ),
   ],
 );

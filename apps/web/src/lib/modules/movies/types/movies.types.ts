@@ -15,8 +15,7 @@ export interface UnifiedMovie {
 	runtime?: number;
 	rating?: number;
 	status: MovieStatus;
-	plannedDate?: string;
-	watchedDate?: string;
+	watchDate?: string;
 	createdAt: string;
 	updatedAt: string;
 }
@@ -32,8 +31,7 @@ export const mapToUnified = (movie: GroupMovieResponseDto): UnifiedMovie => ({
 	runtime: movie.runtime ?? undefined,
 	rating: movie.rating ? parseFloat(movie.rating) : undefined,
 	status: movie.status,
-	plannedDate: movie.plannedDate ?? undefined,
-	watchedDate: movie.watchedDate ?? undefined,
+	watchDate: movie.watchDate ?? undefined,
 	createdAt: movie.createdAt,
 	updatedAt: movie.updatedAt
 });
