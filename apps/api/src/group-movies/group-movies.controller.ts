@@ -158,6 +158,7 @@ export class GroupMoviesController {
     status: 403,
     description: 'Forbidden - Not a group moderator',
   })
+  @ApiResponse({ status: 400, description: 'Invalid status/date combination' })
   createCustomMovie(
     @Param('groupId', ParseIntPipe) groupId: number,
     @Body() dto: CreateCustomMovieDto,
@@ -213,6 +214,7 @@ export class GroupMoviesController {
     status: 403,
     description: 'Forbidden - Not a group moderator',
   })
+  @ApiResponse({ status: 400, description: 'Invalid status/date combination' })
   update(
     @Param('groupId', ParseIntPipe) groupId: number,
     @Param('id', ParseIntPipe) id: number,
