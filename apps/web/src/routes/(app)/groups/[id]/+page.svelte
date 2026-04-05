@@ -14,6 +14,7 @@
 		sortByDateField,
 		withCurrentQuery,
 		buildPath,
+		goBack,
 		type RouteValue
 	} from '$lib/utils';
 	import { groupStore } from '$lib/modules/groups';
@@ -40,7 +41,7 @@
 		topBarStore.configure({
 			title: groupStore.currentGroup?.name ?? 'Группа',
 			showBack: true,
-			onBack: () => goto(ROUTES.GROUPS),
+			onBack: () => goBack(ROUTES.GROUPS),
 			trailingAction: groupStore.isModerator
 				? {
 						Icon: Pencil,

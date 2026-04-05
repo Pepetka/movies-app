@@ -9,9 +9,9 @@
 		type CustomMovieFormData
 	} from '$lib/modules/movies';
 	import { groupStore } from '$lib/modules/groups';
+	import { goBack, ROUTES } from '$lib/utils';
 	import { topBarStore } from '$lib/stores';
 	import { goto } from '$app/navigation';
-	import { ROUTES } from '$lib/utils';
 	import { page } from '$app/state';
 
 	const groupId = $derived(Number(page.params.id));
@@ -23,7 +23,7 @@
 		topBarStore.configure({
 			title: 'Новый фильм',
 			showBack: true,
-			onBack: () => goto(ROUTES.GROUP_MOVIES_SEARCH(groupId))
+			onBack: () => goBack(ROUTES.GROUP_MOVIES_SEARCH(groupId))
 		});
 		return () => {
 			topBarStore.destroy();

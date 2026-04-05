@@ -3,7 +3,7 @@ export { ROUTES } from './routes';
 export { debounce } from './debounce';
 export { DEBOUNCE } from './config';
 export { formatDate, formatRuntime, sortByDateField } from './format';
-export { getSafeRedirect, withCurrentQuery, buildPath } from './navigation.svelte';
+export { getSafeRedirect, goBack, withCurrentQuery, buildPath } from './navigation.svelte';
 export type { Route, RouteValue } from './routes';
 export {
 	createValidator,

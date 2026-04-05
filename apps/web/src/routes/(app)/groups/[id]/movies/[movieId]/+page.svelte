@@ -8,7 +8,7 @@
 		MovieStatusBadge,
 		MovieStatusModal
 	} from '$lib/modules/movies';
-	import { ROUTES, formatDate, formatRuntime, withCurrentQuery } from '$lib/utils';
+	import { ROUTES, formatDate, formatRuntime, withCurrentQuery, goBack } from '$lib/utils';
 	import { PagePlaceholder } from '$lib/ui';
 	import { topBarStore } from '$lib/stores';
 	import { goto } from '$app/navigation';
@@ -25,9 +25,7 @@
 		topBarStore.configure({
 			title: movie?.title ?? (isLoading ? '' : 'Фильм'),
 			showBack: true,
-			onBack: () => {
-				void goto(withCurrentQuery(ROUTES.GROUP_DETAIL(groupId), ['tab']));
-			},
+			onBack: () => goBack(withCurrentQuery(ROUTES.GROUP_DETAIL(groupId), ['tab'])),
 			trailingAction: groupMovieDetailStore.isModerator
 				? {
 						Icon: Pencil,
