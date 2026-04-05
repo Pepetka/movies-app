@@ -20,9 +20,18 @@
 		...restProps
 	}: IProps = $props();
 
-	let imageLoaded = $state(isImageCached(src));
+	let imageLoaded = $state(false);
 	let imageError = $state(false);
 	let imgElement: HTMLImageElement | undefined = $state();
+	let prevSrc: string | undefined | null = undefined;
+
+	$effect(() => {
+		if (src !== prevSrc) {
+			prevSrc = src;
+			imageLoaded = isImageCached(src);
+			imageError = false;
+		}
+	});
 
 	const formatDimension = (value: string | number | undefined): string | undefined => {
 		if (value === undefined) return undefined;
@@ -40,12 +49,6 @@
 		imageLoaded = false;
 		imageError = true;
 	};
-
-	$effect(() => {
-		const _src = src;
-		imageLoaded = isImageCached(_src);
-		imageError = false;
-	});
 
 	const showImage = $derived(!skeleton && src && imageLoaded && !imageError);
 	const showSkeleton = $derived(skeleton || (src && !imageLoaded && !imageError));

@@ -22,14 +22,17 @@
 		...restProps
 	}: IProps = $props();
 
-	let imageLoaded = $state(isImageCached(src));
+	let imageLoaded = $state(false);
 	let imageError = $state(false);
 	let imgElement: HTMLImageElement | undefined = $state();
+	let prevSrc: string | undefined | null = undefined;
 
 	$effect(() => {
-		const _src = src;
-		imageLoaded = isImageCached(_src);
-		imageError = false;
+		if (src !== prevSrc) {
+			prevSrc = src;
+			imageLoaded = isImageCached(src);
+			imageError = false;
+		}
 	});
 
 	const handleImageLoad = () => {
