@@ -9,7 +9,7 @@ export const goBack = (fallback: Route): void => {
 	if (window.history.length > 1) {
 		history.back();
 	} else {
-		goto(fallback);
+		void goto(fallback);
 	}
 };
 
