@@ -32,21 +32,14 @@
 		imageError = false;
 	});
 
-	$effect(() => {
-		if (imgElement && src) {
-			if (imgElement.complete && imgElement.naturalHeight > 0) {
-				imageLoaded = true;
-				imageError = false;
-			}
-		}
-	});
-
 	const handleImageLoad = () => {
+		if (imgElement?.getAttribute('src') !== src) return;
 		imageLoaded = true;
 		imageError = false;
 	};
 
 	const handleImageError = () => {
+		if (imgElement?.getAttribute('src') !== src) return;
 		imageLoaded = false;
 		imageError = true;
 	};

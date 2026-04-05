@@ -30,11 +30,13 @@
 	};
 
 	const handleImageLoad = () => {
+		if (imgElement?.getAttribute('src') !== src) return;
 		imageLoaded = true;
 		imageError = false;
 	};
 
 	const handleImageError = () => {
+		if (imgElement?.getAttribute('src') !== src) return;
 		imageLoaded = false;
 		imageError = true;
 	};
@@ -43,15 +45,6 @@
 		const _src = src;
 		imageLoaded = isImageCached(_src);
 		imageError = false;
-	});
-
-	$effect(() => {
-		if (imgElement && src) {
-			if (imgElement.complete && imgElement.naturalHeight > 0) {
-				imageLoaded = true;
-				imageError = false;
-			}
-		}
 	});
 
 	const showImage = $derived(!skeleton && src && imageLoaded && !imageError);
