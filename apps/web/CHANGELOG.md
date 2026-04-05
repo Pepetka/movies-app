@@ -1,5 +1,17 @@
 # web
 
+## 0.15.0
+
+### Minor Changes
+
+- ffd2541: Improve navigation UX with scroll position restoration
+  - Restore scroll position when navigating back to previously visited pages
+
+### Patch Changes
+
+- Updated dependencies [ffd2541]
+  - @repo/ui@0.9.0
+
 ## 0.14.1
 
 ### Patch Changes

@@ -1,5 +1,12 @@
 # @repo/ui
 
+## 0.9.0
+
+### Minor Changes
+
+- ffd2541: Improve image loading experience
+  - Prevent skeleton flash for cached images by tracking load state
+
 ## 0.8.1
 
 ### Patch Changes
