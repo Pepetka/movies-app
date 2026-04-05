@@ -2,6 +2,7 @@
 	import { ImageOff } from '@lucide/svelte';
 
 	import type { IProps } from './Image.types.svelte';
+	import { isImageCached } from '../../utils/image';
 	import { Skeleton } from '../Skeleton';
 
 	const {
@@ -19,7 +20,7 @@
 		...restProps
 	}: IProps = $props();
 
-	let imageLoaded = $state(false);
+	let imageLoaded = $state(isImageCached(src));
 	let imageError = $state(false);
 	let imgElement: HTMLImageElement | undefined = $state();
 
@@ -40,7 +41,7 @@
 
 	$effect(() => {
 		const _src = src;
-		imageLoaded = false;
+		imageLoaded = isImageCached(_src);
 		imageError = false;
 	});
 

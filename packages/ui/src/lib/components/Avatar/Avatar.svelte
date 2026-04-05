@@ -8,6 +8,7 @@
 		type AvatarSize
 	} from '../../utils/avatar-size';
 	import type { IProps } from './Avatar.types.svelte';
+	import { isImageCached } from '../../utils/image';
 	import { Skeleton } from '../Skeleton';
 
 	let {
@@ -21,13 +22,13 @@
 		...restProps
 	}: IProps = $props();
 
-	let imageLoaded = $state(false);
+	let imageLoaded = $state(isImageCached(src));
 	let imageError = $state(false);
 	let imgElement: HTMLImageElement | undefined = $state();
 
 	$effect(() => {
 		const _src = src;
-		imageLoaded = false;
+		imageLoaded = isImageCached(_src);
 		imageError = false;
 	});
 
