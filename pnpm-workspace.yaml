@@ -8,8 +8,8 @@ catalog:
   "@types/node": "^25.5.2"
 
   # Linting & Formatting
-  eslint: "^10.1.0"
-  "@eslint/compat": "^2.0.3"
+  eslint: "^10.2.0"
+  "@eslint/compat": "^2.0.4"
   prettier: "^3.8.0"
 
   # Svelte ecosystem
