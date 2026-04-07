@@ -13,6 +13,7 @@ export * from './components/Container';
 export * from './components/DatePicker';
 export * from './components/Divider';
 export * from './components/Drawer';
+export * from './components/Dropdown';
 export * from './components/EmptyState';
 export * from './components/FAB';
 export * from './components/Grid';

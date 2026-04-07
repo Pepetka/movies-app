@@ -225,6 +225,7 @@
 		align-items: center;
 		justify-content: center;
 		flex-shrink: 0;
+		color: var(--text-secondary);
 	}
 
 	.ui-list-item-content {
