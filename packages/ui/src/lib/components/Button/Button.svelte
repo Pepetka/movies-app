@@ -17,7 +17,7 @@
 	// Variant-specific props
 	const href = $derived('href' in props ? props.href : undefined);
 	const disabled = $derived('disabled' in props ? props.disabled : undefined);
-	const type = $derived('type' in props ? (props.type ?? 'button') : undefined);
+	const type = $derived('href' in props ? undefined : (props.type ?? 'button'));
 
 	const isDisabled = $derived(disabled || loading);
 	const isLink = $derived(!!href);

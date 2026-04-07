@@ -84,13 +84,17 @@
 	};
 
 	const handleOverlayClick = (e: MouseEvent) => {
-		if (closeOnOverlay && e.target === overlayElement) {
+		if (
+			closeOnOverlay &&
+			overlayElement?.contains(e.target as Node) &&
+			!drawerElement?.contains(e.target as Node)
+		) {
 			close();
 		}
 	};
 
 	const startDrag = (clientY: number) => {
-		if (position !== 'bottom' || !drawerElement) return;
+		if (position !== 'bottom' || !drawerElement || !closeOnOverlay) return;
 		drawerHeight = drawerElement.offsetHeight;
 		dragStartY = clientY;
 		dragOffset = 0;
@@ -228,10 +232,13 @@
 		open ? 'open' : '',
 		isDragging && position === 'bottom' ? 'dragging' : ''
 	]}
-	style:opacity={isDragging && position === 'bottom' ? overlayOpacity : undefined}
 	onclick={handleOverlayClick}
 	aria-hidden={!open}
 >
+	<div
+		class="ui-drawer-backdrop"
+		style:opacity={isDragging && position === 'bottom' ? overlayOpacity : undefined}
+	></div>
 	<div
 		bind:this={drawerElement}
 		class={[
@@ -248,7 +255,7 @@
 		tabindex="-1"
 		{...restProps}
 	>
-		{#if position === 'bottom'}
+		{#if position === 'bottom' && closeOnOverlay}
 			<button
 				bind:this={handleElement}
 				type="button"
@@ -286,16 +293,23 @@
 		position: fixed;
 		inset: 0;
 		z-index: var(--z-modal-backdrop);
-		background-color: var(--bg-overlay);
 		visibility: hidden;
-		opacity: 0;
-		transition:
-			opacity var(--transition-base) var(--ease-out),
-			visibility var(--transition-base) var(--ease-out);
+		transition: visibility var(--transition-base) var(--ease-out);
 	}
 
 	.ui-drawer-overlay.open {
 		visibility: visible;
+	}
+
+	.ui-drawer-backdrop {
+		position: absolute;
+		inset: 0;
+		background-color: var(--bg-overlay);
+		opacity: 0;
+		transition: opacity var(--transition-base) var(--ease-out);
+	}
+
+	.ui-drawer-overlay.open .ui-drawer-backdrop {
 		opacity: 1;
 	}
 
@@ -392,7 +406,7 @@
 		display: flex;
 		align-items: center;
 		gap: var(--space-3);
-		padding: var(--space-4) var(--space-5);
+		padding: 0 var(--space-4) var(--space-5);
 		flex-shrink: 0;
 	}
 
