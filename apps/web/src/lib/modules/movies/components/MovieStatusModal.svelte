@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Button, DatePicker, Divider, Modal, Select, toast } from '@repo/ui';
+	import { Button, DatePicker, Divider, Sheet, Select, toast } from '@repo/ui';
 	import { untrack } from 'svelte';
 
 	import { createFormFieldValidator } from '$lib/utils/validation.svelte';
@@ -69,8 +69,11 @@
 	};
 </script>
 
-<Modal bind:open size="sm">
+<Sheet bind:open size="sm">
 	{#snippet header()}
+		<h2>Изменить статус</h2>
+	{/snippet}
+	{#snippet drawerHeader()}
 		<h2>Изменить статус</h2>
 	{/snippet}
 
@@ -116,7 +119,7 @@
 			</Button>
 		</div>
 	</form>
-</Modal>
+</Sheet>
 
 <style>
 	.status-form {

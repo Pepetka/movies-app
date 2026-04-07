@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Avatar, Badge, Button, Card, IconButton, Input, Modal, Spinner, toast } from '@repo/ui';
+	import { Avatar, Badge, Button, Card, IconButton, Input, Sheet, Spinner, toast } from '@repo/ui';
 	import { Check, Copy, MoreVertical, RefreshCw } from '@lucide/svelte';
 	import type { BadgeVariant } from '@repo/ui';
 
@@ -196,8 +196,11 @@
 	</div>
 {/if}
 
-<Modal open={showConfirmRegenerate} size="sm" onClose={() => (showConfirmRegenerate = false)}>
+<Sheet open={showConfirmRegenerate} size="sm" onClose={() => (showConfirmRegenerate = false)}>
 	{#snippet header(_close)}
+		<h3>Пересоздать ссылку?</h3>
+	{/snippet}
+	{#snippet drawerHeader()}
 		<h3>Пересоздать ссылку?</h3>
 	{/snippet}
 	<p>Старая ссылка перестанет работать.</p>
@@ -205,7 +208,7 @@
 		<Button variant="ghost" onclick={close}>Отмена</Button>
 		<Button onclick={confirmRegenerate}>Пересоздать</Button>
 	{/snippet}
-</Modal>
+</Sheet>
 
 <style>
 	.loading-state {
