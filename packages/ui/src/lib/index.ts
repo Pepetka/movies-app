@@ -22,6 +22,7 @@ export * from './components/Input';
 export * from './components/List';
 export * from './components/Modal';
 export * from './components/Select';
+export * from './components/Sheet';
 export * from './components/Skeleton';
 export * from './components/Spacer';
 export * from './components/Spinner';
