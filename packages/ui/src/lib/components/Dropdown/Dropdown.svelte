@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { fly } from 'svelte/transition';
 
+	import { getFocusableElements } from '../../utils/focus-trap';
 	import { DROPDOWN_FLY } from '../../utils/transitions';
 	import type { IProps } from './Dropdown.types.svelte';
 	import { generateId } from '../../utils/id';
@@ -47,6 +48,36 @@
 			close();
 		}
 	};
+
+	const handleContentKeydown = (e: KeyboardEvent) => {
+		if (!containerRef) return;
+
+		if (e.key === 'ArrowDown' || e.key === 'ArrowUp' || e.key === 'Home' || e.key === 'End') {
+			e.preventDefault();
+			const menu = containerRef.querySelector('[role="menu"]');
+			if (!menu) return;
+			const elements = getFocusableElements(menu as HTMLElement);
+			if (elements.length === 0) return;
+
+			const activeIdx = elements.indexOf(document.activeElement as HTMLElement);
+			let nextIdx: number;
+			if (e.key === 'ArrowDown') nextIdx = activeIdx < elements.length - 1 ? activeIdx + 1 : 0;
+			else if (e.key === 'ArrowUp') nextIdx = activeIdx > 0 ? activeIdx - 1 : elements.length - 1;
+			else if (e.key === 'Home') nextIdx = 0;
+			else nextIdx = elements.length - 1;
+
+			elements[nextIdx].focus();
+		} else if (e.key === 'Enter' || e.key === ' ') {
+			e.preventDefault();
+			handleContentClick();
+		}
+	};
+
+	const focusFirst = (node: HTMLElement) => {
+		const elements = getFocusableElements(node);
+		if (elements.length > 0) elements[0].focus();
+	};
+
 	$effect(() => {
 		if (isOpen) {
 			const controller = new AbortController();
@@ -88,9 +119,8 @@
 			role="menu"
 			tabindex="-1"
 			onclick={handleContentClick}
-			onkeydown={(e) => {
-				if (e.key === 'Enter' || e.key === ' ') handleContentClick();
-			}}
+			onkeydown={handleContentKeydown}
+			use:focusFirst
 			in:fly={flyParams}
 			out:fly={flyParams}
 		>
@@ -117,6 +147,10 @@
 	.ui-dropdown-trigger:focus-visible {
 		outline: 2px solid var(--border-focus);
 		outline-offset: 2px;
+	}
+
+	.ui-dropdown-content :global(button:focus-visible) {
+		background-color: var(--bg-secondary);
 	}
 
 	/* Content */
