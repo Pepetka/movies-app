@@ -217,7 +217,7 @@
 		<div
 			bind:this={drawerElement}
 			class={['ui-drawer', position, isDragging ? 'dragging' : '', className]}
-			style="--drawer-size: {drawerSize}; --drag-transform: {dragTransform}"
+			style="--drawer-size: {drawerSize}; --drag-transform: {dragTransform}; --drawer-bottom-offset: {OVERSCROLL_LIMIT}px"
 			role="dialog"
 			aria-modal="true"
 			aria-labelledby={header ? headerId : undefined}
@@ -304,9 +304,9 @@
 	.ui-drawer.bottom {
 		left: 0;
 		right: 0;
-		bottom: -80px;
+		bottom: calc(-1 * var(--drawer-bottom-offset));
 		max-height: 85vh;
-		padding-bottom: 80px;
+		padding-bottom: var(--drawer-bottom-offset);
 		border-radius: var(--radius-2xl) var(--radius-2xl) 0 0;
 	}
 
