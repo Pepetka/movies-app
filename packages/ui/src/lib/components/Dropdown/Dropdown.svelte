@@ -88,7 +88,9 @@
 			role="menu"
 			tabindex="-1"
 			onclick={handleContentClick}
-			onkeydown={handleContentClick}
+			onkeydown={(e) => {
+				if (e.key === 'Enter' || e.key === ' ') handleContentClick();
+			}}
 			in:fly={flyParams}
 			out:fly={flyParams}
 		>
