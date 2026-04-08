@@ -131,9 +131,6 @@
 		{#snippet header()}
 			<h2>Удалить фильм?</h2>
 		{/snippet}
-		{#snippet drawerHeader()}
-			<h2>Удалить фильм?</h2>
-		{/snippet}
 
 		<p class="modal-text">
 			Вы уверены, что хотите удалить фильм "{groupMovieDetailStore.movie?.title}" из группы? Это

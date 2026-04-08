@@ -31,7 +31,7 @@
 		{closeOnOverlay}
 		{closeOnEscape}
 		{onClose}
-		header={drawerHeader}
+		header={drawerHeader ?? header}
 		{footer}
 	>
 		{@render children?.()}

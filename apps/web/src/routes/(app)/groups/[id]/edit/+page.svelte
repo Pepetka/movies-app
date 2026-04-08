@@ -106,9 +106,6 @@
 	{#snippet header()}
 		<h2>Удалить группу?</h2>
 	{/snippet}
-	{#snippet drawerHeader()}
-		<h2>Удалить группу?</h2>
-	{/snippet}
 
 	<p class="modal-text">
 		Вы уверены, что хотите удалить группу "{groupStore.currentGroup?.name}"? Это действие нельзя

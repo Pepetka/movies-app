@@ -73,9 +73,6 @@
 	{#snippet header()}
 		<h2>Изменить статус</h2>
 	{/snippet}
-	{#snippet drawerHeader()}
-		<h2>Изменить статус</h2>
-	{/snippet}
 
 	<form class="status-form" onsubmit={handleSubmit}>
 		<div class="status-form__body">

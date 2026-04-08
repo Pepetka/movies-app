@@ -42,9 +42,6 @@
 				<h2>Sheet</h2>
 				<IconButton Icon={X} label="Close" onclick={close} />
 			{/snippet}
-			{#snippet drawerHeader()}
-				<h2>Sheet</h2>
-			{/snippet}
 
 			<p>
 				На мобильном (<code>&lt;640px</code>) отображается как Drawer снизу. На десктопе — как
@@ -72,9 +69,6 @@
 				<h2>Sheet Size: md</h2>
 				<IconButton Icon={X} label="Close" onclick={close} />
 			{/snippet}
-			{#snippet drawerHeader()}
-				<h2>Sheet Size: md</h2>
-			{/snippet}
 
 			<p>Size влияет только на десктопный Modal. На мобильном всегда — Drawer на всю ширину.</p>
 
@@ -93,9 +87,6 @@
 			{#snippet header(close)}
 				<h2>Подтверждение удаления</h2>
 				<IconButton Icon={X} label="Close" onclick={close} />
-			{/snippet}
-			{#snippet drawerHeader()}
-				<h2>Подтверждение удаления</h2>
 			{/snippet}
 
 			<p>Вы уверены, что хотите удалить этот элемент? Это действие нельзя отменить.</p>
@@ -121,9 +112,6 @@
 			{#snippet header(close)}
 				<h2>Добавить пользователя</h2>
 				<IconButton Icon={X} label="Close" onclick={close} />
-			{/snippet}
-			{#snippet drawerHeader()}
-				<h2>Добавить пользователя</h2>
 			{/snippet}
 
 			<div style="display: flex; flex-direction: column; gap: var(--space-4);">
@@ -161,9 +149,6 @@
 
 		<Sheet bind:open={strictOpen} size="md" closeOnOverlay={false}>
 			{#snippet header()}
-				<h2>Обязательное действие</h2>
-			{/snippet}
-			{#snippet drawerHeader()}
 				<h2>Обязательное действие</h2>
 			{/snippet}
 

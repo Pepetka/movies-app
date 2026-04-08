@@ -197,10 +197,7 @@
 {/if}
 
 <Sheet open={showConfirmRegenerate} size="sm" onClose={() => (showConfirmRegenerate = false)}>
-	{#snippet header(_close)}
-		<h3>Пересоздать ссылку?</h3>
-	{/snippet}
-	{#snippet drawerHeader()}
+	{#snippet header()}
 		<h3>Пересоздать ссылку?</h3>
 	{/snippet}
 	<p>Старая ссылка перестанет работать.</p>
