@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { fly } from 'svelte/transition';
 
+	import { DROPDOWN_FLY } from '../../utils/transitions';
 	import type { IProps } from './Dropdown.types.svelte';
 	import { generateId } from '../../utils/id';
 
@@ -16,7 +17,7 @@
 
 	const dropdownId = generateId();
 
-	const flyY = $derived(position.startsWith('top') ? 10 : -10);
+	const flyParams = $derived(position.startsWith('top') ? DROPDOWN_FLY.top : DROPDOWN_FLY.bottom);
 
 	let isOpen = $state(false);
 	let containerRef = $state.raw<HTMLDivElement | null>(null);
@@ -36,7 +37,7 @@
 	};
 
 	const handleKeydown = (e: KeyboardEvent) => {
-		if (closeOnEscape && isOpen && e.key === 'Escape') {
+		if (closeOnEscape && e.key === 'Escape') {
 			close();
 		}
 	};
@@ -57,7 +58,7 @@
 	});
 </script>
 
-<svelte:window onkeydown={handleKeydown} />
+<svelte:window onkeydown={isOpen ? handleKeydown : undefined} />
 
 <div bind:this={containerRef} class={['ui-dropdown', className]} {...restProps}>
 	<div
@@ -83,8 +84,8 @@
 			tabindex="-1"
 			onclick={handleContentClick}
 			onkeydown={handleContentClick}
-			in:fly={{ y: flyY, duration: 150 }}
-			out:fly={{ y: flyY, duration: 150 }}
+			in:fly={flyParams}
+			out:fly={flyParams}
 		>
 			{@render items()}
 		</div>

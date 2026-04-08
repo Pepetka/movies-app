@@ -1,4 +1,7 @@
 <script lang="ts">
+	import { fade, fly } from 'svelte/transition';
+
+	import { OVERLAY_FADE, MODAL_FLY } from '../../utils/transitions';
 	import type { IProps } from './Modal.types.svelte';
 	import { generateId } from '../../utils/id';
 
@@ -59,7 +62,6 @@
 	};
 
 	const handleKeydown = (e: KeyboardEvent) => {
-		if (!open) return;
 		if (closeOnEscape && e.key === 'Escape') {
 			close();
 		}
@@ -112,44 +114,48 @@
 	});
 </script>
 
-<svelte:window onkeydown={handleKeydown} />
+<svelte:window onkeydown={open ? handleKeydown : undefined} />
 
-<div
-	bind:this={overlayElement}
-	class={['ui-modal-overlay', open ? 'open' : '', className]}
-	role="presentation"
-	onclick={handleOverlayClick}
-	onkeydown={() => {}}
-	aria-hidden={!open}
->
+{#if open}
 	<div
-		bind:this={modalElement}
-		class={['ui-modal', size]}
-		role="dialog"
-		aria-modal="true"
-		aria-labelledby={header ? headerId : undefined}
-		tabindex="-1"
-		{...restProps}
+		bind:this={overlayElement}
+		class={['ui-modal-overlay', className]}
+		role="presentation"
+		onclick={handleOverlayClick}
+		in:fade={OVERLAY_FADE}
+		out:fade={OVERLAY_FADE}
 	>
-		{#if header}
-			<div class="ui-modal-header" id={headerId}>
-				{@render header(close)}
-			</div>
-		{/if}
+		<div
+			bind:this={modalElement}
+			class={['ui-modal', size]}
+			role="dialog"
+			aria-modal="true"
+			aria-labelledby={header ? headerId : undefined}
+			tabindex="-1"
+			in:fly={MODAL_FLY}
+			out:fly={MODAL_FLY}
+			{...restProps}
+		>
+			{#if header}
+				<div class="ui-modal-header" id={headerId}>
+					{@render header(close)}
+				</div>
+			{/if}
 
-		{#if children}
-			<div class="ui-modal-body">
-				{@render children()}
-			</div>
-		{/if}
+			{#if children}
+				<div class="ui-modal-body">
+					{@render children()}
+				</div>
+			{/if}
 
-		{#if footer}
-			<div class="ui-modal-footer">
-				{@render footer(close)}
-			</div>
-		{/if}
+			{#if footer}
+				<div class="ui-modal-footer">
+					{@render footer(close)}
+				</div>
+			{/if}
+		</div>
 	</div>
-</div>
+{/if}
 
 <style>
 	.ui-modal-overlay {
@@ -161,16 +167,6 @@
 		justify-content: center;
 		padding: var(--space-4);
 		background-color: var(--bg-overlay);
-		visibility: hidden;
-		opacity: 0;
-		transition:
-			opacity var(--transition-base) var(--ease-out),
-			visibility var(--transition-base) var(--ease-out);
-	}
-
-	.ui-modal-overlay.open {
-		visibility: visible;
-		opacity: 1;
 	}
 
 	.ui-modal {
@@ -182,17 +178,7 @@
 		background-color: var(--bg-primary);
 		border-radius: var(--radius-2xl);
 		box-shadow: var(--shadow-xl);
-		opacity: 0;
-		transform: translateY(var(--space-4)) scale(0.95);
-		transition:
-			opacity var(--transition-base) var(--ease-out),
-			transform var(--transition-base) var(--ease-out);
 		overflow: hidden;
-	}
-
-	.ui-modal-overlay.open .ui-modal {
-		opacity: 1;
-		transform: translateY(0) scale(1);
 	}
 
 	/* Sizes */
