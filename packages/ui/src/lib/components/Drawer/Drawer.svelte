@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { fade, fly } from 'svelte/transition';
 
+	import { createFocusTrap, getFocusableElements } from '../../utils/focus-trap';
 	import type { IProps, DrawerPosition } from './Drawer.types.svelte';
 	import { OVERLAY_FADE, DRAWER_FLY } from '../../utils/transitions';
 	import { generateId } from '../../utils/id';
@@ -41,42 +42,7 @@
 	const OVERSCROLL_LIMIT = 80;
 	const OVERSCROLL_RESISTANCE = 0.4;
 
-	const getFocusableElements = (container: HTMLElement): HTMLElement[] => {
-		const focusableSelectors = [
-			'a[href]',
-			'button:not([disabled])',
-			'textarea:not([disabled])',
-			'input:not([disabled])',
-			'select:not([disabled])',
-			'[tabindex]:not([tabindex="-1"])'
-		];
-		return Array.from(container.querySelectorAll(focusableSelectors.join(', '))).filter(
-			(el) => getComputedStyle(el).display !== 'none'
-		) as HTMLElement[];
-	};
-
-	const trapFocus = (e: KeyboardEvent) => {
-		if (!drawerElement) return;
-		const focusableElements = getFocusableElements(drawerElement);
-		if (focusableElements.length === 0) return;
-
-		const firstElement = focusableElements[0];
-		const lastElement = focusableElements[focusableElements.length - 1];
-
-		if (e.key === 'Tab') {
-			if (e.shiftKey) {
-				if (document.activeElement === firstElement) {
-					e.preventDefault();
-					lastElement.focus();
-				}
-			} else {
-				if (document.activeElement === lastElement) {
-					e.preventDefault();
-					firstElement.focus();
-				}
-			}
-		}
-	};
+	const trapFocus = createFocusTrap(() => drawerElement);
 
 	const handleKeydown = (e: KeyboardEvent) => {
 		if (closeOnEscape && e.key === 'Escape') {

@@ -65,7 +65,12 @@
 		class="ui-dropdown-trigger"
 		role="button"
 		onclick={toggle}
-		onkeydown={(e) => (e.key === 'Enter' || e.key === ' ' ? toggle() : undefined)}
+		onkeydown={(e) => {
+			if (e.key === 'Enter' || e.key === ' ') {
+				e.preventDefault();
+				toggle();
+			}
+		}}
 		aria-haspopup="menu"
 		aria-expanded={isOpen}
 		aria-controls={isOpen ? dropdownId : undefined}
