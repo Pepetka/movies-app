@@ -77,17 +77,20 @@
 			{/snippet}
 
 			<List>
-				<ListItem>
-					<User style="width: 20px;" />
-					<span>Профиль</span>
+				<ListItem title="Профиль">
+					{#snippet leading()}
+						<User size={20} />
+					{/snippet}
 				</ListItem>
-				<ListItem>
-					<Bell style="width: 20px;" />
-					<span>Уведомления</span>
+				<ListItem title="Уведомления">
+					{#snippet leading()}
+						<Bell size={20} />
+					{/snippet}
 				</ListItem>
-				<ListItem>
-					<Settings style="width: 20px;" />
-					<span>Настройки</span>
+				<ListItem title="Настройки">
+					{#snippet leading()}
+						<Settings size={20} />
+					{/snippet}
 				</ListItem>
 			</List>
 
@@ -158,35 +161,31 @@
 
 		<Drawer bind:open={bottomOpen} position="bottom">
 			<List>
-				<ListItem>
-					<div style="display: flex; align-items: center; gap: var(--space-2);">
-						<Plus style="width: 20px;" />
-						<span>Создать новый</span>
-					</div>
+				<ListItem title="Создать новый">
+					{#snippet leading()}
+						<Plus size={20} />
+					{/snippet}
 				</ListItem>
-				<ListItem>
-					<div style="display: flex; align-items: center; gap: var(--space-2);">
+				<ListItem title="Редактировать">
+					{#snippet leading()}
 						<div
 							style="width: 20px; height: 20px; background: var(--bg-secondary); border-radius: var(--radius-sm);"
 						></div>
-						<span>Редактировать</span>
-					</div>
+					{/snippet}
 				</ListItem>
-				<ListItem>
-					<div style="display: flex; align-items: center; gap: var(--space-2);">
+				<ListItem title="Поделиться">
+					{#snippet leading()}
 						<div
 							style="width: 20px; height: 20px; background: var(--bg-secondary); border-radius: var(--radius-sm);"
 						></div>
-						<span>Поделиться</span>
-					</div>
+					{/snippet}
 				</ListItem>
-				<ListItem>
-					<div style="display: flex; align-items: center; gap: var(--space-2);">
+				<ListItem title="Дублировать">
+					{#snippet leading()}
 						<div
 							style="width: 20px; height: 20px; background: var(--bg-secondary); border-radius: var(--radius-sm);"
 						></div>
-						<span>Дублировать</span>
-					</div>
+					{/snippet}
 				</ListItem>
 			</List>
 		</Drawer>
@@ -242,38 +241,20 @@
 			{/snippet}
 
 			<List>
-				<ListItem>
-					<div style="display: flex; align-items: center; gap: var(--space-3); flex: 1;">
+				<ListItem title="В сети" subtitle="Показывать всем">
+					{#snippet leading()}
 						<StatusIndicator status="online" />
-						<div style="flex: 1;">
-							<div style="font-weight: var(--font-medium);">В сети</div>
-							<div style="font-size: var(--text-sm); color: var(--text-tertiary);">
-								Показывать всем
-							</div>
-						</div>
-					</div>
+					{/snippet}
 				</ListItem>
-				<ListItem>
-					<div style="display: flex; align-items: center; gap: var(--space-3); flex: 1;">
+				<ListItem title="Не беспокоить" subtitle="Отключить уведомления">
+					{#snippet leading()}
 						<StatusIndicator status="degraded" />
-						<div style="flex: 1;">
-							<div style="font-weight: var(--font-medium);">Не беспокоить</div>
-							<div style="font-size: var(--text-sm); color: var(--text-tertiary);">
-								Отключить уведомления
-							</div>
-						</div>
-					</div>
+					{/snippet}
 				</ListItem>
-				<ListItem>
-					<div style="display: flex; align-items: center; gap: var(--space-3); flex: 1;">
+				<ListItem title="Невидимый" subtitle="Скрыть статус">
+					{#snippet leading()}
 						<StatusIndicator status="offline" />
-						<div style="flex: 1;">
-							<div style="font-weight: var(--font-medium);">Невидимый</div>
-							<div style="font-size: var(--text-sm); color: var(--text-tertiary);">
-								Скрыть статус
-							</div>
-						</div>
-					</div>
+					{/snippet}
 				</ListItem>
 			</List>
 		</Drawer>
@@ -384,17 +365,20 @@
 				{/snippet}
 
 				<List>
-					<ListItem>
-						<User style="width: 20px;" />
-						<span>Профиль</span>
+					<ListItem title="Профиль">
+						{#snippet leading()}
+							<User size={20} />
+						{/snippet}
 					</ListItem>
-					<ListItem>
-						<Bell style="width: 20px;" />
-						<span>Уведомления</span>
+					<ListItem title="Уведомления">
+						{#snippet leading()}
+							<Bell size={20} />
+						{/snippet}
 					</ListItem>
-					<ListItem>
-						<Settings style="width: 20px;" />
-						<span>Настройки</span>
+					<ListItem title="Настройки">
+						{#snippet leading()}
+							<Settings size={20} />
+						{/snippet}
 					</ListItem>
 				</List>
 			</Drawer>
