@@ -17,11 +17,22 @@
 	}: IProps = $props();
 
 	const dropdownId = generateId();
-
-	const flyParams = $derived(position.startsWith('top') ? DROPDOWN_FLY.top : DROPDOWN_FLY.bottom);
+	const triggerId = `${dropdownId}-trigger`;
 
 	let isOpen = $state(false);
 	let containerRef = $state.raw<HTMLDivElement | null>(null);
+
+	const flyParams = $derived(position.startsWith('top') ? DROPDOWN_FLY.top : DROPDOWN_FLY.bottom);
+
+	$effect(() => {
+		if (isOpen) {
+			const controller = new AbortController();
+			document.addEventListener('click', handleClickOutside, {
+				signal: controller.signal
+			});
+			return () => controller.abort();
+		}
+	});
 
 	const toggle = () => {
 		isOpen = !isOpen;
@@ -77,22 +88,13 @@
 		const elements = getFocusableElements(node);
 		if (elements.length > 0) elements[0].focus();
 	};
-
-	$effect(() => {
-		if (isOpen) {
-			const controller = new AbortController();
-			document.addEventListener('click', handleClickOutside, {
-				signal: controller.signal
-			});
-			return () => controller.abort();
-		}
-	});
 </script>
 
 <svelte:window onkeydown={isOpen ? handleKeydown : undefined} />
 
 <div bind:this={containerRef} class={['ui-dropdown', className]} {...restProps}>
 	<div
+		id={triggerId}
 		class="ui-dropdown-trigger"
 		role="button"
 		onclick={toggle}
@@ -117,6 +119,7 @@
 			id={dropdownId}
 			class={['ui-dropdown-content', position]}
 			role="menu"
+			aria-labelledby={triggerId}
 			tabindex="-1"
 			onclick={handleContentClick}
 			onkeydown={handleContentKeydown}
@@ -149,7 +152,8 @@
 		outline-offset: 2px;
 	}
 
-	.ui-dropdown-content :global(button:focus-visible) {
+	.ui-dropdown-content :global(button:focus-visible),
+	.ui-dropdown-content :global(button:hover:not(:disabled)) {
 		background-color: var(--bg-secondary);
 	}
 
