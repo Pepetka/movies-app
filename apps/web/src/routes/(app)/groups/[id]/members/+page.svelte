@@ -196,7 +196,7 @@
 	</div>
 {/if}
 
-<Sheet open={showConfirmRegenerate} size="sm" onClose={() => (showConfirmRegenerate = false)}>
+<Sheet bind:open={showConfirmRegenerate} size="sm">
 	{#snippet header()}
 		<h3>Пересоздать ссылку?</h3>
 	{/snippet}
