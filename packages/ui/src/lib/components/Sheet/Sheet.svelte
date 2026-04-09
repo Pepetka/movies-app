@@ -11,6 +11,7 @@
 		closeOnOverlay = true,
 		closeOnEscape = true,
 		onClose,
+		class: className,
 		children,
 		header,
 		drawerHeader,
@@ -21,7 +22,16 @@
 </script>
 
 {#if isDesktop.current}
-	<Modal bind:open {size} {closeOnOverlay} {closeOnEscape} {onClose} {header} {footer}>
+	<Modal
+		bind:open
+		{size}
+		{closeOnOverlay}
+		{closeOnEscape}
+		{onClose}
+		class={className}
+		{header}
+		{footer}
+	>
 		{@render children?.()}
 	</Modal>
 {:else}
@@ -31,6 +41,7 @@
 		{closeOnOverlay}
 		{closeOnEscape}
 		{onClose}
+		class={className}
 		header={drawerHeader ?? header}
 		{footer}
 	>

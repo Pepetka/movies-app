@@ -152,9 +152,14 @@
 		outline-offset: 2px;
 	}
 
-	.ui-dropdown-content :global(button:focus-visible),
-	.ui-dropdown-content :global(button:hover:not(:disabled)) {
+	.ui-dropdown-content :global(button:focus-visible) {
 		background-color: var(--bg-secondary);
+	}
+
+	@media (hover: hover) {
+		.ui-dropdown-content :global(button:hover:not(:disabled)) {
+			background-color: var(--bg-secondary);
+		}
 	}
 
 	/* Content */
