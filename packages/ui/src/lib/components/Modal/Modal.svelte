@@ -19,7 +19,6 @@
 		...restProps
 	}: IProps = $props();
 
-	let overlayElement = $state.raw<HTMLDivElement | null>(null);
 	let modalElement = $state.raw<HTMLDivElement | null>(null);
 
 	const modalId = generateId();
@@ -62,12 +61,7 @@
 
 {#if open}
 	<div class={['ui-modal-root', className]} role="presentation" onclick={handleOverlayClick}>
-		<div
-			bind:this={overlayElement}
-			class="ui-modal-backdrop"
-			in:fade={OVERLAY_FADE}
-			out:fade={OVERLAY_FADE}
-		></div>
+		<div class="ui-modal-backdrop" in:fade={OVERLAY_FADE} out:fade={OVERLAY_FADE}></div>
 		<div
 			bind:this={modalElement}
 			class={['ui-modal', size]}

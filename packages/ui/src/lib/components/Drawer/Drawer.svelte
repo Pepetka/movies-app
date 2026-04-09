@@ -20,7 +20,6 @@
 		...restProps
 	}: IProps = $props();
 
-	let overlayElement = $state.raw<HTMLDivElement | null>(null);
 	let drawerElement = $state.raw<HTMLDivElement | null>(null);
 	let handleElement = $state.raw<HTMLButtonElement | null>(null);
 
@@ -194,7 +193,6 @@
 {#if open}
 	<div class="ui-drawer-root" role="presentation" onclick={handleOverlayClick}>
 		<div
-			bind:this={overlayElement}
 			class="ui-drawer-backdrop"
 			style:opacity={isDragging && position === 'bottom' ? overlayOpacity : undefined}
 			in:fade={OVERLAY_FADE}
@@ -212,6 +210,7 @@
 			aria-labelledby={header ? headerId : undefined}
 			tabindex="-1"
 			out:fly={flyParams}
+			in:fly={flyParams}
 			{...restProps}
 		>
 			{#if position === 'bottom' && closeOnOverlay}
@@ -262,7 +261,7 @@
 		justify-content: flex-end;
 	}
 
-	.ui-drawer-root.dragging {
+	.ui-drawer.dragging {
 		touch-action: none;
 	}
 
@@ -287,46 +286,20 @@
 		transform: var(--drag-transform);
 	}
 
-	@keyframes translateLeftIn {
-		0% {
-			transform: translateX(calc(-1 * var(--drawer-width)));
-		}
-		100% {
-			transform: translateX(0);
-		}
-	}
 	.ui-drawer.left {
 		left: 0;
 		top: 0;
 		height: 100vh;
 		width: var(--drawer-width, 320px);
-		animation: translateLeftIn var(--transition-base) var(--ease-out);
 	}
 
-	@keyframes translateRightIn {
-		0% {
-			transform: translateX(calc(var(--drawer-width)));
-		}
-		100% {
-			transform: translateX(0);
-		}
-	}
 	.ui-drawer.right {
 		right: 0;
 		top: 0;
 		height: 100vh;
 		width: var(--drawer-width, 320px);
-		animation: translateRightIn var(--transition-base) var(--ease-out);
 	}
 
-	@keyframes translateBottomIn {
-		0% {
-			transform: translateY(calc(var(--drawer-height)));
-		}
-		100% {
-			transform: translateY(0);
-		}
-	}
 	.ui-drawer.bottom {
 		left: 0;
 		right: 0;
@@ -335,7 +308,6 @@
 		width: 100%;
 		padding-bottom: var(--drawer-bottom-offset);
 		border-radius: var(--radius-2xl) var(--radius-2xl) 0 0;
-		animation: translateBottomIn var(--transition-base) var(--ease-out);
 	}
 
 	.ui-drawer-handle-area {
