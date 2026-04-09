@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { fade, fly } from 'svelte/transition';
 
-	import { createFocusTrap, getFocusableElements } from '../../utils/focus-trap';
+	import { createFocusTrap, lockScroll, autoFocusFirst } from '../../utils/focus-trap';
 	import { OVERLAY_FADE, MODAL_FLY } from '../../utils/transitions';
 	import type { IProps } from './Modal.types.svelte';
 	import { generateId } from '../../utils/id';
@@ -35,7 +35,7 @@
 	};
 
 	const handleOverlayClick = (e: MouseEvent) => {
-		if (closeOnOverlay && e.target === overlayElement) {
+		if (closeOnOverlay && !modalElement?.contains(e.target as Node)) {
 			close();
 		}
 	};
@@ -47,35 +47,13 @@
 
 	$effect(() => {
 		if (open) {
-			const savedActiveElement = document.activeElement as HTMLElement | null;
-			const previousBodyOverflow = document.body.style.overflow;
-			const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
-
-			document.body.style.overflow = 'hidden';
-			if (scrollbarWidth > 0) {
-				document.body.style.paddingRight = `${scrollbarWidth}px`;
-			}
-
-			return () => {
-				document.body.style.overflow = previousBodyOverflow;
-				if (scrollbarWidth > 0) {
-					document.body.style.paddingRight = '';
-				}
-				if (savedActiveElement && 'focus' in savedActiveElement) {
-					savedActiveElement.focus();
-				}
-			};
+			return lockScroll();
 		}
 	});
 
 	$effect(() => {
 		if (open && modalElement) {
-			const focusableElements = getFocusableElements(modalElement);
-			if (focusableElements.length > 0) {
-				focusableElements[0].focus();
-			} else {
-				modalElement.focus();
-			}
+			autoFocusFirst(modalElement);
 		}
 	});
 </script>
@@ -83,14 +61,13 @@
 <svelte:window onkeydown={open ? handleKeydown : undefined} />
 
 {#if open}
-	<div
-		bind:this={overlayElement}
-		class={['ui-modal-overlay', className]}
-		role="presentation"
-		onclick={handleOverlayClick}
-		in:fade={OVERLAY_FADE}
-		out:fade={OVERLAY_FADE}
-	>
+	<div class={['ui-modal-root', className]} role="presentation" onclick={handleOverlayClick}>
+		<div
+			bind:this={overlayElement}
+			class="ui-modal-backdrop"
+			in:fade={OVERLAY_FADE}
+			out:fade={OVERLAY_FADE}
+		></div>
 		<div
 			bind:this={modalElement}
 			class={['ui-modal', size]}
@@ -124,7 +101,7 @@
 {/if}
 
 <style>
-	.ui-modal-overlay {
+	.ui-modal-root {
 		position: fixed;
 		inset: 0;
 		z-index: var(--z-modal-backdrop);
@@ -132,6 +109,11 @@
 		align-items: center;
 		justify-content: center;
 		padding: var(--space-4);
+	}
+
+	.ui-modal-backdrop {
+		position: absolute;
+		inset: 0;
 		background-color: var(--bg-overlay);
 	}
 
@@ -239,7 +221,7 @@
 
 	/* Mobile */
 	@media (max-width: 640px) {
-		.ui-modal-overlay {
+		.ui-modal-root {
 			padding: 0;
 		}
 

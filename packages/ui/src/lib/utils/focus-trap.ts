@@ -41,3 +41,33 @@ export const createFocusTrap = (getElement: () => HTMLElement | null) => {
 		}
 	};
 };
+
+export const lockScroll = (): (() => void) => {
+	const savedActiveElement = document.activeElement as HTMLElement | null;
+	const previousBodyOverflow = document.body.style.overflow;
+	const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+
+	document.body.style.overflow = 'hidden';
+	if (scrollbarWidth > 0) {
+		document.body.style.paddingRight = `${scrollbarWidth}px`;
+	}
+
+	return () => {
+		document.body.style.overflow = previousBodyOverflow;
+		if (scrollbarWidth > 0) {
+			document.body.style.paddingRight = '';
+		}
+		if (savedActiveElement && 'focus' in savedActiveElement) {
+			savedActiveElement.focus();
+		}
+	};
+};
+
+export const autoFocusFirst = (container: HTMLElement): void => {
+	const elements = getFocusableElements(container);
+	if (elements.length > 0) {
+		elements[0].focus();
+	} else {
+		container.focus();
+	}
+};

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { fade, fly } from 'svelte/transition';
 
-	import { createFocusTrap, getFocusableElements } from '../../utils/focus-trap';
+	import { createFocusTrap, lockScroll, autoFocusFirst } from '../../utils/focus-trap';
 	import type { IProps, DrawerPosition } from './Drawer.types.svelte';
 	import { OVERLAY_FADE, DRAWER_FLY } from '../../utils/transitions';
 	import { generateId } from '../../utils/id';
@@ -27,7 +27,9 @@
 	let isDragging = $state(false);
 	let dragOffset = $state(0);
 	let dragStartY = 0;
-	let drawerHeight = 0;
+
+	let drawerWidth = $state(0);
+	let drawerHeight = $state(0);
 
 	const drawerId = generateId();
 	const headerId = `${drawerId}-header`;
@@ -52,11 +54,7 @@
 	};
 
 	const handleOverlayClick = (e: MouseEvent) => {
-		if (
-			closeOnOverlay &&
-			overlayElement?.contains(e.target as Node) &&
-			!drawerElement?.contains(e.target as Node)
-		) {
+		if (closeOnOverlay && !drawerElement?.contains(e.target as Node)) {
 			close();
 		}
 	};
@@ -133,35 +131,13 @@
 
 	$effect(() => {
 		if (open) {
-			const savedActiveElement = document.activeElement;
-			const previousBodyOverflow = document.body.style.overflow;
-			const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
-
-			document.body.style.overflow = 'hidden';
-			if (scrollbarWidth > 0) {
-				document.body.style.paddingRight = `${scrollbarWidth}px`;
-			}
-
-			return () => {
-				document.body.style.overflow = previousBodyOverflow;
-				if (scrollbarWidth > 0) {
-					document.body.style.paddingRight = '';
-				}
-				if (savedActiveElement && 'focus' in savedActiveElement) {
-					(savedActiveElement as HTMLElement).focus();
-				}
-			};
+			return lockScroll();
 		}
 	});
 
 	$effect(() => {
 		if (open && drawerElement) {
-			const focusableElements = getFocusableElements(drawerElement);
-			if (focusableElements.length > 0) {
-				focusableElements[0].focus();
-			} else {
-				drawerElement.focus();
-			}
+			autoFocusFirst(drawerElement);
 		}
 	});
 
@@ -177,6 +153,17 @@
 			element.removeEventListener('touchstart', handleTouchStart);
 			element.removeEventListener('touchmove', handleTouchMove);
 			element.removeEventListener('touchend', handleTouchEnd);
+		};
+	});
+
+	$effect(() => {
+		if (open) {
+			drawerWidth = drawerElement?.offsetWidth ?? 0;
+			drawerHeight = drawerElement?.offsetHeight ?? 0;
+		}
+		return () => {
+			drawerWidth = 0;
+			drawerHeight = 0;
 		};
 	});
 
@@ -205,24 +192,25 @@
 <svelte:window onkeydown={open ? handleKeydown : undefined} />
 
 {#if open}
-	<div
-		bind:this={overlayElement}
-		class="ui-drawer-overlay"
-		style:opacity={isDragging && position === 'bottom' ? overlayOpacity : undefined}
-		role="presentation"
-		onclick={handleOverlayClick}
-		in:fade={OVERLAY_FADE}
-		out:fade={OVERLAY_FADE}
-	>
+	<div class="ui-drawer-root" role="presentation" onclick={handleOverlayClick}>
+		<div
+			bind:this={overlayElement}
+			class="ui-drawer-backdrop"
+			style:opacity={isDragging && position === 'bottom' ? overlayOpacity : undefined}
+			in:fade={OVERLAY_FADE}
+			out:fade={OVERLAY_FADE}
+		></div>
 		<div
 			bind:this={drawerElement}
 			class={['ui-drawer', position, isDragging ? 'dragging' : '', className]}
-			style="--drawer-size: {drawerSize}; --drag-transform: {dragTransform}; --drawer-bottom-offset: {OVERSCROLL_LIMIT}px"
+			style:--drawer-width={drawerWidth ? `${drawerWidth}px` : ''}
+			style:--drawer-height={drawerHeight ? `${drawerHeight}px` : ''}
+			style:--drag-transform={dragTransform}
+			style:--drawer-bottom-offset="{OVERSCROLL_LIMIT}px"
 			role="dialog"
 			aria-modal="true"
 			aria-labelledby={header ? headerId : undefined}
 			tabindex="-1"
-			in:fly={flyParams}
 			out:fly={flyParams}
 			{...restProps}
 		>
@@ -261,19 +249,31 @@
 {/if}
 
 <style>
-	.ui-drawer-overlay {
+	.ui-drawer-root {
 		position: fixed;
 		inset: 0;
 		z-index: var(--z-modal-backdrop);
-		background-color: var(--bg-overlay);
+		display: flex;
+		align-items: flex-end;
+		justify-content: flex-start;
 	}
 
-	.ui-drawer-overlay.dragging {
+	.ui-drawer-root:has(.ui-drawer.right) {
+		justify-content: flex-end;
+	}
+
+	.ui-drawer-root.dragging {
 		touch-action: none;
 	}
 
+	.ui-drawer-backdrop {
+		position: absolute;
+		inset: 0;
+		background-color: var(--bg-overlay);
+	}
+
 	.ui-drawer {
-		position: fixed;
+		position: relative;
 		z-index: var(--z-modal);
 		display: flex;
 		flex-direction: column;
@@ -283,31 +283,59 @@
 		overflow: hidden;
 	}
 
-	.ui-drawer.dragging {
+	.ui-drawer.bottom.dragging {
 		transform: var(--drag-transform);
 	}
 
+	@keyframes translateLeftIn {
+		0% {
+			transform: translateX(calc(-1 * var(--drawer-width)));
+		}
+		100% {
+			transform: translateX(0);
+		}
+	}
 	.ui-drawer.left {
 		left: 0;
 		top: 0;
 		height: 100vh;
-		width: var(--drawer-size, 320px);
+		width: var(--drawer-width, 320px);
+		animation: translateLeftIn var(--transition-base) var(--ease-out);
 	}
 
+	@keyframes translateRightIn {
+		0% {
+			transform: translateX(calc(var(--drawer-width)));
+		}
+		100% {
+			transform: translateX(0);
+		}
+	}
 	.ui-drawer.right {
 		right: 0;
 		top: 0;
 		height: 100vh;
-		width: var(--drawer-size, 320px);
+		width: var(--drawer-width, 320px);
+		animation: translateRightIn var(--transition-base) var(--ease-out);
 	}
 
+	@keyframes translateBottomIn {
+		0% {
+			transform: translateY(calc(var(--drawer-height)));
+		}
+		100% {
+			transform: translateY(0);
+		}
+	}
 	.ui-drawer.bottom {
 		left: 0;
 		right: 0;
 		bottom: calc(-1 * var(--drawer-bottom-offset));
 		max-height: 85vh;
+		width: 100%;
 		padding-bottom: var(--drawer-bottom-offset);
 		border-radius: var(--radius-2xl) var(--radius-2xl) 0 0;
+		animation: translateBottomIn var(--transition-base) var(--ease-out);
 	}
 
 	.ui-drawer-handle-area {
