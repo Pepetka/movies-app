@@ -24,6 +24,6 @@
 		min-height: 100vh;
 		width: calc(100vw - 8px);
 		padding: 20px;
-		transform: scale(1);
+		isolation: isolate;
 	}
 </style>
