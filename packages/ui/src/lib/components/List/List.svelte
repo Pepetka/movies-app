@@ -77,4 +77,17 @@
 	.ui-list:not(.no-dividers) :global(.ui-list-item:not(:last-child)) {
 		border-bottom: var(--border-width-thin) solid var(--border-primary);
 	}
+
+	/* Border radius for interactive items */
+	.ui-list :global(.ui-list-item:first-child .ui-list-item-button) {
+		border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+	}
+
+	.ui-list :global(.ui-list-item:last-child .ui-list-item-button) {
+		border-radius: 0 0 var(--radius-xl) var(--radius-xl);
+	}
+
+	.ui-list :global(.ui-list-item:only-child .ui-list-item-button) {
+		border-radius: var(--radius-xl);
+	}
 </style>
