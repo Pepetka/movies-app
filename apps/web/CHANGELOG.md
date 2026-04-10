@@ -1,5 +1,16 @@
 # web
 
+## 0.16.0
+
+### Minor Changes
+
+- 476b612: Replace Modal with adaptive Sheet component across app pages
+
+### Patch Changes
+
+- Updated dependencies [476b612]
+  - @repo/ui@0.10.0
+
 ## 0.15.0
 
 ### Minor Changes
