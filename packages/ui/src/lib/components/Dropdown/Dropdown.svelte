@@ -102,6 +102,9 @@
 			if (e.key === 'Enter' || e.key === ' ') {
 				e.preventDefault();
 				toggle();
+			} else if (e.key === 'ArrowDown' && !isOpen) {
+				e.preventDefault();
+				toggle();
 			}
 		}}
 		aria-haspopup="menu"
