@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Button, Modal, toast } from '@repo/ui';
+	import { Button, Sheet, toast } from '@repo/ui';
 	import { Trash2 } from '@lucide/svelte';
 	import { untrack } from 'svelte';
 
@@ -102,7 +102,7 @@
 	<GroupForm mode="edit" bind:form onSubmit={handleSubmit} isSubmitting={groupStore.isUpdating} />
 </div>
 
-<Modal bind:open={showDeleteModal} size="sm">
+<Sheet bind:open={showDeleteModal} size="sm">
 	{#snippet header()}
 		<h2>Удалить группу?</h2>
 	{/snippet}
@@ -118,7 +118,7 @@
 		</Button>
 		<Button variant="danger" onclick={handleDelete} loading={groupStore.isDeleting}>Удалить</Button>
 	{/snippet}
-</Modal>
+</Sheet>
 
 <style>
 	.edit-page {

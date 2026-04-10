@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Button, Modal, Spinner, toast } from '@repo/ui';
+	import { Button, Sheet, Spinner, toast } from '@repo/ui';
 	import { Trash2 } from '@lucide/svelte';
 	import { untrack } from 'svelte';
 
@@ -127,7 +127,7 @@
 		/>
 	</div>
 
-	<Modal bind:open={showDeleteModal} size="sm">
+	<Sheet bind:open={showDeleteModal} size="sm">
 		{#snippet header()}
 			<h2>Удалить фильм?</h2>
 		{/snippet}
@@ -145,7 +145,7 @@
 				Удалить
 			</Button>
 		{/snippet}
-	</Modal>
+	</Sheet>
 {:else}
 	<div class="page-state">
 		<Spinner size="lg" />

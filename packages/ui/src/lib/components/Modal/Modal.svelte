@@ -1,4 +1,8 @@
 <script lang="ts">
+	import { fade, fly } from 'svelte/transition';
+
+	import { createFocusTrap, lockScroll, autoFocusFirst } from '../../utils/focus-trap';
+	import { OVERLAY_FADE, MODAL_FLY } from '../../utils/transitions';
 	import type { IProps } from './Modal.types.svelte';
 	import { generateId } from '../../utils/id';
 
@@ -15,51 +19,14 @@
 		...restProps
 	}: IProps = $props();
 
-	let overlayElement = $state.raw<HTMLDivElement | null>(null);
 	let modalElement = $state.raw<HTMLDivElement | null>(null);
 
 	const modalId = generateId();
 	const headerId = `${modalId}-header`;
 
-	const getFocusableElements = (container: HTMLElement): HTMLElement[] => {
-		const focusableSelectors = [
-			'a[href]',
-			'button:not([disabled])',
-			'textarea:not([disabled])',
-			'input:not([disabled])',
-			'select:not([disabled])',
-			'[tabindex]:not([tabindex="-1"])'
-		];
-		return Array.from(container.querySelectorAll(focusableSelectors.join(', '))).filter(
-			(el) => getComputedStyle(el).display !== 'none'
-		) as HTMLElement[];
-	};
-
-	const trapFocus = (e: KeyboardEvent) => {
-		if (!modalElement) return;
-		const focusableElements = getFocusableElements(modalElement);
-		if (focusableElements.length === 0) return;
-
-		const firstElement = focusableElements[0];
-		const lastElement = focusableElements[focusableElements.length - 1];
-
-		if (e.key === 'Tab') {
-			if (e.shiftKey) {
-				if (document.activeElement === firstElement) {
-					e.preventDefault();
-					lastElement.focus();
-				}
-			} else {
-				if (document.activeElement === lastElement) {
-					e.preventDefault();
-					firstElement.focus();
-				}
-			}
-		}
-	};
+	const trapFocus = createFocusTrap(() => modalElement);
 
 	const handleKeydown = (e: KeyboardEvent) => {
-		if (!open) return;
 		if (closeOnEscape && e.key === 'Escape') {
 			close();
 		}
@@ -67,7 +34,7 @@
 	};
 
 	const handleOverlayClick = (e: MouseEvent) => {
-		if (closeOnOverlay && e.target === overlayElement) {
+		if (closeOnOverlay && !modalElement?.contains(e.target as Node)) {
 			close();
 		}
 	};
@@ -79,49 +46,22 @@
 
 	$effect(() => {
 		if (open) {
-			const savedActiveElement = document.activeElement as HTMLElement | null;
-			const previousBodyOverflow = document.body.style.overflow;
-			const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
-
-			document.body.style.overflow = 'hidden';
-			if (scrollbarWidth > 0) {
-				document.body.style.paddingRight = `${scrollbarWidth}px`;
-			}
-
-			return () => {
-				document.body.style.overflow = previousBodyOverflow;
-				if (scrollbarWidth > 0) {
-					document.body.style.paddingRight = '';
-				}
-				if (savedActiveElement && 'focus' in savedActiveElement) {
-					savedActiveElement.focus();
-				}
-			};
+			return lockScroll();
 		}
 	});
 
 	$effect(() => {
 		if (open && modalElement) {
-			const focusableElements = getFocusableElements(modalElement);
-			if (focusableElements.length > 0) {
-				focusableElements[0].focus();
-			} else {
-				modalElement.focus();
-			}
+			autoFocusFirst(modalElement);
 		}
 	});
 </script>
 
-<svelte:window onkeydown={handleKeydown} />
+<svelte:window onkeydown={open ? handleKeydown : undefined} />
 
 {#if open}
-	<div
-		bind:this={overlayElement}
-		class={['ui-modal-overlay', className]}
-		role="presentation"
-		onclick={handleOverlayClick}
-		onkeydown={() => {}}
-	>
+	<div class={['ui-modal-root', className]} role="presentation" onclick={handleOverlayClick}>
+		<div class="ui-modal-backdrop" in:fade={OVERLAY_FADE} out:fade={OVERLAY_FADE}></div>
 		<div
 			bind:this={modalElement}
 			class={['ui-modal', size]}
@@ -129,6 +69,8 @@
 			aria-modal="true"
 			aria-labelledby={header ? headerId : undefined}
 			tabindex="-1"
+			in:fly={MODAL_FLY}
+			out:fly={MODAL_FLY}
 			{...restProps}
 		>
 			{#if header}
@@ -153,7 +95,7 @@
 {/if}
 
 <style>
-	.ui-modal-overlay {
+	.ui-modal-root {
 		position: fixed;
 		inset: 0;
 		z-index: var(--z-modal-backdrop);
@@ -161,17 +103,12 @@
 		align-items: center;
 		justify-content: center;
 		padding: var(--space-4);
-		background-color: var(--bg-overlay);
-		animation: overlay-fade-in var(--transition-fast) var(--ease-out);
 	}
 
-	@keyframes overlay-fade-in {
-		from {
-			opacity: 0;
-		}
-		to {
-			opacity: 1;
-		}
+	.ui-modal-backdrop {
+		position: absolute;
+		inset: 0;
+		background-color: var(--bg-overlay);
 	}
 
 	.ui-modal {
@@ -183,19 +120,7 @@
 		background-color: var(--bg-primary);
 		border-radius: var(--radius-2xl);
 		box-shadow: var(--shadow-xl);
-		animation: modal-enter var(--transition-base) var(--ease-out);
 		overflow: hidden;
-	}
-
-	@keyframes modal-enter {
-		from {
-			opacity: 0;
-			transform: translateY(var(--space-4)) scale(0.95);
-		}
-		to {
-			opacity: 1;
-			transform: translateY(0) scale(1);
-		}
 	}
 
 	/* Sizes */
@@ -290,7 +215,7 @@
 
 	/* Mobile */
 	@media (max-width: 640px) {
-		.ui-modal-overlay {
+		.ui-modal-root {
 			padding: 0;
 		}
 

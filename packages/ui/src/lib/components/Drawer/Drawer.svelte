@@ -1,5 +1,9 @@
 <script lang="ts">
+	import { fade, fly } from 'svelte/transition';
+
+	import { createFocusTrap, lockScroll, autoFocusFirst } from '../../utils/focus-trap';
 	import type { IProps, DrawerPosition } from './Drawer.types.svelte';
+	import { OVERLAY_FADE, DRAWER_FLY } from '../../utils/transitions';
 	import { generateId } from '../../utils/id';
 
 	let {
@@ -16,14 +20,14 @@
 		...restProps
 	}: IProps = $props();
 
-	let overlayElement = $state.raw<HTMLDivElement | null>(null);
 	let drawerElement = $state.raw<HTMLDivElement | null>(null);
 	let handleElement = $state.raw<HTMLButtonElement | null>(null);
 
 	let isDragging = $state(false);
 	let dragOffset = $state(0);
 	let dragStartY = 0;
-	let drawerHeight = 0;
+
+	let drawerHeight = $state.raw(0);
 
 	const drawerId = generateId();
 	const headerId = `${drawerId}-header`;
@@ -38,45 +42,9 @@
 	const OVERSCROLL_LIMIT = 80;
 	const OVERSCROLL_RESISTANCE = 0.4;
 
-	const getFocusableElements = (container: HTMLElement): HTMLElement[] => {
-		const focusableSelectors = [
-			'a[href]',
-			'button:not([disabled])',
-			'textarea:not([disabled])',
-			'input:not([disabled])',
-			'select:not([disabled])',
-			'[tabindex]:not([tabindex="-1"])'
-		];
-		return Array.from(container.querySelectorAll(focusableSelectors.join(', '))).filter(
-			(el) => getComputedStyle(el).display !== 'none'
-		) as HTMLElement[];
-	};
-
-	const trapFocus = (e: KeyboardEvent) => {
-		if (!drawerElement) return;
-		const focusableElements = getFocusableElements(drawerElement);
-		if (focusableElements.length === 0) return;
-
-		const firstElement = focusableElements[0];
-		const lastElement = focusableElements[focusableElements.length - 1];
-
-		if (e.key === 'Tab') {
-			if (e.shiftKey) {
-				if (document.activeElement === firstElement) {
-					e.preventDefault();
-					lastElement.focus();
-				}
-			} else {
-				if (document.activeElement === lastElement) {
-					e.preventDefault();
-					firstElement.focus();
-				}
-			}
-		}
-	};
+	const trapFocus = createFocusTrap(() => drawerElement);
 
 	const handleKeydown = (e: KeyboardEvent) => {
-		if (!open) return;
 		if (closeOnEscape && e.key === 'Escape') {
 			close();
 		}
@@ -84,13 +52,13 @@
 	};
 
 	const handleOverlayClick = (e: MouseEvent) => {
-		if (closeOnOverlay && e.target === overlayElement) {
+		if (closeOnOverlay && !drawerElement?.contains(e.target as Node)) {
 			close();
 		}
 	};
 
 	const startDrag = (clientY: number) => {
-		if (position !== 'bottom' || !drawerElement) return;
+		if (position !== 'bottom' || !drawerElement || !closeOnOverlay) return;
 		drawerHeight = drawerElement.offsetHeight;
 		dragStartY = clientY;
 		dragOffset = 0;
@@ -161,35 +129,13 @@
 
 	$effect(() => {
 		if (open) {
-			const savedActiveElement = document.activeElement;
-			const previousBodyOverflow = document.body.style.overflow;
-			const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
-
-			document.body.style.overflow = 'hidden';
-			if (scrollbarWidth > 0) {
-				document.body.style.paddingRight = `${scrollbarWidth}px`;
-			}
-
-			return () => {
-				document.body.style.overflow = previousBodyOverflow;
-				if (scrollbarWidth > 0) {
-					document.body.style.paddingRight = '';
-				}
-				if (savedActiveElement && 'focus' in savedActiveElement) {
-					(savedActiveElement as HTMLElement).focus();
-				}
-			};
+			return lockScroll();
 		}
 	});
 
 	$effect(() => {
 		if (open && drawerElement) {
-			const focusableElements = getFocusableElements(drawerElement);
-			if (focusableElements.length > 0) {
-				focusableElements[0].focus();
-			} else {
-				drawerElement.focus();
-			}
+			autoFocusFirst(drawerElement);
 		}
 	});
 
@@ -208,104 +154,120 @@
 		};
 	});
 
+	$effect(() => {
+		if (open) {
+			drawerHeight = drawerElement?.offsetHeight ?? 0;
+		}
+		return () => {
+			drawerHeight = 0;
+		};
+	});
+
 	const drawerSize = $derived(size ?? defaultSizes[position]);
 	const dragTransform = $derived(
-		isDragging || dragOffset !== 0 ? `translateY(${OVERSCROLL_LIMIT + dragOffset}px)` : ''
+		isDragging || dragOffset !== 0 ? `translateY(${dragOffset}px)` : ''
 	);
 	const overlayOpacity = $derived.by(() => {
 		if (!isDragging || drawerHeight === 0) return 1;
 		const progress = Math.max(0, Math.min(1, 1 - dragOffset / drawerHeight));
 		return progress;
 	});
+	const flyParams = $derived.by(() => {
+		switch (position) {
+			case 'left':
+				return DRAWER_FLY.left(drawerSize);
+			case 'right':
+				return DRAWER_FLY.right(drawerSize);
+			case 'bottom':
+				return DRAWER_FLY.bottom;
+		}
+	});
 </script>
 
-<svelte:window onkeydown={handleKeydown} />
+<svelte:window onkeydown={open ? handleKeydown : undefined} />
 
-<div
-	bind:this={overlayElement}
-	class={[
-		'ui-drawer-overlay',
-		open ? 'open' : '',
-		isDragging && position === 'bottom' ? 'dragging' : ''
-	]}
-	style:opacity={isDragging && position === 'bottom' ? overlayOpacity : undefined}
-	onclick={handleOverlayClick}
-	aria-hidden={!open}
->
-	<div
-		bind:this={drawerElement}
-		class={[
-			'ui-drawer',
-			position,
-			open ? 'open' : '',
-			isDragging && position === 'bottom' ? 'dragging' : '',
-			className
-		]}
-		style="--drawer-size: {drawerSize}; --drag-transform: {dragTransform}"
-		role="dialog"
-		aria-modal="true"
-		aria-labelledby={header ? headerId : undefined}
-		tabindex="-1"
-		{...restProps}
-	>
-		{#if position === 'bottom'}
-			<button
-				bind:this={handleElement}
-				type="button"
-				class="ui-drawer-handle-area"
-				tabindex="-1"
-				aria-label="Drag down to close"
-				onmousedown={handleMouseDown}
-			>
-				<div class="ui-drawer-handle"></div>
-			</button>
-		{/if}
+{#if open}
+	<div class="ui-drawer-root" role="presentation" onclick={handleOverlayClick}>
+		<div
+			class="ui-drawer-backdrop"
+			style:opacity={isDragging && position === 'bottom' ? overlayOpacity : undefined}
+			in:fade={OVERLAY_FADE}
+			out:fade={OVERLAY_FADE}
+		></div>
+		<div
+			bind:this={drawerElement}
+			class={['ui-drawer', position, isDragging ? 'dragging' : '', className]}
+			style:--drawer-width={drawerSize}
+			style:--drag-transform={dragTransform}
+			style:--drawer-bottom-offset="{OVERSCROLL_LIMIT}px"
+			role="dialog"
+			aria-modal="true"
+			aria-labelledby={header ? headerId : undefined}
+			tabindex="-1"
+			out:fly={flyParams}
+			in:fly={flyParams}
+			{...restProps}
+		>
+			{#if position === 'bottom' && closeOnOverlay}
+				<button
+					bind:this={handleElement}
+					type="button"
+					class="ui-drawer-handle-area"
+					tabindex="-1"
+					aria-label="Drag down to close"
+					onmousedown={handleMouseDown}
+				>
+					<div class="ui-drawer-handle"></div>
+				</button>
+			{/if}
 
-		{#if header}
-			<div class="ui-drawer-header" id={headerId}>
-				{@render header(close)}
-			</div>
-		{/if}
+			{#if header}
+				<div class="ui-drawer-header" id={headerId}>
+					{@render header(close)}
+				</div>
+			{/if}
 
-		{#if children}
-			<div class="ui-drawer-body">
-				{@render children()}
-			</div>
-		{/if}
+			{#if children}
+				<div class="ui-drawer-body">
+					{@render children()}
+				</div>
+			{/if}
 
-		{#if footer}
-			<div class="ui-drawer-footer">
-				{@render footer(close)}
-			</div>
-		{/if}
+			{#if footer}
+				<div class="ui-drawer-footer">
+					{@render footer(close)}
+				</div>
+			{/if}
+		</div>
 	</div>
-</div>
+{/if}
 
 <style>
-	.ui-drawer-overlay {
+	.ui-drawer-root {
 		position: fixed;
 		inset: 0;
 		z-index: var(--z-modal-backdrop);
-		background-color: var(--bg-overlay);
-		visibility: hidden;
-		opacity: 0;
-		transition:
-			opacity var(--transition-base) var(--ease-out),
-			visibility var(--transition-base) var(--ease-out);
+		display: flex;
+		align-items: flex-end;
+		justify-content: flex-start;
 	}
 
-	.ui-drawer-overlay.open {
-		visibility: visible;
-		opacity: 1;
+	.ui-drawer-root:has(.ui-drawer.right) {
+		justify-content: flex-end;
 	}
 
-	.ui-drawer-overlay.dragging {
+	.ui-drawer.dragging {
 		touch-action: none;
-		transition: none;
+	}
+
+	.ui-drawer-backdrop {
+		position: absolute;
+		inset: 0;
+		background-color: var(--bg-overlay);
 	}
 
 	.ui-drawer {
-		position: fixed;
+		position: relative;
 		z-index: var(--z-modal);
 		display: flex;
 		flex-direction: column;
@@ -313,53 +275,35 @@
 		background-color: var(--bg-primary);
 		box-shadow: var(--shadow-xl);
 		overflow: hidden;
-		transition: transform var(--transition-base) var(--ease-out);
 	}
 
-	.ui-drawer.dragging {
-		transition: none;
+	.ui-drawer.bottom.dragging {
+		transform: var(--drag-transform);
+	}
+
+	.ui-drawer.left,
+	.ui-drawer.right {
+		top: 0;
+		height: 100vh;
+		width: var(--drawer-width, 320px);
 	}
 
 	.ui-drawer.left {
 		left: 0;
-		top: 0;
-		height: 100vh;
-		width: var(--drawer-size, 320px);
-		transform: translateX(-100%);
-	}
-
-	.ui-drawer.left.open {
-		transform: translateX(0);
 	}
 
 	.ui-drawer.right {
 		right: 0;
-		top: 0;
-		height: 100vh;
-		width: var(--drawer-size, 320px);
-		transform: translateX(100%);
-	}
-
-	.ui-drawer.right.open {
-		transform: translateX(0);
 	}
 
 	.ui-drawer.bottom {
 		left: 0;
 		right: 0;
-		bottom: 0;
+		bottom: calc(-1 * var(--drawer-bottom-offset));
 		max-height: 85vh;
-		padding-bottom: 80px;
+		width: 100%;
+		padding-bottom: var(--drawer-bottom-offset);
 		border-radius: var(--radius-2xl) var(--radius-2xl) 0 0;
-		transform: translateY(100%);
-	}
-
-	.ui-drawer.bottom.open {
-		transform: translateY(80px);
-	}
-
-	.ui-drawer.bottom.open.dragging {
-		transform: var(--drag-transform, translateY(80px));
 	}
 
 	.ui-drawer-handle-area {
