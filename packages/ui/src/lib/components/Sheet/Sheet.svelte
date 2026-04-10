@@ -1,7 +1,6 @@
 <script lang="ts">
-	import { MediaQuery } from 'svelte/reactivity';
-
 	import type { IProps } from './Sheet.types.svelte';
+	import { isDesktop } from '../../utils/media';
 	import { Drawer } from '../Drawer';
 	import { Modal } from '../Modal';
 
@@ -17,8 +16,6 @@
 		drawerHeader,
 		footer
 	}: IProps = $props();
-
-	const isDesktop = new MediaQuery('(min-width: 640px)');
 </script>
 
 {#if isDesktop.current}

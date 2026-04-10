@@ -173,12 +173,11 @@
 		return progress;
 	});
 	const flyParams = $derived.by(() => {
-		const sizePx = parseInt(drawerSize, 10);
 		switch (position) {
 			case 'left':
-				return DRAWER_FLY.left(sizePx);
+				return DRAWER_FLY.left(drawerSize);
 			case 'right':
-				return DRAWER_FLY.right(sizePx);
+				return DRAWER_FLY.right(drawerSize);
 			case 'bottom':
 				return DRAWER_FLY.bottom;
 		}
