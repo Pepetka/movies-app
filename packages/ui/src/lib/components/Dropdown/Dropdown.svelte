@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { fly } from 'svelte/transition';
 
-	import { getFocusableElements } from '../../utils/focus-trap';
+	import { autoFocusFirst, getFocusableElements } from '../../utils/focus-trap';
 	import { DROPDOWN_FLY } from '../../utils/transitions';
 	import type { IProps } from './Dropdown.types.svelte';
 	import { generateId } from '../../utils/id';
@@ -21,16 +21,21 @@
 
 	let isOpen = $state(false);
 	let containerRef = $state.raw<HTMLDivElement | null>(null);
+	let savedFocusElement = $state.raw<HTMLElement | null>(null);
 
 	const flyParams = $derived(position.startsWith('top') ? DROPDOWN_FLY.top : DROPDOWN_FLY.bottom);
 
 	$effect(() => {
 		if (isOpen) {
+			savedFocusElement = document.activeElement as HTMLElement;
 			const controller = new AbortController();
 			document.addEventListener('click', handleClickOutside, {
 				signal: controller.signal
 			});
-			return () => controller.abort();
+			return () => {
+				controller.abort();
+				savedFocusElement?.focus();
+			};
 		}
 	});
 
@@ -83,11 +88,6 @@
 			handleContentClick();
 		}
 	};
-
-	const focusFirst = (node: HTMLElement) => {
-		const elements = getFocusableElements(node);
-		if (elements.length > 0) elements[0].focus();
-	};
 </script>
 
 <svelte:window onkeydown={isOpen ? handleKeydown : undefined} />
@@ -126,7 +126,7 @@
 			tabindex="-1"
 			onclick={handleContentClick}
 			onkeydown={handleContentKeydown}
-			use:focusFirst
+			use:autoFocusFirst
 			in:fly={flyParams}
 			out:fly={flyParams}
 		>
@@ -148,21 +148,6 @@
 		cursor: pointer;
 		outline: none;
 		border-radius: var(--radius-md);
-	}
-
-	.ui-dropdown-trigger:focus-visible {
-		outline: 2px solid var(--border-focus);
-		outline-offset: 2px;
-	}
-
-	.ui-dropdown-content :global(button:focus-visible) {
-		background-color: var(--bg-secondary);
-	}
-
-	@media (hover: hover) {
-		.ui-dropdown-content :global(button:hover:not(:disabled)) {
-			background-color: var(--bg-secondary);
-		}
 	}
 
 	/* Content */
@@ -199,5 +184,21 @@
 		bottom: 100%;
 		right: 0;
 		margin-bottom: var(--space-1);
+	}
+
+	/* States */
+	.ui-dropdown-trigger:focus-visible {
+		outline: 2px solid var(--border-focus);
+		outline-offset: 2px;
+	}
+
+	.ui-dropdown-content :global(button:focus-visible) {
+		background-color: var(--bg-secondary);
+	}
+
+	@media (hover: hover) {
+		.ui-dropdown-content :global(button:hover:not(:disabled)) {
+			background-color: var(--bg-secondary);
+		}
 	}
 </style>
