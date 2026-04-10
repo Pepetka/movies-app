@@ -27,8 +27,7 @@
 	let dragOffset = $state(0);
 	let dragStartY = 0;
 
-	let drawerWidth = $state(0);
-	let drawerHeight = $state(0);
+	let drawerHeight = $state.raw(0);
 
 	const drawerId = generateId();
 	const headerId = `${drawerId}-header`;
@@ -157,11 +156,9 @@
 
 	$effect(() => {
 		if (open) {
-			drawerWidth = drawerElement?.offsetWidth ?? 0;
 			drawerHeight = drawerElement?.offsetHeight ?? 0;
 		}
 		return () => {
-			drawerWidth = 0;
 			drawerHeight = 0;
 		};
 	});
@@ -201,7 +198,7 @@
 		<div
 			bind:this={drawerElement}
 			class={['ui-drawer', position, isDragging ? 'dragging' : '', className]}
-			style:--drawer-width={drawerWidth ? `${drawerWidth}px` : ''}
+			style:--drawer-width={drawerSize}
 			style:--drawer-height={drawerHeight ? `${drawerHeight}px` : ''}
 			style:--drag-transform={dragTransform}
 			style:--drawer-bottom-offset="{OVERSCROLL_LIMIT}px"
@@ -286,18 +283,19 @@
 		transform: var(--drag-transform);
 	}
 
-	.ui-drawer.left {
-		left: 0;
+	.ui-drawer.left,
+	.ui-drawer.right {
 		top: 0;
 		height: 100vh;
 		width: var(--drawer-width, 320px);
 	}
 
+	.ui-drawer.left {
+		left: 0;
+	}
+
 	.ui-drawer.right {
 		right: 0;
-		top: 0;
-		height: 100vh;
-		width: var(--drawer-width, 320px);
 	}
 
 	.ui-drawer.bottom {
