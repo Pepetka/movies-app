@@ -198,7 +198,6 @@
 			bind:this={drawerElement}
 			class={['ui-drawer', position, isDragging ? 'dragging' : '', className]}
 			style:--drawer-width={drawerSize}
-			style:--drawer-height={drawerHeight ? `${drawerHeight}px` : ''}
 			style:--drag-transform={dragTransform}
 			style:--drawer-bottom-offset="{OVERSCROLL_LIMIT}px"
 			role="dialog"
