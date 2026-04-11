@@ -48,6 +48,8 @@
 		userName: string;
 	} | null>(null);
 
+	let showConfirmAction = $state(false);
+
 	let showConfirmRegenerate = $state(false);
 	let isCopied = $state(false);
 	let copyTimeoutId: ReturnType<typeof setTimeout> | null = null;
@@ -103,6 +105,7 @@
 
 	const handleAction = (type: ConfirmAction, member: GroupMemberResponseDto) => {
 		pendingAction = { type, userId: member.userId, userName: member.user.name };
+		showConfirmAction = true;
 	};
 
 	const ACTION_HANDLERS: Record<
@@ -146,15 +149,10 @@
 
 		if (handler.isSuccess()) {
 			toast.success(config.successMessage);
+			showConfirmAction = false;
 		} else {
 			toast.error(handler.error() ?? config.errorFallback);
 		}
-
-		pendingAction = null;
-	};
-
-	const closeConfirmAction = () => {
-		pendingAction = null;
 	};
 
 	const handleGenerateInvite = () => {
@@ -271,21 +269,25 @@
 	</div>
 {/if}
 
-{#if pendingAction}
-	{@const confirm = CONFIRM_TEXT[pendingAction.type]}
-	<Sheet open size="sm" onClose={closeConfirmAction}>
-		{#snippet header()}
-			<h3>{confirm.title}</h3>
-		{/snippet}
-		<p>{confirm.getDescription(pendingAction.userName)}</p>
-		{#snippet footer(close)}
-			<Button variant="ghost" onclick={close}>Отмена</Button>
+<Sheet bind:open={showConfirmAction} size="sm">
+	{#snippet header()}
+		{#if pendingAction}
+			<h3>{CONFIRM_TEXT[pendingAction.type].title}</h3>
+		{/if}
+	{/snippet}
+	{#if pendingAction}
+		<p>{CONFIRM_TEXT[pendingAction.type].getDescription(pendingAction.userName)}</p>
+	{/if}
+	{#snippet footer(close)}
+		<Button variant="ghost" onclick={close}>Отмена</Button>
+		{#if pendingAction}
+			{@const confirm = CONFIRM_TEXT[pendingAction.type]}
 			<Button variant={confirm.variant} onclick={confirmAction} loading={isMutating}>
 				{confirm.button}
 			</Button>
-		{/snippet}
-	</Sheet>
-{/if}
+		{/if}
+	{/snippet}
+</Sheet>
 
 <Sheet bind:open={showConfirmRegenerate} size="sm">
 	{#snippet header()}

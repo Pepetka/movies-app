@@ -133,10 +133,6 @@ class MembersStore extends BaseStore {
 		await untrack(() => this._removeMutation.mutate({ groupId, userId }));
 	}
 
-	resetRemove(): void {
-		this._removeMutation.reset();
-	}
-
 	// === Update role mutation ===
 
 	get isUpdatingRole(): boolean {
@@ -160,10 +156,6 @@ class MembersStore extends BaseStore {
 		await untrack(() => this._updateRoleMutation.mutate({ groupId, userId, role }));
 	}
 
-	resetUpdateRole(): void {
-		this._updateRoleMutation.reset();
-	}
-
 	// === Transfer ownership mutation ===
 
 	get isTransferring(): boolean {
@@ -181,10 +173,6 @@ class MembersStore extends BaseStore {
 
 	async transferOwnership(groupId: number, targetUserId: number): Promise<void> {
 		await untrack(() => this._transferMutation.mutate({ groupId, targetUserId }));
-	}
-
-	resetTransfer(): void {
-		this._transferMutation.reset();
 	}
 
 	// === Reset ===
