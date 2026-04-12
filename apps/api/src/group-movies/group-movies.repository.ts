@@ -6,6 +6,13 @@ import { DrizzleDb } from '$db/types/drizzle.types';
 import { escapeLikePattern } from '$common/utils';
 import { DRIZZLE } from '$db/db.module';
 
+const VALID_STATUSES = ['tracking', 'planned', 'watched'] as const;
+type ValidStatus = (typeof VALID_STATUSES)[number];
+
+function isValidStatus(status: string): status is ValidStatus {
+  return VALID_STATUSES.includes(status as ValidStatus);
+}
+
 @Injectable()
 export class GroupMoviesRepository {
   constructor(@Inject(DRIZZLE) private readonly db: DrizzleDb) {}
@@ -17,21 +24,18 @@ export class GroupMoviesRepository {
 
   async findByGroup(
     groupId: number,
-    status?: string,
-    query?: string,
+    options?: { status?: string; query?: string },
     limit = 100,
     offset = 0,
   ): Promise<GroupMovie[]> {
     const conditions = [eq(groupMovies.groupId, groupId)];
 
-    if (status) {
-      conditions.push(
-        eq(groupMovies.status, status as 'tracking' | 'planned' | 'watched'),
-      );
+    if (options?.status && isValidStatus(options.status)) {
+      conditions.push(eq(groupMovies.status, options.status));
     }
 
-    if (query) {
-      const escapedQuery = escapeLikePattern(query);
+    if (options?.query) {
+      const escapedQuery = escapeLikePattern(options.query);
       const searchCondition = or(
         ilike(groupMovies.title, `%${escapedQuery}%`),
         ilike(groupMovies.overview, `%${escapedQuery}%`),

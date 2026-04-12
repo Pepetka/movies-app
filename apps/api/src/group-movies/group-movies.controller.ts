@@ -54,8 +54,6 @@ export class GroupMoviesController {
     summary: 'Search movies in group context (Group moderators only)',
   })
   @ApiParam({ name: 'groupId', description: 'Group ID' })
-  @ApiQuery({ name: 'query', required: true, example: 'матрица' })
-  @ApiQuery({ name: 'page', required: false, example: 1 })
   @ApiResponse({
     status: 200,
     description: 'Search results with provider and group movies',
@@ -70,11 +68,8 @@ export class GroupMoviesController {
     @Query() dto: MovieSearchGroupDto,
   ) {
     const [providerResults, groupMovies] = await Promise.all([
-      this.moviesService.search({
-        query: dto.query,
-        page: dto.page,
-      }),
-      this.groupMoviesService.findByGroup(groupId, undefined, dto.query),
+      this.moviesService.search(dto),
+      this.groupMoviesService.findByGroup(groupId, { query: dto.query }),
     ]);
 
     return {
@@ -107,7 +102,7 @@ export class GroupMoviesController {
     @Query('status') status?: string,
     @Query('query') query?: string,
   ) {
-    return this.groupMoviesService.findByGroup(groupId, status, query);
+    return this.groupMoviesService.findByGroup(groupId, { status, query });
   }
 
   @Post()

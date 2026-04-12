@@ -1,20 +1,30 @@
-import { IsString, IsOptional, IsNumber, Min } from 'class-validator';
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import {
+  IsString,
+  IsOptional,
+  IsNumber,
+  Min,
+  MaxLength,
+} from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 
-export class MovieSearchGroupDto {
+import { MovieSearchFiltersBaseDto } from '../../movies/dto/movie-search-filters-base.dto';
+
+export class MovieSearchGroupDto extends MovieSearchFiltersBaseDto {
   @ApiProperty({ description: 'Search query', example: 'матрица' })
   @IsString()
+  @MaxLength(200)
   query: string;
 
-  @ApiPropertyOptional({
+  @ApiProperty({
     description: 'Page number (for provider results)',
+    required: false,
     example: 1,
     default: 1,
   })
   @IsOptional()
+  @Type(() => Number)
   @IsNumber()
   @Min(1)
-  @Type(() => Number)
   page?: number;
 }

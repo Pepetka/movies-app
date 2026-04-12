@@ -1,11 +1,8 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 
 import { MovieAlreadyInGroupException } from '$common/exceptions';
-import { MoviesRepository } from '$src/movies/movies.repository';
-import { DEFAULT_PROVIDER } from '$src/movies/movies.constants';
-import { GroupMovie, Movie, NewGroupMovie } from '$db/schemas';
-import { MovieProvidersService } from '$src/movies/providers';
-import type { MovieProvider } from '$src/movies/providers';
+import { MoviesService } from '$src/movies/movies.service';
+import { GroupMovie, NewGroupMovie } from '$db/schemas';
 import { GroupMemberRole } from '$common/enums';
 
 import { AddMovieDto, CreateCustomMovieDto, GroupMovieUpdateDto } from './dto';
@@ -17,8 +14,7 @@ export class GroupMoviesService {
 
   constructor(
     private readonly groupMoviesRepository: GroupMoviesRepository,
-    private readonly moviesRepository: MoviesRepository,
-    private readonly movieProvidersService: MovieProvidersService,
+    private readonly moviesService: MoviesService,
   ) {}
 
   async addProviderMovie(
@@ -79,46 +75,17 @@ export class GroupMoviesService {
     return groupMovie;
   }
 
-  async findOrCreateMovie(dto: AddMovieDto): Promise<Movie> {
-    const provider = this.movieProvidersService.getProvider(DEFAULT_PROVIDER);
-
-    let movie: Movie | null = null;
-
-    if (dto.imdbId) {
-      movie = await this.moviesRepository.findByImdbId(dto.imdbId);
-    } else if (dto.externalId) {
-      movie = await this.moviesRepository.findByExternalId(dto.externalId);
-    }
-
-    if (movie) {
-      this._logger.log(`Movie already exists locally: ${movie.id}`);
-      return movie;
-    }
-
-    return this.importMovie(dto, provider);
-  }
-
-  private async importMovie(
+  async findOrCreateMovie(
     dto: AddMovieDto,
-    provider: MovieProvider,
-  ): Promise<Movie> {
-    const details = dto.imdbId
-      ? await provider.findByImdbId(dto.imdbId)
-      : await provider.getMovieDetails(dto.externalId ?? '');
-
-    const newMovie = provider.mapToNewMovie(details);
-    const movie = await this.moviesRepository.create(newMovie);
-
-    this._logger.log(`Movie imported from provider with id: ${movie.id}`);
-    return movie;
+  ): ReturnType<MoviesService['findOrCreateMovie']> {
+    return this.moviesService.findOrCreateMovie(dto.imdbId, dto.externalId);
   }
 
   async findByGroup(
     groupId: number,
-    status?: string,
-    query?: string,
+    options?: { status?: string; query?: string },
   ): Promise<GroupMovie[]> {
-    return this.groupMoviesRepository.findByGroup(groupId, status, query);
+    return this.groupMoviesRepository.findByGroup(groupId, options);
   }
 
   async findOne(
