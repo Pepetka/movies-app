@@ -1,5 +1,12 @@
 # @repo/ui
 
+## 0.10.1
+
+### Patch Changes
+
+- 1f22a38: Minor utility improvements
+  - Extracted transition duration constant for reuse
+
 ## 0.10.0
 
 ### Minor Changes
