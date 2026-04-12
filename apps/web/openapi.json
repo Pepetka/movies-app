@@ -269,6 +269,41 @@
 				"operationId": "MoviesController_search_v1",
 				"parameters": [
 					{
+						"name": "order",
+						"required": false,
+						"in": "query",
+						"description": "Sort order",
+						"schema": { "enum": ["RATING", "NUM_VOTE", "YEAR"], "type": "string" }
+					},
+					{
+						"name": "ratingFrom",
+						"required": false,
+						"in": "query",
+						"description": "Minimum rating (0-10)",
+						"schema": { "minimum": 0, "maximum": 10, "type": "number" }
+					},
+					{
+						"name": "ratingTo",
+						"required": false,
+						"in": "query",
+						"description": "Maximum rating (0-10)",
+						"schema": { "minimum": 0, "maximum": 10, "type": "number" }
+					},
+					{
+						"name": "yearFrom",
+						"required": false,
+						"in": "query",
+						"description": "Minimum year",
+						"schema": { "minimum": 1000, "type": "number" }
+					},
+					{
+						"name": "yearTo",
+						"required": false,
+						"in": "query",
+						"description": "Maximum year",
+						"schema": { "minimum": 1000, "maximum": 2100, "type": "number" }
+					},
+					{
 						"name": "query",
 						"required": true,
 						"in": "query",
@@ -936,6 +971,41 @@
 						"in": "path",
 						"description": "Group ID",
 						"schema": { "type": "number" }
+					},
+					{
+						"name": "order",
+						"required": false,
+						"in": "query",
+						"description": "Sort order",
+						"schema": { "enum": ["RATING", "NUM_VOTE", "YEAR"], "type": "string" }
+					},
+					{
+						"name": "ratingFrom",
+						"required": false,
+						"in": "query",
+						"description": "Minimum rating (0-10)",
+						"schema": { "minimum": 0, "maximum": 10, "type": "number" }
+					},
+					{
+						"name": "ratingTo",
+						"required": false,
+						"in": "query",
+						"description": "Maximum rating (0-10)",
+						"schema": { "minimum": 0, "maximum": 10, "type": "number" }
+					},
+					{
+						"name": "yearFrom",
+						"required": false,
+						"in": "query",
+						"description": "Minimum year",
+						"schema": { "minimum": 1000, "type": "number" }
+					},
+					{
+						"name": "yearTo",
+						"required": false,
+						"in": "query",
+						"description": "Maximum year",
+						"schema": { "minimum": 1000, "maximum": 2100, "type": "number" }
 					},
 					{
 						"name": "query",
