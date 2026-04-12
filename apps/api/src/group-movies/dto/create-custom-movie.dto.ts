@@ -9,7 +9,7 @@ import {
   Min,
   Max,
 } from 'class-validator';
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty } from '@nestjs/swagger';
 
 import { MovieStatus, MovieStatusEnum } from '$common/dto/movie-status.dto';
 import { IsValidMovieStatus } from '$common/validators';
@@ -21,44 +21,46 @@ export class CreateCustomMovieDto {
   @MaxLength(255)
   title: string;
 
-  @ApiPropertyOptional({ description: 'Poster path' })
+  @ApiProperty({ description: 'Poster path', required: false })
   @IsOptional()
   @IsString()
   @MaxLength(512)
   posterPath?: string;
 
-  @ApiPropertyOptional({ description: 'Movie overview' })
+  @ApiProperty({ description: 'Movie overview', required: false })
   @IsOptional()
   @IsString()
   overview?: string;
 
-  @ApiPropertyOptional({ description: 'Release year' })
+  @ApiProperty({ description: 'Release year', required: false })
   @IsOptional()
   @IsNumber()
   @Min(1800)
   @Max(2100)
   releaseYear?: number;
 
-  @ApiPropertyOptional({ description: 'Runtime in minutes' })
+  @ApiProperty({ description: 'Runtime in minutes', required: false })
   @IsOptional()
   @IsNumber()
   @Min(1)
   runtime?: number;
 
-  @ApiPropertyOptional({
+  @ApiProperty({
     description: 'Movie status',
     enum: MovieStatusEnum,
     default: 'tracking',
+    required: false,
   })
   @IsOptional()
   @IsEnum(MovieStatusEnum)
   status?: MovieStatus;
 
-  @ApiPropertyOptional({
+  @ApiProperty({
     type: String,
     nullable: true,
     description: 'Watch date (planned or actual, depending on status)',
     example: '2024-12-31T20:00:00Z',
+    required: false,
   })
   @IsOptional()
   @IsDateString()
