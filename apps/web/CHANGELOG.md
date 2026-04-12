@@ -1,5 +1,17 @@
 # web
 
+## 0.17.0
+
+### Minor Changes
+
+- 1f22a38: Member management in groups
+  - Added member list with role management and removal functionality via API store and UI
+
+### Patch Changes
+
+- Updated dependencies [1f22a38]
+  - @repo/ui@0.10.1
+
 ## 0.16.0
 
 ### Minor Changes
