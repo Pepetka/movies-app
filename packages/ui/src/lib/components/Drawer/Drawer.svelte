@@ -154,15 +154,6 @@
 		};
 	});
 
-	$effect(() => {
-		if (open) {
-			drawerHeight = drawerElement?.offsetHeight ?? 0;
-		}
-		return () => {
-			drawerHeight = 0;
-		};
-	});
-
 	const drawerSize = $derived(size ?? defaultSizes[position]);
 	const dragTransform = $derived(
 		isDragging || dragOffset !== 0 ? `translateY(${dragOffset}px)` : ''
@@ -191,6 +182,7 @@
 		<div
 			class="ui-drawer-backdrop"
 			style:opacity={isDragging && position === 'bottom' ? overlayOpacity : undefined}
+			aria-hidden="true"
 			in:fade={OVERLAY_FADE}
 			out:fade={OVERLAY_FADE}
 		></div>
@@ -300,7 +292,7 @@
 		left: 0;
 		right: 0;
 		bottom: calc(-1 * var(--drawer-bottom-offset));
-		max-height: 85vh;
+		max-height: 95dvh;
 		width: 100%;
 		padding-bottom: var(--drawer-bottom-offset);
 		border-radius: var(--radius-2xl) var(--radius-2xl) 0 0;

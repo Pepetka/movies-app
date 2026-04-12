@@ -61,7 +61,12 @@
 
 {#if open}
 	<div class={['ui-modal-root', className]} role="presentation" onclick={handleOverlayClick}>
-		<div class="ui-modal-backdrop" in:fade={OVERLAY_FADE} out:fade={OVERLAY_FADE}></div>
+		<div
+			class="ui-modal-backdrop"
+			aria-hidden="true"
+			in:fade={OVERLAY_FADE}
+			out:fade={OVERLAY_FADE}
+		></div>
 		<div
 			bind:this={modalElement}
 			class={['ui-modal', size]}
