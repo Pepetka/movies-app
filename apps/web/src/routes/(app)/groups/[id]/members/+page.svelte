@@ -1,10 +1,22 @@
 <script lang="ts">
-	import { Avatar, Badge, Button, Card, IconButton, Input, Sheet, Spinner, toast } from '@repo/ui';
+	import {
+		Avatar,
+		Badge,
+		Button,
+		Card,
+		Dropdown,
+		IconButton,
+		Input,
+		List,
+		ListItem,
+		Sheet,
+		Spinner,
+		toast
+	} from '@repo/ui';
 	import { Check, Copy, MoreVertical, RefreshCw } from '@lucide/svelte';
-	import type { BadgeVariant } from '@repo/ui';
 
 	import { groupStore, inviteStore, membersStore } from '$lib/modules/groups';
-	import type { GroupMemberResponseDtoRole } from '$lib/api/generated/types';
+	import type { GroupMemberResponseDto } from '$lib/api/generated/types';
 	import { authStore } from '$lib/modules/auth';
 	import { goBack, ROUTES } from '$lib/utils';
 	import { topBarStore } from '$lib/stores';
@@ -12,16 +24,31 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 
+	import { CONFIRM_TEXT, ROLE_BADGE_VARIANT, ROLE_LABEL } from './constants';
+	import { canManageMember, getDropdownItems } from './helpers';
+	import type { ConfirmAction } from './constants';
+
 	const groupId = $derived(Number(page.params.id));
 
 	const isLoading = $derived(membersStore.isLoading);
 	const isInviteLoading = $derived(inviteStore.isGenerating || inviteStore.isTokenFetching);
+	const isMutating = $derived(
+		membersStore.isRemoving || membersStore.isUpdatingRole || membersStore.isTransferring
+	);
 
 	const inviteLink = $derived.by(() => {
 		const token = inviteStore.inviteToken;
 		if (!token) return '';
 		return `${page.url.origin}/invite/${token}`;
 	});
+
+	let pendingAction = $state<{
+		type: ConfirmAction;
+		userId: number;
+		userName: string;
+	} | null>(null);
+
+	let showConfirmAction = $state(false);
 
 	let showConfirmRegenerate = $state(false);
 	let isCopied = $state(false);
@@ -49,6 +76,9 @@
 		if (groupId) {
 			void membersStore.fetchMembers(groupId);
 		}
+		return () => {
+			membersStore.resetMutations();
+		};
 	});
 
 	$effect(() => {
@@ -67,28 +97,62 @@
 		}
 	});
 
-	const ROLE_BADGE_VARIANT: Record<GroupMemberResponseDtoRole, BadgeVariant> = {
-		admin: 'warning',
-		moderator: 'primary',
-		member: 'default'
+	const canManageMemberLocal = (memberRole: GroupMemberResponseDto['role']) =>
+		canManageMember(memberRole, groupStore.currentUserRole);
+
+	const getDropdownItemsLocal = (member: GroupMemberResponseDto) =>
+		getDropdownItems(member, groupStore.currentUserRole);
+
+	const handleAction = (type: ConfirmAction, member: GroupMemberResponseDto) => {
+		pendingAction = { type, userId: member.userId, userName: member.user.name };
+		showConfirmAction = true;
 	};
 
-	const ROLE_LABEL: Record<GroupMemberResponseDtoRole, string> = {
-		admin: 'Админ',
-		moderator: 'Модератор',
-		member: 'Участник'
+	const ACTION_HANDLERS: Record<
+		ConfirmAction,
+		{
+			execute: (groupId: number, userId: number) => Promise<void>;
+			isSuccess: () => boolean;
+			error: () => string | null;
+		}
+	> = {
+		remove: {
+			execute: (gid, uid) => membersStore.removeMember(gid, uid),
+			isSuccess: () => membersStore.isRemoveSuccess,
+			error: () => membersStore.removeError
+		},
+		'make-moderator': {
+			execute: (gid, uid) => membersStore.updateMemberRole(gid, uid, 'moderator'),
+			isSuccess: () => membersStore.isUpdateRoleSuccess,
+			error: () => membersStore.updateRoleError
+		},
+		'demote-moderator': {
+			execute: (gid, uid) => membersStore.updateMemberRole(gid, uid, 'member'),
+			isSuccess: () => membersStore.isUpdateRoleSuccess,
+			error: () => membersStore.updateRoleError
+		},
+		'transfer-ownership': {
+			execute: (gid, uid) => membersStore.transferOwnership(gid, uid),
+			isSuccess: () => membersStore.isTransferSuccess,
+			error: () => membersStore.transferError
+		}
 	};
 
-	const canManageMember = (memberRole: GroupMemberResponseDtoRole): boolean => {
-		const myRole = groupStore.currentUserRole;
-		if (!myRole) return false;
-		if (myRole === 'admin') return memberRole !== 'admin';
-		if (myRole === 'moderator') return memberRole === 'member';
-		return false;
-	};
+	const confirmAction = async () => {
+		if (!pendingAction || isMutating) return;
 
-	const handleManageMember = (_userId: number) => {
-		// TODO: implement member management menu
+		const { type, userId } = pendingAction;
+		const config = CONFIRM_TEXT[type];
+		const handler = ACTION_HANDLERS[type];
+
+		await handler.execute(groupId, userId);
+
+		if (handler.isSuccess()) {
+			toast.success(config.successMessage);
+			showConfirmAction = false;
+		} else {
+			toast.error(handler.error() ?? config.errorFallback);
+		}
 	};
 
 	const handleGenerateInvite = () => {
@@ -165,7 +229,7 @@
 			</Card>
 		{/if}
 
-		<ul class="members-list">
+		<ul class="members-list" aria-label="Список участников группы">
 			{#each membersStore.members as member (member.userId)}
 				{@const user = member.user}
 				{@const isCurrentUser = member.userId === authStore.user?.id}
@@ -182,19 +246,48 @@
 					<Badge variant={ROLE_BADGE_VARIANT[member.role]} size="sm">
 						{ROLE_LABEL[member.role]}
 					</Badge>
-					{#if canManageMember(member.role)}
-						<IconButton
-							Icon={MoreVertical}
-							variant="ghost"
-							label="Управление"
-							onclick={() => handleManageMember(member.userId)}
-						/>
+					{#if canManageMemberLocal(member.role)}
+						<Dropdown position="bottom-end">
+							<IconButton Icon={MoreVertical} variant="ghost" label="Управление" />
+							{#snippet items()}
+								<List variant="plain" style="white-space: nowrap;">
+									{#each getDropdownItemsLocal(member) as item (item.type)}
+										<ListItem
+											title={item.label}
+											interactive
+											size="sm"
+											onclick={() => handleAction(item.type, member)}
+										/>
+									{/each}
+								</List>
+							{/snippet}
+						</Dropdown>
 					{/if}
 				</li>
 			{/each}
 		</ul>
 	</div>
 {/if}
+
+<Sheet bind:open={showConfirmAction} size="sm">
+	{#snippet header()}
+		{#if pendingAction}
+			<h3>{CONFIRM_TEXT[pendingAction.type].title}</h3>
+		{/if}
+	{/snippet}
+	{#if pendingAction}
+		<p>{CONFIRM_TEXT[pendingAction.type].getDescription(pendingAction.userName)}</p>
+	{/if}
+	{#snippet footer(close)}
+		<Button variant="ghost" onclick={close}>Отмена</Button>
+		{#if pendingAction}
+			{@const confirm = CONFIRM_TEXT[pendingAction.type]}
+			<Button variant={confirm.variant} onclick={confirmAction} loading={isMutating}>
+				{confirm.button}
+			</Button>
+		{/if}
+	{/snippet}
+</Sheet>
 
 <Sheet bind:open={showConfirmRegenerate} size="sm">
 	{#snippet header()}
