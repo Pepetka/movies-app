@@ -2,12 +2,13 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { NotFoundException } from '@nestjs/common';
 
 import { MovieAlreadyInGroupException } from '$common/exceptions';
-import { GroupMemberRole } from '$common/enums';
+import { GroupMemberRole, GroupMovieStatus } from '$common/enums';
 
 import { GroupMoviesRepository } from './group-movies.repository';
 import { GroupMoviesService } from './group-movies.service';
 import { MoviesService } from '../movies/movies.service';
-import { AddMovieDto, GroupMovieStatus } from './dto';
+import { AddMovieDto } from './dto';
+import { ProviderSearchResult } from '$src/movies/providers/interfaces/provider-result.dto';
 
 const mockGroupMovie = {
   id: 1,
@@ -60,6 +61,7 @@ const createMockRepositories = () => ({
     findByExternalId: jest.fn(),
     createFromProvider: jest.fn(),
     findOrCreateMovie: jest.fn(),
+    search: jest.fn(),
   },
 });
 
@@ -305,11 +307,13 @@ describe('GroupMoviesService', () => {
         mockGroupMovies,
       );
 
-      const result = await service.findByGroup(1, { status: 'watched' });
+      const result = await service.findByGroup(1, {
+        status: GroupMovieStatus.WATCHED,
+      });
 
       expect(result[0].status).toBe(GroupMovieStatus.WATCHED);
       expect(mocks.groupMoviesRepository.findByGroup).toHaveBeenCalledWith(1, {
-        status: 'watched',
+        status: GroupMovieStatus.WATCHED,
       });
     });
 
@@ -325,6 +329,60 @@ describe('GroupMoviesService', () => {
       expect(mocks.groupMoviesRepository.findByGroup).toHaveBeenCalledWith(1, {
         query: 'matrix',
       });
+    });
+  });
+
+  describe('searchInGroup', () => {
+    it('should return provider results and current group movies', async () => {
+      const providerResult: ProviderSearchResult = {
+        page: 1,
+        totalPages: 1,
+        totalResults: 1,
+        results: [
+          {
+            imdbId: 'tt1234567',
+            externalId: 'kp123',
+            title: 'Search Result',
+            posterPath: null,
+            overview: 'Test overview',
+            releaseYear: 2024,
+            rating: 8.5,
+          },
+        ],
+      };
+      const groupMovies = [{ ...mockGroupMovie, title: 'Group Movie' }];
+
+      mocks.moviesService.search.mockResolvedValue(providerResult);
+      mocks.groupMoviesRepository.findByGroup.mockResolvedValue(groupMovies);
+
+      const dto = { query: 'test', page: 1 };
+      const result = await service.searchInGroup(1, dto);
+
+      expect(result).toEqual({
+        provider: providerResult,
+        currentGroup: groupMovies,
+      });
+      expect(mocks.moviesService.search).toHaveBeenCalledWith(dto);
+      expect(mocks.groupMoviesRepository.findByGroup).toHaveBeenCalledWith(1, {
+        query: 'test',
+      });
+    });
+
+    it('should call dependencies in parallel', async () => {
+      const providerResult: ProviderSearchResult = {
+        page: 1,
+        totalPages: 1,
+        totalResults: 0,
+        results: [],
+      };
+
+      mocks.moviesService.search.mockResolvedValue(providerResult);
+      mocks.groupMoviesRepository.findByGroup.mockResolvedValue([]);
+
+      await service.searchInGroup(1, { query: 'matrix' });
+
+      expect(mocks.moviesService.search).toHaveBeenCalledTimes(1);
+      expect(mocks.groupMoviesRepository.findByGroup).toHaveBeenCalledTimes(1);
     });
   });
 
