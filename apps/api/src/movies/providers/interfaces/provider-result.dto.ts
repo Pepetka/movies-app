@@ -27,8 +27,8 @@ export class ProviderMovieSummary {
   releaseYear: number | null;
 
   @Expose()
-  @ApiProperty()
-  rating: number;
+  @ApiProperty({ type: Number, nullable: true })
+  rating: number | null;
 }
 
 export class ProviderSearchResult {
@@ -75,8 +75,8 @@ export class ProviderMovieDetails {
   releaseYear: number | null;
 
   @Expose()
-  @ApiProperty()
-  rating: number;
+  @ApiProperty({ type: Number, nullable: true })
+  rating: number | null;
 
   @Expose()
   @ApiProperty({ type: [String] })

@@ -119,7 +119,7 @@ export class KinopoiskService implements MovieProvider {
         posterPath: r.posterUrlPreview ?? null,
         overview: '',
         releaseYear: r.year ?? null,
-        rating: r.ratingImdb ?? 0,
+        rating: r.ratingImdb ?? null,
       })),
     };
   }
@@ -189,7 +189,7 @@ export class KinopoiskService implements MovieProvider {
       posterPath: details.posterPath,
       overview: details.overview,
       releaseYear: details.releaseYear,
-      rating: details.rating.toString(),
+      rating: details.rating?.toString() ?? null,
       genres: details.genres,
       runtime: details.runtime,
     };
@@ -207,7 +207,7 @@ export class KinopoiskService implements MovieProvider {
       posterPath: movie.posterUrl ?? null,
       overview: movie.description ?? movie.shortDescription ?? null,
       releaseYear: movie.year ?? null,
-      rating: movie.ratingImdb ?? 0,
+      rating: movie.ratingImdb ?? null,
       genres,
       runtime: movie.filmLength ?? null,
     };
