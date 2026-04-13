@@ -5,7 +5,14 @@ import { MoviesService } from '$src/movies/movies.service';
 import { GroupMovie, NewGroupMovie } from '$db/schemas';
 import { GroupMemberRole } from '$common/enums';
 
-import { AddMovieDto, CreateCustomMovieDto, GroupMovieUpdateDto } from './dto';
+import {
+  AddMovieDto,
+  CreateCustomMovieDto,
+  GroupMovieUpdateDto,
+  FindAllGroupMoviesDto,
+  MovieSearchGroupDto,
+} from './dto';
+import { ProviderSearchResult } from '$src/movies/providers/interfaces/provider-result.dto';
 import { GroupMoviesRepository } from './group-movies.repository';
 
 @Injectable()
@@ -83,9 +90,30 @@ export class GroupMoviesService {
 
   async findByGroup(
     groupId: number,
-    options?: { status?: string; query?: string },
+    options?: FindAllGroupMoviesDto,
   ): Promise<GroupMovie[]> {
-    return this.groupMoviesRepository.findByGroup(groupId, options);
+    return this.groupMoviesRepository.findByGroup(
+      groupId,
+      options && {
+        status: options.status,
+        query: options.query,
+      },
+    );
+  }
+
+  async searchInGroup(
+    groupId: number,
+    dto: MovieSearchGroupDto,
+  ): Promise<{ provider: ProviderSearchResult; currentGroup: GroupMovie[] }> {
+    const [providerResults, groupMovies] = await Promise.all([
+      this.moviesService.search(dto),
+      this.groupMoviesRepository.findByGroup(groupId, { query: dto.query }),
+    ]);
+
+    return {
+      provider: providerResults,
+      currentGroup: groupMovies,
+    };
   }
 
   async findOne(

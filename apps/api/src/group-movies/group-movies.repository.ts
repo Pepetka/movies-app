@@ -4,13 +4,12 @@ import { Inject, Injectable } from '@nestjs/common';
 import { groupMovies, type GroupMovie, type NewGroupMovie } from '$db/schemas';
 import { DrizzleDb } from '$db/types/drizzle.types';
 import { escapeLikePattern } from '$common/utils';
+import { GroupMovieStatus } from '$common/enums';
 import { DRIZZLE } from '$db/db.module';
 
-const VALID_STATUSES = ['tracking', 'planned', 'watched'] as const;
-type ValidStatus = (typeof VALID_STATUSES)[number];
-
-function isValidStatus(status: string): status is ValidStatus {
-  return VALID_STATUSES.includes(status as ValidStatus);
+export interface FindGroupMoviesOptions {
+  status?: GroupMovieStatus;
+  query?: string;
 }
 
 @Injectable()
@@ -24,13 +23,13 @@ export class GroupMoviesRepository {
 
   async findByGroup(
     groupId: number,
-    options?: { status?: string; query?: string },
+    options?: FindGroupMoviesOptions,
     limit = 100,
     offset = 0,
   ): Promise<GroupMovie[]> {
     const conditions = [eq(groupMovies.groupId, groupId)];
 
-    if (options?.status && isValidStatus(options.status)) {
+    if (options?.status) {
       conditions.push(eq(groupMovies.status, options.status));
     }
 

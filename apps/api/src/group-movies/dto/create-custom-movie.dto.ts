@@ -11,8 +11,8 @@ import {
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
-import { MovieStatus, MovieStatusEnum } from '$common/dto/movie-status.dto';
 import { IsValidMovieStatus } from '$common/validators';
+import { GroupMovieStatus } from '$common/enums';
 
 export class CreateCustomMovieDto {
   @ApiProperty({ description: 'Movie title' })
@@ -30,6 +30,7 @@ export class CreateCustomMovieDto {
   @ApiProperty({ description: 'Movie overview', required: false })
   @IsOptional()
   @IsString()
+  @MaxLength(2000)
   overview?: string;
 
   @ApiProperty({ description: 'Release year', required: false })
@@ -47,13 +48,13 @@ export class CreateCustomMovieDto {
 
   @ApiProperty({
     description: 'Movie status',
-    enum: MovieStatusEnum,
-    default: 'tracking',
+    enum: GroupMovieStatus,
+    default: GroupMovieStatus.TRACKING,
     required: false,
   })
   @IsOptional()
-  @IsEnum(MovieStatusEnum)
-  status?: MovieStatus;
+  @IsEnum(GroupMovieStatus)
+  status?: GroupMovieStatus;
 
   @ApiProperty({
     type: String,

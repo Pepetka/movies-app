@@ -2,18 +2,14 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Expose } from 'class-transformer';
 
 import { ProviderSearchResult } from '$src/movies/providers/interfaces/provider-result.dto';
-import { GroupMemberRole } from '$common/enums';
+import { GroupMemberRole, GroupMovieStatus } from '$common/enums';
 
-export enum GroupMovieStatus {
-  TRACKING = 'tracking',
-  PLANNED = 'planned',
-  WATCHED = 'watched',
-}
+export const MovieSource = {
+  PROVIDER: 'provider',
+  CUSTOM: 'custom',
+} as const;
 
-export enum MovieSource {
-  PROVIDER = 'provider',
-  CUSTOM = 'custom',
-}
+export type MovieSource = (typeof MovieSource)[keyof typeof MovieSource];
 
 export class GroupMovieResponseDto {
   @Expose()

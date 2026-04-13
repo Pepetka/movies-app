@@ -11,8 +11,7 @@ import {
 import { ApiProperty } from '@nestjs/swagger';
 
 import { IsValidMovieStatus } from '$common/validators';
-
-import { GroupMovieStatus } from './group-movie-response.dto';
+import { GroupMovieStatus } from '$common/enums';
 
 export class GroupMovieUpdateDto {
   // Status fields
@@ -52,6 +51,7 @@ export class GroupMovieUpdateDto {
   @ApiProperty({ description: 'Movie overview', required: false })
   @IsOptional()
   @IsString()
+  @MaxLength(2000)
   overview?: string;
 
   @ApiProperty({ description: 'Release year', required: false })

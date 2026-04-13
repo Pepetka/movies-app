@@ -19,7 +19,6 @@ import {
   ApiResponse,
   ApiParam,
   ApiBearerAuth,
-  ApiQuery,
 } from '@nestjs/swagger';
 
 import { GroupMemberGuard, GroupModeratorGuard } from '$src/groups/guards';
@@ -30,22 +29,19 @@ import { GroupMemberRole } from '$common/enums';
 import {
   AddMovieDto,
   CreateCustomMovieDto,
+  FindAllGroupMoviesDto,
   GroupMovieUpdateDto,
   MovieSearchGroupDto,
   GroupMovieResponseDto,
   SearchInGroupResponseDto,
 } from './dto';
 import { GroupMoviesService } from './group-movies.service';
-import { MoviesService } from '../movies/movies.service';
 
 @ApiTags('Groups / Movies')
 @ApiBearerAuth('access-token')
 @Controller('groups/:groupId/movies')
 export class GroupMoviesController {
-  constructor(
-    private readonly groupMoviesService: GroupMoviesService,
-    private readonly moviesService: MoviesService,
-  ) {}
+  constructor(private readonly groupMoviesService: GroupMoviesService) {}
 
   @Get('search')
   @UseGuards(GroupModeratorGuard)
@@ -63,19 +59,11 @@ export class GroupMoviesController {
     status: 403,
     description: 'Forbidden - Not a group moderator',
   })
-  async searchInGroup(
+  searchInGroup(
     @Param('groupId', ParseIntPipe) groupId: number,
     @Query() dto: MovieSearchGroupDto,
   ) {
-    const [providerResults, groupMovies] = await Promise.all([
-      this.moviesService.search(dto),
-      this.groupMoviesService.findByGroup(groupId, { query: dto.query }),
-    ]);
-
-    return {
-      provider: providerResults,
-      currentGroup: groupMovies,
-    };
+    return this.groupMoviesService.searchInGroup(groupId, dto);
   }
 
   @Get()
@@ -85,24 +73,18 @@ export class GroupMoviesController {
     summary: 'Get all movies in group (Group members only)',
   })
   @ApiParam({ name: 'groupId', description: 'Group ID' })
-  @ApiQuery({
-    name: 'status',
-    required: false,
-    enum: ['tracking', 'planned', 'watched'],
-  })
-  @ApiQuery({ name: 'query', required: false })
   @ApiResponse({
     status: 200,
     description: 'List of group movies',
     type: [GroupMovieResponseDto],
   })
+  @ApiResponse({ status: 400, description: 'Invalid query parameters' })
   @ApiResponse({ status: 403, description: 'Forbidden - Not a group member' })
   findAll(
     @Param('groupId', ParseIntPipe) groupId: number,
-    @Query('status') status?: string,
-    @Query('query') query?: string,
+    @Query() dto: FindAllGroupMoviesDto,
   ) {
-    return this.groupMoviesService.findByGroup(groupId, { status, query });
+    return this.groupMoviesService.findByGroup(groupId, dto);
   }
 
   @Post()
