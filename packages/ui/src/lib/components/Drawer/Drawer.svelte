@@ -107,19 +107,6 @@
 	const handleMouseDown = (e: MouseEvent) => {
 		e.preventDefault();
 		startDrag(e.clientY);
-
-		const handleMouseMove = (e: MouseEvent) => {
-			updateDrag(e.clientY);
-		};
-
-		const handleMouseUp = () => {
-			endDrag();
-			document.removeEventListener('mousemove', handleMouseMove);
-			document.removeEventListener('mouseup', handleMouseUp);
-		};
-
-		document.addEventListener('mousemove', handleMouseMove);
-		document.addEventListener('mouseup', handleMouseUp);
 	};
 
 	const close = () => {
@@ -140,23 +127,38 @@
 	});
 
 	$effect(() => {
+		if (!isDragging || position !== 'bottom') return;
+
+		const ac = new AbortController();
+		const { signal } = ac;
+
+		document.addEventListener('mousemove', (e: MouseEvent) => {
+			updateDrag(e.clientY);
+		}, { signal });
+		document.addEventListener('mouseup', () => {
+			endDrag();
+		}, { signal });
+
+		return () => ac.abort();
+	});
+
+	$effect(() => {
 		const element = handleElement;
 		if (position !== 'bottom' || !element) return;
 
-		element.addEventListener('touchstart', handleTouchStart, { passive: true });
-		element.addEventListener('touchmove', handleTouchMove, { passive: false });
-		element.addEventListener('touchend', handleTouchEnd, { passive: true });
+		const ac = new AbortController();
+		const { signal } = ac;
 
-		return () => {
-			element.removeEventListener('touchstart', handleTouchStart);
-			element.removeEventListener('touchmove', handleTouchMove);
-			element.removeEventListener('touchend', handleTouchEnd);
-		};
+		element.addEventListener('touchstart', handleTouchStart, { passive: true, signal });
+		element.addEventListener('touchmove', handleTouchMove, { passive: false, signal });
+		element.addEventListener('touchend', handleTouchEnd, { passive: true, signal });
+
+		return () => ac.abort();
 	});
 
 	const drawerSize = $derived(size ?? defaultSizes[position]);
 	const dragTransform = $derived(
-		isDragging || dragOffset !== 0 ? `translateY(${dragOffset}px)` : ''
+		dragOffset !== 0 ? `translateY(${dragOffset}px)` : ''
 	);
 	const overlayOpacity = $derived.by(() => {
 		if (!isDragging || drawerHeight === 0) return 1;
