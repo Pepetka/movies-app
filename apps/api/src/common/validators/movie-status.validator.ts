@@ -25,7 +25,8 @@ export class IsValidMovieStatusConstraint implements ValidatorConstraintInterfac
     const { status, watchDate } = object;
 
     if (
-      (status === GroupMovieStatus.PLANNED || status === GroupMovieStatus.WATCHED) &&
+      (status === GroupMovieStatus.PLANNED ||
+        status === GroupMovieStatus.WATCHED) &&
       !watchDate
     ) {
       return false;

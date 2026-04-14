@@ -29,7 +29,10 @@ export const mapToUnified = (movie: GroupMovieResponseDto): UnifiedMovie => ({
 	overview: movie.overview ?? undefined,
 	releaseYear: movie.releaseYear ?? undefined,
 	runtime: movie.runtime ?? undefined,
-	rating: movie.rating != null && Number.isFinite(Number(movie.rating)) ? Number(movie.rating) : undefined,
+	rating:
+		movie.rating != null && Number.isFinite(Number(movie.rating))
+			? Number(movie.rating)
+			: undefined,
 	status: movie.status,
 	watchDate: movie.watchDate ?? undefined,
 	createdAt: movie.createdAt,

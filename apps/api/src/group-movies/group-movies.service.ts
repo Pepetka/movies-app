@@ -1,5 +1,6 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 
+import { ProviderSearchResult } from '$src/movies/providers/interfaces/provider-result.dto';
 import { MovieAlreadyInGroupException } from '$common/exceptions';
 import { MoviesService } from '$src/movies/movies.service';
 import { GroupMovie, NewGroupMovie } from '$db/schemas';
@@ -12,7 +13,6 @@ import {
   FindAllGroupMoviesDto,
   MovieSearchGroupDto,
 } from './dto';
-import { ProviderSearchResult } from '$src/movies/providers/interfaces/provider-result.dto';
 import { GroupMoviesRepository } from './group-movies.repository';
 
 @Injectable()

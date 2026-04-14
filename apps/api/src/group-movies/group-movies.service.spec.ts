@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { NotFoundException } from '@nestjs/common';
 
+import { ProviderSearchResult } from '$src/movies/providers/interfaces/provider-result.dto';
 import { MovieAlreadyInGroupException } from '$common/exceptions';
 import { GroupMemberRole, GroupMovieStatus } from '$common/enums';
 
@@ -8,7 +9,6 @@ import { GroupMoviesRepository } from './group-movies.repository';
 import { GroupMoviesService } from './group-movies.service';
 import { MoviesService } from '../movies/movies.service';
 import { AddMovieDto } from './dto';
-import { ProviderSearchResult } from '$src/movies/providers/interfaces/provider-result.dto';
 
 const mockGroupMovie = {
   id: 1,
