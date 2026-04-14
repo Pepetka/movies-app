@@ -6,8 +6,10 @@ import {
   ValidationArguments,
 } from 'class-validator';
 
+import { GroupMovieStatus } from '$common/enums';
+
 interface MovieStatusDto {
-  status?: string;
+  status?: GroupMovieStatus;
   watchDate?: string;
 }
 
@@ -22,11 +24,14 @@ export class IsValidMovieStatusConstraint implements ValidatorConstraintInterfac
 
     const { status, watchDate } = object;
 
-    if ((status === 'planned' || status === 'watched') && !watchDate) {
+    if (
+      (status === GroupMovieStatus.PLANNED || status === GroupMovieStatus.WATCHED) &&
+      !watchDate
+    ) {
       return false;
     }
 
-    if (status === 'tracking' && watchDate) {
+    if (status === GroupMovieStatus.TRACKING && watchDate) {
       return false;
     }
 
