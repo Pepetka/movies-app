@@ -12,6 +12,7 @@
 	} from '@repo/ui';
 	import { Search } from '@lucide/svelte';
 
+	import { MOVIE_SEARCH_YEAR_FILTER } from '$lib/modules/movies/config/movies-search.config';
 	import { moviesSearchStore, groupMovieStore, MovieRating } from '$lib/modules/movies';
 	import type { ProviderMovieSummary } from '$lib/api/generated/types';
 	import { groupStore } from '$lib/modules/groups';
@@ -24,20 +25,20 @@
 	let inputValue = $state('');
 	let selectedYear = $state('');
 	let hasRedirected = $state(false);
-	let isTyping = $state(false);
-
-	$effect(() => {
-		if (moviesSearchStore.isLoading) {
-			isTyping = false;
-		}
-	});
 
 	const currentYear = new Date().getFullYear();
-	const maxYear = currentYear + 3;
-	const yearOptions = Array.from({ length: maxYear - 1949 }, (_, i) => {
-		const year = String(maxYear - i);
-		return { value: year, label: year };
-	});
+	const maxYear = currentYear + MOVIE_SEARCH_YEAR_FILTER.futureOffset;
+	const yearOptions = Array.from(
+		{ length: maxYear - (MOVIE_SEARCH_YEAR_FILTER.minYear - 1) },
+		(_, i) => {
+			const year = String(maxYear - i);
+			return { value: year, label: year };
+		}
+	);
+
+	const yearFilter = $derived<{ yearFrom?: number; yearTo?: number }>(
+		selectedYear ? { yearFrom: Number(selectedYear), yearTo: Number(selectedYear) } : {}
+	);
 
 	$effect(() => {
 		topBarStore.configure({
@@ -63,33 +64,18 @@
 	const handleClear = () => {
 		inputValue = '';
 		selectedYear = '';
-		isTyping = false;
 		moviesSearchStore.clear();
 	};
 
-	const getYearFilter = (): { yearFrom?: number; yearTo?: number } => {
-		if (!selectedYear) return {};
-		const year = Number(selectedYear);
-		return { yearFrom: year, yearTo: year };
-	};
-
-	const handleSearch = () => {
-		const { yearFrom, yearTo } = getYearFilter();
-		moviesSearchStore.search(groupId, inputValue, yearFrom, yearTo);
-	};
-
 	const handleInputChange = (value: string) => {
-		isTyping = true;
 		inputValue = value;
-		const { yearFrom, yearTo } = getYearFilter();
-		moviesSearchStore.search(groupId, value, yearFrom, yearTo);
+		moviesSearchStore.search(groupId, value, yearFilter.yearFrom, yearFilter.yearTo);
 	};
 
 	const handleYearChange = (value: string) => {
 		selectedYear = value;
 		if (inputValue.trim()) {
-			isTyping = true;
-			handleSearch();
+			moviesSearchStore.search(groupId, inputValue, yearFilter.yearFrom, yearFilter.yearTo);
 		}
 	};
 
@@ -143,7 +129,7 @@
 	</div>
 
 	<div class="search-page__results">
-		{#if moviesSearchStore.isLoading || isTyping}
+		{#if moviesSearchStore.isLoading}
 			<div class="search-page__loading">
 				<Spinner size="lg" />
 			</div>
