@@ -39,7 +39,7 @@ class MoviesSearchStore extends BaseStore {
 				}
 				const { groupId, query, yearFrom, yearTo } = params;
 				return groupMoviesControllerSearchInGroupV1(
-					Number(groupId),
+					groupId,
 					{ query, yearFrom, yearTo },
 					{ signal }
 				);
@@ -50,7 +50,10 @@ class MoviesSearchStore extends BaseStore {
 		this._debouncedSearch = debounce(
 			(groupId: number, query: string, yearFrom?: number, yearTo?: number) => {
 				if (query.trim()) {
-					void this._query.revalidate(['movies', 'search', groupId, query, yearFrom, yearTo], {
+					const key = ['movies', 'search', groupId, query];
+					if (yearFrom !== undefined) key.push(yearFrom);
+					if (yearTo !== undefined) key.push(yearTo);
+					void this._query.revalidate(key, {
 						groupId,
 						query,
 						yearFrom,
@@ -113,7 +116,15 @@ class MoviesSearchStore extends BaseStore {
 	}
 
 	search(groupId: number, query: string, yearFrom?: number, yearTo?: number): void {
-		untrack(() => this._debouncedSearch(groupId, query, yearFrom, yearTo));
+		untrack(() => {
+			const key = ['movies', 'search', groupId, query];
+			if (yearFrom !== undefined) key.push(yearFrom);
+			if (yearTo !== undefined) key.push(yearTo);
+			if (this._query.isCurrentKey(key) && (this.isLoaded || this.isFetching)) {
+				return;
+			}
+			this._debouncedSearch(groupId, query, yearFrom, yearTo);
+		});
 	}
 
 	clear(): void {
