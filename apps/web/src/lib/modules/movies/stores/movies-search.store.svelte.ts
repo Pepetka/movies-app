@@ -13,35 +13,55 @@ import { DEBOUNCE, debounce } from '$lib/utils';
 class MoviesSearchStore extends BaseStore {
 	private readonly _query: QueryResult<
 		SearchInGroupResponseDto,
-		{ groupId: number; query: string }
+		{ groupId: number; query: string; yearFrom?: number; yearTo?: number }
 	>;
-	private readonly _debouncedSearch: ((groupId: number, query: string) => void) & {
+	private readonly _debouncedSearch: ((
+		groupId: number,
+		query: string,
+		yearFrom?: number,
+		yearTo?: number
+	) => void) & {
 		cancel: () => void;
 	};
 
 	constructor() {
 		super();
 
-		this._query = createQuery<SearchInGroupResponseDto, { groupId: number; query: string }>({
+		this._query = createQuery<
+			SearchInGroupResponseDto,
+			{ groupId: number; query: string; yearFrom?: number; yearTo?: number }
+		>({
 			key: ['movies', 'search'],
 			tags: ['movies-search'],
 			fetcher: (signal, params) => {
 				if (!params?.groupId) {
 					throw new Error('No group id');
 				}
-				const { groupId, query } = params;
-				return groupMoviesControllerSearchInGroupV1(Number(groupId), { query }, { signal });
+				const { groupId, query, yearFrom, yearTo } = params;
+				return groupMoviesControllerSearchInGroupV1(
+					Number(groupId),
+					{ query, yearFrom, yearTo },
+					{ signal }
+				);
 			},
 			debug: !__IS_PROD__
 		});
 
-		this._debouncedSearch = debounce((groupId: number, query: string) => {
-			if (query.trim()) {
-				void this._query.revalidate(['movies', 'search', groupId, query], { groupId, query });
-			} else {
-				this._query.reset();
-			}
-		}, DEBOUNCE);
+		this._debouncedSearch = debounce(
+			(groupId: number, query: string, yearFrom?: number, yearTo?: number) => {
+				if (query.trim()) {
+					void this._query.revalidate(['movies', 'search', groupId, query, yearFrom, yearTo], {
+						groupId,
+						query,
+						yearFrom,
+						yearTo
+					});
+				} else {
+					this._query.reset();
+				}
+			},
+			DEBOUNCE
+		);
 	}
 
 	get providerResults(): ProviderSearchResult {
@@ -92,8 +112,8 @@ class MoviesSearchStore extends BaseStore {
 		return this.results.length === 0 && this.currentGroup.length === 0;
 	}
 
-	search(groupId: number, query: string): void {
-		untrack(() => this._debouncedSearch(groupId, query));
+	search(groupId: number, query: string, yearFrom?: number, yearTo?: number): void {
+		untrack(() => this._debouncedSearch(groupId, query, yearFrom, yearTo));
 	}
 
 	clear(): void {

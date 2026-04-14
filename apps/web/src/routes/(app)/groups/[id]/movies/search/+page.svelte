@@ -1,5 +1,15 @@
 <script lang="ts">
-	import { Input, Spinner, EmptyState, List, ListItem, Image, toast, Button } from '@repo/ui';
+	import {
+		Input,
+		Spinner,
+		EmptyState,
+		List,
+		ListItem,
+		Image,
+		toast,
+		Button,
+		Select
+	} from '@repo/ui';
 	import { Search } from '@lucide/svelte';
 
 	import { moviesSearchStore, groupMovieStore, MovieRating } from '$lib/modules/movies';
@@ -12,7 +22,22 @@
 
 	const groupId = $derived(Number(page.params.id));
 	let inputValue = $state('');
+	let selectedYear = $state('');
 	let hasRedirected = $state(false);
+	let isTyping = $state(false);
+
+	$effect(() => {
+		if (moviesSearchStore.isLoading) {
+			isTyping = false;
+		}
+	});
+
+	const currentYear = new Date().getFullYear();
+	const maxYear = currentYear + 3;
+	const yearOptions = Array.from({ length: maxYear - 1949 }, (_, i) => {
+		const year = String(maxYear - i);
+		return { value: year, label: year };
+	});
 
 	$effect(() => {
 		topBarStore.configure({
@@ -37,7 +62,35 @@
 
 	const handleClear = () => {
 		inputValue = '';
+		selectedYear = '';
+		isTyping = false;
 		moviesSearchStore.clear();
+	};
+
+	const getYearFilter = (): { yearFrom?: number; yearTo?: number } => {
+		if (!selectedYear) return {};
+		const year = Number(selectedYear);
+		return { yearFrom: year, yearTo: year };
+	};
+
+	const handleSearch = () => {
+		const { yearFrom, yearTo } = getYearFilter();
+		moviesSearchStore.search(groupId, inputValue, yearFrom, yearTo);
+	};
+
+	const handleInputChange = (value: string) => {
+		isTyping = true;
+		inputValue = value;
+		const { yearFrom, yearTo } = getYearFilter();
+		moviesSearchStore.search(groupId, value, yearFrom, yearTo);
+	};
+
+	const handleYearChange = (value: string) => {
+		selectedYear = value;
+		if (inputValue.trim()) {
+			isTyping = true;
+			handleSearch();
+		}
 	};
 
 	const formatSubtitle = (movie: ProviderMovieSummary): string => {
@@ -55,7 +108,7 @@
 
 		if (groupMovieStore.isAddSuccess) {
 			toast.success('Фильм добавлен');
-			await goto(ROUTES.GROUP_DETAIL(groupId));
+			handleClear();
 		} else {
 			toast.error(groupMovieStore.addError ?? 'Ошибка добавления');
 		}
@@ -76,12 +129,21 @@
 			Icon={Search}
 			iconAction={inputValue ? handleClear : undefined}
 			iconLabel={inputValue ? 'Очистить' : undefined}
-			onChange={(value) => moviesSearchStore.search(groupId, value)}
+			onChange={handleInputChange}
 		/>
+		<div class="search-page__year-select">
+			<Select
+				label="Год"
+				placeholder="Все"
+				options={yearOptions}
+				value={selectedYear}
+				onChange={handleYearChange}
+			/>
+		</div>
 	</div>
 
 	<div class="search-page__results">
-		{#if moviesSearchStore.isLoading}
+		{#if moviesSearchStore.isLoading || isTyping}
 			<div class="search-page__loading">
 				<Spinner size="lg" />
 			</div>
@@ -142,6 +204,20 @@
 
 	.search-page__input {
 		padding: var(--space-4) 0;
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-3);
+	}
+
+	@media (min-width: 768px) {
+		.search-page__input {
+			flex-direction: row;
+			align-items: flex-start;
+		}
+	}
+
+	.search-page__year-select {
+		width: 140px;
 	}
 
 	.search-page__results {
