@@ -237,7 +237,7 @@
 					<Avatar name={user.name} size="md" />
 					<div class="member-item__info">
 						<span class="member-item__name">
-							{user.name}
+							<span class="member-item__name-text">{user.name}</span>
 							{#if isCurrentUser}
 								<span class="member-item__you">(вы)</span>
 							{/if}
@@ -363,16 +363,25 @@
 	}
 
 	.member-item__name {
+		display: flex;
+		align-items: center;
+		gap: var(--space-1);
 		font-size: var(--text-sm);
 		font-weight: var(--font-medium);
 		color: var(--text-primary);
+		min-width: 0;
+	}
+
+	.member-item__name-text {
 		white-space: nowrap;
 		overflow: hidden;
 		text-overflow: ellipsis;
+		min-width: 0;
 	}
 
 	.member-item__you {
 		color: var(--text-secondary);
 		font-weight: var(--font-normal);
+		flex-shrink: 0;
 	}
 </style>
