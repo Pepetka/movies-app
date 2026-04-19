@@ -18,5 +18,6 @@ export interface IProps extends Omit<HTMLSelectAttributes, 'size'> {
 	disabled?: boolean;
 	size?: SelectSize;
 	onChange?: (value: string) => void;
+	hideMessage?: boolean;
 	class?: string;
 }
