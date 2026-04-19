@@ -10,7 +10,7 @@ interface TopBarState {
 	title?: string;
 	showBack?: boolean;
 	onBack?: () => void;
-	trailingAction?: TopBarAction;
+	trailingActions?: TopBarAction[];
 }
 
 class TopBarStore {
@@ -28,8 +28,8 @@ class TopBarStore {
 		return this._state.onBack;
 	}
 
-	get trailingAction(): TopBarAction | undefined {
-		return this._state.trailingAction;
+	get trailingActions(): TopBarAction[] | undefined {
+		return this._state.trailingActions;
 	}
 
 	configure(config: TopBarState): void {
