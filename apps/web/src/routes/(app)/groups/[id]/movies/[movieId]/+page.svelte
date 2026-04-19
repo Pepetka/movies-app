@@ -1,9 +1,10 @@
 <script lang="ts">
-	import { Pencil, Calendar, Clock } from '@lucide/svelte';
-	import { Button, Image, Spinner } from '@repo/ui';
+	import { Pencil, Trash2, Calendar, Clock } from '@lucide/svelte';
+	import { Button, Image, Sheet, Spinner, toast } from '@repo/ui';
 
 	import {
 		groupMovieDetailStore,
+		groupMovieStore,
 		MovieRating,
 		MovieStatusBadge,
 		MovieStatusModal
@@ -20,21 +21,53 @@
 	const isLoading = $derived(groupMovieDetailStore.isLoading);
 
 	let statusModalOpen = $state(false);
+	let showDeleteModal = $state(false);
+
+	const openDeleteModal = () => {
+		showDeleteModal = true;
+	};
+
+	const closeDeleteModal = () => {
+		showDeleteModal = false;
+		groupMovieStore.resetRemove();
+	};
+
+	const handleDelete = async () => {
+		await groupMovieStore.removeMovie(groupId, movieId);
+
+		if (groupMovieStore.isRemoveSuccess) {
+			toast.success('Фильм удалён из группы');
+			await goto(withCurrentQuery(ROUTES.GROUP_DETAIL(groupId), ['tab']));
+		} else {
+			toast.error(groupMovieStore.removeError ?? 'Ошибка удаления');
+		}
+	};
+
+	const trailingActions = $derived(
+		groupMovieDetailStore.isModerator
+			? [
+					{
+						Icon: Pencil,
+						label: 'Редактировать',
+						onclick: () => {
+							void goto(withCurrentQuery(ROUTES.GROUP_MOVIE_EDIT(groupId, movieId), ['tab']));
+						}
+					},
+					{
+						Icon: Trash2,
+						label: 'Удалить фильм',
+						onclick: openDeleteModal
+					}
+				]
+			: undefined
+	);
 
 	$effect(() => {
 		topBarStore.configure({
 			title: movie?.title ?? (isLoading ? '' : 'Фильм'),
 			showBack: true,
 			onBack: () => goBack(withCurrentQuery(ROUTES.GROUP_DETAIL(groupId), ['tab'])),
-			trailingAction: groupMovieDetailStore.isModerator
-				? {
-						Icon: Pencil,
-						label: 'Редактировать',
-						onclick: () => {
-							void goto(withCurrentQuery(ROUTES.GROUP_MOVIE_EDIT(groupId, movieId), ['tab']));
-						}
-					}
-				: undefined
+			trailingActions
 		});
 		return () => topBarStore.destroy();
 	});
@@ -134,6 +167,25 @@
 {/if}
 
 <MovieStatusModal bind:open={statusModalOpen} {movie} {groupId} {movieId} />
+
+<Sheet bind:open={showDeleteModal} size="sm">
+	{#snippet header()}
+		<h2>Удалить фильм?</h2>
+	{/snippet}
+
+	<p class="modal-text">
+		Вы уверены, что хотите удалить фильм "{movie?.title}" из группы? Это действие нельзя отменить.
+	</p>
+
+	{#snippet footer()}
+		<Button variant="secondary" onclick={closeDeleteModal} disabled={groupMovieStore.isRemoving}>
+			Отмена
+		</Button>
+		<Button variant="danger" onclick={handleDelete} loading={groupMovieStore.isRemoving}>
+			Удалить
+		</Button>
+	{/snippet}
+</Sheet>
 
 <style>
 	.loading-state {
@@ -266,5 +318,11 @@
 		.movie-header__poster {
 			width: 200px;
 		}
+	}
+
+	.modal-text {
+		margin: 0;
+		color: var(--text-secondary);
+		line-height: var(--leading-relaxed);
 	}
 </style>
