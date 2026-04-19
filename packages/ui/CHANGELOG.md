@@ -1,5 +1,13 @@
 # @repo/ui
 
+## 0.11.0
+
+### Minor Changes
+
+- 976ba36: Improved Select and Drawer components
+  - Added `hideMessage` prop to Select component for optional validation message display
+  - Fixed drawer accessibility issues and corrected height calculations
+
 ## 0.10.1
 
 ### Patch Changes

@@ -1,5 +1,13 @@
 # api
 
+## 0.9.0
+
+### Minor Changes
+
+- 976ba36: Added movie search filters for group movies
+  - Added `SearchGroupMoviesDto` with advanced filtering, cross-field validation (`AtLeastOneOf`, `GroupMovieStatus` enum), custom validators, and endpoint integration
+  - Made provider movie rating nullable to handle missing ratings
+
 ## 0.8.0
 
 ### Minor Changes
