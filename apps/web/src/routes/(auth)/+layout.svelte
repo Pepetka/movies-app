@@ -1,6 +1,6 @@
 <script lang="ts">
+	import { Container, Spinner } from '@repo/ui';
 	import type { Snippet } from 'svelte';
-	import { Spinner } from '@repo/ui';
 
 	import { authStore, redirectIfAuthenticated } from '$lib/modules/auth';
 
@@ -16,13 +16,15 @@
 </script>
 
 <div class="auth-layout">
-	{#if !authStore.isInitialized}
-		<div class="loading">
-			<Spinner size="lg" />
-		</div>
-	{:else if !authStore.isAuthenticated}
-		{@render children()}
-	{/if}
+	<Container>
+		{#if !authStore.isInitialized}
+			<div class="loading">
+				<Spinner size="lg" />
+			</div>
+		{:else if !authStore.isAuthenticated}
+			{@render children()}
+		{/if}
+	</Container>
 </div>
 
 <style>
