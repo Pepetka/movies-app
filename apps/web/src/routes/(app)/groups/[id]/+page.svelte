@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Button, FAB, Sheet, Tabs, Avatar, IconButton, toast } from '@repo/ui';
+	import { Button, FAB, Sheet, Tabs, Avatar, toast } from '@repo/ui';
 	import { Plus, Pencil, Trash2, Users } from '@lucide/svelte';
 
 	import {
@@ -59,8 +59,17 @@
 		return tab && validFilters.includes(tab) ? (tab as MovieFilter) : 'all';
 	});
 
-	const trailingActions = $derived(
-		groupStore.isModerator
+	const handleMembersClick = () => {
+		void goto(ROUTES.GROUP_MEMBERS(groupId));
+	};
+
+	const trailingActions = $derived([
+		{
+			Icon: Users,
+			label: 'Участники',
+			onclick: handleMembersClick
+		},
+		...(groupStore.isModerator
 			? [
 					{
 						Icon: Pencil,
@@ -77,8 +86,8 @@
 							]
 						: [])
 				]
-			: undefined
-	);
+			: [])
+	]);
 
 	$effect(() => {
 		topBarStore.configure({
@@ -125,10 +134,6 @@
 		});
 	};
 
-	const handleMembersClick = () => {
-		void goto(ROUTES.GROUP_MEMBERS(groupId));
-	};
-
 	const handleAddMovie = () => {
 		void goto(ROUTES.GROUP_MOVIES_SEARCH(groupId));
 	};
@@ -162,7 +167,6 @@
 					<p class="group-info__description">{groupStore.currentGroup?.description}</p>
 				{/if}
 			</div>
-			<IconButton Icon={Users} variant="ghost" label="Участники" onclick={handleMembersClick} />
 		</div>
 	</div>
 
