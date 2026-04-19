@@ -121,6 +121,7 @@
 			<Select
 				label="Год"
 				placeholder="Все"
+				hideMessage
 				options={yearOptions}
 				value={selectedYear}
 				onChange={handleYearChange}
@@ -129,7 +130,7 @@
 	</div>
 
 	<div class="search-page__results">
-		{#if moviesSearchStore.isLoading}
+		{#if moviesSearchStore.isLoading || moviesSearchStore.isPending}
 			<div class="search-page__loading">
 				<Spinner size="lg" />
 			</div>

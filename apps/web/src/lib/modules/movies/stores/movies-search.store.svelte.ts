@@ -22,6 +22,7 @@ class MoviesSearchStore extends BaseStore {
 		yearTo?: number
 	) => void) & {
 		cancel: () => void;
+		pending: () => boolean;
 	};
 
 	constructor() {
@@ -113,6 +114,10 @@ class MoviesSearchStore extends BaseStore {
 
 	get isEmpty(): boolean {
 		return this.results.length === 0 && this.currentGroup.length === 0;
+	}
+
+	get isPending(): boolean {
+		return this._debouncedSearch.pending();
 	}
 
 	search(groupId: number, query: string, yearFrom?: number, yearTo?: number): void {
