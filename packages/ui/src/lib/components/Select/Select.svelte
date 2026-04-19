@@ -14,6 +14,7 @@
 		disabled,
 		size = 'responsive',
 		onChange,
+		hideMessage,
 		class: className,
 		placeholder,
 		...restProps
@@ -42,8 +43,8 @@
 			onchange={handleChange}
 			{disabled}
 			aria-invalid={!!error}
-			aria-errormessage={error ? errorId : undefined}
-			aria-describedby={helper ? helperId : undefined}
+			aria-errormessage={error && !hideMessage ? errorId : undefined}
+			aria-describedby={helper && !hideMessage ? helperId : undefined}
 			onfocus={() => (isFocused = true)}
 			onblur={() => (isFocused = false)}
 			{...restProps}
@@ -69,14 +70,16 @@
 			<ChevronDown size={getIconSize(size)} />
 		</span>
 	</div>
-	{#if error}
-		<div id={errorId} class="ui-select-message error">
-			{error}
-		</div>
-	{:else}
-		<div id={helperId} class="ui-select-message" aria-hidden={!helper}>
-			{helper}
-		</div>
+	{#if !hideMessage}
+		{#if error}
+			<div id={errorId} class="ui-select-message error">
+				{error}
+			</div>
+		{:else}
+			<div id={helperId} class="ui-select-message" aria-hidden={!helper}>
+				{helper}
+			</div>
+		{/if}
 	{/if}
 </div>
 

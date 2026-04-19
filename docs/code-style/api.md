@@ -70,12 +70,12 @@ export class GroupCreateDto {
   @MaxLength(256)
   name: string;
 
-  @ApiPropertyOptional({ example: 'Weekly movie nights' })
+  @ApiProperty({ example: 'Weekly movie nights', required: false })
   @IsOptional()
   @IsString()
   description?: string;
 
-  @ApiPropertyOptional({ example: 'https://example.com/avatar.jpg' })
+  @ApiProperty({ example: 'https://example.com/avatar.jpg', required: false })
   @IsOptional()
   @IsUrl()
   @MaxLength(512)

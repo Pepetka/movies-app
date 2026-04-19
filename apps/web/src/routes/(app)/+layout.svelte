@@ -1,6 +1,15 @@
 <script lang="ts">
-	import { BottomNav, Container, IconButton, Spinner, TopBar } from '@repo/ui';
-	import { House, Settings, User } from '@lucide/svelte';
+	import {
+		BottomNav,
+		Container,
+		Dropdown,
+		IconButton,
+		List,
+		ListItem,
+		Spinner,
+		TopBar
+	} from '@repo/ui';
+	import { House, MoreVertical, Settings, User } from '@lucide/svelte';
 	import type { Snippet } from 'svelte';
 
 	import { authStore, requireAuth } from '$lib/modules/auth';
@@ -53,12 +62,21 @@
 		contained
 	>
 		{#snippet trailing()}
-			{#if topBarStore.trailingAction}
-				<IconButton
-					Icon={topBarStore.trailingAction.Icon}
-					label={topBarStore.trailingAction.label}
-					onclick={topBarStore.trailingAction.onclick}
-				/>
+			{#if topBarStore.trailingActions && topBarStore.trailingActions.length > 0}
+				<Dropdown position="bottom-end">
+					<IconButton Icon={MoreVertical} variant="ghost" label="Действия" />
+					{#snippet items()}
+						<List variant="plain" style="white-space: nowrap;">
+							{#each topBarStore.trailingActions as action (action.label)}
+								<ListItem title={action.label} interactive size="sm" onclick={action.onclick}>
+									{#snippet leading()}
+										<action.Icon size={16} />
+									{/snippet}
+								</ListItem>
+							{/each}
+						</List>
+					{/snippet}
+				</Dropdown>
 			{/if}
 		{/snippet}
 	</TopBar>

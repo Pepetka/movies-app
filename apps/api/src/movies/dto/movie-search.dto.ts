@@ -8,7 +8,9 @@ import {
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 
-export class MovieSearchDto {
+import { MovieSearchFiltersBaseDto } from './movie-search-filters-base.dto';
+
+export class MovieSearchDto extends MovieSearchFiltersBaseDto {
   @ApiProperty({ description: 'Search query', example: 'матрица' })
   @IsString()
   @MaxLength(200)
@@ -24,5 +26,5 @@ export class MovieSearchDto {
   @Type(() => Number)
   @IsNumber()
   @Min(1)
-  page?: number = 1;
+  page?: number;
 }

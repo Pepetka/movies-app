@@ -4,7 +4,13 @@ import { Inject, Injectable } from '@nestjs/common';
 import { groupMovies, type GroupMovie, type NewGroupMovie } from '$db/schemas';
 import { DrizzleDb } from '$db/types/drizzle.types';
 import { escapeLikePattern } from '$common/utils';
+import { GroupMovieStatus } from '$common/enums';
 import { DRIZZLE } from '$db/db.module';
+
+export interface FindGroupMoviesOptions {
+  status?: GroupMovieStatus;
+  query?: string;
+}
 
 @Injectable()
 export class GroupMoviesRepository {
@@ -17,21 +23,18 @@ export class GroupMoviesRepository {
 
   async findByGroup(
     groupId: number,
-    status?: string,
-    query?: string,
+    options?: FindGroupMoviesOptions,
     limit = 100,
     offset = 0,
   ): Promise<GroupMovie[]> {
     const conditions = [eq(groupMovies.groupId, groupId)];
 
-    if (status) {
-      conditions.push(
-        eq(groupMovies.status, status as 'tracking' | 'planned' | 'watched'),
-      );
+    if (options?.status) {
+      conditions.push(eq(groupMovies.status, options.status));
     }
 
-    if (query) {
-      const escapedQuery = escapeLikePattern(query);
+    if (options?.query) {
+      const escapedQuery = escapeLikePattern(options.query);
       const searchCondition = or(
         ilike(groupMovies.title, `%${escapedQuery}%`),
         ilike(groupMovies.overview, `%${escapedQuery}%`),

@@ -8,58 +8,60 @@ import {
   Min,
   Max,
 } from 'class-validator';
-import { ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty } from '@nestjs/swagger';
 
 import { IsValidMovieStatus } from '$common/validators';
-
-import { GroupMovieStatus } from './group-movie-response.dto';
+import { GroupMovieStatus } from '$common/enums';
 
 export class GroupMovieUpdateDto {
   // Status fields
-  @ApiPropertyOptional({
+  @ApiProperty({
     description: 'Movie status in group',
     enum: GroupMovieStatus,
+    required: false,
   })
   @IsOptional()
   @IsEnum(GroupMovieStatus)
   status?: GroupMovieStatus;
 
-  @ApiPropertyOptional({
+  @ApiProperty({
     type: String,
     nullable: true,
     description: 'Watch date (planned or actual, depending on status)',
     example: '2024-12-31T20:00:00Z',
+    required: false,
   })
   @IsOptional()
   @IsDateString()
   watchDate?: string | null;
 
   // Movie data fields (for editing)
-  @ApiPropertyOptional({ description: 'Movie title' })
+  @ApiProperty({ description: 'Movie title', required: false })
   @IsOptional()
   @IsString()
   @MaxLength(255)
   title?: string;
 
-  @ApiPropertyOptional({ description: 'Poster path' })
+  @ApiProperty({ description: 'Poster path', required: false })
   @IsOptional()
   @IsString()
   @MaxLength(512)
   posterPath?: string;
 
-  @ApiPropertyOptional({ description: 'Movie overview' })
+  @ApiProperty({ description: 'Movie overview', required: false })
   @IsOptional()
   @IsString()
+  @MaxLength(2000)
   overview?: string;
 
-  @ApiPropertyOptional({ description: 'Release year' })
+  @ApiProperty({ description: 'Release year', required: false })
   @IsOptional()
   @IsNumber()
   @Min(1800)
   @Max(2100)
   releaseYear?: number;
 
-  @ApiPropertyOptional({ description: 'Runtime in minutes' })
+  @ApiProperty({ description: 'Runtime in minutes', required: false })
   @IsOptional()
   @IsNumber()
   @Min(1)

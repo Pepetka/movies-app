@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { FAB, Tabs, Avatar, IconButton } from '@repo/ui';
-	import { Plus, Pencil, Users } from '@lucide/svelte';
+	import { Button, FAB, Sheet, Tabs, Avatar, IconButton, toast } from '@repo/ui';
+	import { Plus, Pencil, Trash2, Users } from '@lucide/svelte';
 
 	import {
 		groupMoviesStore,
@@ -24,6 +24,28 @@
 
 	const groupId = $derived(Number(page.params.id));
 
+	let showDeleteModal = $state(false);
+
+	const openDeleteModal = () => {
+		showDeleteModal = true;
+	};
+
+	const closeDeleteModal = () => {
+		showDeleteModal = false;
+		groupStore.resetDelete();
+	};
+
+	const handleDelete = async () => {
+		await groupStore.deleteGroup(groupId);
+
+		if (groupStore.isDeleteSuccess) {
+			toast.success('Группа удалена');
+			await goto(ROUTES.GROUPS);
+		} else {
+			toast.error(groupStore.deleteError ?? 'Ошибка удаления');
+		}
+	};
+
 	const filterTabs = [
 		{ id: 'all', label: 'Все' },
 		{ id: 'tracking', label: 'К просмотру' },
@@ -37,18 +59,33 @@
 		return tab && validFilters.includes(tab) ? (tab as MovieFilter) : 'all';
 	});
 
+	const trailingActions = $derived(
+		groupStore.isModerator
+			? [
+					{
+						Icon: Pencil,
+						label: 'Редактировать',
+						onclick: () => goto(ROUTES.GROUP_EDIT(groupId))
+					},
+					...(groupStore.isAdmin
+						? [
+								{
+									Icon: Trash2,
+									label: 'Удалить группу',
+									onclick: openDeleteModal
+								}
+							]
+						: [])
+				]
+			: undefined
+	);
+
 	$effect(() => {
 		topBarStore.configure({
 			title: groupStore.currentGroup?.name ?? 'Группа',
 			showBack: true,
 			onBack: () => goBack(ROUTES.GROUPS),
-			trailingAction: groupStore.isModerator
-				? {
-						Icon: Pencil,
-						label: 'Редактировать',
-						onclick: () => goto(ROUTES.GROUP_EDIT(groupId))
-					}
-				: undefined
+			trailingActions
 		});
 		return () => topBarStore.destroy();
 	});
@@ -155,6 +192,24 @@
 	</FAB>
 {/if}
 
+<Sheet bind:open={showDeleteModal} size="sm">
+	{#snippet header()}
+		<h2>Удалить группу?</h2>
+	{/snippet}
+
+	<p class="modal-text">
+		Вы уверены, что хотите удалить группу "{groupStore.currentGroup?.name}"? Это действие нельзя
+		отменить.
+	</p>
+
+	{#snippet footer()}
+		<Button variant="secondary" onclick={closeDeleteModal} disabled={groupStore.isDeleting}>
+			Отмена
+		</Button>
+		<Button variant="danger" onclick={handleDelete} loading={groupStore.isDeleting}>Удалить</Button>
+	{/snippet}
+</Sheet>
+
 <style>
 	.group-page {
 		display: flex;
@@ -201,5 +256,11 @@
 
 	.group-page__movies {
 		margin-top: var(--space-4);
+	}
+
+	.modal-text {
+		margin: 0;
+		color: var(--text-secondary);
+		line-height: var(--leading-relaxed);
 	}
 </style>

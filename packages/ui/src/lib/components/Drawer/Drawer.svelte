@@ -107,19 +107,6 @@
 	const handleMouseDown = (e: MouseEvent) => {
 		e.preventDefault();
 		startDrag(e.clientY);
-
-		const handleMouseMove = (e: MouseEvent) => {
-			updateDrag(e.clientY);
-		};
-
-		const handleMouseUp = () => {
-			endDrag();
-			document.removeEventListener('mousemove', handleMouseMove);
-			document.removeEventListener('mouseup', handleMouseUp);
-		};
-
-		document.addEventListener('mousemove', handleMouseMove);
-		document.addEventListener('mouseup', handleMouseUp);
 	};
 
 	const close = () => {
@@ -140,32 +127,38 @@
 	});
 
 	$effect(() => {
-		const element = handleElement;
-		if (position !== 'bottom' || !element) return;
+		if (!isDragging || position !== 'bottom') return;
 
-		element.addEventListener('touchstart', handleTouchStart, { passive: true });
-		element.addEventListener('touchmove', handleTouchMove, { passive: false });
-		element.addEventListener('touchend', handleTouchEnd, { passive: true });
+		const ac = new AbortController();
+		const { signal } = ac;
 
-		return () => {
-			element.removeEventListener('touchstart', handleTouchStart);
-			element.removeEventListener('touchmove', handleTouchMove);
-			element.removeEventListener('touchend', handleTouchEnd);
-		};
+		document.addEventListener('mousemove', (e: MouseEvent) => {
+			updateDrag(e.clientY);
+		}, { signal });
+		document.addEventListener('mouseup', () => {
+			endDrag();
+		}, { signal });
+
+		return () => ac.abort();
 	});
 
 	$effect(() => {
-		if (open) {
-			drawerHeight = drawerElement?.offsetHeight ?? 0;
-		}
-		return () => {
-			drawerHeight = 0;
-		};
+		const element = handleElement;
+		if (position !== 'bottom' || !element) return;
+
+		const ac = new AbortController();
+		const { signal } = ac;
+
+		element.addEventListener('touchstart', handleTouchStart, { passive: true, signal });
+		element.addEventListener('touchmove', handleTouchMove, { passive: false, signal });
+		element.addEventListener('touchend', handleTouchEnd, { passive: true, signal });
+
+		return () => ac.abort();
 	});
 
 	const drawerSize = $derived(size ?? defaultSizes[position]);
 	const dragTransform = $derived(
-		isDragging || dragOffset !== 0 ? `translateY(${dragOffset}px)` : ''
+		dragOffset !== 0 ? `translateY(${dragOffset}px)` : ''
 	);
 	const overlayOpacity = $derived.by(() => {
 		if (!isDragging || drawerHeight === 0) return 1;
@@ -191,6 +184,7 @@
 		<div
 			class="ui-drawer-backdrop"
 			style:opacity={isDragging && position === 'bottom' ? overlayOpacity : undefined}
+			aria-hidden="true"
 			in:fade={OVERLAY_FADE}
 			out:fade={OVERLAY_FADE}
 		></div>
@@ -300,7 +294,7 @@
 		left: 0;
 		right: 0;
 		bottom: calc(-1 * var(--drawer-bottom-offset));
-		max-height: 85vh;
+		max-height: 95dvh;
 		width: 100%;
 		padding-bottom: var(--drawer-bottom-offset);
 		border-radius: var(--radius-2xl) var(--radius-2xl) 0 0;

@@ -1,6 +1,5 @@
 <script lang="ts">
-	import { Button, Sheet, toast } from '@repo/ui';
-	import { Trash2 } from '@lucide/svelte';
+	import { toast } from '@repo/ui';
 	import { untrack } from 'svelte';
 
 	import {
@@ -19,31 +18,14 @@
 	const groupId = $derived(Number(page.params.id));
 
 	let form = $state<GroupFormData>({ ...EMPTY_GROUP_FORM });
-	let showDeleteModal = $state(false);
 	let hasRedirected = $state(false);
 	let isFormInitialized = $state(false);
-
-	const openDeleteModal = () => {
-		showDeleteModal = true;
-	};
-
-	const closeDeleteModal = () => {
-		showDeleteModal = false;
-		groupStore.resetDelete();
-	};
 
 	$effect(() => {
 		topBarStore.configure({
 			title: 'Редактирование',
 			showBack: true,
-			onBack: () => goBack(ROUTES.GROUP_DETAIL(groupId)),
-			trailingAction: groupStore.isAdmin
-				? {
-						Icon: Trash2,
-						label: 'Удалить группу',
-						onclick: openDeleteModal
-					}
-				: undefined
+			onBack: () => goBack(ROUTES.GROUP_DETAIL(groupId))
 		});
 		return () => topBarStore.destroy();
 	});
@@ -81,17 +63,6 @@
 			toast.error(groupStore.updateError ?? 'Ошибка обновления');
 		}
 	};
-
-	const handleDelete = async () => {
-		await groupStore.deleteGroup(groupId);
-
-		if (groupStore.isDeleteSuccess) {
-			toast.success('Группа удалена');
-			await goto(ROUTES.GROUPS);
-		} else {
-			toast.error(groupStore.deleteError ?? 'Ошибка удаления');
-		}
-	};
 </script>
 
 <svelte:head>
@@ -101,24 +72,6 @@
 <div class="edit-page">
 	<GroupForm mode="edit" bind:form onSubmit={handleSubmit} isSubmitting={groupStore.isUpdating} />
 </div>
-
-<Sheet bind:open={showDeleteModal} size="sm">
-	{#snippet header()}
-		<h2>Удалить группу?</h2>
-	{/snippet}
-
-	<p class="modal-text">
-		Вы уверены, что хотите удалить группу "{groupStore.currentGroup?.name}"? Это действие нельзя
-		отменить.
-	</p>
-
-	{#snippet footer()}
-		<Button variant="secondary" onclick={closeDeleteModal} disabled={groupStore.isDeleting}>
-			Отмена
-		</Button>
-		<Button variant="danger" onclick={handleDelete} loading={groupStore.isDeleting}>Удалить</Button>
-	{/snippet}
-</Sheet>
 
 <style>
 	.edit-page {

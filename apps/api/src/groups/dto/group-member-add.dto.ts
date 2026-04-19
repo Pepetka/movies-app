@@ -1,5 +1,5 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsIn, IsNumber, IsOptional } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
 
 import { GroupMemberRole } from '$common/enums';
 
@@ -8,10 +8,11 @@ export class GroupMemberAddDto {
   @IsNumber()
   userId: number;
 
-  @ApiPropertyOptional({
+  @ApiProperty({
     example: GroupMemberRole.MEMBER,
     description: 'Role in the group (member or moderator)',
     enum: [GroupMemberRole.MEMBER, GroupMemberRole.MODERATOR],
+    required: false,
   })
   @IsOptional()
   @IsIn([GroupMemberRole.MEMBER, GroupMemberRole.MODERATOR], {

@@ -206,4 +206,213 @@ describe('MoviesService', () => {
       await expect(service.remove(999)).rejects.toThrow(NotFoundException);
     });
   });
+
+  describe('findByImdbId', () => {
+    it('should return movie by imdbId', async () => {
+      mocks.moviesRepository.findByImdbId.mockResolvedValue(mockMovie);
+
+      const result = await service.findByImdbId('tt1234567');
+
+      expect(result).toEqual(mockMovie);
+      expect(mocks.moviesRepository.findByImdbId).toHaveBeenCalledWith(
+        'tt1234567',
+      );
+    });
+
+    it('should return null if not found', async () => {
+      mocks.moviesRepository.findByImdbId.mockResolvedValue(null);
+
+      const result = await service.findByImdbId('tt9999999');
+
+      expect(result).toBeNull();
+    });
+  });
+
+  describe('findByExternalId', () => {
+    it('should return movie by externalId', async () => {
+      mocks.moviesRepository.findByExternalId.mockResolvedValue(mockMovie);
+
+      const result = await service.findByExternalId('kp123');
+
+      expect(result).toEqual(mockMovie);
+      expect(mocks.moviesRepository.findByExternalId).toHaveBeenCalledWith(
+        'kp123',
+      );
+    });
+
+    it('should return null if not found', async () => {
+      mocks.moviesRepository.findByExternalId.mockResolvedValue(null);
+
+      const result = await service.findByExternalId('kp999');
+
+      expect(result).toBeNull();
+    });
+  });
+
+  describe('createFromProvider', () => {
+    it('should create movie from provider details', async () => {
+      const providerDetails = {
+        externalId: 'kp999',
+        imdbId: 'tt9999999',
+        title: 'New Movie',
+        posterPath: '/poster.jpg',
+        overview: 'Description',
+        releaseYear: 2024,
+        rating: 8.5,
+        genres: ['Drama'],
+        runtime: 120,
+      };
+      const newMovieData = {
+        externalId: 'kp999',
+        imdbId: 'tt9999999',
+        title: 'New Movie',
+        posterPath: '/poster.jpg',
+        overview: 'Description',
+        releaseYear: 2024,
+        rating: '8.5',
+        genres: ['Drama'],
+        runtime: 120,
+      };
+
+      mockProvider.mapToNewMovie.mockReturnValue(newMovieData);
+      mocks.moviesRepository.create.mockResolvedValue({
+        id: 2,
+        ...newMovieData,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
+
+      const result = await service.createFromProvider(providerDetails);
+
+      expect(result.id).toBe(2);
+      expect(mockProvider.mapToNewMovie).toHaveBeenCalledWith(providerDetails);
+      expect(mocks.moviesRepository.create).toHaveBeenCalledWith(newMovieData);
+    });
+  });
+
+  describe('findOrCreateMovie', () => {
+    it('should return existing movie by imdbId', async () => {
+      mocks.moviesRepository.findByImdbId.mockResolvedValue(mockMovie);
+
+      const result = await service.findOrCreateMovie('tt1234567', undefined);
+
+      expect(result).toEqual(mockMovie);
+      expect(mocks.moviesRepository.findByImdbId).toHaveBeenCalledWith(
+        'tt1234567',
+      );
+    });
+
+    it('should return existing movie by externalId', async () => {
+      mocks.moviesRepository.findByExternalId.mockResolvedValue(mockMovie);
+
+      const result = await service.findOrCreateMovie(undefined, 'kp123');
+
+      expect(result).toEqual(mockMovie);
+      expect(mocks.moviesRepository.findByExternalId).toHaveBeenCalledWith(
+        'kp123',
+      );
+    });
+
+    it('should create movie from provider if not found by imdbId', async () => {
+      const providerDetails = {
+        externalId: 'kp999',
+        imdbId: 'tt9999999',
+        title: 'New Movie',
+        posterPath: null,
+        overview: null,
+        releaseYear: 2024,
+        rating: 8.5,
+        genres: [],
+        runtime: null,
+      };
+      const newMovieData = {
+        externalId: 'kp999',
+        imdbId: 'tt9999999',
+        title: 'New Movie',
+        posterPath: null,
+        overview: null,
+        releaseYear: 2024,
+        rating: '8.5',
+        genres: [],
+        runtime: null,
+      };
+      const createdMovie = { id: 2, ...newMovieData };
+
+      mocks.moviesRepository.findByImdbId.mockResolvedValue(null);
+      mockProvider.findByImdbId.mockResolvedValue(providerDetails);
+      mockProvider.mapToNewMovie.mockReturnValue(newMovieData);
+      mocks.moviesRepository.create.mockResolvedValue(createdMovie);
+
+      const result = await service.findOrCreateMovie('tt9999999', undefined);
+
+      expect(result).toEqual(createdMovie);
+      expect(mockProvider.findByImdbId).toHaveBeenCalledWith('tt9999999');
+    });
+
+    it('should create movie from provider if not found by externalId', async () => {
+      const providerDetails = {
+        externalId: 'kp999',
+        title: 'New Movie',
+        posterPath: null,
+        overview: null,
+        releaseYear: 2024,
+        rating: 8.5,
+        genres: [],
+        runtime: null,
+      };
+      const newMovieData = {
+        externalId: 'kp999',
+        title: 'New Movie',
+        posterPath: null,
+        overview: null,
+        releaseYear: 2024,
+        rating: '8.5',
+        genres: [],
+        runtime: null,
+      };
+      const createdMovie = { id: 2, ...newMovieData };
+
+      mocks.moviesRepository.findByExternalId.mockResolvedValue(null);
+      mockProvider.getMovieDetails.mockResolvedValue(providerDetails);
+      mockProvider.mapToNewMovie.mockReturnValue(newMovieData);
+      mocks.moviesRepository.create.mockResolvedValue(createdMovie);
+
+      const result = await service.findOrCreateMovie(undefined, 'kp999');
+
+      expect(result).toEqual(createdMovie);
+      expect(mockProvider.getMovieDetails).toHaveBeenCalledWith('kp999');
+    });
+
+    it('should prevent race condition by double-checking before creation', async () => {
+      const providerDetails = {
+        externalId: 'kp999',
+        imdbId: 'tt9999999',
+        title: 'New Movie',
+        posterPath: null,
+        overview: null,
+        releaseYear: 2024,
+        rating: 8.5,
+        genres: [],
+        runtime: null,
+      };
+
+      // First check returns null
+      mocks.moviesRepository.findByImdbId.mockResolvedValueOnce(null);
+      // Provider fetch returns details
+      mockProvider.findByImdbId.mockResolvedValue(providerDetails);
+      // Second check returns existing movie (race condition prevented)
+      mocks.moviesRepository.findByImdbId.mockResolvedValueOnce(mockMovie);
+
+      const result = await service.findOrCreateMovie('tt9999999', undefined);
+
+      expect(result).toEqual(mockMovie);
+      expect(mocks.moviesRepository.create).not.toHaveBeenCalled();
+    });
+
+    it('should throw BadRequestException if neither id provided', async () => {
+      await expect(
+        service.findOrCreateMovie(undefined, undefined),
+      ).rejects.toThrow(BadRequestException);
+    });
+  });
 });

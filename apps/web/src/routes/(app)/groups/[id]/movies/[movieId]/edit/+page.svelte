@@ -1,6 +1,5 @@
 <script lang="ts">
-	import { Button, Sheet, Spinner, toast } from '@repo/ui';
-	import { Trash2 } from '@lucide/svelte';
+	import { Spinner, toast } from '@repo/ui';
 	import { untrack } from 'svelte';
 
 	import {
@@ -23,30 +22,13 @@
 	const movieId = $derived(Number(page.params.movieId));
 
 	let form = $state<CustomMovieFormData>({ ...EMPTY_CUSTOM_MOVIE_FORM });
-	let showDeleteModal = $state(false);
 	let hasRedirected = $state(false);
-
-	const openDeleteModal = () => {
-		showDeleteModal = true;
-	};
-
-	const closeDeleteModal = () => {
-		showDeleteModal = false;
-		groupMovieStore.resetRemove();
-	};
 
 	$effect(() => {
 		topBarStore.configure({
 			title: 'Редактирование',
 			showBack: true,
-			onBack: () => goBack(withCurrentQuery(ROUTES.GROUP_MOVIE_DETAIL(groupId, movieId), ['tab'])),
-			trailingAction: groupMovieDetailStore.isModerator
-				? {
-						Icon: Trash2,
-						label: 'Удалить фильм',
-						onclick: openDeleteModal
-					}
-				: undefined
+			onBack: () => goBack(withCurrentQuery(ROUTES.GROUP_MOVIE_DETAIL(groupId, movieId), ['tab']))
 		});
 		return () => topBarStore.destroy();
 	});
@@ -58,7 +40,6 @@
 
 		return () => {
 			groupMovieStore.resetUpdate();
-			groupMovieStore.resetRemove();
 		};
 	});
 
@@ -91,17 +72,6 @@
 	const handleRetry = () => {
 		void groupMovieDetailStore.fetchMovie(groupId, movieId);
 	};
-
-	const handleDelete = async () => {
-		await groupMovieStore.removeMovie(groupId, movieId);
-
-		if (groupMovieStore.isRemoveSuccess) {
-			toast.success('Фильм удалён из группы');
-			await goto(withCurrentQuery(ROUTES.GROUP_DETAIL(groupId), ['tab']));
-		} else {
-			toast.error(groupMovieStore.removeError ?? 'Ошибка удаления');
-		}
-	};
 </script>
 
 <svelte:head>
@@ -126,26 +96,6 @@
 			isSubmitting={groupMovieStore.isUpdating}
 		/>
 	</div>
-
-	<Sheet bind:open={showDeleteModal} size="sm">
-		{#snippet header()}
-			<h2>Удалить фильм?</h2>
-		{/snippet}
-
-		<p class="modal-text">
-			Вы уверены, что хотите удалить фильм "{groupMovieDetailStore.movie?.title}" из группы? Это
-			действие нельзя отменить.
-		</p>
-
-		{#snippet footer()}
-			<Button variant="secondary" onclick={closeDeleteModal} disabled={groupMovieStore.isRemoving}>
-				Отмена
-			</Button>
-			<Button variant="danger" onclick={handleDelete} loading={groupMovieStore.isRemoving}>
-				Удалить
-			</Button>
-		{/snippet}
-	</Sheet>
 {:else}
 	<div class="page-state">
 		<Spinner size="lg" />

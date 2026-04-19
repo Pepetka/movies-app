@@ -5,6 +5,10 @@ import type {
   ProviderSearchResult,
 } from '../interfaces/provider-result.dto';
 import {
+  MovieSearchOrder,
+  type MovieSearchFilters,
+} from '../interfaces/movie-search-filters';
+import {
   KINOPOISK_API_OPTIONS,
   type KinopoiskApiOptions,
 } from './kinopoisk.constants';
@@ -26,10 +30,13 @@ export class KinopoiskService implements MovieProvider {
     this._options = options;
   }
 
-  private _createAbortController(): AbortController {
+  private _createAbortController(): {
+    controller: AbortController;
+    clearTimeout: () => void;
+  } {
     const controller = new AbortController();
-    setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
-    return controller;
+    const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+    return { controller, clearTimeout: () => clearTimeout(timeout) };
   }
 
   private _getHeaders(): Record<string, string> {
@@ -43,6 +50,7 @@ export class KinopoiskService implements MovieProvider {
     query: string,
     page = KINOPOISK_DEFAULTS.PAGE,
     isImdb = false,
+    filters?: MovieSearchFilters,
   ): Promise<KinopoiskSearchResponseDto> {
     const url = new URL(`${this._options.baseUrl}/films`);
     if (isImdb) {
@@ -52,13 +60,25 @@ export class KinopoiskService implements MovieProvider {
     }
     url.searchParams.set('page', page.toString());
     url.searchParams.set('type', 'FILM');
-    url.searchParams.set('order', 'YEAR');
+    url.searchParams.set('order', filters?.order ?? MovieSearchOrder.YEAR);
 
+    if (filters?.ratingFrom !== undefined)
+      url.searchParams.set('ratingFrom', filters.ratingFrom.toString());
+    if (filters?.ratingTo !== undefined)
+      url.searchParams.set('ratingTo', filters.ratingTo.toString());
+    if (filters?.yearFrom !== undefined)
+      url.searchParams.set('yearFrom', filters.yearFrom.toString());
+    if (filters?.yearTo !== undefined)
+      url.searchParams.set('yearTo', filters.yearTo.toString());
+
+    const { controller, clearTimeout: clearTimeoutFn } =
+      this._createAbortController();
     try {
       const response = await fetch(url.toString(), {
         headers: this._getHeaders(),
-        signal: this._createAbortController().signal,
+        signal: controller.signal,
       });
+      clearTimeoutFn();
       if (!response.ok) {
         throw new KinopoiskApiException(
           `Kinopoisk API error: ${response.status} ${response.statusText}`,
@@ -85,8 +105,9 @@ export class KinopoiskService implements MovieProvider {
   async search(
     query: string,
     page = KINOPOISK_DEFAULTS.PAGE,
+    filters?: MovieSearchFilters,
   ): Promise<ProviderSearchResult> {
-    const result = await this._searchMovies(query, page);
+    const result = await this._searchMovies(query, page, false, filters);
     return {
       page: page,
       totalPages: result.totalPages,
@@ -98,7 +119,7 @@ export class KinopoiskService implements MovieProvider {
         posterPath: r.posterUrlPreview ?? null,
         overview: '',
         releaseYear: r.year ?? null,
-        rating: r.ratingImdb ?? 0,
+        rating: r.ratingImdb ?? null,
       })),
     };
   }
@@ -112,11 +133,14 @@ export class KinopoiskService implements MovieProvider {
   async getMovieDetails(externalId: string): Promise<ProviderMovieDetails> {
     const url = new URL(`${this._options.baseUrl}/films/${externalId}`);
 
+    const { controller, clearTimeout: clearTimeoutFn } =
+      this._createAbortController();
     try {
       const response = await fetch(url.toString(), {
         headers: this._getHeaders(),
-        signal: this._createAbortController().signal,
+        signal: controller.signal,
       });
+      clearTimeoutFn();
       if (!response.ok) {
         throw new KinopoiskApiException(
           `Kinopoisk API error: ${response.status} ${response.statusText}`,
@@ -165,7 +189,7 @@ export class KinopoiskService implements MovieProvider {
       posterPath: details.posterPath,
       overview: details.overview,
       releaseYear: details.releaseYear,
-      rating: details.rating.toString(),
+      rating: details.rating?.toString() ?? null,
       genres: details.genres,
       runtime: details.runtime,
     };
@@ -183,7 +207,7 @@ export class KinopoiskService implements MovieProvider {
       posterPath: movie.posterUrl ?? null,
       overview: movie.description ?? movie.shortDescription ?? null,
       releaseYear: movie.year ?? null,
-      rating: movie.ratingImdb ?? 0,
+      rating: movie.ratingImdb ?? null,
       genres,
       runtime: movie.filmLength ?? null,
     };

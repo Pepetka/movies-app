@@ -269,6 +269,45 @@
 				"operationId": "MoviesController_search_v1",
 				"parameters": [
 					{
+						"name": "order",
+						"required": false,
+						"in": "query",
+						"description": "Sort order",
+						"schema": {
+							"default": "YEAR",
+							"type": "string",
+							"enum": ["RATING", "NUM_VOTE", "YEAR"]
+						}
+					},
+					{
+						"name": "ratingFrom",
+						"required": false,
+						"in": "query",
+						"description": "Minimum rating (0-10)",
+						"schema": { "minimum": 0, "maximum": 10, "type": "number" }
+					},
+					{
+						"name": "ratingTo",
+						"required": false,
+						"in": "query",
+						"description": "Maximum rating (0-10)",
+						"schema": { "minimum": 0, "maximum": 10, "type": "number" }
+					},
+					{
+						"name": "yearFrom",
+						"required": false,
+						"in": "query",
+						"description": "Minimum year",
+						"schema": { "minimum": 1000, "maximum": 2100, "type": "number" }
+					},
+					{
+						"name": "yearTo",
+						"required": false,
+						"in": "query",
+						"description": "Maximum year",
+						"schema": { "minimum": 1000, "maximum": 2100, "type": "number" }
+					},
+					{
 						"name": "query",
 						"required": true,
 						"in": "query",
@@ -280,7 +319,7 @@
 						"required": false,
 						"in": "query",
 						"description": "Page number",
-						"schema": { "minimum": 1, "default": 1, "example": 1, "type": "number" }
+						"schema": { "minimum": 1, "default": 1, "type": "number" }
 					}
 				],
 				"responses": {
@@ -938,6 +977,45 @@
 						"schema": { "type": "number" }
 					},
 					{
+						"name": "order",
+						"required": false,
+						"in": "query",
+						"description": "Sort order",
+						"schema": {
+							"default": "YEAR",
+							"type": "string",
+							"enum": ["RATING", "NUM_VOTE", "YEAR"]
+						}
+					},
+					{
+						"name": "ratingFrom",
+						"required": false,
+						"in": "query",
+						"description": "Minimum rating (0-10)",
+						"schema": { "minimum": 0, "maximum": 10, "type": "number" }
+					},
+					{
+						"name": "ratingTo",
+						"required": false,
+						"in": "query",
+						"description": "Maximum rating (0-10)",
+						"schema": { "minimum": 0, "maximum": 10, "type": "number" }
+					},
+					{
+						"name": "yearFrom",
+						"required": false,
+						"in": "query",
+						"description": "Minimum year",
+						"schema": { "minimum": 1000, "maximum": 2100, "type": "number" }
+					},
+					{
+						"name": "yearTo",
+						"required": false,
+						"in": "query",
+						"description": "Maximum year",
+						"schema": { "minimum": 1000, "maximum": 2100, "type": "number" }
+					},
+					{
 						"name": "query",
 						"required": true,
 						"in": "query",
@@ -983,9 +1061,16 @@
 						"name": "status",
 						"required": false,
 						"in": "query",
-						"schema": { "enum": ["tracking", "planned", "watched"], "type": "string" }
+						"description": "Filter by movie status",
+						"schema": { "type": "string", "enum": ["tracking", "planned", "watched"] }
 					},
-					{ "name": "query", "required": false, "in": "query", "schema": { "type": "string" } }
+					{
+						"name": "query",
+						"required": false,
+						"in": "query",
+						"description": "Search query for movie title",
+						"schema": { "type": "string" }
+					}
 				],
 				"responses": {
 					"200": {
@@ -999,6 +1084,7 @@
 							}
 						}
 					},
+					"400": { "description": "Invalid query parameters" },
 					"403": { "description": "Forbidden - Not a group member" }
 				},
 				"security": [{ "access-token": [] }],
@@ -1274,7 +1360,7 @@
 					"posterPath": { "type": "string", "nullable": true },
 					"overview": { "type": "string" },
 					"releaseYear": { "type": "number", "nullable": true },
-					"rating": { "type": "number" }
+					"rating": { "type": "number", "nullable": true }
 				},
 				"required": [
 					"imdbId",

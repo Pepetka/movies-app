@@ -1,19 +1,19 @@
 import { IsString, IsOptional, MaxLength, IsUrl } from 'class-validator';
-import { ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty } from '@nestjs/swagger';
 
 export class GroupUpdateDto {
-  @ApiPropertyOptional({ example: 'Movie Club' })
+  @ApiProperty({ example: 'Movie Club', required: false })
   @IsOptional()
   @IsString()
-  @MaxLength(256)
+  @MaxLength(100)
   name?: string;
 
-  @ApiPropertyOptional({ example: 'Weekly movie nights' })
+  @ApiProperty({ example: 'Weekly movie nights', required: false })
   @IsOptional()
   @IsString()
   description?: string;
 
-  @ApiPropertyOptional({ example: 'https://example.com/avatar.jpg' })
+  @ApiProperty({ example: 'https://example.com/avatar.jpg', required: false })
   @IsOptional()
   @IsUrl()
   @MaxLength(512)

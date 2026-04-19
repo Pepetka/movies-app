@@ -1,4 +1,5 @@
 export * from './interfaces/movie-provider.interface';
+export * from './interfaces/movie-search-filters';
 export * from './interfaces/provider-result.dto';
 export * from './kinopoisk/kinopoisk.constants';
 export * from './kinopoisk/kinopoisk.service';

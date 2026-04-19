@@ -46,8 +46,6 @@ export class MoviesController {
   @Throttle(THROTTLE.movies.search)
   @SerializeOptions({ type: ProviderSearchResult })
   @ApiOperation({ summary: 'Search movies via provider API' })
-  @ApiQuery({ name: 'query', required: true, example: 'матрица' })
-  @ApiQuery({ name: 'page', required: false, example: 1 })
   @ApiResponse({
     status: 200,
     description: 'Search results',

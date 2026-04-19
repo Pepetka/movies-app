@@ -7,6 +7,7 @@ import {
 
 import { MovieAlreadyExistsException } from '$common/exceptions';
 
+import { MovieSearchOrder } from './providers/interfaces/movie-search-filters';
 import type { ProviderMovieDetails, ProviderSearchResult } from './providers';
 import { MovieCreateDto, MovieUpdateDto, MovieSearchDto } from './dto';
 import { MoviesRepository } from './movies.repository';
@@ -31,8 +32,11 @@ export class MoviesService {
    * @returns Paginated search results from the provider
    */
   async search(dto: MovieSearchDto): Promise<ProviderSearchResult> {
+    const { query, page: pageParam, ...filters } = dto;
+    const page = pageParam ?? 1;
+    const order = filters.order ?? MovieSearchOrder.YEAR;
     const provider = this.movieProvidersService.getProvider(DEFAULT_PROVIDER);
-    return provider.search(dto.query, dto.page);
+    return provider.search(query, page, { ...filters, order });
   }
 
   /**
@@ -144,5 +148,92 @@ export class MoviesService {
     }
     await this.moviesRepository.delete(id);
     this._logger.log(`Movie deleted with id: ${id}`);
+  }
+
+  /**
+   * Find a movie by IMDb ID
+   * @param imdbId - IMDb ID (e.g., 'tt0111161')
+   * @returns Movie record or null if not found
+   */
+  async findByImdbId(imdbId: string): Promise<Movie | null> {
+    return this.moviesRepository.findByImdbId(imdbId);
+  }
+
+  /**
+   * Find a movie by external provider ID
+   * @param externalId - External provider ID
+   * @returns Movie record or null if not found
+   */
+  async findByExternalId(externalId: string): Promise<Movie | null> {
+    return this.moviesRepository.findByExternalId(externalId);
+  }
+
+  /**
+   * Create a movie from provider details
+   * @param details - Provider movie details
+   * @returns Created movie record
+   */
+  async createFromProvider(details: ProviderMovieDetails): Promise<Movie> {
+    const newMovie = this.movieProvidersService
+      .getProvider(DEFAULT_PROVIDER)
+      .mapToNewMovie(details);
+    const movie = await this.moviesRepository.create(newMovie);
+    this._logger.log(`Movie imported from provider with id: ${movie.id}`);
+    return movie;
+  }
+
+  /**
+   * Find existing movie by imdbId or externalId, or create from provider if not found.
+   * This method prevents race conditions by double-checking before creation.
+   * @param imdbId - Optional IMDb ID
+   * @param externalId - Optional external provider ID
+   * @returns Found or created movie
+   * @throws BadRequestException if neither id is provided
+   */
+  async findOrCreateMovie(
+    imdbId: string | undefined,
+    externalId: string | undefined,
+  ): Promise<Movie> {
+    if (!imdbId && !externalId) {
+      throw new BadRequestException(
+        'Either imdbId or externalId must be provided',
+      );
+    }
+
+    // First check: find existing movie
+    let movie: Movie | null = null;
+    if (imdbId) {
+      movie = await this.moviesRepository.findByImdbId(imdbId);
+    }
+    if (!movie && externalId) {
+      movie = await this.moviesRepository.findByExternalId(externalId);
+    }
+
+    if (movie) {
+      this._logger.log(`Movie found locally: ${movie.id}`);
+      return movie;
+    }
+
+    // Fetch from provider
+    const provider = this.movieProvidersService.getProvider(DEFAULT_PROVIDER);
+    const details = imdbId
+      ? await provider.findByImdbId(imdbId)
+      : await provider.getMovieDetails(externalId!);
+
+    // Second check before creation (prevent race condition)
+    if (imdbId) {
+      movie = await this.moviesRepository.findByImdbId(imdbId);
+    }
+    if (!movie && externalId) {
+      movie = await this.moviesRepository.findByExternalId(externalId);
+    }
+
+    if (movie) {
+      this._logger.log(`Movie found locally after provider fetch: ${movie.id}`);
+      return movie;
+    }
+
+    // Create new movie
+    return this.createFromProvider(details);
   }
 }

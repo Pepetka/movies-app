@@ -1,14 +1,14 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { NotFoundException } from '@nestjs/common';
 
+import { ProviderSearchResult } from '$src/movies/providers/interfaces/provider-result.dto';
 import { MovieAlreadyInGroupException } from '$common/exceptions';
-import { GroupMemberRole } from '$common/enums';
+import { GroupMemberRole, GroupMovieStatus } from '$common/enums';
 
 import { GroupMoviesRepository } from './group-movies.repository';
-import { MoviesRepository } from '../movies/movies.repository';
-import { MovieProvidersService } from '../movies/providers';
 import { GroupMoviesService } from './group-movies.service';
-import { AddMovieDto, GroupMovieStatus } from './dto';
+import { MoviesService } from '../movies/movies.service';
+import { AddMovieDto } from './dto';
 
 const mockGroupMovie = {
   id: 1,
@@ -56,14 +56,12 @@ const createMockRepositories = () => ({
     update: jest.fn(),
     delete: jest.fn(),
   },
-  moviesRepository: {
-    findById: jest.fn(),
+  moviesService: {
     findByImdbId: jest.fn(),
     findByExternalId: jest.fn(),
-    create: jest.fn(),
-  },
-  movieProvidersService: {
-    getProvider: jest.fn(),
+    createFromProvider: jest.fn(),
+    findOrCreateMovie: jest.fn(),
+    search: jest.fn(),
   },
 });
 
@@ -82,12 +80,8 @@ describe('GroupMoviesService', () => {
           useValue: mocks.groupMoviesRepository,
         },
         {
-          provide: MoviesRepository,
-          useValue: mocks.moviesRepository,
-        },
-        {
-          provide: MovieProvidersService,
-          useValue: mocks.movieProvidersService,
+          provide: MoviesService,
+          useValue: mocks.moviesService,
         },
       ],
     }).compile();
@@ -100,18 +94,8 @@ describe('GroupMoviesService', () => {
   });
 
   describe('addProviderMovie', () => {
-    const mockProvider = {
-      findByImdbId: jest.fn(),
-      getMovieDetails: jest.fn(),
-      mapToNewMovie: jest.fn(),
-    };
-
-    beforeEach(() => {
-      mocks.movieProvidersService.getProvider.mockReturnValue(mockProvider);
-    });
-
     it('should find existing movie by imdbId and add to group', async () => {
-      mocks.moviesRepository.findByImdbId.mockResolvedValue(mockMovie);
+      mocks.moviesService.findOrCreateMovie.mockResolvedValue(mockMovie);
       mocks.groupMoviesRepository.exists.mockResolvedValue(false);
       mocks.groupMoviesRepository.create.mockResolvedValue(mockGroupMovie);
 
@@ -122,13 +106,14 @@ describe('GroupMoviesService', () => {
       );
 
       expect(result).toEqual(mockGroupMovie);
-      expect(mocks.moviesRepository.findByImdbId).toHaveBeenCalledWith(
+      expect(mocks.moviesService.findOrCreateMovie).toHaveBeenCalledWith(
         'tt1234567',
+        undefined,
       );
     });
 
     it('should find existing movie by externalId and add to group', async () => {
-      mocks.moviesRepository.findByExternalId.mockResolvedValue(mockMovie);
+      mocks.moviesService.findOrCreateMovie.mockResolvedValue(mockMovie);
       mocks.groupMoviesRepository.exists.mockResolvedValue(false);
       mocks.groupMoviesRepository.create.mockResolvedValue(mockGroupMovie);
 
@@ -139,13 +124,14 @@ describe('GroupMoviesService', () => {
       );
 
       expect(result).toEqual(mockGroupMovie);
-      expect(mocks.moviesRepository.findByExternalId).toHaveBeenCalledWith(
+      expect(mocks.moviesService.findOrCreateMovie).toHaveBeenCalledWith(
+        undefined,
         'kp123',
       );
     });
 
     it('should throw MovieAlreadyInGroupException if movie already in group', async () => {
-      mocks.moviesRepository.findByImdbId.mockResolvedValue(mockMovie);
+      mocks.moviesService.findOrCreateMovie.mockResolvedValue(mockMovie);
       mocks.groupMoviesRepository.exists.mockResolvedValue(true);
 
       await expect(
@@ -154,27 +140,9 @@ describe('GroupMoviesService', () => {
     });
 
     it('should import new movie via provider if not found', async () => {
-      const providerMovieData = { title: 'New Movie', imdbId: 'tt9999999' };
       const newMovie = { ...mockMovie, id: 101, imdbId: 'tt9999999' };
 
-      mocks.moviesRepository.findByImdbId.mockResolvedValue(null);
-      mockProvider.findByImdbId.mockResolvedValue(providerMovieData);
-      mockProvider.mapToNewMovie.mockReturnValue({
-        externalId: null,
-        imdbId: 'tt9999999',
-        title: 'New Movie',
-        originalTitle: 'New Movie',
-        year: 2024,
-        description: null,
-        posterUrl: null,
-        ratingKp: null,
-        ratingImdb: null,
-        genres: [],
-        countries: [],
-        duration: null,
-        premiereRussia: null,
-      });
-      mocks.moviesRepository.create.mockResolvedValue(newMovie);
+      mocks.moviesService.findOrCreateMovie.mockResolvedValue(newMovie);
       mocks.groupMoviesRepository.exists.mockResolvedValue(false);
       mocks.groupMoviesRepository.create.mockResolvedValue({
         ...mockGroupMovie,
@@ -188,35 +156,16 @@ describe('GroupMoviesService', () => {
       );
 
       expect(result.movieId).toBe(101);
-      expect(mockProvider.findByImdbId).toHaveBeenCalledWith('tt9999999');
-      expect(mocks.moviesRepository.create).toHaveBeenCalled();
+      expect(mocks.moviesService.findOrCreateMovie).toHaveBeenCalledWith(
+        'tt9999999',
+        undefined,
+      );
     });
 
     it('should import new movie by externalId via provider if not found', async () => {
-      const providerMovieData = {
-        title: 'External Movie',
-        externalId: 'kp999',
-      };
       const newMovie = { ...mockMovie, id: 102, externalId: 'kp999' };
 
-      mocks.moviesRepository.findByExternalId.mockResolvedValue(null);
-      mockProvider.getMovieDetails.mockResolvedValue(providerMovieData);
-      mockProvider.mapToNewMovie.mockReturnValue({
-        externalId: 'kp999',
-        imdbId: null,
-        title: 'External Movie',
-        originalTitle: 'External Movie',
-        year: 2024,
-        description: null,
-        posterUrl: null,
-        ratingKp: null,
-        ratingImdb: null,
-        genres: [],
-        countries: [],
-        duration: null,
-        premiereRussia: null,
-      });
-      mocks.moviesRepository.create.mockResolvedValue(newMovie);
+      mocks.moviesService.findOrCreateMovie.mockResolvedValue(newMovie);
       mocks.groupMoviesRepository.exists.mockResolvedValue(false);
       mocks.groupMoviesRepository.create.mockResolvedValue({
         ...mockGroupMovie,
@@ -230,7 +179,10 @@ describe('GroupMoviesService', () => {
       );
 
       expect(result.movieId).toBe(102);
-      expect(mockProvider.getMovieDetails).toHaveBeenCalledWith('kp999');
+      expect(mocks.moviesService.findOrCreateMovie).toHaveBeenCalledWith(
+        undefined,
+        'kp999',
+      );
     });
   });
 
@@ -302,108 +254,32 @@ describe('GroupMoviesService', () => {
   });
 
   describe('findOrCreateMovie', () => {
-    const mockProvider = {
-      findByImdbId: jest.fn(),
-      getMovieDetails: jest.fn(),
-      mapToNewMovie: jest.fn(),
-    };
-
-    beforeEach(() => {
-      mocks.movieProvidersService.getProvider.mockReturnValue(mockProvider);
-    });
-
-    it('should return existing movie if found by imdbId', async () => {
-      mocks.moviesRepository.findByImdbId.mockResolvedValue(mockMovie);
+    it('should call moviesService.findOrCreateMovie with correct params', async () => {
+      mocks.moviesService.findOrCreateMovie.mockResolvedValue(mockMovie);
 
       const result = await service.findOrCreateMovie({
         imdbId: 'tt1234567',
       } as AddMovieDto);
 
       expect(result).toEqual(mockMovie);
-      expect(mocks.moviesRepository.findByImdbId).toHaveBeenCalledWith(
+      expect(mocks.moviesService.findOrCreateMovie).toHaveBeenCalledWith(
         'tt1234567',
+        undefined,
       );
     });
 
-    it('should return existing movie if found by externalId', async () => {
-      mocks.moviesRepository.findByExternalId.mockResolvedValue(mockMovie);
+    it('should call moviesService.findOrCreateMovie with externalId', async () => {
+      mocks.moviesService.findOrCreateMovie.mockResolvedValue(mockMovie);
 
       const result = await service.findOrCreateMovie({
         externalId: 'kp123',
       } as AddMovieDto);
 
       expect(result).toEqual(mockMovie);
-      expect(mocks.moviesRepository.findByExternalId).toHaveBeenCalledWith(
+      expect(mocks.moviesService.findOrCreateMovie).toHaveBeenCalledWith(
+        undefined,
         'kp123',
       );
-    });
-
-    it('should import movie by imdbId if not found locally', async () => {
-      const providerMovieData = {
-        title: 'Imported Movie',
-        imdbId: 'tt9999999',
-      };
-      const importedMovie = { ...mockMovie, id: 101, imdbId: 'tt9999999' };
-
-      mocks.moviesRepository.findByImdbId.mockResolvedValue(null);
-      mockProvider.findByImdbId.mockResolvedValue(providerMovieData);
-      mockProvider.mapToNewMovie.mockReturnValue({
-        externalId: null,
-        imdbId: 'tt9999999',
-        title: 'Imported Movie',
-        originalTitle: 'Imported Movie',
-        year: 2024,
-        description: null,
-        posterUrl: null,
-        ratingKp: null,
-        ratingImdb: null,
-        genres: [],
-        countries: [],
-        duration: null,
-        premiereRussia: null,
-      });
-      mocks.moviesRepository.create.mockResolvedValue(importedMovie);
-
-      const result = await service.findOrCreateMovie({
-        imdbId: 'tt9999999',
-      } as AddMovieDto);
-
-      expect(result).toEqual(importedMovie);
-      expect(mockProvider.findByImdbId).toHaveBeenCalledWith('tt9999999');
-    });
-
-    it('should import movie by externalId if not found locally', async () => {
-      const providerMovieData = {
-        title: 'Imported Movie',
-        externalId: 'kp999',
-      };
-      const importedMovie = { ...mockMovie, id: 102, externalId: 'kp999' };
-
-      mocks.moviesRepository.findByExternalId.mockResolvedValue(null);
-      mockProvider.getMovieDetails.mockResolvedValue(providerMovieData);
-      mockProvider.mapToNewMovie.mockReturnValue({
-        externalId: 'kp999',
-        imdbId: null,
-        title: 'Imported Movie',
-        originalTitle: 'Imported Movie',
-        year: 2024,
-        description: null,
-        posterUrl: null,
-        ratingKp: null,
-        ratingImdb: null,
-        genres: [],
-        countries: [],
-        duration: null,
-        premiereRussia: null,
-      });
-      mocks.moviesRepository.create.mockResolvedValue(importedMovie);
-
-      const result = await service.findOrCreateMovie({
-        externalId: 'kp999',
-      } as AddMovieDto);
-
-      expect(result).toEqual(importedMovie);
-      expect(mockProvider.getMovieDetails).toHaveBeenCalledWith('kp999');
     });
   });
 
@@ -420,7 +296,6 @@ describe('GroupMoviesService', () => {
       expect(mocks.groupMoviesRepository.findByGroup).toHaveBeenCalledWith(
         1,
         undefined,
-        undefined,
       );
     });
 
@@ -432,14 +307,14 @@ describe('GroupMoviesService', () => {
         mockGroupMovies,
       );
 
-      const result = await service.findByGroup(1, 'watched');
+      const result = await service.findByGroup(1, {
+        status: GroupMovieStatus.WATCHED,
+      });
 
       expect(result[0].status).toBe(GroupMovieStatus.WATCHED);
-      expect(mocks.groupMoviesRepository.findByGroup).toHaveBeenCalledWith(
-        1,
-        'watched',
-        undefined,
-      );
+      expect(mocks.groupMoviesRepository.findByGroup).toHaveBeenCalledWith(1, {
+        status: GroupMovieStatus.WATCHED,
+      });
     });
 
     it('should filter by query', async () => {
@@ -448,14 +323,66 @@ describe('GroupMoviesService', () => {
         mockGroupMovies,
       );
 
-      const result = await service.findByGroup(1, undefined, 'matrix');
+      const result = await service.findByGroup(1, { query: 'matrix' });
 
       expect(result[0].title).toBe('Matrix');
-      expect(mocks.groupMoviesRepository.findByGroup).toHaveBeenCalledWith(
-        1,
-        undefined,
-        'matrix',
-      );
+      expect(mocks.groupMoviesRepository.findByGroup).toHaveBeenCalledWith(1, {
+        query: 'matrix',
+      });
+    });
+  });
+
+  describe('searchInGroup', () => {
+    it('should return provider results and current group movies', async () => {
+      const providerResult: ProviderSearchResult = {
+        page: 1,
+        totalPages: 1,
+        totalResults: 1,
+        results: [
+          {
+            imdbId: 'tt1234567',
+            externalId: 'kp123',
+            title: 'Search Result',
+            posterPath: null,
+            overview: 'Test overview',
+            releaseYear: 2024,
+            rating: 8.5,
+          },
+        ],
+      };
+      const groupMovies = [{ ...mockGroupMovie, title: 'Group Movie' }];
+
+      mocks.moviesService.search.mockResolvedValue(providerResult);
+      mocks.groupMoviesRepository.findByGroup.mockResolvedValue(groupMovies);
+
+      const dto = { query: 'test', page: 1 };
+      const result = await service.searchInGroup(1, dto);
+
+      expect(result).toEqual({
+        provider: providerResult,
+        currentGroup: groupMovies,
+      });
+      expect(mocks.moviesService.search).toHaveBeenCalledWith(dto);
+      expect(mocks.groupMoviesRepository.findByGroup).toHaveBeenCalledWith(1, {
+        query: 'test',
+      });
+    });
+
+    it('should call dependencies in parallel', async () => {
+      const providerResult: ProviderSearchResult = {
+        page: 1,
+        totalPages: 1,
+        totalResults: 0,
+        results: [],
+      };
+
+      mocks.moviesService.search.mockResolvedValue(providerResult);
+      mocks.groupMoviesRepository.findByGroup.mockResolvedValue([]);
+
+      await service.searchInGroup(1, { query: 'matrix' });
+
+      expect(mocks.moviesService.search).toHaveBeenCalledTimes(1);
+      expect(mocks.groupMoviesRepository.findByGroup).toHaveBeenCalledTimes(1);
     });
   });
 

@@ -1,15 +1,7 @@
-import { IsOptional, IsString, Matches, Validate } from 'class-validator';
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsOptional, IsString, Matches } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
 
-class MovieIdRequired {
-  validate(value: AddMovieDto) {
-    return !!(value && (value.imdbId || value.externalId));
-  }
-
-  defaultMessage() {
-    return 'Either imdbId or externalId must be provided';
-  }
-}
+import { AtLeastOneOf } from '$common/validators';
 
 export class AddMovieDto {
   @ApiProperty({
@@ -20,18 +12,17 @@ export class AddMovieDto {
   @IsOptional()
   @IsString()
   @Matches(/^tt\d{7,8}$/)
+  @AtLeastOneOf(['imdbId', 'externalId'], {
+    message: 'Either imdbId or externalId must be provided',
+  })
   imdbId?: string;
 
-  @ApiPropertyOptional({
+  @ApiProperty({
     description: 'Provider external ID',
     example: '301',
+    required: false,
   })
   @IsOptional()
   @IsString()
   externalId?: string;
-
-  @Validate(MovieIdRequired, {
-    message: 'Either imdbId or externalId must be provided',
-  })
-  validateCombination() {}
 }
