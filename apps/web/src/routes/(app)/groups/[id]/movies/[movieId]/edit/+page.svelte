@@ -49,7 +49,7 @@
 			if (!groupMovieDetailStore.isModerator && !hasRedirected) {
 				hasRedirected = true;
 				toast.error('Редактирование доступно только модераторам');
-				void goto(ROUTES.GROUP_MOVIE_DETAIL(groupId, movieId));
+				void goto(ROUTES.GROUP_MOVIE_DETAIL(groupId, movieId), { replaceState: true });
 				return;
 			}
 			untrack(() => {
@@ -63,7 +63,7 @@
 
 		if (groupMovieStore.isUpdateSuccess) {
 			toast.success('Фильм обновлён');
-			await goto(ROUTES.GROUP_MOVIE_DETAIL(groupId, movieId));
+			await goto(ROUTES.GROUP_MOVIE_DETAIL(groupId, movieId), { replaceState: true });
 		} else {
 			toast.error(groupMovieStore.updateError ?? 'Ошибка обновления');
 		}

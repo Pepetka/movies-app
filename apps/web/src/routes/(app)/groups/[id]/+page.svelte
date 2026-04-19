@@ -65,7 +65,7 @@
 					{
 						Icon: Pencil,
 						label: 'Редактировать',
-						onclick: () => goto(ROUTES.GROUP_EDIT(groupId))
+						onclick: () => goto(ROUTES.GROUP_EDIT(groupId), { replaceState: true })
 					},
 					...(groupStore.isAdmin
 						? [

@@ -50,7 +50,9 @@
 						Icon: Pencil,
 						label: 'Редактировать',
 						onclick: () => {
-							void goto(withCurrentQuery(ROUTES.GROUP_MOVIE_EDIT(groupId, movieId), ['tab']));
+							void goto(withCurrentQuery(ROUTES.GROUP_MOVIE_EDIT(groupId, movieId), ['tab']), {
+								replaceState: true
+							});
 						}
 					},
 					{

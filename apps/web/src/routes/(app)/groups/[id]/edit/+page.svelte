@@ -40,7 +40,7 @@
 		if (groupStore.isLoaded && !groupStore.isModerator && !hasRedirected) {
 			hasRedirected = true;
 			toast.error('Редактирование доступно только модераторам');
-			void goto(ROUTES.GROUP_DETAIL(groupId));
+			void goto(ROUTES.GROUP_DETAIL(groupId), { replaceState: true });
 		}
 	});
 
@@ -58,7 +58,7 @@
 
 		if (groupStore.isUpdateSuccess) {
 			toast.success('Группа обновлена');
-			await goto(ROUTES.GROUP_DETAIL(groupId));
+			await goto(ROUTES.GROUP_DETAIL(groupId), { replaceState: true });
 		} else {
 			toast.error(groupStore.updateError ?? 'Ошибка обновления');
 		}
