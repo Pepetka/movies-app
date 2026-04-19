@@ -63,7 +63,7 @@
     "@repo/eslint-config": "workspace:*",
     "@repo/typescript-config": "workspace:*",
     "@swc/cli": "^0.8.1",
-    "@swc/core": "^1.15.24",
+    "@swc/core": "^1.15.30",
     "@types/bcrypt": "^6.0.0",
     "@types/jest": "^30.0.0",
     "@types/node": "catalog:",
