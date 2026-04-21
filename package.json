@@ -25,7 +25,7 @@
     "prepare": "husky"
   },
   "devDependencies": {
-    "@changesets/cli": "^2.30.0",
+    "@changesets/cli": "^2.31.0",
     "husky": "^9.1.7",
     "lint-staged": "^16.4.0",
     "prettier-plugin-svelte": "catalog:",
