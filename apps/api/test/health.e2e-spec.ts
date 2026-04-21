@@ -1,20 +1,43 @@
+import {
+  FastifyAdapter,
+  NestFastifyApplication,
+} from '@nestjs/platform-fastify';
 import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication } from '@nestjs/common';
-import { FastifyInstance } from 'fastify';
+import { ConfigService } from '@nestjs/config';
+import type { FastifyInstance } from 'fastify';
+import csrf from '@fastify/csrf-protection';
+import cookie from '@fastify/cookie';
 import request from 'supertest';
 
 import { AppModule } from '../src/app.module';
 
 describe('Health E2E', () => {
-  let app: INestApplication;
+  let app: NestFastifyApplication;
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
     }).compile();
 
-    app = moduleFixture.createNestApplication();
+    app = moduleFixture.createNestApplication<NestFastifyApplication>(
+      new FastifyAdapter(),
+    );
+
+    const configService = app.get<ConfigService>(ConfigService);
+    const secret = configService.getOrThrow<string>('COOKIE_SECRET');
+
+    await app.register(cookie, { secret });
+    await app.register(csrf, {
+      cookieOpts: {
+        httpOnly: true,
+        secure: false,
+        sameSite: 'strict',
+        path: '/',
+      },
+    });
+
     await app.init();
+    await app.getHttpAdapter().getInstance().ready();
   });
 
   afterAll(async () => {
