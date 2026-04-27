@@ -34,7 +34,7 @@
 		"@sveltejs/vite-plugin-svelte": "catalog:",
 		"@types/node": "catalog:",
 		"eslint": "catalog:",
-		"orval": "^8.6.2",
+		"orval": "^8.9.0",
 		"prettier": "catalog:",
 		"prettier-plugin-svelte": "catalog:",
 		"svelte": "catalog:",
