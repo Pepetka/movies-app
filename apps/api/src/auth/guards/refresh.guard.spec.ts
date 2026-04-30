@@ -56,7 +56,14 @@ describe('RefreshGuard', () => {
         {
           provide: ConfigService,
           useValue: {
-            getOrThrow: jest.fn().mockReturnValue('test-refresh-secret'),
+            get: jest.fn().mockReturnValue('test'),
+            getOrThrow: jest.fn((key: string) => {
+              const config: Record<string, unknown> = {
+                JWT_ISSUER: 'movies-app-test',
+                JWT_REFRESH_SECRET: 'test-refresh-secret',
+              };
+              return config[key] as string;
+            }),
           },
         },
       ],
@@ -84,6 +91,9 @@ describe('RefreshGuard', () => {
         'valid-refresh-token',
         {
           secret: 'test-refresh-secret',
+          algorithms: ['HS256'],
+          issuer: 'movies-app-test',
+          audience: 'movies-app-refresh',
         },
       );
       expect(userService.findById).toHaveBeenCalledWith(1);

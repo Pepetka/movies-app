@@ -74,7 +74,14 @@ describe('AuthGuard', () => {
         {
           provide: ConfigService,
           useValue: {
-            getOrThrow: jest.fn().mockReturnValue('test-secret'),
+            get: jest.fn().mockReturnValue('test'),
+            getOrThrow: jest.fn((key: string) => {
+              const config: Record<string, unknown> = {
+                JWT_ISSUER: 'movies-app-test',
+                JWT_ACCESS_SECRET: 'test-secret',
+              };
+              return config[key] as string;
+            }),
           },
         },
       ],
@@ -114,6 +121,9 @@ describe('AuthGuard', () => {
       expect(result).toBe(true);
       expect(jwtService.verifyAsync).toHaveBeenCalledWith('valid-token', {
         secret: 'test-secret',
+        algorithms: ['HS256'],
+        issuer: 'movies-app-test',
+        audience: 'movies-app-access',
       });
       expect(userService.findById).toHaveBeenCalledWith(1);
       expect(context.switchToHttp().getRequest().user).toEqual(mockUser);

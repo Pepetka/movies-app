@@ -7,13 +7,15 @@ import { Environment } from '$common/configs';
 import { parseDuration } from '$common/utils';
 
 import {
+  JWT_ACCESS_AUDIENCE,
   REFRESH_COOKIE_OPTIONS,
   REFRESH_COOKIE_PATH,
   RefreshCookieOptions,
 } from './auth.constants';
-import { AuthService, Expires } from './auth.service';
 import { RefreshGuard } from './guards/refresh.guard';
+import type { Expires } from './types/expires.type';
 import { AuthController } from './auth.controller';
+import { AuthService } from './auth.service';
 
 @Module({
   imports: [
@@ -24,6 +26,8 @@ import { AuthController } from './auth.controller';
         secret: configService.getOrThrow<string>('JWT_ACCESS_SECRET'),
         signOptions: {
           expiresIn: configService.getOrThrow<Expires>('JWT_ACCESS_EXPIRATION'),
+          issuer: configService.getOrThrow<string>('JWT_ISSUER'),
+          audience: JWT_ACCESS_AUDIENCE,
         },
       }),
       inject: [ConfigService],
@@ -41,7 +45,7 @@ import { AuthController } from './auth.controller';
         );
         return {
           httpOnly: true,
-          secure: configService.get('NODE_ENV') === Environment.Production,
+          secure: configService.get('NODE_ENV') !== Environment.Development,
           sameSite: 'strict',
           path: REFRESH_COOKIE_PATH,
           maxAge: parseDuration(refreshExpiration),

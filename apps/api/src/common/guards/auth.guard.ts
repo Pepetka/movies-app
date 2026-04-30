@@ -11,6 +11,7 @@ import { Reflector } from '@nestjs/core';
 import { JwtService } from '@nestjs/jwt';
 
 import type { UserRequest } from '$src/auth/types/user-request.type';
+import { JWT_ACCESS_AUDIENCE } from '$src/auth/auth.constants';
 import { UserService } from '$src/user/user.service';
 import { IS_PUBLIC_KEY } from '$common/decorators';
 
@@ -41,6 +42,9 @@ export class AuthGuard implements CanActivate {
     try {
       payload = await this.jwtService.verifyAsync<{ sub: number }>(token, {
         secret: this.configService.getOrThrow<string>('JWT_ACCESS_SECRET'),
+        algorithms: ['HS256'],
+        issuer: this.configService.getOrThrow<string>('JWT_ISSUER'),
+        audience: JWT_ACCESS_AUDIENCE,
       });
     } catch (error) {
       this._logger.warn(

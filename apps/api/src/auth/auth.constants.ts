@@ -9,3 +9,6 @@ export interface RefreshCookieOptions {
 export const REFRESH_COOKIE_OPTIONS = Symbol('REFRESH_COOKIE_OPTIONS');
 export const REFRESH_COOKIE_NAME = 'refresh_token';
 export const REFRESH_COOKIE_PATH = '/api/v1/auth/refresh';
+
+export const JWT_ACCESS_AUDIENCE = 'movies-app-access';
+export const JWT_REFRESH_AUDIENCE = 'movies-app-refresh';

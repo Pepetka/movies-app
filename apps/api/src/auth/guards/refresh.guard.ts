@@ -8,8 +8,11 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 
+import {
+  JWT_REFRESH_AUDIENCE,
+  REFRESH_COOKIE_NAME,
+} from '$src/auth/auth.constants';
 import type { UserRequest } from '$src/auth/types/user-request.type';
-import { REFRESH_COOKIE_NAME } from '$src/auth/auth.constants';
 import { UserService } from '$src/user/user.service';
 
 @Injectable()
@@ -34,6 +37,9 @@ export class RefreshGuard implements CanActivate {
     try {
       payload = await this.jwtService.verifyAsync<{ sub: number }>(token, {
         secret: this.configService.getOrThrow<string>('JWT_REFRESH_SECRET'),
+        algorithms: ['HS256'],
+        issuer: this.configService.getOrThrow<string>('JWT_ISSUER'),
+        audience: JWT_REFRESH_AUDIENCE,
       });
     } catch (error) {
       this._logger.warn(
