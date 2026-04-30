@@ -1,5 +1,4 @@
 import { ConfigService, ConfigModule } from '@nestjs/config';
-import { PassportModule } from '@nestjs/passport';
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 
@@ -12,15 +11,13 @@ import {
   REFRESH_COOKIE_PATH,
   RefreshCookieOptions,
 } from './auth.constants';
-import { JwtRefreshStrategy } from './strategies/jwt-refresh.strategy';
-import { JwtAccessStrategy } from './strategies/jwt-access.strategy';
 import { AuthService, Expires } from './auth.service';
+import { RefreshGuard } from './guards/refresh.guard';
 import { AuthController } from './auth.controller';
 
 @Module({
   imports: [
     UserModule,
-    PassportModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => ({
@@ -35,8 +32,7 @@ import { AuthController } from './auth.controller';
   controllers: [AuthController],
   providers: [
     AuthService,
-    JwtAccessStrategy,
-    JwtRefreshStrategy,
+    RefreshGuard,
     {
       provide: REFRESH_COOKIE_OPTIONS,
       useFactory: (configService: ConfigService): RefreshCookieOptions => {
@@ -54,6 +50,6 @@ import { AuthController } from './auth.controller';
       inject: [ConfigService],
     },
   ],
-  exports: [AuthService, REFRESH_COOKIE_OPTIONS],
+  exports: [AuthService, REFRESH_COOKIE_OPTIONS, JwtModule],
 })
 export class AuthModule {}
