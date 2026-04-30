@@ -36,9 +36,10 @@ API-запрос с заголовком Authorization
 2. **CsrfGuard** — CSRF-защита (отключён в test)
 3. **AuthGuard** — JWT-валидация (обход через `@Public()`)
 4. **RolesGuard** — Ролевой доступ (`@Roles('admin')`)
-5. **GroupMemberGuard** — Проверка членства в группе
-6. **GroupModeratorGuard** — Модератор или админ группы
-7. **GroupAdminGuard** — Только админ группы
+5. **AuthorGuard** — Проверка владельца ресурса (`@Author()`)
+6. **GroupMemberGuard** — Проверка членства в группе
+7. **GroupModeratorGuard** — Модератор или админ группы
+8. **GroupAdminGuard** — Только админ группы
 
 ## Роли
 
