@@ -161,10 +161,7 @@ describe('AuthController', () => {
       );
 
       expect(result).toEqual({ accessToken: mockTokens.accessToken });
-      expect(authService.refresh).toHaveBeenCalledWith(
-        mockUser.id,
-        refreshToken,
-      );
+      expect(authService.refresh).toHaveBeenCalledWith(mockUser, refreshToken);
       expect(mockReply.cookie).toHaveBeenCalledWith(
         REFRESH_COOKIE_NAME,
         mockTokens.refreshToken,

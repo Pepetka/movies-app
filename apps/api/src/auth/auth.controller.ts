@@ -116,7 +116,7 @@ export class AuthController {
     @Cookie(REFRESH_COOKIE_NAME) refreshToken: string,
     @Res({ passthrough: true }) reply: FastifyReply,
   ) {
-    const tokens = await this.authService.refresh(user.id, refreshToken);
+    const tokens = await this.authService.refresh(user, refreshToken);
 
     reply.cookie(REFRESH_COOKIE_NAME, tokens.refreshToken, this.cookieOptions);
 

@@ -6,10 +6,9 @@ import { hashSync } from 'bcrypt';
 import { UserService } from '$src/user/user.service';
 import type { User } from '$db/schemas';
 
+import { JWT_REFRESH_AUDIENCE } from './auth.constants';
+import type { Expires } from './types/expires.type';
 import { AuthRegisterDto } from './dto';
-
-type ExpiresUnits = 'd' | 'h' | 'm' | 's';
-export type Expires = `${number}${ExpiresUnits}`;
 
 // Dummy hash for constant-time comparison (generated at startup)
 const DUMMY_REFRESH_HASH = hashSync('dummy-refresh-token', 10);
@@ -81,14 +80,13 @@ export class AuthService {
 
   /**
    * Refreshes access token using refresh token
-   * @param userId - User ID from JWT
+   * @param user - User from RefreshGuard
    * @param refreshToken - Refresh token from cookie
    * @returns New access and refresh tokens
    * @throws UnauthorizedException if token is invalid
    */
-  async refresh(userId: number, refreshToken: string) {
-    const user = await this.userService.findById(userId);
-    const storedHash = user?.refreshTokenHash ?? DUMMY_REFRESH_HASH;
+  async refresh(user: User, refreshToken: string) {
+    const storedHash = user.refreshTokenHash ?? DUMMY_REFRESH_HASH;
 
     // Constant-time: bcrypt.compare() всегда выполняется
     const isValid = await this.userService.validateRefreshToken(
@@ -96,8 +94,8 @@ export class AuthService {
       storedHash,
     );
 
-    if (!user || !isValid) {
-      this._logger.warn(`Failed refresh token: userId=${userId}`);
+    if (!isValid) {
+      this._logger.warn(`Failed refresh token: userId=${user.id}`);
       // Dummy operation to align response time (timing attack prevention)
       await this.userService.hashToken('dummy');
       throw new UnauthorizedException();
@@ -137,6 +135,8 @@ export class AuthService {
           expiresIn: this.configService.getOrThrow<Expires>(
             'JWT_REFRESH_EXPIRATION',
           ),
+          issuer: this.configService.getOrThrow<string>('JWT_ISSUER'),
+          audience: JWT_REFRESH_AUDIENCE,
         },
       ),
     ]);
