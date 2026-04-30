@@ -129,15 +129,7 @@ export class AuthService {
    */
   private async _generateTokens(userId: number, email: string, role: string) {
     const [accessToken, refreshToken] = await Promise.all([
-      this.jwtService.signAsync(
-        { sub: userId, email, role },
-        {
-          secret: this.configService.getOrThrow<string>('JWT_ACCESS_SECRET'),
-          expiresIn: this.configService.getOrThrow<Expires>(
-            'JWT_ACCESS_EXPIRATION',
-          ),
-        },
-      ),
+      this.jwtService.signAsync({ sub: userId, email, role }),
       this.jwtService.signAsync(
         { sub: userId, email, role },
         {
