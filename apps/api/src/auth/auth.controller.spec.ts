@@ -10,6 +10,7 @@ import {
   RefreshCookieOptions,
 } from './auth.constants';
 import { AuthLoginDto, AuthRegisterDto } from './dto';
+import { RefreshGuard } from './guards/refresh.guard';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 
@@ -66,7 +67,10 @@ describe('AuthController', () => {
           useValue: mockCookieOptions,
         },
       ],
-    }).compile();
+    })
+      .overrideGuard(RefreshGuard)
+      .useValue({ canActivate: jest.fn(() => true) })
+      .compile();
 
     controller = module.get<AuthController>(AuthController);
     authService = module.get<AuthService>(
