@@ -1,4 +1,4 @@
-import { UnauthorizedException } from '@nestjs/common';
+import { ExecutionContext, UnauthorizedException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { ConfigService } from '@nestjs/config';
 import type { FastifyRequest } from 'fastify';
@@ -28,17 +28,17 @@ describe('AuthGuard', () => {
   };
 
   const createMockExecutionContext = (
-    isPublic = false,
+    _isPublic = false,
     authHeader?: string,
-  ) => {
+  ): ExecutionContext => {
     const request = {
       headers: {
         authorization: authHeader,
       },
     } as FastifyRequest;
 
-    const handler = {};
-    const classRef = {};
+    const handler = () => {};
+    const classRef = class {};
 
     return {
       switchToHttp: () => ({
@@ -46,7 +46,7 @@ describe('AuthGuard', () => {
       }),
       getHandler: () => handler,
       getClass: () => classRef,
-    } as any;
+    } as unknown as ExecutionContext;
   };
 
   beforeEach(async () => {

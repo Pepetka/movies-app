@@ -1,4 +1,4 @@
-import { UnauthorizedException } from '@nestjs/common';
+import { ExecutionContext, UnauthorizedException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
@@ -25,7 +25,7 @@ describe('RefreshGuard', () => {
     updatedAt: new Date(),
   };
 
-  const createMockExecutionContext = (cookie?: string) => {
+  const createMockExecutionContext = (cookie?: string): ExecutionContext => {
     const request = {
       cookies: cookie ? { [REFRESH_COOKIE_NAME]: cookie } : {},
     };
@@ -34,7 +34,9 @@ describe('RefreshGuard', () => {
       switchToHttp: () => ({
         getRequest: () => request,
       }),
-    } as any;
+      getHandler: () => ({}),
+      getClass: () => ({}),
+    } as unknown as ExecutionContext;
   };
 
   beforeEach(async () => {
