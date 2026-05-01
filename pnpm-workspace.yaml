@@ -17,9 +17,9 @@ catalog:
   "@sveltejs/kit": "^2.58.0"
   "@sveltejs/vite-plugin-svelte": "^7.0.0"
   prettier-plugin-svelte: "^3.5.1"
-  svelte-check: "^4.4.6"
+  svelte-check: "^4.4.7"
   vite: "^8.0.10"
-  "@lucide/svelte": "^1.11.0"
+  "@lucide/svelte": "^1.14.0"
 
   # Storybook
   storybook: "^10.3.4"
