@@ -1,5 +1,4 @@
 import { ConfigService, ConfigModule } from '@nestjs/config';
-import { PassportModule } from '@nestjs/passport';
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 
@@ -8,25 +7,27 @@ import { Environment } from '$common/configs';
 import { parseDuration } from '$common/utils';
 
 import {
+  JWT_ACCESS_AUDIENCE,
   REFRESH_COOKIE_OPTIONS,
   REFRESH_COOKIE_PATH,
   RefreshCookieOptions,
 } from './auth.constants';
-import { JwtRefreshStrategy } from './strategies/jwt-refresh.strategy';
-import { JwtAccessStrategy } from './strategies/jwt-access.strategy';
-import { AuthService, Expires } from './auth.service';
+import { RefreshGuard } from './guards/refresh.guard';
+import type { Expires } from './types/expires.type';
 import { AuthController } from './auth.controller';
+import { AuthService } from './auth.service';
 
 @Module({
   imports: [
     UserModule,
-    PassportModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => ({
         secret: configService.getOrThrow<string>('JWT_ACCESS_SECRET'),
         signOptions: {
           expiresIn: configService.getOrThrow<Expires>('JWT_ACCESS_EXPIRATION'),
+          issuer: configService.getOrThrow<string>('JWT_ISSUER'),
+          audience: JWT_ACCESS_AUDIENCE,
         },
       }),
       inject: [ConfigService],
@@ -35,8 +36,7 @@ import { AuthController } from './auth.controller';
   controllers: [AuthController],
   providers: [
     AuthService,
-    JwtAccessStrategy,
-    JwtRefreshStrategy,
+    RefreshGuard,
     {
       provide: REFRESH_COOKIE_OPTIONS,
       useFactory: (configService: ConfigService): RefreshCookieOptions => {
@@ -45,7 +45,7 @@ import { AuthController } from './auth.controller';
         );
         return {
           httpOnly: true,
-          secure: configService.get('NODE_ENV') === Environment.Production,
+          secure: configService.get('NODE_ENV') !== Environment.Development,
           sameSite: 'strict',
           path: REFRESH_COOKIE_PATH,
           maxAge: parseDuration(refreshExpiration),
@@ -54,6 +54,6 @@ import { AuthController } from './auth.controller';
       inject: [ConfigService],
     },
   ],
-  exports: [AuthService, REFRESH_COOKIE_OPTIONS],
+  exports: [AuthService, REFRESH_COOKIE_OPTIONS, JwtModule],
 })
 export class AuthModule {}

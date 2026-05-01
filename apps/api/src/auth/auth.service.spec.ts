@@ -33,6 +33,7 @@ const createMockJwtService = () => ({
 });
 
 const createMockConfigService = () => ({
+  get: jest.fn<unknown, [string]>(),
   getOrThrow: jest.fn<unknown, [string]>(),
 });
 
@@ -45,6 +46,13 @@ describe('AuthService', () => {
   beforeEach(async () => {
     const mockJwt = createMockJwtService();
     const mockConfig = createMockConfigService();
+
+    mockConfig.get.mockImplementation((key: string) => {
+      const config: Record<string, unknown> = {
+        JWT_ISSUER: 'movies-app-test',
+      };
+      return config[key] as string;
+    });
 
     mockConfig.getOrThrow.mockImplementation((key: string) => {
       const config: Record<string, unknown> = {
@@ -212,17 +220,15 @@ describe('AuthService', () => {
       const refreshToken = 'valid-refresh-token';
       const hashedToken = 'hashed-refresh-token';
 
-      userService.findById.mockResolvedValue({
-        ...mockUser,
-        refreshTokenHash: hashedToken,
-      });
       userService.validateRefreshToken.mockResolvedValue(true);
       userService.hashToken.mockResolvedValue('new-hashed-token');
 
-      const result = await service.refresh(mockUser.id, refreshToken);
+      const result = await service.refresh(
+        { ...mockUser, refreshTokenHash: hashedToken },
+        refreshToken,
+      );
 
       expect(result).toEqual(mockTokens);
-      expect(userService.findById).toHaveBeenCalledWith(mockUser.id);
       expect(userService.validateRefreshToken).toHaveBeenCalledWith(
         refreshToken,
         hashedToken,
@@ -240,45 +246,27 @@ describe('AuthService', () => {
       const refreshToken = 'invalid-refresh-token';
       const hashedToken = 'hashed-refresh-token';
 
-      userService.findById.mockResolvedValue({
-        ...mockUser,
-        refreshTokenHash: hashedToken,
-      });
       userService.validateRefreshToken.mockResolvedValue(false);
       userService.hashToken.mockResolvedValue('dummy-hash');
 
-      await expect(service.refresh(mockUser.id, refreshToken)).rejects.toThrow(
-        UnauthorizedException,
-      );
-      expect(userService.hashToken).toHaveBeenCalledWith('dummy');
-    });
-
-    it('should throw UnauthorizedException when user not found with timing dummy op', async () => {
-      const refreshToken = 'some-refresh-token';
-
-      userService.findById.mockResolvedValue(null);
-      userService.validateRefreshToken.mockResolvedValue(false);
-      userService.hashToken.mockResolvedValue('dummy-hash');
-
-      await expect(service.refresh(999, refreshToken)).rejects.toThrow(
-        UnauthorizedException,
-      );
+      await expect(
+        service.refresh(
+          { ...mockUser, refreshTokenHash: hashedToken },
+          refreshToken,
+        ),
+      ).rejects.toThrow(UnauthorizedException);
       expect(userService.hashToken).toHaveBeenCalledWith('dummy');
     });
 
     it('should throw UnauthorizedException when refresh token hash is null', async () => {
       const refreshToken = 'some-refresh-token';
 
-      userService.findById.mockResolvedValue({
-        ...mockUser,
-        refreshTokenHash: null,
-      });
       userService.validateRefreshToken.mockResolvedValue(false);
       userService.hashToken.mockResolvedValue('dummy-hash');
 
-      await expect(service.refresh(mockUser.id, refreshToken)).rejects.toThrow(
-        UnauthorizedException,
-      );
+      await expect(
+        service.refresh({ ...mockUser, refreshTokenHash: null }, refreshToken),
+      ).rejects.toThrow(UnauthorizedException);
       expect(userService.hashToken).toHaveBeenCalledWith('dummy');
     });
   });

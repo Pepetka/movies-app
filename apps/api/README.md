@@ -85,7 +85,6 @@ src/
 │   ├── auth.service.ts     # Business logic
 │   ├── auth.constants.ts   # Константы
 │   ├── guards/             # AuthGuard, RefreshGuard
-│   ├── strategies/         # JWT стратегии
 │   ├── dto/                # DTOs для запросов/ответов
 │   └── types/              # TypeScript типы
 │

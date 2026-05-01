@@ -82,5 +82,6 @@ export const validate = (config: Record<string, unknown>) => {
   return {
     ...validatedConfig,
     BCRYPT_ROUNDS: validatedConfig.BCRYPT_ROUNDS ?? 12,
+    JWT_ISSUER: `movies-app-${validatedConfig.NODE_ENV}`,
   };
 };
