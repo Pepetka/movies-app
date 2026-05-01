@@ -97,8 +97,6 @@ updates:
     ignore:
       - dependency-name: "drizzle-orm"
         update-types: ["version-update:semver-major"]
-      - dependency-name: "passport*"
-        update-types: ["version-update:semver-major"]
       - dependency-name: "bcrypt"
         update-types: ["version-update:semver-major"]
 

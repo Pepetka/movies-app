@@ -22,7 +22,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          for pkg in drizzle-orm passport passport-jwt bcrypt; do
+          for pkg in drizzle-orm bcrypt; do
             current=$(syncpack list --dependencies $pkg 2>/dev/null | head -1 | awk '{print $2}' | tr -d '^~')
             latest=$(pnpm view $pkg version 2>/dev/null)
 
