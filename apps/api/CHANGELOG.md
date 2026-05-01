@@ -1,5 +1,14 @@
 # api
 
+## 0.10.0
+
+### Minor Changes
+
+- 1c8f5ee: Replaced Passport JWT with custom guards and hardened token validation
+  - Migrated from @nestjs/passport and passport-jwt to native AuthGuard and RefreshGuard with explicit JWT verification
+  - Added algorithm whitelist (HS256), issuer, and audience validation to prevent token misuse
+  - Updated API documentation with current guards order
+
 ## 0.9.0
 
 ### Minor Changes
