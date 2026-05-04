@@ -27,4 +27,4 @@ catalog:
   "@storybook/addon-svelte-csf": "^5.1.2"
 
   # Validation
-  zod: "^4.3.6"
+  zod: "^4.4.3"
