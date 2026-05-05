@@ -236,7 +236,7 @@ describe('AuthController', () => {
         'https://accounts.google.com/o/oauth2/v2/auth?client_id=test',
       );
 
-      await controller.oauthRedirect('google', mockReply);
+      await controller.oauthRedirect('google', undefined, mockReply);
 
       expect(mockReply.cookie).toHaveBeenCalledWith(
         OAUTH_SESSION_COOKIE_NAME,
@@ -258,6 +258,23 @@ describe('AuthController', () => {
         expect.stringContaining('accounts.google.com'),
         302,
       );
+    });
+
+    it('should store redirect in oauth_session cookie when provided', async () => {
+      mockOAuthService.buildAuthUrl.mockReturnValue(
+        'https://accounts.google.com/o/oauth2/v2/auth?client_id=test',
+      );
+
+      await controller.oauthRedirect('google', '/invite/test-token', mockReply);
+
+      const cookieValue = JSON.parse(
+        (
+          (mockReply.cookie as jest.Mock).mock.calls.find(
+            (call: [string, string]) => call[0] === OAUTH_SESSION_COOKIE_NAME,
+          ) as [string, string]
+        )[1],
+      );
+      expect(cookieValue.redirect).toBe('/invite/test-token');
     });
   });
 
@@ -347,6 +364,33 @@ describe('AuthController', () => {
       );
       expect(mockReply.redirect).toHaveBeenCalledWith(
         expect.stringContaining('/oauth/success'),
+        302,
+      );
+    });
+
+    it('should append redirect query param to /oauth/success when session has redirect', async () => {
+      const request = mockRequest({
+        value: JSON.stringify({
+          ...validSession,
+          redirect: '/invite/test-token',
+        }),
+      });
+      oauthService.handleCallback.mockResolvedValue({
+        ...mockTokens,
+        user: mockUser,
+      });
+
+      await controller.oauthCallback(
+        'google',
+        { state: validSession.state, code: 'auth-code-789' },
+        request,
+        mockReply,
+      );
+
+      expect(mockReply.redirect).toHaveBeenCalledWith(
+        expect.stringContaining(
+          '/oauth/success?redirect=%2Finvite%2Ftest-token',
+        ),
         302,
       );
     });

@@ -28,4 +28,5 @@ export interface OAuthSession {
   codeVerifier: string;
   intent: OAuthIntent;
   userId?: number;
+  redirect?: string;
 }

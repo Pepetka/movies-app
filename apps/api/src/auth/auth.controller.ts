@@ -18,6 +18,7 @@ import {
   ApiResponse,
   ApiBearerAuth,
   ApiParam,
+  ApiQuery,
 } from '@nestjs/swagger';
 import type { FastifyReply, FastifyRequest } from 'fastify';
 import { Throttle } from '@nestjs/throttler';
@@ -107,6 +108,7 @@ export class AuthController {
     return { accessToken: tokens.accessToken };
   }
 
+  @CsrfProtected()
   @Post('logout')
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiBearerAuth('access-token')
@@ -151,15 +153,25 @@ export class AuthController {
   @Get('oauth/:provider')
   @Throttle(THROTTLE.auth.oauth)
   @ApiParam({ name: 'provider', enum: [...authProviderEnum.enumValues] })
+  @ApiQuery({
+    name: 'redirect',
+    required: false,
+    description: 'Path to redirect after OAuth login',
+  })
   @ApiOperation({ summary: 'Redirect to OAuth provider authorization page' })
   @ApiResponse({ status: 302, description: 'Redirect to provider' })
   @ApiResponse({ status: 400, description: 'Unsupported provider' })
   @ApiResponse({ status: 501, description: 'Provider not configured' })
   async oauthRedirect(
     @Param('provider', ParseAuthProviderPipe) provider: AuthProvider,
+    @Query('redirect') redirect: string | undefined,
     @Res({ passthrough: true }) reply: FastifyReply,
   ): Promise<void> {
-    const { session, codeChallenge } = createOAuthSession('login');
+    const { session, codeChallenge } = createOAuthSession(
+      'login',
+      undefined,
+      redirect,
+    );
 
     reply.cookie(OAUTH_SESSION_COOKIE_NAME, JSON.stringify(session), {
       httpOnly: true,
@@ -283,7 +295,11 @@ export class AuthController {
         );
 
         const webUrl = this.oauthService.getPrimaryWebUrl();
-        reply.redirect(`${webUrl}${OAUTH_SUCCESS_PATH}`, HttpStatus.FOUND);
+        const successUrl = new URL(`${webUrl}${OAUTH_SUCCESS_PATH}`);
+        if (session.redirect) {
+          successUrl.searchParams.set('redirect', session.redirect);
+        }
+        reply.redirect(successUrl.toString(), HttpStatus.FOUND);
         return;
       }
 

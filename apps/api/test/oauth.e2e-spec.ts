@@ -115,9 +115,11 @@ function parseStateFromUrl(url: string): string | null {
 
 async function performOAuthLogin(
   app: NestFastifyApplication,
+  redirect?: string,
 ): Promise<request.Response> {
   const redirectResponse = await request(app.getHttpServer())
     .get('/auth/oauth/google')
+    .query(redirect ? { redirect } : {})
     .expect(302);
 
   const sessionCookie = extractCookieValue(
@@ -205,6 +207,25 @@ describe('OAuth E2E', () => {
   });
 
   // ============================================================
+  describe('CSRF Token', () => {
+    it('should return a CSRF token and set _csrf cookie', async () => {
+      const response = await request(app.getHttpServer())
+        .get('/csrf/token')
+        .expect(200);
+
+      expect(response.body).toHaveProperty('token');
+      expect(typeof response.body.token).toBe('string');
+      expect(response.body.token.length).toBeGreaterThan(0);
+
+      const csrfCookie = extractCookieValue(
+        response.headers['set-cookie'],
+        '_csrf',
+      );
+      expect(csrfCookie).toBeDefined();
+    });
+  });
+
+  // ============================================================
   describe('OAuth Redirect (init)', () => {
     it('should redirect to Google with state, code_challenge, openid scope', async () => {
       const response = await request(app.getHttpServer())
@@ -231,6 +252,19 @@ describe('OAuth E2E', () => {
 
     it('should reject unsupported provider with 400', async () => {
       await request(app.getHttpServer()).get('/auth/oauth/unknown').expect(400);
+    });
+
+    it('should store redirect in oauth_session cookie when provided', async () => {
+      const response = await request(app.getHttpServer())
+        .get('/auth/oauth/google')
+        .query({ redirect: '/invite/test-token' })
+        .expect(302);
+
+      const sessionCookie = extractCookieValue(
+        response.headers['set-cookie'],
+        'oauth_session',
+      );
+      expect(sessionCookie).toBeDefined();
     });
   });
 
@@ -311,6 +345,25 @@ describe('OAuth E2E', () => {
       const dbOAuth = await drizzleDb.select().from(oauthAccounts);
       expect(dbOAuth).toHaveLength(1);
       expect(dbOAuth[0].userId).toBe(localUser.id);
+    });
+
+    it('should redirect to /oauth/success with redirect query param when session has redirect', async () => {
+      const callbackResponse = await performOAuthLogin(
+        app,
+        '/invite/test-token',
+      );
+
+      expect(callbackResponse.status).toBe(302);
+      expect(callbackResponse.headers.location).toContain('/oauth/success');
+      expect(callbackResponse.headers.location).toContain(
+        'redirect=%2Finvite%2Ftest-token',
+      );
+
+      const refreshToken = extractCookieValue(
+        callbackResponse.headers['set-cookie'],
+        'refresh_token',
+      );
+      expect(refreshToken).toBeDefined();
     });
 
     it('should redirect to /oauth/error on invalid state (302)', async () => {
