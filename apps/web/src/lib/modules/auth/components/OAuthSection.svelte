@@ -5,9 +5,10 @@
 
 	interface Props {
 		buttonText?: string;
+		showDivider?: boolean;
 	}
 
-	let { buttonText = 'Войти через Google' }: Props = $props();
+	let { buttonText = 'Войти через Google', showDivider = true }: Props = $props();
 </script>
 
 <Button
@@ -18,4 +19,6 @@
 	{buttonText}
 </Button>
 
-<Divider label="или" />
+{#if showDivider}
+	<Divider label="или" />
+{/if}
