@@ -31,6 +31,15 @@ export class AuthService {
    */
   async validateUser(email: string, password: string): Promise<User | null> {
     const user = await this.userService.findByEmail(email);
+
+    // OAuth-only пользователь без пароля
+    if (user && !user.passwordHash) {
+      this._logger.warn(
+        `Login attempt for OAuth-only user: ${email.slice(0, 3)}***`,
+      );
+      return null;
+    }
+
     if (
       user &&
       (await this.userService.validatePassword(password, user.passwordHash))
@@ -51,7 +60,7 @@ export class AuthService {
   async register(dto: AuthRegisterDto) {
     const user = await this.userService.create(dto);
     this._logger.log(`User registered: ${user.id}`);
-    const tokens = await this._generateTokens(user.id, user.email, user.role);
+    const tokens = await this.generateTokens(user.id, user.email, user.role);
     const tokenHash = await this.userService.hashToken(tokens.refreshToken);
     await this.userService.updateRefreshTokenHash(user.id, tokenHash);
     return tokens;
@@ -71,7 +80,7 @@ export class AuthService {
     }
 
     this._logger.log(`User logged in: ${user.id}`);
-    const tokens = await this._generateTokens(user.id, user.email, user.role);
+    const tokens = await this.generateTokens(user.id, user.email, user.role);
     const tokenHash = await this.userService.hashToken(tokens.refreshToken);
     await this.userService.updateRefreshTokenHash(user.id, tokenHash);
 
@@ -102,7 +111,7 @@ export class AuthService {
     }
 
     this._logger.log(`Token refreshed: ${user.id}`);
-    const tokens = await this._generateTokens(user.id, user.email, user.role);
+    const tokens = await this.generateTokens(user.id, user.email, user.role);
     const tokenHash = await this.userService.hashToken(tokens.refreshToken);
     await this.userService.updateRefreshTokenHash(user.id, tokenHash);
 
@@ -125,7 +134,7 @@ export class AuthService {
    * @param role - User role
    * @returns Object with accessToken and refreshToken
    */
-  private async _generateTokens(userId: number, email: string, role: string) {
+  async generateTokens(userId: number, email: string, role: string) {
     const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.signAsync({ sub: userId, email, role }),
       this.jwtService.signAsync(

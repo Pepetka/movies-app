@@ -25,6 +25,7 @@ const mockUser = {
   role: UserRole.USER,
   passwordHash: mockHashedPassword,
   refreshTokenHash: null,
+  avatar: null,
   createdAt: new Date(),
   updatedAt: new Date(),
 };
@@ -92,12 +93,12 @@ describe('UserService', () => {
 
       expect(result).toEqual(mockUser);
       expect(userRepository.findByEmail).toHaveBeenCalledWith(
-        createUserDto.email,
+        createUserDto.email.toLowerCase(),
       );
       expect(bcrypt.hash).toHaveBeenCalledWith('SecurePass123!', 12);
       expect(userRepository.create).toHaveBeenCalledWith({
         name: createUserDto.name,
-        email: createUserDto.email,
+        email: createUserDto.email.toLowerCase(),
         passwordHash: mockHashedPassword,
       });
     });
@@ -246,6 +247,47 @@ describe('UserService', () => {
       expect(userRepository.findByEmail).not.toHaveBeenCalled();
       expect(userRepository.update).toHaveBeenCalledWith(1, updateDto);
     });
+
+    it('should normalize email to lowercase on update', async () => {
+      const updateDto: UserUpdateDto = { email: 'User@Example.COM' };
+
+      userRepository.findById.mockResolvedValue(mockUser);
+      userRepository.findByEmail.mockResolvedValue(null);
+      userRepository.update.mockResolvedValue({
+        ...mockUser,
+        email: 'user@example.com',
+      });
+
+      const result = await service.update(1, updateDto);
+
+      expect(result.email).toBe('user@example.com');
+      expect(userRepository.findByEmail).toHaveBeenCalledWith(
+        'user@example.com',
+      );
+      expect(userRepository.update).toHaveBeenCalledWith(1, {
+        email: 'user@example.com',
+      });
+    });
+
+    it('should trim whitespace from email on update', async () => {
+      const updateDto: UserUpdateDto = { email: '  new@example.com  ' };
+
+      userRepository.findById.mockResolvedValue(mockUser);
+      userRepository.findByEmail.mockResolvedValue(null);
+      userRepository.update.mockResolvedValue({
+        ...mockUser,
+        email: 'new@example.com',
+      });
+
+      await service.update(1, updateDto);
+
+      expect(userRepository.findByEmail).toHaveBeenCalledWith(
+        'new@example.com',
+      );
+      expect(userRepository.update).toHaveBeenCalledWith(1, {
+        email: 'new@example.com',
+      });
+    });
   });
 
   describe('remove', () => {
@@ -333,6 +375,13 @@ describe('UserService', () => {
 
       expect(result).toBe(false);
     });
+
+    it('should return false when hashedPassword is null', async () => {
+      const result = await service.validatePassword('password123', null);
+
+      expect(result).toBe(false);
+      expect(bcrypt.compare).not.toHaveBeenCalled();
+    });
   });
 
   describe('updateRefreshTokenHash', () => {
@@ -344,6 +393,7 @@ describe('UserService', () => {
       expect(userRepository.updateRefreshTokenHash).toHaveBeenCalledWith(
         1,
         'hashed-token',
+        undefined,
       );
     });
 
@@ -355,6 +405,7 @@ describe('UserService', () => {
       expect(userRepository.updateRefreshTokenHash).toHaveBeenCalledWith(
         1,
         null,
+        undefined,
       );
     });
   });

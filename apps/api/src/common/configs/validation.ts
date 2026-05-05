@@ -61,6 +61,18 @@ class EnvironmentVariables {
   @Min(4)
   @Max(16)
   BCRYPT_ROUNDS: number;
+
+  @IsOptional()
+  @IsString()
+  GOOGLE_CLIENT_ID?: string;
+
+  @IsOptional()
+  @IsString()
+  GOOGLE_CLIENT_SECRET?: string;
+
+  @IsOptional()
+  @IsUrl({ require_tld: false })
+  GOOGLE_REDIRECT_URI?: string;
 }
 
 export const validate = (config: Record<string, unknown>) => {

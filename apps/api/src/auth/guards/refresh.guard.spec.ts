@@ -21,6 +21,7 @@ describe('RefreshGuard', () => {
     role: UserRole.USER,
     passwordHash: '$2b$12$hashedPassword',
     refreshTokenHash: 'hashed-refresh-token',
+    avatar: null,
     createdAt: new Date(),
     updatedAt: new Date(),
   };

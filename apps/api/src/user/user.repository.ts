@@ -1,21 +1,23 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { eq, asc } from 'drizzle-orm';
 
+import { DrizzleDb, DrizzleTx } from '../db/types/drizzle.types';
 import { users, type User, type NewUser } from '../db/schemas';
-import { DrizzleDb } from '../db/types/drizzle.types';
 import { DRIZZLE } from '../db/db.module';
 
 @Injectable()
 export class UserRepository {
   constructor(@Inject(DRIZZLE) private readonly db: DrizzleDb) {}
 
-  async create(data: NewUser): Promise<User> {
-    const [result] = await this.db.insert(users).values(data).returning();
+  async create(data: NewUser, tx?: DrizzleTx): Promise<User> {
+    const conn = tx ?? this.db;
+    const [result] = await conn.insert(users).values(data).returning();
     return result;
   }
 
-  async findById(id: number): Promise<User | null> {
-    const [result] = await this.db
+  async findById(id: number, tx?: DrizzleTx): Promise<User | null> {
+    const conn = tx ?? this.db;
+    const [result] = await conn
       .select()
       .from(users)
       .where(eq(users.id, id))
@@ -23,8 +25,9 @@ export class UserRepository {
     return result ?? null;
   }
 
-  async findByEmail(email: string): Promise<User | null> {
-    const [result] = await this.db
+  async findByEmail(email: string, tx?: DrizzleTx): Promise<User | null> {
+    const conn = tx ?? this.db;
+    const [result] = await conn
       .select()
       .from(users)
       .where(eq(users.email, email))
@@ -59,8 +62,13 @@ export class UserRepository {
     return result !== null;
   }
 
-  async updateRefreshTokenHash(id: number, hash: string | null): Promise<void> {
-    await this.db
+  async updateRefreshTokenHash(
+    id: number,
+    hash: string | null,
+    tx?: DrizzleTx,
+  ): Promise<void> {
+    const conn = tx ?? this.db;
+    await conn
       .update(users)
       .set({ refreshTokenHash: hash })
       .where(eq(users.id, id));

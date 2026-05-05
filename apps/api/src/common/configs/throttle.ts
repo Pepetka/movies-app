@@ -12,6 +12,10 @@ export const THROTTLE = {
       short: { limit: 5, ttl: 1000 },
       long: { limit: 15, ttl: 60000 },
     },
+    oauth: {
+      short: { limit: 5, ttl: 1000 },
+      long: { limit: 15, ttl: 60000 },
+    },
   },
   invites: {
     info: {

@@ -16,6 +16,7 @@ const mockUser = {
   passwordHash: '$2b$12$hashedPassword',
   role: UserRole.USER,
   refreshTokenHash: null,
+  avatar: null,
   createdAt: new Date(),
   updatedAt: new Date(),
 };
@@ -147,6 +148,21 @@ describe('AuthService', () => {
       );
 
       expect(result).toBeNull();
+    });
+
+    it('should return null for OAuth-only user (passwordHash is null)', async () => {
+      userService.findByEmail.mockResolvedValue({
+        ...mockUser,
+        passwordHash: null,
+      });
+
+      const result = await service.validateUser(
+        'test@example.com',
+        'password123',
+      );
+
+      expect(result).toBeNull();
+      expect(userService.validatePassword).not.toHaveBeenCalled();
     });
   });
 

@@ -228,6 +228,9 @@ jobs:
           BCRYPT_ROUNDS: 4
           KINOPOISK_API_KEY: test_kinopoisk_api_key
           KINOPOISK_BASE_URL: https://kinopoiskapi.com
+          GOOGLE_CLIENT_ID: test-client-id
+          GOOGLE_CLIENT_SECRET: test-client-secret
+          GOOGLE_REDIRECT_URI: http://localhost:3000/api/v1/auth/oauth/google/callback
 
       - name: Upload coverage
         uses: actions/upload-artifact@v7

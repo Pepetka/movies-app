@@ -21,9 +21,10 @@ export const users = pgTable(
     id: serial().primaryKey(),
     name: varchar({ length: 256 }).notNull(),
     email: varchar({ length: 256 }).notNull(),
-    passwordHash: varchar({ length: 256 }).notNull(),
+    passwordHash: varchar({ length: 256 }),
     role: userRoleEnum('role').notNull().default(UserRole.USER),
     refreshTokenHash: varchar({ length: 256 }),
+    avatar: varchar({ length: 512 }),
     ...timestamps,
   },
   (table) => [

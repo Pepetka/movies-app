@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
 
 import { EmailAlreadyInUseException } from '../common/exceptions';
+import type { DrizzleTx } from '../db/types/drizzle.types';
 import { UserCreateDto, UserUpdateDto } from './dto';
 import type { User, NewUser } from '../db/schemas';
 import { UserRepository } from './user.repository';
@@ -26,20 +27,52 @@ export class UserService {
    * @throws EmailAlreadyInUseException if email already exists
    */
   async create(dto: UserCreateDto): Promise<User> {
-    const existingUser = await this.userRepository.findByEmail(dto.email);
+    const normalizedEmail = dto.email.toLowerCase().trim();
+    const existingUser = await this.userRepository.findByEmail(normalizedEmail);
     if (existingUser) {
-      throw new EmailAlreadyInUseException(dto.email);
+      throw new EmailAlreadyInUseException(normalizedEmail);
     }
 
     const passwordHash = await this._hashPassword(dto.password);
 
     const user = await this.userRepository.create({
       name: dto.name,
-      email: dto.email,
+      email: normalizedEmail,
       passwordHash,
     });
 
     this._logger.log(`User created with id: ${user.id}`);
+    return user;
+  }
+
+  /**
+   * Creates a user without password (OAuth-only).
+   * Creates only the `users` row — oauth_accounts linkage happens in OAuthService.
+   */
+  async createOAuthUser(
+    data: { name: string; email: string; avatar?: string | null },
+    tx?: DrizzleTx,
+  ): Promise<User> {
+    const normalizedEmail = data.email.toLowerCase().trim();
+    const existingUser = await this.userRepository.findByEmail(
+      normalizedEmail,
+      tx,
+    );
+    if (existingUser) {
+      throw new EmailAlreadyInUseException(normalizedEmail);
+    }
+
+    const user = await this.userRepository.create(
+      {
+        name: data.name,
+        email: normalizedEmail,
+        passwordHash: null,
+        avatar: data.avatar ?? null,
+      },
+      tx,
+    );
+
+    this._logger.log(`OAuth user created with id: ${user.id}`);
     return user;
   }
 
@@ -84,14 +117,20 @@ export class UserService {
       throw new NotFoundException(`User with id ${id} not found`);
     }
 
-    if (dto.email && dto.email !== user.email) {
-      const existingUser = await this.userRepository.findByEmail(dto.email);
+    const normalizedEmail = dto.email?.toLowerCase().trim();
+
+    if (normalizedEmail && normalizedEmail !== user.email) {
+      const existingUser =
+        await this.userRepository.findByEmail(normalizedEmail);
       if (existingUser) {
-        throw new EmailAlreadyInUseException(dto.email);
+        throw new EmailAlreadyInUseException(normalizedEmail);
       }
     }
 
     const updateData: Partial<Record<string, unknown>> = { ...dto };
+    if (normalizedEmail) {
+      updateData.email = normalizedEmail;
+    }
     if (dto.password) {
       updateData.passwordHash = await this._hashPassword(dto.password);
       delete updateData.password;
@@ -144,8 +183,11 @@ export class UserService {
    */
   async validatePassword(
     plainPassword: string,
-    hashedPassword: string,
+    hashedPassword: string | null,
   ): Promise<boolean> {
+    if (!hashedPassword) {
+      return false;
+    }
     return bcrypt.compare(plainPassword, hashedPassword);
   }
 
@@ -154,8 +196,12 @@ export class UserService {
    * @param id - User ID
    * @param hash - Hashed refresh token or null to clear
    */
-  async updateRefreshTokenHash(id: number, hash: string | null): Promise<void> {
-    await this.userRepository.updateRefreshTokenHash(id, hash);
+  async updateRefreshTokenHash(
+    id: number,
+    hash: string | null,
+    tx?: DrizzleTx,
+  ): Promise<void> {
+    await this.userRepository.updateRefreshTokenHash(id, hash, tx);
   }
 
   /**
