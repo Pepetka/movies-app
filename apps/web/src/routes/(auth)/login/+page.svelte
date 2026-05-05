@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { Button, Card, Divider, Input, toast } from '@repo/ui';
 	import { Eye, EyeOff, Film, Mail } from '@lucide/svelte';
+	import { Button, Card, Input, toast } from '@repo/ui';
 
 	import {
 		authStore,
@@ -10,8 +10,10 @@
 		EMPTY_LOGIN_FORM,
 		loginFormToDto
 	} from '$lib/modules/auth';
+	import OAuthSection from '$lib/modules/auth/components/OAuthSection.svelte';
 	import { ROUTES, withCurrentQuery, getSafeRedirect } from '$lib/utils';
 	import { goto } from '$app/navigation';
+	import { page } from '$app/state';
 
 	import '$lib/styles/auth.css';
 
@@ -21,6 +23,16 @@
 	const fieldValidator = createFormFieldValidator(validateLoginForm);
 
 	const registerHref = $derived(withCurrentQuery(ROUTES.REGISTER, ['redirect']));
+
+	$effect(() => {
+		const oauthError = page.url.searchParams.get('oauth_error');
+		if (oauthError === '1') {
+			toast.error('Ошибка входа через OAuth');
+			const url = new URL(page.url);
+			url.searchParams.delete('oauth_error');
+			void goto(url.toString(), { replaceState: true, keepFocus: true, noScroll: true });
+		}
+	});
 
 	$effect(() => {
 		return () => {
@@ -73,15 +85,7 @@
 		{/snippet}
 
 		<div class="auth-oauth-section">
-			<Button
-				variant="secondary"
-				fullWidth
-				href={`${__API_URL__}/api/v1/auth/oauth/google?redirect=${encodeURIComponent(getSafeRedirect(ROUTES.GROUPS))}`}
-			>
-				Войти через Google
-			</Button>
-
-			<Divider label="или" />
+			<OAuthSection buttonText="Войти через Google" />
 
 			<form class="form-fields" onsubmit={handleSubmit}>
 				<Input

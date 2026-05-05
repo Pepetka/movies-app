@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Eye, EyeOff, Film, Mail, User, Users } from '@lucide/svelte';
-	import { Button, Card, Divider, Input, toast } from '@repo/ui';
+	import { Button, Card, Input, toast } from '@repo/ui';
 	import { fade } from 'svelte/transition';
 
 	import {
@@ -12,6 +12,7 @@
 		EMPTY_REGISTER_FORM,
 		registerFormToDto
 	} from '$lib/modules/auth';
+	import OAuthSection from '$lib/modules/auth/components/OAuthSection.svelte';
 	import { ROUTES, withCurrentQuery, getSafeRedirect } from '$lib/utils';
 	import { goto } from '$app/navigation';
 
@@ -90,15 +91,7 @@
 		</div>
 
 		<div class="auth-oauth-section">
-			<Button
-				variant="secondary"
-				fullWidth
-				href={`${__API_URL__}/api/v1/auth/oauth/google?redirect=${encodeURIComponent(getSafeRedirect(ROUTES.GROUPS))}`}
-			>
-				Продолжить с Google
-			</Button>
-
-			<Divider label="или" />
+			<OAuthSection buttonText="Продолжить с Google" />
 
 			<form class="form-fields" onsubmit={handleSubmit}>
 				<Input
