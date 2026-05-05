@@ -387,11 +387,14 @@ describe('OAuth E2E', () => {
       expect(response.headers.location).toContain('reason=invalid_state');
     });
 
-    it('should reject callback without oauth_session cookie (400)', async () => {
-      await request(app.getHttpServer())
+    it('should redirect to /oauth/error on missing oauth_session cookie', async () => {
+      const response = await request(app.getHttpServer())
         .get('/auth/oauth/google/callback')
         .query({ code: 'mock-auth-code', state: 'whatever' })
-        .expect(400);
+        .expect(302);
+
+      expect(response.headers.location).toContain('/oauth/error');
+      expect(response.headers.location).toContain('reason=invalid_session');
     });
 
     it('should redirect to /oauth/error on access_denied', async () => {

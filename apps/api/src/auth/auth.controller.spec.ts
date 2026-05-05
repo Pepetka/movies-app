@@ -1,4 +1,4 @@
-import { BadRequestException, UnauthorizedException } from '@nestjs/common';
+import { UnauthorizedException } from '@nestjs/common';
 import { FastifyReply, FastifyRequest } from 'fastify';
 import { Test, TestingModule } from '@nestjs/testing';
 
@@ -446,17 +446,20 @@ describe('AuthController', () => {
       );
     });
 
-    it('should throw BadRequestException for tampered cookie', async () => {
+    it('should redirect to /oauth/error on tampered cookie', async () => {
       const request = mockRequest({ valid: false, value: '' });
 
-      await expect(
-        controller.oauthCallback(
-          'google',
-          { state: validSession.state, code: 'auth-code' },
-          request,
-          mockReply,
-        ),
-      ).rejects.toThrow(BadRequestException);
+      await controller.oauthCallback(
+        'google',
+        { state: validSession.state, code: 'auth-code' },
+        request,
+        mockReply,
+      );
+
+      expect(mockReply.redirect).toHaveBeenCalledWith(
+        expect.stringContaining(`${OAUTH_ERROR_PATH}?reason=invalid_session`),
+        302,
+      );
     });
 
     it('should redirect to /oauth/error on email_unverified', async () => {

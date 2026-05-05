@@ -1,5 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 
+import type { AuthProvider } from '$db/schemas';
+
 import {
   OAuthProviderNotConfiguredException,
   UnsupportedOAuthProviderException,
@@ -23,7 +25,7 @@ export class OAuthProviderRegistry {
    * @throws UnsupportedOAuthProviderException (400) if no provider is registered under that name
    * @throws OAuthProviderNotConfiguredException (501) if the provider exists but env is missing
    */
-  get(name: string): OAuthProvider {
+  get(name: AuthProvider): OAuthProvider {
     const provider = this._providers.get(name);
     if (!provider) {
       throw new UnsupportedOAuthProviderException(name);

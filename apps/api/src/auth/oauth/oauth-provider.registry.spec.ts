@@ -1,5 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 
+import type { AuthProvider } from '$db/schemas';
+
 import {
   OAuthProviderNotConfiguredException,
   UnsupportedOAuthProviderException,
@@ -38,7 +40,7 @@ describe('OAuthProviderRegistry', () => {
 
   it('throws UnsupportedOAuthProviderException for unknown provider', async () => {
     const { registry } = await buildRegistry(true);
-    expect(() => registry.get('unknown')).toThrow(
+    expect(() => registry.get('unknown' as AuthProvider)).toThrow(
       UnsupportedOAuthProviderException,
     );
   });

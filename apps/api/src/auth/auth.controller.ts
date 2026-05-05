@@ -9,8 +9,11 @@ import {
   HttpCode,
   HttpStatus,
   UseGuards,
+  UsePipes,
+  ValidationPipe,
   Res,
   Inject,
+  Logger,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -51,6 +54,7 @@ import {
 import { ParseAuthProviderPipe } from './oauth/pipes/parse-auth-provider.pipe';
 import { createOAuthSession } from './oauth/utils/create-oauth-session.util';
 import { readOAuthSession } from './oauth/utils/parse-oauth-session.util';
+import type { OAuthSession } from './oauth/types/oauth.types';
 import { RefreshGuard } from './guards/refresh.guard';
 import { OAuthService } from './oauth/oauth.service';
 import { AuthService } from './auth.service';
@@ -58,6 +62,8 @@ import { AuthService } from './auth.service';
 @ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
+  private readonly _logger = new Logger(AuthController.name);
+
   constructor(
     private readonly authService: AuthService,
     private readonly oauthService: OAuthService,
@@ -234,6 +240,13 @@ export class AuthController {
 
   @Public()
   @Get('oauth/:provider/callback')
+  @UsePipes(
+    new ValidationPipe({
+      whitelist: true,
+      forbidNonWhitelisted: false,
+      transform: true,
+    }),
+  )
   @Throttle(THROTTLE.auth.oauth)
   @ApiParam({ name: 'provider', enum: [...authProviderEnum.enumValues] })
   @ApiOperation({ summary: 'OAuth callback — redirects to SPA after auth' })
@@ -247,7 +260,20 @@ export class AuthController {
     @Req() request: FastifyRequest,
     @Res({ passthrough: true }) reply: FastifyReply,
   ): Promise<void> {
-    const session = readOAuthSession(request);
+    let session: OAuthSession;
+    try {
+      session = readOAuthSession(request);
+    } catch {
+      reply.clearCookie(OAUTH_SESSION_COOKIE_NAME, {
+        path: OAUTH_SESSION_COOKIE_PATH,
+        sameSite: 'lax',
+        secure: this.cookieOptions.secure,
+      });
+      return reply.redirect(
+        this.oauthService.buildErrorUrl('invalid_session'),
+        HttpStatus.FOUND,
+      );
+    }
 
     if (session.state !== query.state) {
       reply.clearCookie(OAUTH_SESSION_COOKIE_NAME, {
@@ -328,6 +354,9 @@ export class AuthController {
       );
     } catch (e) {
       const reason = this.oauthService.mapErrorToReason(e);
+      if (reason === 'oauth_failed') {
+        this._logger.error('Unexpected OAuth callback error', e);
+      }
       reply.redirect(this.oauthService.buildErrorUrl(reason), HttpStatus.FOUND);
     }
   }
