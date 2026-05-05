@@ -1,14 +1,22 @@
+import { toast } from '@repo/ui';
+
 import {
 	authControllerLoginV1,
 	authControllerLogoutV1,
 	authControllerOauthLinkInitV1,
+	authControllerRefreshV1,
 	authControllerRegisterV1,
 	userControllerGetMeV1
 } from '$lib/api/generated/api';
-import type { AuthLoginDto, AuthRegisterDto, UserResponseDto } from '$lib/api/generated/types';
+import type {
+	AuthLoginDto,
+	AuthRegisterDto,
+	AuthResponseDto,
+	UserResponseDto
+} from '$lib/api/generated/types';
 import { httpClient } from '$lib/api/client';
 
-export type AuthProvider = Parameters<typeof authControllerOauthLinkInitV1>[0];
+export type AuthProvider = 'google';
 
 export const login = async (data: AuthLoginDto, signal?: AbortSignal): Promise<void> => {
 	const response = await authControllerLoginV1(data, { signal });
@@ -29,7 +37,15 @@ export const getCurrentUser = async (signal?: AbortSignal): Promise<UserResponse
 	return userControllerGetMeV1({ signal });
 };
 
-export async function initLinkProvider(provider: AuthProvider): Promise<void> {
-	const { authUrl } = await authControllerOauthLinkInitV1(provider);
-	window.location.href = authUrl;
-}
+export const refreshTokens = async (): Promise<AuthResponseDto> => {
+	return authControllerRefreshV1();
+};
+
+export const initLinkProvider = async (provider: AuthProvider): Promise<void> => {
+	try {
+		const { authUrl } = await authControllerOauthLinkInitV1(provider);
+		window.location.href = authUrl;
+	} catch {
+		toast.error('Не удалось начать привязку аккаунта');
+	}
+};

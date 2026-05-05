@@ -1,5 +1,9 @@
 // Types
 export type { AuthStatus, ValidationResult } from './types';
+export type { AuthProvider } from './api';
+
+// API
+export { initLinkProvider, refreshTokens } from './api';
 
 // Store
 export { authStore } from './stores';
