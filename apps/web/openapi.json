@@ -10,11 +10,7 @@
 					"200": {
 						"description": "Health status",
 						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/HealthResponseDto"
-								}
-							}
+							"application/json": { "schema": { "$ref": "#/components/schemas/HealthResponseDto" } }
 						}
 					}
 				},
@@ -29,36 +25,20 @@
 				"requestBody": {
 					"required": true,
 					"content": {
-						"application/json": {
-							"schema": {
-								"$ref": "#/components/schemas/UserCreateDto"
-							}
-						}
+						"application/json": { "schema": { "$ref": "#/components/schemas/UserCreateDto" } }
 					}
 				},
 				"responses": {
 					"201": {
 						"description": "User successfully created",
 						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/UserResponseDto"
-								}
-							}
+							"application/json": { "schema": { "$ref": "#/components/schemas/UserResponseDto" } }
 						}
 					},
-					"403": {
-						"description": "Forbidden - Admin only"
-					},
-					"409": {
-						"description": "Email already in use"
-					}
+					"403": { "description": "Forbidden - Admin only" },
+					"409": { "description": "Email already in use" }
 				},
-				"security": [
-					{
-						"access-token": []
-					}
-				],
+				"security": [{ "access-token": [] }],
 				"summary": "Create a new user (Admin only)",
 				"tags": ["Users"]
 			},
@@ -69,19 +49,13 @@
 						"name": "page",
 						"required": false,
 						"in": "query",
-						"schema": {
-							"example": 1,
-							"type": "number"
-						}
+						"schema": { "example": 1, "type": "number" }
 					},
 					{
 						"name": "limit",
 						"required": false,
 						"in": "query",
-						"schema": {
-							"example": 20,
-							"type": "number"
-						}
+						"schema": { "example": 20, "type": "number" }
 					}
 				],
 				"responses": {
@@ -91,22 +65,14 @@
 							"application/json": {
 								"schema": {
 									"type": "array",
-									"items": {
-										"$ref": "#/components/schemas/UserResponseDto"
-									}
+									"items": { "$ref": "#/components/schemas/UserResponseDto" }
 								}
 							}
 						}
 					},
-					"403": {
-						"description": "Forbidden - Admin only"
-					}
+					"403": { "description": "Forbidden - Admin only" }
 				},
-				"security": [
-					{
-						"access-token": []
-					}
-				],
+				"security": [{ "access-token": [] }],
 				"summary": "Get all users (Admin only)",
 				"tags": ["Users"]
 			}
@@ -119,19 +85,11 @@
 					"200": {
 						"description": "Current user data",
 						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/UserResponseDto"
-								}
-							}
+							"application/json": { "schema": { "$ref": "#/components/schemas/UserResponseDto" } }
 						}
 					}
 				},
-				"security": [
-					{
-						"access-token": []
-					}
-				],
+				"security": [{ "access-token": [] }],
 				"summary": "Get current user",
 				"tags": ["Users"]
 			}
@@ -145,34 +103,20 @@
 						"required": true,
 						"in": "path",
 						"description": "User ID",
-						"schema": {
-							"type": "number"
-						}
+						"schema": { "type": "number" }
 					}
 				],
 				"responses": {
 					"200": {
 						"description": "User found",
 						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/UserResponseDto"
-								}
-							}
+							"application/json": { "schema": { "$ref": "#/components/schemas/UserResponseDto" } }
 						}
 					},
-					"403": {
-						"description": "Forbidden - Not your resource"
-					},
-					"404": {
-						"description": "User not found"
-					}
+					"403": { "description": "Forbidden - Not your resource" },
+					"404": { "description": "User not found" }
 				},
-				"security": [
-					{
-						"access-token": []
-					}
-				],
+				"security": [{ "access-token": [] }],
 				"summary": "Get user by id",
 				"tags": ["Users"]
 			},
@@ -184,44 +128,26 @@
 						"required": true,
 						"in": "path",
 						"description": "User ID",
-						"schema": {
-							"type": "number"
-						}
+						"schema": { "type": "number" }
 					}
 				],
 				"requestBody": {
 					"required": true,
 					"content": {
-						"application/json": {
-							"schema": {
-								"$ref": "#/components/schemas/UserUpdateDto"
-							}
-						}
+						"application/json": { "schema": { "$ref": "#/components/schemas/UserUpdateDto" } }
 					}
 				},
 				"responses": {
 					"200": {
 						"description": "User updated",
 						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/UserResponseDto"
-								}
-							}
+							"application/json": { "schema": { "$ref": "#/components/schemas/UserResponseDto" } }
 						}
 					},
-					"403": {
-						"description": "Forbidden - Not your resource"
-					},
-					"404": {
-						"description": "User not found"
-					}
+					"403": { "description": "Forbidden - Not your resource" },
+					"404": { "description": "User not found" }
 				},
-				"security": [
-					{
-						"access-token": []
-					}
-				],
+				"security": [{ "access-token": [] }],
 				"summary": "Update user",
 				"tags": ["Users"]
 			},
@@ -233,27 +159,15 @@
 						"required": true,
 						"in": "path",
 						"description": "User ID",
-						"schema": {
-							"type": "number"
-						}
+						"schema": { "type": "number" }
 					}
 				],
 				"responses": {
-					"204": {
-						"description": "User deleted"
-					},
-					"403": {
-						"description": "Forbidden - Not your resource"
-					},
-					"404": {
-						"description": "User not found"
-					}
+					"204": { "description": "User deleted" },
+					"403": { "description": "Forbidden - Not your resource" },
+					"404": { "description": "User not found" }
 				},
-				"security": [
-					{
-						"access-token": []
-					}
-				],
+				"security": [{ "access-token": [] }],
 				"summary": "Delete user",
 				"tags": ["Users"]
 			}
@@ -265,27 +179,17 @@
 				"requestBody": {
 					"required": true,
 					"content": {
-						"application/json": {
-							"schema": {
-								"$ref": "#/components/schemas/AuthRegisterDto"
-							}
-						}
+						"application/json": { "schema": { "$ref": "#/components/schemas/AuthRegisterDto" } }
 					}
 				},
 				"responses": {
 					"201": {
 						"description": "User successfully registered",
 						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/AuthResponseDto"
-								}
-							}
+							"application/json": { "schema": { "$ref": "#/components/schemas/AuthResponseDto" } }
 						}
 					},
-					"409": {
-						"description": "Email already in use"
-					}
+					"409": { "description": "Email already in use" }
 				},
 				"summary": "Register a new user",
 				"tags": ["Auth"]
@@ -298,27 +202,17 @@
 				"requestBody": {
 					"required": true,
 					"content": {
-						"application/json": {
-							"schema": {
-								"$ref": "#/components/schemas/AuthLoginDto"
-							}
-						}
+						"application/json": { "schema": { "$ref": "#/components/schemas/AuthLoginDto" } }
 					}
 				},
 				"responses": {
 					"200": {
 						"description": "User successfully logged in",
 						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/AuthResponseDto"
-								}
-							}
+							"application/json": { "schema": { "$ref": "#/components/schemas/AuthResponseDto" } }
 						}
 					},
-					"401": {
-						"description": "Invalid credentials"
-					}
+					"401": { "description": "Invalid credentials" }
 				},
 				"summary": "Login user",
 				"tags": ["Auth"]
@@ -329,18 +223,10 @@
 				"operationId": "AuthController_logout_v1",
 				"parameters": [],
 				"responses": {
-					"204": {
-						"description": "User successfully logged out"
-					},
-					"401": {
-						"description": "Unauthorized"
-					}
+					"204": { "description": "User successfully logged out" },
+					"401": { "description": "Unauthorized" }
 				},
-				"security": [
-					{
-						"access-token": []
-					}
-				],
+				"security": [{ "access-token": [] }],
 				"summary": "Logout user",
 				"tags": ["Auth"]
 			}
@@ -353,16 +239,10 @@
 					"200": {
 						"description": "Tokens successfully refreshed",
 						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/AuthResponseDto"
-								}
-							}
+							"application/json": { "schema": { "$ref": "#/components/schemas/AuthResponseDto" } }
 						}
 					},
-					"401": {
-						"description": "Unauthorized"
-					}
+					"401": { "description": "Unauthorized" }
 				},
 				"summary": "Refresh access token",
 				"tags": ["Auth"]
@@ -383,22 +263,13 @@
 						"name": "provider",
 						"required": true,
 						"in": "path",
-						"schema": {
-							"enum": ["google"],
-							"type": "string"
-						}
+						"schema": { "enum": ["google"], "type": "string" }
 					}
 				],
 				"responses": {
-					"302": {
-						"description": "Redirect to provider"
-					},
-					"400": {
-						"description": "Unsupported provider"
-					},
-					"501": {
-						"description": "Provider not configured"
-					}
+					"302": { "description": "Redirect to provider" },
+					"400": { "description": "Unsupported provider" },
+					"501": { "description": "Provider not configured" }
 				},
 				"summary": "Redirect to OAuth provider authorization page",
 				"tags": ["Auth"]
@@ -412,10 +283,7 @@
 						"name": "provider",
 						"required": true,
 						"in": "path",
-						"schema": {
-							"enum": ["google"],
-							"type": "string"
-						}
+						"schema": { "enum": ["google"], "type": "string" }
 					}
 				],
 				"responses": {
@@ -423,28 +291,16 @@
 						"description": "Auth URL ready, cookie set",
 						"content": {
 							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/OAuthLinkInitResponseDto"
-								}
+								"schema": { "$ref": "#/components/schemas/OAuthLinkInitResponseDto" }
 							}
 						}
 					},
-					"400": {
-						"description": "Unsupported provider"
-					},
-					"401": {
-						"description": "Unauthorized"
-					},
-					"501": {
-						"description": "Provider not configured"
-					}
+					"400": { "description": "Unsupported provider" },
+					"401": { "description": "Unauthorized" },
+					"501": { "description": "Provider not configured" }
 				},
-				"security": [
-					{
-						"access-token": []
-					}
-				],
-				"summary": "Init OAuth account linking \u2014 returns provider authUrl",
+				"security": [{ "access-token": [] }],
+				"summary": "Init OAuth account linking — returns provider authUrl",
 				"tags": ["Auth"]
 			}
 		},
@@ -457,44 +313,59 @@
 						"required": false,
 						"in": "query",
 						"description": "Authorization code from provider",
-						"schema": {
-							"type": "string"
-						}
+						"schema": { "type": "string" }
 					},
 					{
 						"name": "state",
 						"required": true,
 						"in": "query",
 						"description": "CSRF state parameter",
-						"schema": {
-							"type": "string"
-						}
+						"schema": { "type": "string" }
 					},
 					{
 						"name": "error",
 						"required": false,
 						"in": "query",
 						"description": "Error from provider (e.g. access_denied)",
-						"schema": {
-							"type": "string"
-						}
+						"schema": { "type": "string" }
+					},
+					{
+						"name": "iss",
+						"required": false,
+						"in": "query",
+						"description": "Issuer identifier (Google-specific)",
+						"schema": { "type": "string" }
+					},
+					{
+						"name": "scope",
+						"required": false,
+						"in": "query",
+						"description": "Granted scopes (Google-specific)",
+						"schema": { "type": "string" }
+					},
+					{
+						"name": "authuser",
+						"required": false,
+						"in": "query",
+						"description": "Auth user index (Google-specific)",
+						"schema": { "type": "string" }
+					},
+					{
+						"name": "prompt",
+						"required": false,
+						"in": "query",
+						"description": "Prompt type (Google-specific)",
+						"schema": { "type": "string" }
 					},
 					{
 						"name": "provider",
 						"required": true,
 						"in": "path",
-						"schema": {
-							"enum": ["google"],
-							"type": "string"
-						}
+						"schema": { "enum": ["google"], "type": "string" }
 					}
 				],
-				"responses": {
-					"302": {
-						"description": "Redirect to SPA /oauth/success or /oauth/error"
-					}
-				},
-				"summary": "OAuth callback \u2014 redirects to SPA after auth",
+				"responses": { "302": { "description": "Redirect to SPA /oauth/success or /oauth/error" } },
+				"summary": "OAuth callback — redirects to SPA after auth",
 				"tags": ["Auth"]
 			}
 		},
@@ -506,11 +377,7 @@
 					"200": {
 						"description": "",
 						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/CsrfResponseDto"
-								}
-							}
+							"application/json": { "schema": { "$ref": "#/components/schemas/CsrfResponseDto" } }
 						}
 					}
 				},
@@ -538,65 +405,42 @@
 						"required": false,
 						"in": "query",
 						"description": "Minimum rating (0-10)",
-						"schema": {
-							"minimum": 0,
-							"maximum": 10,
-							"type": "number"
-						}
+						"schema": { "minimum": 0, "maximum": 10, "type": "number" }
 					},
 					{
 						"name": "ratingTo",
 						"required": false,
 						"in": "query",
 						"description": "Maximum rating (0-10)",
-						"schema": {
-							"minimum": 0,
-							"maximum": 10,
-							"type": "number"
-						}
+						"schema": { "minimum": 0, "maximum": 10, "type": "number" }
 					},
 					{
 						"name": "yearFrom",
 						"required": false,
 						"in": "query",
 						"description": "Minimum year",
-						"schema": {
-							"minimum": 1000,
-							"maximum": 2100,
-							"type": "number"
-						}
+						"schema": { "minimum": 1000, "maximum": 2100, "type": "number" }
 					},
 					{
 						"name": "yearTo",
 						"required": false,
 						"in": "query",
 						"description": "Maximum year",
-						"schema": {
-							"minimum": 1000,
-							"maximum": 2100,
-							"type": "number"
-						}
+						"schema": { "minimum": 1000, "maximum": 2100, "type": "number" }
 					},
 					{
 						"name": "query",
 						"required": true,
 						"in": "query",
 						"description": "Search query",
-						"schema": {
-							"example": "\u043c\u0430\u0442\u0440\u0438\u0446\u0430",
-							"type": "string"
-						}
+						"schema": { "example": "матрица", "type": "string" }
 					},
 					{
 						"name": "page",
 						"required": false,
 						"in": "query",
 						"description": "Page number",
-						"schema": {
-							"minimum": 1,
-							"default": 1,
-							"type": "number"
-						}
+						"schema": { "minimum": 1, "default": 1, "type": "number" }
 					}
 				],
 				"responses": {
@@ -604,18 +448,12 @@
 						"description": "Search results",
 						"content": {
 							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/ProviderSearchResult"
-								}
+								"schema": { "$ref": "#/components/schemas/ProviderSearchResult" }
 							}
 						}
 					}
 				},
-				"security": [
-					{
-						"access-token": []
-					}
-				],
+				"security": [{ "access-token": [] }],
 				"summary": "Search movies via provider API",
 				"tags": ["Movies"]
 			}
@@ -628,19 +466,13 @@
 						"name": "page",
 						"required": false,
 						"in": "query",
-						"schema": {
-							"example": 1,
-							"type": "number"
-						}
+						"schema": { "example": 1, "type": "number" }
 					},
 					{
 						"name": "limit",
 						"required": false,
 						"in": "query",
-						"schema": {
-							"example": 20,
-							"type": "number"
-						}
+						"schema": { "example": 20, "type": "number" }
 					}
 				],
 				"responses": {
@@ -650,22 +482,14 @@
 							"application/json": {
 								"schema": {
 									"type": "array",
-									"items": {
-										"$ref": "#/components/schemas/MovieResponseDto"
-									}
+									"items": { "$ref": "#/components/schemas/MovieResponseDto" }
 								}
 							}
 						}
 					},
-					"403": {
-						"description": "Forbidden - Admin only"
-					}
+					"403": { "description": "Forbidden - Admin only" }
 				},
-				"security": [
-					{
-						"access-token": []
-					}
-				],
+				"security": [{ "access-token": [] }],
 				"summary": "Get all movies from database (Admin only)",
 				"tags": ["Movies"]
 			},
@@ -676,39 +500,21 @@
 				"requestBody": {
 					"required": true,
 					"content": {
-						"application/json": {
-							"schema": {
-								"$ref": "#/components/schemas/MovieCreateDto"
-							}
-						}
+						"application/json": { "schema": { "$ref": "#/components/schemas/MovieCreateDto" } }
 					}
 				},
 				"responses": {
 					"201": {
 						"description": "Movie created",
 						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/MovieResponseDto"
-								}
-							}
+							"application/json": { "schema": { "$ref": "#/components/schemas/MovieResponseDto" } }
 						}
 					},
-					"400": {
-						"description": "Invalid input - must provide imdbId or externalId"
-					},
-					"403": {
-						"description": "Forbidden - Admin only"
-					},
-					"409": {
-						"description": "Movie with this IMDb ID or external ID already exists"
-					}
+					"400": { "description": "Invalid input - must provide imdbId or externalId" },
+					"403": { "description": "Forbidden - Admin only" },
+					"409": { "description": "Movie with this IMDb ID or external ID already exists" }
 				},
-				"security": [
-					{
-						"access-token": []
-					}
-				],
+				"security": [{ "access-token": [] }],
 				"summary": "Create movie by IMDb ID or Provider external ID (Admin only)",
 				"tags": ["Movies"]
 			}
@@ -722,31 +528,19 @@
 						"required": true,
 						"in": "path",
 						"description": "Movie ID",
-						"schema": {
-							"type": "number"
-						}
+						"schema": { "type": "number" }
 					}
 				],
 				"responses": {
 					"200": {
 						"description": "Movie found",
 						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/MovieResponseDto"
-								}
-							}
+							"application/json": { "schema": { "$ref": "#/components/schemas/MovieResponseDto" } }
 						}
 					},
-					"404": {
-						"description": "Movie not found"
-					}
+					"404": { "description": "Movie not found" }
 				},
-				"security": [
-					{
-						"access-token": []
-					}
-				],
+				"security": [{ "access-token": [] }],
 				"summary": "Get movie by id",
 				"tags": ["Movies"]
 			},
@@ -758,44 +552,26 @@
 						"required": true,
 						"in": "path",
 						"description": "Movie ID",
-						"schema": {
-							"type": "number"
-						}
+						"schema": { "type": "number" }
 					}
 				],
 				"requestBody": {
 					"required": true,
 					"content": {
-						"application/json": {
-							"schema": {
-								"$ref": "#/components/schemas/MovieUpdateDto"
-							}
-						}
+						"application/json": { "schema": { "$ref": "#/components/schemas/MovieUpdateDto" } }
 					}
 				},
 				"responses": {
 					"200": {
 						"description": "Movie updated",
 						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/MovieResponseDto"
-								}
-							}
+							"application/json": { "schema": { "$ref": "#/components/schemas/MovieResponseDto" } }
 						}
 					},
-					"403": {
-						"description": "Forbidden - Admin only"
-					},
-					"404": {
-						"description": "Movie not found"
-					}
+					"403": { "description": "Forbidden - Admin only" },
+					"404": { "description": "Movie not found" }
 				},
-				"security": [
-					{
-						"access-token": []
-					}
-				],
+				"security": [{ "access-token": [] }],
 				"summary": "Update movie (Admin only)",
 				"tags": ["Movies"]
 			},
@@ -807,27 +583,15 @@
 						"required": true,
 						"in": "path",
 						"description": "Movie ID",
-						"schema": {
-							"type": "number"
-						}
+						"schema": { "type": "number" }
 					}
 				],
 				"responses": {
-					"204": {
-						"description": "Movie deleted"
-					},
-					"403": {
-						"description": "Forbidden - Admin only"
-					},
-					"404": {
-						"description": "Movie not found"
-					}
+					"204": { "description": "Movie deleted" },
+					"403": { "description": "Forbidden - Admin only" },
+					"404": { "description": "Movie not found" }
 				},
-				"security": [
-					{
-						"access-token": []
-					}
-				],
+				"security": [{ "access-token": [] }],
 				"summary": "Delete movie (Admin only)",
 				"tags": ["Movies"]
 			}
@@ -843,19 +607,13 @@
 							"application/json": {
 								"schema": {
 									"type": "array",
-									"items": {
-										"$ref": "#/components/schemas/GroupResponseDto"
-									}
+									"items": { "$ref": "#/components/schemas/GroupResponseDto" }
 								}
 							}
 						}
 					}
 				},
-				"security": [
-					{
-						"access-token": []
-					}
-				],
+				"security": [{ "access-token": [] }],
 				"summary": "Get current user's groups",
 				"tags": ["Groups"]
 			},
@@ -865,30 +623,18 @@
 				"requestBody": {
 					"required": true,
 					"content": {
-						"application/json": {
-							"schema": {
-								"$ref": "#/components/schemas/GroupCreateDto"
-							}
-						}
+						"application/json": { "schema": { "$ref": "#/components/schemas/GroupCreateDto" } }
 					}
 				},
 				"responses": {
 					"201": {
 						"description": "Group created",
 						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/GroupResponseDto"
-								}
-							}
+							"application/json": { "schema": { "$ref": "#/components/schemas/GroupResponseDto" } }
 						}
 					}
 				},
-				"security": [
-					{
-						"access-token": []
-					}
-				],
+				"security": [{ "access-token": [] }],
 				"summary": "Create a new group",
 				"tags": ["Groups"]
 			}
@@ -904,22 +650,14 @@
 							"application/json": {
 								"schema": {
 									"type": "array",
-									"items": {
-										"$ref": "#/components/schemas/GroupResponseDto"
-									}
+									"items": { "$ref": "#/components/schemas/GroupResponseDto" }
 								}
 							}
 						}
 					},
-					"403": {
-						"description": "Forbidden - Admin only"
-					}
+					"403": { "description": "Forbidden - Admin only" }
 				},
-				"security": [
-					{
-						"access-token": []
-					}
-				],
+				"security": [{ "access-token": [] }],
 				"summary": "Get all groups (Admin only)",
 				"tags": ["Groups"]
 			}
@@ -933,9 +671,7 @@
 						"required": true,
 						"in": "path",
 						"description": "User ID",
-						"schema": {
-							"type": "number"
-						}
+						"schema": { "type": "number" }
 					}
 				],
 				"responses": {
@@ -945,22 +681,14 @@
 							"application/json": {
 								"schema": {
 									"type": "array",
-									"items": {
-										"$ref": "#/components/schemas/GroupResponseDto"
-									}
+									"items": { "$ref": "#/components/schemas/GroupResponseDto" }
 								}
 							}
 						}
 					},
-					"403": {
-						"description": "Forbidden - Admin only"
-					}
+					"403": { "description": "Forbidden - Admin only" }
 				},
-				"security": [
-					{
-						"access-token": []
-					}
-				],
+				"security": [{ "access-token": [] }],
 				"summary": "Get user's groups by user ID (Admin only)",
 				"tags": ["Groups"]
 			}
@@ -974,34 +702,20 @@
 						"required": true,
 						"in": "path",
 						"description": "Group ID",
-						"schema": {
-							"type": "number"
-						}
+						"schema": { "type": "number" }
 					}
 				],
 				"responses": {
 					"200": {
 						"description": "Group found",
 						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/GroupResponseDto"
-								}
-							}
+							"application/json": { "schema": { "$ref": "#/components/schemas/GroupResponseDto" } }
 						}
 					},
-					"403": {
-						"description": "Forbidden - Not a group member"
-					},
-					"404": {
-						"description": "Group not found"
-					}
+					"403": { "description": "Forbidden - Not a group member" },
+					"404": { "description": "Group not found" }
 				},
-				"security": [
-					{
-						"access-token": []
-					}
-				],
+				"security": [{ "access-token": [] }],
 				"summary": "Get group by id (Group members only)",
 				"tags": ["Groups"]
 			},
@@ -1013,44 +727,26 @@
 						"required": true,
 						"in": "path",
 						"description": "Group ID",
-						"schema": {
-							"type": "number"
-						}
+						"schema": { "type": "number" }
 					}
 				],
 				"requestBody": {
 					"required": true,
 					"content": {
-						"application/json": {
-							"schema": {
-								"$ref": "#/components/schemas/GroupUpdateDto"
-							}
-						}
+						"application/json": { "schema": { "$ref": "#/components/schemas/GroupUpdateDto" } }
 					}
 				},
 				"responses": {
 					"200": {
 						"description": "Group updated",
 						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/GroupResponseDto"
-								}
-							}
+							"application/json": { "schema": { "$ref": "#/components/schemas/GroupResponseDto" } }
 						}
 					},
-					"403": {
-						"description": "Forbidden - Insufficient permissions"
-					},
-					"404": {
-						"description": "Group not found"
-					}
+					"403": { "description": "Forbidden - Insufficient permissions" },
+					"404": { "description": "Group not found" }
 				},
-				"security": [
-					{
-						"access-token": []
-					}
-				],
+				"security": [{ "access-token": [] }],
 				"summary": "Update group (Group moderators only)",
 				"tags": ["Groups"]
 			},
@@ -1062,27 +758,15 @@
 						"required": true,
 						"in": "path",
 						"description": "Group ID",
-						"schema": {
-							"type": "number"
-						}
+						"schema": { "type": "number" }
 					}
 				],
 				"responses": {
-					"204": {
-						"description": "Group deleted"
-					},
-					"403": {
-						"description": "Forbidden - Not the group admin"
-					},
-					"404": {
-						"description": "Group not found"
-					}
+					"204": { "description": "Group deleted" },
+					"403": { "description": "Forbidden - Not the group admin" },
+					"404": { "description": "Group not found" }
 				},
-				"security": [
-					{
-						"access-token": []
-					}
-				],
+				"security": [{ "access-token": [] }],
 				"summary": "Delete group (Group admin only)",
 				"tags": ["Groups"]
 			}
@@ -1096,9 +780,7 @@
 						"required": true,
 						"in": "path",
 						"description": "Group ID",
-						"schema": {
-							"type": "number"
-						}
+						"schema": { "type": "number" }
 					}
 				],
 				"responses": {
@@ -1106,24 +788,14 @@
 						"description": "Invite token",
 						"content": {
 							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/InviteTokenResponseDto"
-								}
+								"schema": { "$ref": "#/components/schemas/InviteTokenResponseDto" }
 							}
 						}
 					},
-					"403": {
-						"description": "Forbidden - Insufficient permissions"
-					},
-					"404": {
-						"description": "Group not found"
-					}
+					"403": { "description": "Forbidden - Insufficient permissions" },
+					"404": { "description": "Group not found" }
 				},
-				"security": [
-					{
-						"access-token": []
-					}
-				],
+				"security": [{ "access-token": [] }],
 				"summary": "Get existing invite token (Group moderators only)",
 				"tags": ["Groups"]
 			},
@@ -1135,9 +807,7 @@
 						"required": true,
 						"in": "path",
 						"description": "Group ID",
-						"schema": {
-							"type": "number"
-						}
+						"schema": { "type": "number" }
 					}
 				],
 				"responses": {
@@ -1145,24 +815,14 @@
 						"description": "Invite token generated",
 						"content": {
 							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/GeneratedInviteTokenResponseDto"
-								}
+								"schema": { "$ref": "#/components/schemas/GeneratedInviteTokenResponseDto" }
 							}
 						}
 					},
-					"403": {
-						"description": "Forbidden - Insufficient permissions"
-					},
-					"404": {
-						"description": "Group not found"
-					}
+					"403": { "description": "Forbidden - Insufficient permissions" },
+					"404": { "description": "Group not found" }
 				},
-				"security": [
-					{
-						"access-token": []
-					}
-				],
+				"security": [{ "access-token": [] }],
 				"summary": "Generate or regenerate invite link (Group moderators only)",
 				"tags": ["Groups"]
 			}
@@ -1176,9 +836,7 @@
 						"required": true,
 						"in": "path",
 						"description": "Group ID",
-						"schema": {
-							"type": "number"
-						}
+						"schema": { "type": "number" }
 					}
 				],
 				"responses": {
@@ -1188,25 +846,15 @@
 							"application/json": {
 								"schema": {
 									"type": "array",
-									"items": {
-										"$ref": "#/components/schemas/GroupMemberResponseDto"
-									}
+									"items": { "$ref": "#/components/schemas/GroupMemberResponseDto" }
 								}
 							}
 						}
 					},
-					"403": {
-						"description": "Forbidden - Not a group member"
-					},
-					"404": {
-						"description": "Group not found"
-					}
+					"403": { "description": "Forbidden - Not a group member" },
+					"404": { "description": "Group not found" }
 				},
-				"security": [
-					{
-						"access-token": []
-					}
-				],
+				"security": [{ "access-token": [] }],
 				"summary": "Get group members (Group members only)",
 				"tags": ["Groups"]
 			},
@@ -1218,40 +866,22 @@
 						"required": true,
 						"in": "path",
 						"description": "Group ID",
-						"schema": {
-							"type": "number"
-						}
+						"schema": { "type": "number" }
 					}
 				],
 				"requestBody": {
 					"required": true,
 					"content": {
-						"application/json": {
-							"schema": {
-								"$ref": "#/components/schemas/GroupMemberAddDto"
-							}
-						}
+						"application/json": { "schema": { "$ref": "#/components/schemas/GroupMemberAddDto" } }
 					}
 				},
 				"responses": {
-					"201": {
-						"description": "Member added"
-					},
-					"403": {
-						"description": "Forbidden - Insufficient permissions"
-					},
-					"404": {
-						"description": "Group not found"
-					},
-					"409": {
-						"description": "User already a member"
-					}
+					"201": { "description": "Member added" },
+					"403": { "description": "Forbidden - Insufficient permissions" },
+					"404": { "description": "Group not found" },
+					"409": { "description": "User already a member" }
 				},
-				"security": [
-					{
-						"access-token": []
-					}
-				],
+				"security": [{ "access-token": [] }],
 				"summary": "Add member to group (Group moderators only)",
 				"tags": ["Groups"]
 			}
@@ -1265,9 +895,7 @@
 						"required": true,
 						"in": "path",
 						"description": "Group ID",
-						"schema": {
-							"type": "number"
-						}
+						"schema": { "type": "number" }
 					}
 				],
 				"responses": {
@@ -1275,24 +903,14 @@
 						"description": "Current user member info",
 						"content": {
 							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/GroupMemberResponseDto"
-								}
+								"schema": { "$ref": "#/components/schemas/GroupMemberResponseDto" }
 							}
 						}
 					},
-					"403": {
-						"description": "Forbidden - Not a group member"
-					},
-					"404": {
-						"description": "Group not found"
-					}
+					"403": { "description": "Forbidden - Not a group member" },
+					"404": { "description": "Group not found" }
 				},
-				"security": [
-					{
-						"access-token": []
-					}
-				],
+				"security": [{ "access-token": [] }],
 				"summary": "Get current user info in group (Group members only)",
 				"tags": ["Groups"]
 			},
@@ -1304,27 +922,15 @@
 						"required": true,
 						"in": "path",
 						"description": "Group ID",
-						"schema": {
-							"type": "number"
-						}
+						"schema": { "type": "number" }
 					}
 				],
 				"responses": {
-					"204": {
-						"description": "Left group"
-					},
-					"403": {
-						"description": "Forbidden - Last admin cannot leave"
-					},
-					"404": {
-						"description": "Group not found"
-					}
+					"204": { "description": "Left group" },
+					"403": { "description": "Forbidden - Last admin cannot leave" },
+					"404": { "description": "Group not found" }
 				},
-				"security": [
-					{
-						"access-token": []
-					}
-				],
+				"security": [{ "access-token": [] }],
 				"summary": "Leave group",
 				"tags": ["Groups"]
 			}
@@ -1338,46 +944,30 @@
 						"required": true,
 						"in": "path",
 						"description": "Group ID",
-						"schema": {
-							"type": "number"
-						}
+						"schema": { "type": "number" }
 					},
 					{
 						"name": "userId",
 						"required": true,
 						"in": "path",
 						"description": "User ID",
-						"schema": {
-							"type": "number"
-						}
+						"schema": { "type": "number" }
 					}
 				],
 				"requestBody": {
 					"required": true,
 					"content": {
 						"application/json": {
-							"schema": {
-								"$ref": "#/components/schemas/GroupMemberRoleUpdateDto"
-							}
+							"schema": { "$ref": "#/components/schemas/GroupMemberRoleUpdateDto" }
 						}
 					}
 				},
 				"responses": {
-					"204": {
-						"description": "Member role updated"
-					},
-					"403": {
-						"description": "Forbidden - Insufficient permissions"
-					},
-					"404": {
-						"description": "Group not found"
-					}
+					"204": { "description": "Member role updated" },
+					"403": { "description": "Forbidden - Insufficient permissions" },
+					"404": { "description": "Group not found" }
 				},
-				"security": [
-					{
-						"access-token": []
-					}
-				],
+				"security": [{ "access-token": [] }],
 				"summary": "Update member's role (Group admin only)",
 				"tags": ["Groups"]
 			},
@@ -1389,36 +979,22 @@
 						"required": true,
 						"in": "path",
 						"description": "Group ID",
-						"schema": {
-							"type": "number"
-						}
+						"schema": { "type": "number" }
 					},
 					{
 						"name": "userId",
 						"required": true,
 						"in": "path",
 						"description": "User ID",
-						"schema": {
-							"type": "number"
-						}
+						"schema": { "type": "number" }
 					}
 				],
 				"responses": {
-					"204": {
-						"description": "Member removed"
-					},
-					"403": {
-						"description": "Forbidden - Insufficient permissions or cannot remove admin"
-					},
-					"404": {
-						"description": "Group not found"
-					}
+					"204": { "description": "Member removed" },
+					"403": { "description": "Forbidden - Insufficient permissions or cannot remove admin" },
+					"404": { "description": "Group not found" }
 				},
-				"security": [
-					{
-						"access-token": []
-					}
-				],
+				"security": [{ "access-token": [] }],
 				"summary": "Remove member from group (Group moderators only)",
 				"tags": ["Groups"]
 			}
@@ -1432,37 +1008,23 @@
 						"required": true,
 						"in": "path",
 						"description": "Group ID",
-						"schema": {
-							"type": "number"
-						}
+						"schema": { "type": "number" }
 					}
 				],
 				"requestBody": {
 					"required": true,
 					"content": {
 						"application/json": {
-							"schema": {
-								"$ref": "#/components/schemas/TransferOwnershipDto"
-							}
+							"schema": { "$ref": "#/components/schemas/TransferOwnershipDto" }
 						}
 					}
 				},
 				"responses": {
-					"204": {
-						"description": "Admin rights transferred"
-					},
-					"403": {
-						"description": "Forbidden - Not admin or invalid target"
-					},
-					"404": {
-						"description": "Group not found"
-					}
+					"204": { "description": "Admin rights transferred" },
+					"403": { "description": "Forbidden - Not admin or invalid target" },
+					"404": { "description": "Group not found" }
 				},
-				"security": [
-					{
-						"access-token": []
-					}
-				],
+				"security": [{ "access-token": [] }],
 				"summary": "Transfer group admin rights (Group admin only)",
 				"tags": ["Groups"]
 			}
@@ -1476,11 +1038,7 @@
 						"required": true,
 						"in": "path",
 						"description": "Invite token",
-						"schema": {
-							"minLength": 32,
-							"maxLength": 32,
-							"type": "string"
-						}
+						"schema": { "minLength": 32, "maxLength": 32, "type": "string" }
 					}
 				],
 				"responses": {
@@ -1488,15 +1046,11 @@
 						"description": "Invite info",
 						"content": {
 							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/InviteInfoResponseDto"
-								}
+								"schema": { "$ref": "#/components/schemas/InviteInfoResponseDto" }
 							}
 						}
 					},
-					"404": {
-						"description": "Invite not found"
-					}
+					"404": { "description": "Invite not found" }
 				},
 				"summary": "Get invite info by token (Public)",
 				"tags": ["Invites"]
@@ -1511,11 +1065,7 @@
 						"required": true,
 						"in": "path",
 						"description": "Invite token",
-						"schema": {
-							"minLength": 32,
-							"maxLength": 32,
-							"type": "string"
-						}
+						"schema": { "minLength": 32, "maxLength": 32, "type": "string" }
 					}
 				],
 				"responses": {
@@ -1523,27 +1073,15 @@
 						"description": "Invite accepted",
 						"content": {
 							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/AcceptInviteResponseDto"
-								}
+								"schema": { "$ref": "#/components/schemas/AcceptInviteResponseDto" }
 							}
 						}
 					},
-					"401": {
-						"description": "Unauthorized"
-					},
-					"404": {
-						"description": "Invite not found"
-					},
-					"409": {
-						"description": "User already a member"
-					}
+					"401": { "description": "Unauthorized" },
+					"404": { "description": "Invite not found" },
+					"409": { "description": "User already a member" }
 				},
-				"security": [
-					{
-						"access-token": []
-					}
-				],
+				"security": [{ "access-token": [] }],
 				"summary": "Accept group invite",
 				"tags": ["Invites"]
 			}
@@ -1557,9 +1095,7 @@
 						"required": true,
 						"in": "path",
 						"description": "Group ID",
-						"schema": {
-							"type": "number"
-						}
+						"schema": { "type": "number" }
 					},
 					{
 						"name": "order",
@@ -1577,65 +1113,42 @@
 						"required": false,
 						"in": "query",
 						"description": "Minimum rating (0-10)",
-						"schema": {
-							"minimum": 0,
-							"maximum": 10,
-							"type": "number"
-						}
+						"schema": { "minimum": 0, "maximum": 10, "type": "number" }
 					},
 					{
 						"name": "ratingTo",
 						"required": false,
 						"in": "query",
 						"description": "Maximum rating (0-10)",
-						"schema": {
-							"minimum": 0,
-							"maximum": 10,
-							"type": "number"
-						}
+						"schema": { "minimum": 0, "maximum": 10, "type": "number" }
 					},
 					{
 						"name": "yearFrom",
 						"required": false,
 						"in": "query",
 						"description": "Minimum year",
-						"schema": {
-							"minimum": 1000,
-							"maximum": 2100,
-							"type": "number"
-						}
+						"schema": { "minimum": 1000, "maximum": 2100, "type": "number" }
 					},
 					{
 						"name": "yearTo",
 						"required": false,
 						"in": "query",
 						"description": "Maximum year",
-						"schema": {
-							"minimum": 1000,
-							"maximum": 2100,
-							"type": "number"
-						}
+						"schema": { "minimum": 1000, "maximum": 2100, "type": "number" }
 					},
 					{
 						"name": "query",
 						"required": true,
 						"in": "query",
 						"description": "Search query",
-						"schema": {
-							"example": "\u043c\u0430\u0442\u0440\u0438\u0446\u0430",
-							"type": "string"
-						}
+						"schema": { "example": "матрица", "type": "string" }
 					},
 					{
 						"name": "page",
 						"required": false,
 						"in": "query",
 						"description": "Page number (for provider results)",
-						"schema": {
-							"default": 1,
-							"example": 1,
-							"type": "number"
-						}
+						"schema": { "default": 1, "example": 1, "type": "number" }
 					}
 				],
 				"responses": {
@@ -1643,21 +1156,13 @@
 						"description": "Search results with provider and group movies",
 						"content": {
 							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/SearchInGroupResponseDto"
-								}
+								"schema": { "$ref": "#/components/schemas/SearchInGroupResponseDto" }
 							}
 						}
 					},
-					"403": {
-						"description": "Forbidden - Not a group moderator"
-					}
+					"403": { "description": "Forbidden - Not a group moderator" }
 				},
-				"security": [
-					{
-						"access-token": []
-					}
-				],
+				"security": [{ "access-token": [] }],
 				"summary": "Search movies in group context (Group moderators only)",
 				"tags": ["Groups / Movies"]
 			}
@@ -1671,28 +1176,21 @@
 						"required": true,
 						"in": "path",
 						"description": "Group ID",
-						"schema": {
-							"type": "number"
-						}
+						"schema": { "type": "number" }
 					},
 					{
 						"name": "status",
 						"required": false,
 						"in": "query",
 						"description": "Filter by movie status",
-						"schema": {
-							"type": "string",
-							"enum": ["tracking", "planned", "watched"]
-						}
+						"schema": { "type": "string", "enum": ["tracking", "planned", "watched"] }
 					},
 					{
 						"name": "query",
 						"required": false,
 						"in": "query",
 						"description": "Search query for movie title",
-						"schema": {
-							"type": "string"
-						}
+						"schema": { "type": "string" }
 					}
 				],
 				"responses": {
@@ -1702,25 +1200,15 @@
 							"application/json": {
 								"schema": {
 									"type": "array",
-									"items": {
-										"$ref": "#/components/schemas/GroupMovieResponseDto"
-									}
+									"items": { "$ref": "#/components/schemas/GroupMovieResponseDto" }
 								}
 							}
 						}
 					},
-					"400": {
-						"description": "Invalid query parameters"
-					},
-					"403": {
-						"description": "Forbidden - Not a group member"
-					}
+					"400": { "description": "Invalid query parameters" },
+					"403": { "description": "Forbidden - Not a group member" }
 				},
-				"security": [
-					{
-						"access-token": []
-					}
-				],
+				"security": [{ "access-token": [] }],
 				"summary": "Get all movies in group (Group members only)",
 				"tags": ["Groups / Movies"]
 			},
@@ -1732,19 +1220,13 @@
 						"required": true,
 						"in": "path",
 						"description": "Group ID",
-						"schema": {
-							"type": "number"
-						}
+						"schema": { "type": "number" }
 					}
 				],
 				"requestBody": {
 					"required": true,
 					"content": {
-						"application/json": {
-							"schema": {
-								"$ref": "#/components/schemas/AddMovieDto"
-							}
-						}
+						"application/json": { "schema": { "$ref": "#/components/schemas/AddMovieDto" } }
 					}
 				},
 				"responses": {
@@ -1752,24 +1234,14 @@
 						"description": "Movie added to group",
 						"content": {
 							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/GroupMovieResponseDto"
-								}
+								"schema": { "$ref": "#/components/schemas/GroupMovieResponseDto" }
 							}
 						}
 					},
-					"403": {
-						"description": "Forbidden - Not a group moderator"
-					},
-					"409": {
-						"description": "Movie already added to this group"
-					}
+					"403": { "description": "Forbidden - Not a group moderator" },
+					"409": { "description": "Movie already added to this group" }
 				},
-				"security": [
-					{
-						"access-token": []
-					}
-				],
+				"security": [{ "access-token": [] }],
 				"summary": "Add provider movie to group (Group moderators only)",
 				"tags": ["Groups / Movies"]
 			}
@@ -1783,18 +1255,14 @@
 						"required": true,
 						"in": "path",
 						"description": "Group ID",
-						"schema": {
-							"type": "number"
-						}
+						"schema": { "type": "number" }
 					}
 				],
 				"requestBody": {
 					"required": true,
 					"content": {
 						"application/json": {
-							"schema": {
-								"$ref": "#/components/schemas/CreateCustomMovieDto"
-							}
+							"schema": { "$ref": "#/components/schemas/CreateCustomMovieDto" }
 						}
 					}
 				},
@@ -1803,24 +1271,14 @@
 						"description": "Custom movie created",
 						"content": {
 							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/GroupMovieResponseDto"
-								}
+								"schema": { "$ref": "#/components/schemas/GroupMovieResponseDto" }
 							}
 						}
 					},
-					"400": {
-						"description": "Invalid status/date combination"
-					},
-					"403": {
-						"description": "Forbidden - Not a group moderator"
-					}
+					"400": { "description": "Invalid status/date combination" },
+					"403": { "description": "Forbidden - Not a group moderator" }
 				},
-				"security": [
-					{
-						"access-token": []
-					}
-				],
+				"security": [{ "access-token": [] }],
 				"summary": "Create custom movie in group (Group moderators only)",
 				"tags": ["Groups / Movies"]
 			}
@@ -1834,18 +1292,14 @@
 						"required": true,
 						"in": "path",
 						"description": "Group ID",
-						"schema": {
-							"type": "number"
-						}
+						"schema": { "type": "number" }
 					},
 					{
 						"name": "id",
 						"required": true,
 						"in": "path",
 						"description": "Group Movie ID",
-						"schema": {
-							"type": "number"
-						}
+						"schema": { "type": "number" }
 					}
 				],
 				"responses": {
@@ -1853,24 +1307,14 @@
 						"description": "Group movie found",
 						"content": {
 							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/GroupMovieResponseDto"
-								}
+								"schema": { "$ref": "#/components/schemas/GroupMovieResponseDto" }
 							}
 						}
 					},
-					"403": {
-						"description": "Forbidden - Not a group member"
-					},
-					"404": {
-						"description": "Movie not found in group"
-					}
+					"403": { "description": "Forbidden - Not a group member" },
+					"404": { "description": "Movie not found in group" }
 				},
-				"security": [
-					{
-						"access-token": []
-					}
-				],
+				"security": [{ "access-token": [] }],
 				"summary": "Get movie details in group (Group members only)",
 				"tags": ["Groups / Movies"]
 			},
@@ -1882,28 +1326,20 @@
 						"required": true,
 						"in": "path",
 						"description": "Group ID",
-						"schema": {
-							"type": "number"
-						}
+						"schema": { "type": "number" }
 					},
 					{
 						"name": "id",
 						"required": true,
 						"in": "path",
 						"description": "Group Movie ID",
-						"schema": {
-							"type": "number"
-						}
+						"schema": { "type": "number" }
 					}
 				],
 				"requestBody": {
 					"required": true,
 					"content": {
-						"application/json": {
-							"schema": {
-								"$ref": "#/components/schemas/GroupMovieUpdateDto"
-							}
-						}
+						"application/json": { "schema": { "$ref": "#/components/schemas/GroupMovieUpdateDto" } }
 					}
 				},
 				"responses": {
@@ -1911,27 +1347,15 @@
 						"description": "Movie updated",
 						"content": {
 							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/GroupMovieResponseDto"
-								}
+								"schema": { "$ref": "#/components/schemas/GroupMovieResponseDto" }
 							}
 						}
 					},
-					"400": {
-						"description": "Invalid status/date combination"
-					},
-					"403": {
-						"description": "Forbidden - Not a group moderator"
-					},
-					"404": {
-						"description": "Movie not found in group"
-					}
+					"400": { "description": "Invalid status/date combination" },
+					"403": { "description": "Forbidden - Not a group moderator" },
+					"404": { "description": "Movie not found in group" }
 				},
-				"security": [
-					{
-						"access-token": []
-					}
-				],
+				"security": [{ "access-token": [] }],
 				"summary": "Update movie in group (Group moderators only)",
 				"tags": ["Groups / Movies"]
 			},
@@ -1943,36 +1367,22 @@
 						"required": true,
 						"in": "path",
 						"description": "Group ID",
-						"schema": {
-							"type": "number"
-						}
+						"schema": { "type": "number" }
 					},
 					{
 						"name": "id",
 						"required": true,
 						"in": "path",
 						"description": "Group Movie ID",
-						"schema": {
-							"type": "number"
-						}
+						"schema": { "type": "number" }
 					}
 				],
 				"responses": {
-					"204": {
-						"description": "Movie removed from group"
-					},
-					"403": {
-						"description": "Forbidden - Not a group moderator"
-					},
-					"404": {
-						"description": "Movie not found in group"
-					}
+					"204": { "description": "Movie removed from group" },
+					"403": { "description": "Forbidden - Not a group moderator" },
+					"404": { "description": "Movie not found in group" }
 				},
-				"security": [
-					{
-						"access-token": []
-					}
-				],
+				"security": [{ "access-token": [] }],
 				"summary": "Remove movie from group (Group moderators only)",
 				"tags": ["Groups / Movies"]
 			}
@@ -1985,11 +1395,7 @@
 		"contact": {}
 	},
 	"tags": [],
-	"servers": [
-		{
-			"url": "http://localhost:8080"
-		}
-	],
+	"servers": [{ "url": "http://localhost:8080" }],
 	"components": {
 		"securitySchemes": {
 			"access-token": {
@@ -2003,176 +1409,87 @@
 			"HealthResponseDto": {
 				"type": "object",
 				"properties": {
-					"status": {
-						"type": "string",
-						"enum": ["ok", "degraded"]
-					},
-					"timestamp": {
-						"type": "number"
-					},
-					"database": {
-						"type": "string",
-						"enum": ["connected", "disconnected"]
-					},
-					"error": {
-						"type": "string"
-					}
+					"status": { "type": "string", "enum": ["ok", "degraded"] },
+					"timestamp": { "type": "number" },
+					"database": { "type": "string", "enum": ["connected", "disconnected"] },
+					"error": { "type": "string" }
 				},
 				"required": ["status", "timestamp", "database"]
 			},
 			"UserCreateDto": {
 				"type": "object",
 				"properties": {
-					"name": {
-						"type": "string",
-						"example": "John Doe"
-					},
-					"email": {
-						"type": "string",
-						"example": "john@example.com"
-					},
-					"password": {
-						"type": "string",
-						"example": "SecurePass123!"
-					}
+					"name": { "type": "string", "example": "John Doe" },
+					"email": { "type": "string", "example": "john@example.com" },
+					"password": { "type": "string", "example": "SecurePass123!" }
 				},
 				"required": ["name", "email", "password"]
 			},
 			"UserResponseDto": {
 				"type": "object",
 				"properties": {
-					"id": {
-						"type": "number"
-					},
-					"name": {
-						"type": "string"
-					},
-					"email": {
-						"type": "string"
-					},
-					"role": {
-						"type": "string"
-					},
-					"createdAt": {
-						"format": "date-time",
-						"type": "string"
-					},
-					"updatedAt": {
-						"format": "date-time",
-						"type": "string"
-					},
-					"avatar": {
-						"type": "string",
-						"nullable": true
-					}
+					"id": { "type": "number" },
+					"name": { "type": "string" },
+					"email": { "type": "string" },
+					"role": { "type": "string" },
+					"createdAt": { "format": "date-time", "type": "string" },
+					"updatedAt": { "format": "date-time", "type": "string" },
+					"avatar": { "type": "string", "nullable": true }
 				},
 				"required": ["id", "name", "email", "role", "createdAt", "updatedAt", "avatar"]
 			},
 			"UserUpdateDto": {
 				"type": "object",
 				"properties": {
-					"name": {
-						"type": "string",
-						"example": "John Doe"
-					},
-					"email": {
-						"type": "string",
-						"example": "john@example.com"
-					},
-					"password": {
-						"type": "string",
-						"example": "NewSecurePass123!"
-					}
+					"name": { "type": "string", "example": "John Doe" },
+					"email": { "type": "string", "example": "john@example.com" },
+					"password": { "type": "string", "example": "NewSecurePass123!" }
 				}
 			},
 			"AuthRegisterDto": {
 				"type": "object",
 				"properties": {
-					"name": {
-						"type": "string",
-						"example": "John Doe"
-					},
-					"email": {
-						"type": "string",
-						"example": "john@example.com"
-					},
-					"password": {
-						"type": "string",
-						"example": "SecurePass123!"
-					}
+					"name": { "type": "string", "example": "John Doe" },
+					"email": { "type": "string", "example": "john@example.com" },
+					"password": { "type": "string", "example": "SecurePass123!" }
 				},
 				"required": ["name", "email", "password"]
 			},
 			"AuthResponseDto": {
 				"type": "object",
-				"properties": {
-					"accessToken": {
-						"type": "string"
-					}
-				},
+				"properties": { "accessToken": { "type": "string" } },
 				"required": ["accessToken"]
 			},
 			"AuthLoginDto": {
 				"type": "object",
 				"properties": {
-					"email": {
-						"type": "string",
-						"example": "john@example.com"
-					},
-					"password": {
-						"type": "string",
-						"example": "SecurePass123!"
-					}
+					"email": { "type": "string", "example": "john@example.com" },
+					"password": { "type": "string", "example": "SecurePass123!" }
 				},
 				"required": ["email", "password"]
 			},
 			"OAuthLinkInitResponseDto": {
 				"type": "object",
 				"properties": {
-					"authUrl": {
-						"type": "string",
-						"description": "OAuth provider authorization URL"
-					}
+					"authUrl": { "type": "string", "description": "OAuth provider authorization URL" }
 				},
 				"required": ["authUrl"]
 			},
 			"CsrfResponseDto": {
 				"type": "object",
-				"properties": {
-					"token": {
-						"type": "string"
-					}
-				},
+				"properties": { "token": { "type": "string" } },
 				"required": ["token"]
 			},
 			"ProviderMovieSummary": {
 				"type": "object",
 				"properties": {
-					"imdbId": {
-						"type": "string",
-						"nullable": true
-					},
-					"externalId": {
-						"type": "string"
-					},
-					"title": {
-						"type": "string"
-					},
-					"posterPath": {
-						"type": "string",
-						"nullable": true
-					},
-					"overview": {
-						"type": "string"
-					},
-					"releaseYear": {
-						"type": "number",
-						"nullable": true
-					},
-					"rating": {
-						"type": "number",
-						"nullable": true
-					}
+					"imdbId": { "type": "string", "nullable": true },
+					"externalId": { "type": "string" },
+					"title": { "type": "string" },
+					"posterPath": { "type": "string", "nullable": true },
+					"overview": { "type": "string" },
+					"releaseYear": { "type": "number", "nullable": true },
+					"rating": { "type": "number", "nullable": true }
 				},
 				"required": [
 					"imdbId",
@@ -2187,20 +1504,12 @@
 			"ProviderSearchResult": {
 				"type": "object",
 				"properties": {
-					"page": {
-						"type": "number"
-					},
-					"totalPages": {
-						"type": "number"
-					},
-					"totalResults": {
-						"type": "number"
-					},
+					"page": { "type": "number" },
+					"totalPages": { "type": "number" },
+					"totalResults": { "type": "number" },
 					"results": {
 						"type": "array",
-						"items": {
-							"$ref": "#/components/schemas/ProviderMovieSummary"
-						}
+						"items": { "$ref": "#/components/schemas/ProviderMovieSummary" }
 					}
 				},
 				"required": ["page", "totalPages", "totalResults", "results"]
@@ -2208,54 +1517,18 @@
 			"MovieResponseDto": {
 				"type": "object",
 				"properties": {
-					"id": {
-						"type": "number"
-					},
-					"externalId": {
-						"type": "string"
-					},
-					"imdbId": {
-						"type": "string",
-						"nullable": true
-					},
-					"title": {
-						"type": "string"
-					},
-					"posterPath": {
-						"type": "string",
-						"nullable": true
-					},
-					"overview": {
-						"type": "string",
-						"nullable": true
-					},
-					"releaseYear": {
-						"type": "number",
-						"nullable": true
-					},
-					"rating": {
-						"type": "string",
-						"nullable": true
-					},
-					"genres": {
-						"nullable": true,
-						"type": "array",
-						"items": {
-							"type": "string"
-						}
-					},
-					"runtime": {
-						"type": "number",
-						"nullable": true
-					},
-					"createdAt": {
-						"format": "date-time",
-						"type": "string"
-					},
-					"updatedAt": {
-						"format": "date-time",
-						"type": "string"
-					}
+					"id": { "type": "number" },
+					"externalId": { "type": "string" },
+					"imdbId": { "type": "string", "nullable": true },
+					"title": { "type": "string" },
+					"posterPath": { "type": "string", "nullable": true },
+					"overview": { "type": "string", "nullable": true },
+					"releaseYear": { "type": "number", "nullable": true },
+					"rating": { "type": "string", "nullable": true },
+					"genres": { "nullable": true, "type": "array", "items": { "type": "string" } },
+					"runtime": { "type": "number", "nullable": true },
+					"createdAt": { "format": "date-time", "type": "string" },
+					"updatedAt": { "format": "date-time", "type": "string" }
 				},
 				"required": [
 					"id",
@@ -2290,75 +1563,36 @@
 			"MovieUpdateDto": {
 				"type": "object",
 				"properties": {
-					"title": {
-						"type": "string",
-						"description": "Movie title"
-					},
-					"posterPath": {
-						"type": "string",
-						"description": "Poster path"
-					},
-					"overview": {
-						"type": "string",
-						"description": "Movie overview"
-					},
-					"releaseYear": {
-						"type": "number",
-						"description": "Release year",
-						"example": 1999
-					},
+					"title": { "type": "string", "description": "Movie title" },
+					"posterPath": { "type": "string", "description": "Poster path" },
+					"overview": { "type": "string", "description": "Movie overview" },
+					"releaseYear": { "type": "number", "description": "Release year", "example": 1999 },
 					"rating": {
 						"type": "number",
 						"description": "Rating (0-10)",
 						"minimum": 0,
 						"maximum": 10
 					},
-					"runtime": {
-						"type": "number",
-						"description": "Runtime in minutes"
-					}
+					"runtime": { "type": "number", "description": "Runtime in minutes" }
 				}
 			},
 			"GroupResponseDto": {
 				"type": "object",
 				"properties": {
-					"id": {
-						"type": "number"
-					},
-					"name": {
-						"type": "string"
-					},
-					"description": {
-						"type": "string",
-						"nullable": true
-					},
-					"avatarUrl": {
-						"type": "string",
-						"nullable": true
-					},
-					"createdAt": {
-						"format": "date-time",
-						"type": "string"
-					},
-					"updatedAt": {
-						"format": "date-time",
-						"type": "string"
-					},
-					"currentUserRole": {
-						"type": "string",
-						"enum": ["admin", "moderator", "member"]
-					}
+					"id": { "type": "number" },
+					"name": { "type": "string" },
+					"description": { "type": "string", "nullable": true },
+					"avatarUrl": { "type": "string", "nullable": true },
+					"createdAt": { "format": "date-time", "type": "string" },
+					"updatedAt": { "format": "date-time", "type": "string" },
+					"currentUserRole": { "type": "string", "enum": ["admin", "moderator", "member"] }
 				},
 				"required": ["id", "name", "description", "avatarUrl", "createdAt", "updatedAt"]
 			},
 			"GroupCreateDto": {
 				"type": "object",
 				"properties": {
-					"name": {
-						"type": "string",
-						"example": "Movie Club",
-						"description": "Group name"
-					},
+					"name": { "type": "string", "example": "Movie Club", "description": "Group name" },
 					"description": {
 						"type": "string",
 						"example": "Weekly movie nights",
@@ -2374,79 +1608,37 @@
 			},
 			"InviteTokenResponseDto": {
 				"type": "object",
-				"properties": {
-					"inviteToken": {
-						"type": "string",
-						"nullable": true
-					}
-				},
+				"properties": { "inviteToken": { "type": "string", "nullable": true } },
 				"required": ["inviteToken"]
 			},
 			"GeneratedInviteTokenResponseDto": {
 				"type": "object",
-				"properties": {
-					"inviteToken": {
-						"type": "string"
-					}
-				},
+				"properties": { "inviteToken": { "type": "string" } },
 				"required": ["inviteToken"]
 			},
 			"GroupUpdateDto": {
 				"type": "object",
 				"properties": {
-					"name": {
-						"type": "string",
-						"example": "Movie Club"
-					},
-					"description": {
-						"type": "string",
-						"example": "Weekly movie nights"
-					},
-					"avatarUrl": {
-						"type": "string",
-						"example": "https://example.com/avatar.jpg"
-					}
+					"name": { "type": "string", "example": "Movie Club" },
+					"description": { "type": "string", "example": "Weekly movie nights" },
+					"avatarUrl": { "type": "string", "example": "https://example.com/avatar.jpg" }
 				}
 			},
 			"GroupMemberUserDto": {
 				"type": "object",
-				"properties": {
-					"id": {
-						"type": "number"
-					},
-					"name": {
-						"type": "string"
-					}
-				},
+				"properties": { "id": { "type": "number" }, "name": { "type": "string" } },
 				"required": ["id", "name"]
 			},
 			"GroupMemberResponseDto": {
 				"type": "object",
 				"properties": {
-					"id": {
-						"type": "number"
-					},
-					"groupId": {
-						"type": "number"
-					},
-					"userId": {
-						"type": "number"
-					},
-					"role": {
-						"type": "string",
-						"enum": ["admin", "moderator", "member"]
-					},
-					"createdAt": {
-						"format": "date-time",
-						"type": "string"
-					},
-					"updatedAt": {
-						"format": "date-time",
-						"type": "string"
-					},
-					"user": {
-						"$ref": "#/components/schemas/GroupMemberUserDto"
-					}
+					"id": { "type": "number" },
+					"groupId": { "type": "number" },
+					"userId": { "type": "number" },
+					"role": { "type": "string", "enum": ["admin", "moderator", "member"] },
+					"createdAt": { "format": "date-time", "type": "string" },
+					"updatedAt": { "format": "date-time", "type": "string" },
+					"user": { "$ref": "#/components/schemas/GroupMemberUserDto" }
 				},
 				"required": ["id", "groupId", "userId", "role", "createdAt", "updatedAt", "user"]
 			},
@@ -2493,99 +1685,38 @@
 			"InviteInfoResponseDto": {
 				"type": "object",
 				"properties": {
-					"id": {
-						"type": "number"
-					},
-					"name": {
-						"type": "string"
-					},
-					"description": {
-						"type": "string",
-						"nullable": true
-					},
-					"avatarUrl": {
-						"type": "string",
-						"nullable": true
-					},
-					"memberCount": {
-						"type": "number"
-					}
+					"id": { "type": "number" },
+					"name": { "type": "string" },
+					"description": { "type": "string", "nullable": true },
+					"avatarUrl": { "type": "string", "nullable": true },
+					"memberCount": { "type": "number" }
 				},
 				"required": ["id", "name", "description", "avatarUrl", "memberCount"]
 			},
 			"AcceptInviteResponseDto": {
 				"type": "object",
-				"properties": {
-					"groupId": {
-						"type": "number"
-					}
-				},
+				"properties": { "groupId": { "type": "number" } },
 				"required": ["groupId"]
 			},
 			"GroupMovieResponseDto": {
 				"type": "object",
 				"properties": {
-					"id": {
-						"type": "number"
-					},
-					"groupId": {
-						"type": "number"
-					},
-					"source": {
-						"type": "string",
-						"enum": ["provider", "custom"]
-					},
-					"movieId": {
-						"type": "number",
-						"nullable": true
-					},
-					"title": {
-						"type": "string"
-					},
-					"posterPath": {
-						"type": "string",
-						"nullable": true
-					},
-					"overview": {
-						"type": "string",
-						"nullable": true
-					},
-					"releaseYear": {
-						"type": "number",
-						"nullable": true
-					},
-					"runtime": {
-						"type": "number",
-						"nullable": true
-					},
-					"rating": {
-						"type": "string",
-						"nullable": true
-					},
-					"addedBy": {
-						"type": "number"
-					},
-					"status": {
-						"type": "string",
-						"enum": ["tracking", "planned", "watched"]
-					},
-					"watchDate": {
-						"format": "date-time",
-						"type": "string",
-						"nullable": true
-					},
-					"createdAt": {
-						"format": "date-time",
-						"type": "string"
-					},
-					"updatedAt": {
-						"format": "date-time",
-						"type": "string"
-					},
-					"currentUserRole": {
-						"type": "string",
-						"enum": ["admin", "moderator", "member"]
-					}
+					"id": { "type": "number" },
+					"groupId": { "type": "number" },
+					"source": { "type": "string", "enum": ["provider", "custom"] },
+					"movieId": { "type": "number", "nullable": true },
+					"title": { "type": "string" },
+					"posterPath": { "type": "string", "nullable": true },
+					"overview": { "type": "string", "nullable": true },
+					"releaseYear": { "type": "number", "nullable": true },
+					"runtime": { "type": "number", "nullable": true },
+					"rating": { "type": "string", "nullable": true },
+					"addedBy": { "type": "number" },
+					"status": { "type": "string", "enum": ["tracking", "planned", "watched"] },
+					"watchDate": { "format": "date-time", "type": "string", "nullable": true },
+					"createdAt": { "format": "date-time", "type": "string" },
+					"updatedAt": { "format": "date-time", "type": "string" },
+					"currentUserRole": { "type": "string", "enum": ["admin", "moderator", "member"] }
 				},
 				"required": [
 					"id",
@@ -2608,14 +1739,10 @@
 			"SearchInGroupResponseDto": {
 				"type": "object",
 				"properties": {
-					"provider": {
-						"$ref": "#/components/schemas/ProviderSearchResult"
-					},
+					"provider": { "$ref": "#/components/schemas/ProviderSearchResult" },
 					"currentGroup": {
 						"type": "array",
-						"items": {
-							"$ref": "#/components/schemas/GroupMovieResponseDto"
-						}
+						"items": { "$ref": "#/components/schemas/GroupMovieResponseDto" }
 					}
 				},
 				"required": ["provider", "currentGroup"]
@@ -2638,26 +1765,11 @@
 			"CreateCustomMovieDto": {
 				"type": "object",
 				"properties": {
-					"title": {
-						"type": "string",
-						"description": "Movie title"
-					},
-					"posterPath": {
-						"type": "string",
-						"description": "Poster path"
-					},
-					"overview": {
-						"type": "string",
-						"description": "Movie overview"
-					},
-					"releaseYear": {
-						"type": "number",
-						"description": "Release year"
-					},
-					"runtime": {
-						"type": "number",
-						"description": "Runtime in minutes"
-					},
+					"title": { "type": "string", "description": "Movie title" },
+					"posterPath": { "type": "string", "description": "Poster path" },
+					"overview": { "type": "string", "description": "Movie overview" },
+					"releaseYear": { "type": "number", "description": "Release year" },
+					"runtime": { "type": "number", "description": "Runtime in minutes" },
 					"status": {
 						"type": "string",
 						"description": "Movie status",
@@ -2687,33 +1799,14 @@
 						"description": "Watch date (planned or actual, depending on status)",
 						"example": "2024-12-31T20:00:00Z"
 					},
-					"title": {
-						"type": "string",
-						"description": "Movie title"
-					},
-					"posterPath": {
-						"type": "string",
-						"description": "Poster path"
-					},
-					"overview": {
-						"type": "string",
-						"description": "Movie overview"
-					},
-					"releaseYear": {
-						"type": "number",
-						"description": "Release year"
-					},
-					"runtime": {
-						"type": "number",
-						"description": "Runtime in minutes"
-					}
+					"title": { "type": "string", "description": "Movie title" },
+					"posterPath": { "type": "string", "description": "Poster path" },
+					"overview": { "type": "string", "description": "Movie overview" },
+					"releaseYear": { "type": "number", "description": "Release year" },
+					"runtime": { "type": "number", "description": "Runtime in minutes" }
 				}
 			}
 		}
 	},
-	"security": [
-		{
-			"access-token": []
-		}
-	]
+	"security": [{ "access-token": [] }]
 }
