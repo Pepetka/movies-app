@@ -162,8 +162,8 @@ export class UserService {
    * @param email - User email
    * @returns User object or null
    */
-  async findByEmail(email: string) {
-    return this.userRepository.findByEmail(email);
+  async findByEmail(email: string, tx?: DrizzleTx) {
+    return this.userRepository.findByEmail(email, tx);
   }
 
   /**
@@ -171,8 +171,8 @@ export class UserService {
    * @param id - User ID
    * @returns User object or null
    */
-  async findById(id: number) {
-    return this.userRepository.findById(id);
+  async findById(id: number, tx?: DrizzleTx) {
+    return this.userRepository.findById(id, tx);
   }
 
   /**

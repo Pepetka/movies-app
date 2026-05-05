@@ -1,8 +1,13 @@
-import { Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import {
+  Inject,
+  Injectable,
+  InternalServerErrorException,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
 import type { DrizzleDb, DrizzleTx } from '$db/types/drizzle.types';
-import { UserRepository } from '$src/user/user.repository';
 import type { AuthProvider, User } from '$db/schemas';
 import { UserService } from '$src/user/user.service';
 import { AuthService } from '$src/auth/auth.service';
@@ -35,7 +40,6 @@ export class OAuthService {
     @Inject(DRIZZLE) private readonly db: DrizzleDb,
     private readonly providerRegistry: OAuthProviderRegistry,
     private readonly oauthAccountRepository: OAuthAccountRepository,
-    private readonly userRepository: UserRepository,
     private readonly userService: UserService,
     private readonly authService: AuthService,
     private readonly configService: ConfigService,
@@ -80,26 +84,24 @@ export class OAuthService {
       codeVerifier,
     );
 
-    const user = await this.db.transaction((tx) =>
-      this._findOrCreateUser(tx, provider, profile),
-    );
+    return this.db.transaction(async (tx) => {
+      const user = await this._findOrCreateUser(tx, provider, profile);
 
-    const tokens = await this.authService.generateTokens(
-      user.id,
-      user.email,
-      user.role,
-    );
-    const tokenHash = await this.userService.hashToken(tokens.refreshToken);
+      const tokens = await this.authService.generateTokens(
+        user.id,
+        user.email,
+        user.role,
+      );
+      const tokenHash = await this.userService.hashToken(tokens.refreshToken);
 
-    await this.db.transaction(async (tx) => {
       await this.userService.updateRefreshTokenHash(user.id, tokenHash, tx);
+
+      this._logger.log(
+        `OAuth login successful: userId=${user.id}, provider=${provider}`,
+      );
+
+      return { ...tokens, user };
     });
-
-    this._logger.log(
-      `OAuth login successful: userId=${user.id}, provider=${provider}`,
-    );
-
-    return { ...tokens, user };
   }
 
   /**
@@ -129,7 +131,7 @@ export class OAuthService {
     );
 
     return this.db.transaction(async (tx) => {
-      const user = await this.userRepository.findById(userId, tx);
+      const user = await this.userService.findById(userId, tx);
       if (!user) {
         throw new NotFoundException(`User ${userId} not found`);
       }
@@ -196,14 +198,12 @@ export class OAuthService {
       this._logger.debug(
         `Existing OAuth account: ${existingAccount.id}, provider=${provider}`,
       );
-      const user = await this.userRepository.findById(
-        existingAccount.userId,
-        tx,
-      );
+      const user = await this.userService.findById(existingAccount.userId, tx);
       if (!user) {
-        throw new Error(
+        this._logger.error(
           `OAuth account ${existingAccount.id} references missing user ${existingAccount.userId}`,
         );
+        throw new InternalServerErrorException('Data integrity error');
       }
       return user;
     }
@@ -214,7 +214,7 @@ export class OAuthService {
       throw new OAuthEmailNotVerifiedException();
     }
 
-    let user = await this.userRepository.findByEmail(profile.email, tx);
+    let user = await this.userService.findByEmail(profile.email, tx);
 
     if (user) {
       this._logger.log(

@@ -2,7 +2,6 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
-import { UserRepository } from '$src/user/user.repository';
 import { UserService } from '$src/user/user.service';
 import { UserRole } from '$common/enums';
 import { DRIZZLE } from '$db/db.module';
@@ -66,8 +65,9 @@ describe('OAuthService', () => {
     findByProviderAccount: jest.Mock;
     create: jest.Mock;
   };
-  let userRepository: { findById: jest.Mock; findByEmail: jest.Mock };
   let userService: {
+    findById: jest.Mock;
+    findByEmail: jest.Mock;
     createOAuthUser: jest.Mock;
     hashToken: jest.Mock;
     updateRefreshTokenHash: jest.Mock;
@@ -91,11 +91,9 @@ describe('OAuthService', () => {
       findByProviderAccount: jest.fn(),
       create: jest.fn().mockResolvedValue(mockOAuthAccount),
     };
-    userRepository = {
+    userService = {
       findById: jest.fn(),
       findByEmail: jest.fn(),
-    };
-    userService = {
       createOAuthUser: jest.fn(),
       hashToken: jest.fn().mockResolvedValue('hashed-refresh'),
       updateRefreshTokenHash: jest.fn().mockResolvedValue(undefined),
@@ -121,7 +119,6 @@ describe('OAuthService', () => {
         { provide: DRIZZLE, useValue: db },
         { provide: OAuthProviderRegistry, useValue: providerRegistry },
         { provide: OAuthAccountRepository, useValue: oauthAccountRepository },
-        { provide: UserRepository, useValue: userRepository },
         { provide: UserService, useValue: userService },
         { provide: AuthService, useValue: authService },
         { provide: ConfigService, useValue: config },
@@ -153,7 +150,6 @@ describe('OAuthService', () => {
           { provide: DRIZZLE, useValue: db },
           { provide: OAuthProviderRegistry, useValue: providerRegistry },
           { provide: OAuthAccountRepository, useValue: oauthAccountRepository },
-          { provide: UserRepository, useValue: userRepository },
           { provide: UserService, useValue: userService },
           { provide: AuthService, useValue: authService },
           { provide: ConfigService, useValue: config },
@@ -172,7 +168,7 @@ describe('OAuthService', () => {
       oauthAccountRepository.findByProviderAccount.mockResolvedValue(
         mockOAuthAccount,
       );
-      userRepository.findById.mockResolvedValue(mockUser);
+      userService.findById.mockResolvedValue(mockUser);
 
       const result = await service.handleCallback(
         'google',
@@ -186,13 +182,13 @@ describe('OAuthService', () => {
         REDIRECT_URI,
         CODE_VERIFIER,
       );
-      expect(db.transaction).toHaveBeenCalledTimes(2);
+      expect(db.transaction).toHaveBeenCalledTimes(1);
       expect(oauthAccountRepository.findByProviderAccount).toHaveBeenCalledWith(
         'google',
         mockProfile.id,
         TX_SENTINEL,
       );
-      expect(userRepository.findById).toHaveBeenCalledWith(
+      expect(userService.findById).toHaveBeenCalledWith(
         mockOAuthAccount.userId,
         TX_SENTINEL,
       );
@@ -215,7 +211,7 @@ describe('OAuthService', () => {
 
     it('creates new user and oauth_accounts when nothing matches', async () => {
       oauthAccountRepository.findByProviderAccount.mockResolvedValue(null);
-      userRepository.findByEmail.mockResolvedValue(null);
+      userService.findByEmail.mockResolvedValue(null);
       userService.createOAuthUser.mockResolvedValue(mockUser);
 
       await service.handleCallback('google', CODE, CODE_VERIFIER);
@@ -241,7 +237,7 @@ describe('OAuthService', () => {
 
     it('auto-links oauth_accounts to existing user found by email', async () => {
       oauthAccountRepository.findByProviderAccount.mockResolvedValue(null);
-      userRepository.findByEmail.mockResolvedValue(mockUser);
+      userService.findByEmail.mockResolvedValue(mockUser);
 
       await service.handleCallback('google', CODE, CODE_VERIFIER);
 
@@ -271,7 +267,7 @@ describe('OAuthService', () => {
 
     it('propagates errors from oauthAccountRepository.create and skips token issuance', async () => {
       oauthAccountRepository.findByProviderAccount.mockResolvedValue(null);
-      userRepository.findByEmail.mockResolvedValue(null);
+      userService.findByEmail.mockResolvedValue(null);
       userService.createOAuthUser.mockResolvedValue(mockUser);
       oauthAccountRepository.create.mockRejectedValue(
         new Error('insert failed'),
@@ -307,7 +303,7 @@ describe('OAuthService', () => {
       oauthAccountRepository.findByProviderAccount.mockResolvedValue(
         mockOAuthAccount,
       );
-      userRepository.findById.mockResolvedValue(mockUser);
+      userService.findById.mockResolvedValue(mockUser);
 
       const result = await service.handleCallback(
         'google',
@@ -316,7 +312,7 @@ describe('OAuthService', () => {
       );
 
       expect(result).toEqual({ ...mockTokens, user: mockUser });
-      expect(userRepository.findById).toHaveBeenCalledWith(
+      expect(userService.findById).toHaveBeenCalledWith(
         mockOAuthAccount.userId,
         TX_SENTINEL,
       );
@@ -336,7 +332,7 @@ describe('OAuthService', () => {
         ...mockProfile,
         email: linkUser.email,
       });
-      userRepository.findById.mockResolvedValue(linkUser);
+      userService.findById.mockResolvedValue(linkUser);
       oauthAccountRepository.findByProviderAccount.mockResolvedValue(null);
       oauthAccountRepository.create.mockResolvedValue(mockOAuthAccount);
 
@@ -353,7 +349,7 @@ describe('OAuthService', () => {
         REDIRECT_URI,
         CODE_VERIFIER,
       );
-      expect(userRepository.findById).toHaveBeenCalledWith(
+      expect(userService.findById).toHaveBeenCalledWith(
         linkUser.id,
         TX_SENTINEL,
       );
@@ -375,7 +371,7 @@ describe('OAuthService', () => {
 
     it('throws OAuthLinkEmailMismatchException when profile email differs', async () => {
       providerImpl.exchangeCodeForProfile.mockResolvedValue(mockProfile);
-      userRepository.findById.mockResolvedValue(linkUser);
+      userService.findById.mockResolvedValue(linkUser);
 
       await expect(
         service.linkProvider(linkUser.id, 'google', CODE, CODE_VERIFIER),
@@ -389,7 +385,7 @@ describe('OAuthService', () => {
         ...mockProfile,
         email: linkUser.email,
       });
-      userRepository.findById.mockResolvedValue(linkUser);
+      userService.findById.mockResolvedValue(linkUser);
       oauthAccountRepository.findByProviderAccount.mockResolvedValue({
         ...mockOAuthAccount,
         userId: 999,
@@ -407,7 +403,7 @@ describe('OAuthService', () => {
         ...mockProfile,
         email: linkUser.email,
       });
-      userRepository.findById.mockResolvedValue(linkUser);
+      userService.findById.mockResolvedValue(linkUser);
       oauthAccountRepository.findByProviderAccount.mockResolvedValue({
         ...mockOAuthAccount,
         userId: linkUser.id,
@@ -429,7 +425,7 @@ describe('OAuthService', () => {
         ...mockProfile,
         email: linkUser.email,
       });
-      userRepository.findById.mockResolvedValue(null);
+      userService.findById.mockResolvedValue(null);
 
       await expect(
         service.linkProvider(linkUser.id, 'google', CODE, CODE_VERIFIER),

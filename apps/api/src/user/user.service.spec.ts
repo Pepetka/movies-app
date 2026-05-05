@@ -318,6 +318,7 @@ describe('UserService', () => {
       expect(result).toEqual(mockUser);
       expect(userRepository.findByEmail).toHaveBeenCalledWith(
         'test@example.com',
+        undefined,
       );
     });
 
@@ -337,7 +338,7 @@ describe('UserService', () => {
       const result = await service.findById(1);
 
       expect(result).toEqual(mockUser);
-      expect(userRepository.findById).toHaveBeenCalledWith(1);
+      expect(userRepository.findById).toHaveBeenCalledWith(1, undefined);
     });
 
     it('should return null when user not found', async () => {
