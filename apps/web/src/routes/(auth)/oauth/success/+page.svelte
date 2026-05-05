@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { authControllerRefreshV1 } from '$lib/api/generated/api';
+	import { getSafeRedirect, ROUTES } from '$lib/utils';
 	import { httpClient } from '$lib/api/client';
 	import { queryRegistry } from '$lib/query';
 	import { goto } from '$app/navigation';
@@ -11,7 +12,7 @@
 			const response = await authControllerRefreshV1();
 			httpClient.setAccessToken(response.accessToken);
 			queryRegistry.invalidateByTag('user');
-			await goto('/groups', { replaceState: true });
+			await goto(getSafeRedirect(ROUTES.GROUPS), { replaceState: true });
 		} catch {
 			error = 'Ошибка входа через OAuth';
 			await goto('/login?oauth_error=1', { replaceState: true });

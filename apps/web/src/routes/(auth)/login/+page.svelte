@@ -73,7 +73,11 @@
 		{/snippet}
 
 		<div class="auth-oauth-section">
-			<Button variant="secondary" fullWidth href={`${__API_URL__}/api/v1/auth/oauth/google`}>
+			<Button
+				variant="secondary"
+				fullWidth
+				href={`${__API_URL__}/api/v1/auth/oauth/google?redirect=${encodeURIComponent(getSafeRedirect(ROUTES.GROUPS))}`}
+			>
 				Войти через Google
 			</Button>
 
