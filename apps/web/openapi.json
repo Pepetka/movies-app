@@ -248,6 +248,92 @@
 				"tags": ["Auth"]
 			}
 		},
+		"/api/v1/auth/oauth/{provider}": {
+			"get": {
+				"operationId": "AuthController_oauthRedirect_v1",
+				"parameters": [
+					{
+						"name": "provider",
+						"required": true,
+						"in": "path",
+						"schema": { "enum": ["google"], "type": "string" }
+					}
+				],
+				"responses": {
+					"302": { "description": "Redirect to provider" },
+					"400": { "description": "Unsupported provider" },
+					"501": { "description": "Provider not configured" }
+				},
+				"summary": "Redirect to OAuth provider authorization page",
+				"tags": ["Auth"]
+			}
+		},
+		"/api/v1/auth/oauth/{provider}/link/init": {
+			"post": {
+				"operationId": "AuthController_oauthLinkInit_v1",
+				"parameters": [
+					{
+						"name": "provider",
+						"required": true,
+						"in": "path",
+						"schema": { "enum": ["google"], "type": "string" }
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Auth URL ready, cookie set",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/OAuthLinkInitResponseDto" }
+							}
+						}
+					},
+					"400": { "description": "Unsupported provider" },
+					"401": { "description": "Unauthorized" },
+					"501": { "description": "Provider not configured" }
+				},
+				"security": [{ "access-token": [] }],
+				"summary": "Init OAuth account linking — returns provider authUrl",
+				"tags": ["Auth"]
+			}
+		},
+		"/api/v1/auth/oauth/{provider}/callback": {
+			"get": {
+				"operationId": "AuthController_oauthCallback_v1",
+				"parameters": [
+					{
+						"name": "code",
+						"required": false,
+						"in": "query",
+						"description": "Authorization code from provider",
+						"schema": { "type": "string" }
+					},
+					{
+						"name": "state",
+						"required": true,
+						"in": "query",
+						"description": "CSRF state parameter",
+						"schema": { "type": "string" }
+					},
+					{
+						"name": "error",
+						"required": false,
+						"in": "query",
+						"description": "Error from provider (e.g. access_denied)",
+						"schema": { "type": "string" }
+					},
+					{
+						"name": "provider",
+						"required": true,
+						"in": "path",
+						"schema": { "enum": ["google"], "type": "string" }
+					}
+				],
+				"responses": { "302": { "description": "Redirect to SPA /oauth/success or /oauth/error" } },
+				"summary": "OAuth callback — redirects to SPA after auth",
+				"tags": ["Auth"]
+			}
+		},
 		"/api/v1/csrf/token": {
 			"get": {
 				"operationId": "CsrfController_getToken_v1",
@@ -1312,9 +1398,10 @@
 					"email": { "type": "string" },
 					"role": { "type": "string" },
 					"createdAt": { "format": "date-time", "type": "string" },
-					"updatedAt": { "format": "date-time", "type": "string" }
+					"updatedAt": { "format": "date-time", "type": "string" },
+					"avatar": { "type": "string", "nullable": true }
 				},
-				"required": ["id", "name", "email", "role", "createdAt", "updatedAt"]
+				"required": ["id", "name", "email", "role", "createdAt", "updatedAt", "avatar"]
 			},
 			"UserUpdateDto": {
 				"type": "object",
@@ -1345,6 +1432,13 @@
 					"password": { "type": "string", "example": "SecurePass123!" }
 				},
 				"required": ["email", "password"]
+			},
+			"OAuthLinkInitResponseDto": {
+				"type": "object",
+				"properties": {
+					"authUrl": { "type": "string", "description": "OAuth provider authorization URL" }
+				},
+				"required": ["authUrl"]
 			},
 			"CsrfResponseDto": {
 				"type": "object",

@@ -1,6 +1,6 @@
 <script lang="ts">
+	import { Button, Card, Divider, Input, toast } from '@repo/ui';
 	import { Eye, EyeOff, Film, Mail } from '@lucide/svelte';
-	import { Button, Card, Input, toast } from '@repo/ui';
 
 	import {
 		authStore,
@@ -72,36 +72,44 @@
 			</div>
 		{/snippet}
 
-		<form class="form-fields" onsubmit={handleSubmit}>
-			<Input
-				type="email"
-				label="Email"
-				bind:value={form.email}
-				error={fieldValidator.errors.email}
-				Icon={Mail}
-				placeholder="anaconda@mail.ru"
-				disabled={authStore.isLoggingIn}
-				onChange={() => fieldValidator.handleFieldChange(form, 'email')}
-			/>
+		<div class="auth-oauth-section">
+			<Button variant="secondary" fullWidth href={`${__API_URL__}/api/v1/auth/oauth/google`}>
+				Войти через Google
+			</Button>
 
-			<Input
-				type={showPassword ? 'text' : 'password'}
-				label="Пароль"
-				bind:value={form.password}
-				error={fieldValidator.errors.password}
-				placeholder="Введите пароль"
-				Icon={showPassword ? EyeOff : Eye}
-				iconAction={() => (showPassword = !showPassword)}
-				iconLabel={showPassword ? 'Скрыть пароль' : 'Показать пароль'}
-				autocomplete="current-password"
-				disabled={authStore.isLoggingIn}
-				onChange={() => fieldValidator.handleFieldChange(form, 'password')}
-			/>
+			<Divider label="или" />
 
-			<Button type="submit" variant="primary" fullWidth loading={authStore.isLoggingIn}
-				>Войти</Button
-			>
-		</form>
+			<form class="form-fields" onsubmit={handleSubmit}>
+				<Input
+					type="email"
+					label="Email"
+					bind:value={form.email}
+					error={fieldValidator.errors.email}
+					Icon={Mail}
+					placeholder="anaconda@mail.ru"
+					disabled={authStore.isLoggingIn}
+					onChange={() => fieldValidator.handleFieldChange(form, 'email')}
+				/>
+
+				<Input
+					type={showPassword ? 'text' : 'password'}
+					label="Пароль"
+					bind:value={form.password}
+					error={fieldValidator.errors.password}
+					placeholder="Введите пароль"
+					Icon={showPassword ? EyeOff : Eye}
+					iconAction={() => (showPassword = !showPassword)}
+					iconLabel={showPassword ? 'Скрыть пароль' : 'Показать пароль'}
+					autocomplete="current-password"
+					disabled={authStore.isLoggingIn}
+					onChange={() => fieldValidator.handleFieldChange(form, 'password')}
+				/>
+
+				<Button type="submit" variant="primary" fullWidth loading={authStore.isLoggingIn}
+					>Войти</Button
+				>
+			</form>
+		</div>
 
 		{#snippet footer()}
 			<div class="form-footer">

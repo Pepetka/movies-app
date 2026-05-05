@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Eye, EyeOff, Film, Mail, User, Users } from '@lucide/svelte';
-	import { Button, Card, Input, toast } from '@repo/ui';
+	import { Button, Card, Divider, Input, toast } from '@repo/ui';
 	import { fade } from 'svelte/transition';
 
 	import {
@@ -89,74 +89,82 @@
 			</div>
 		</div>
 
-		<form class="form-fields" onsubmit={handleSubmit}>
-			<Input
-				type="text"
-				label="Имя"
-				bind:value={form.name}
-				error={fieldValidator.errors.name}
-				placeholder="Маргарита Александровна"
-				Icon={User}
-				disabled={authStore.isRegistering}
-				onChange={() => fieldValidator.handleFieldChange(form, 'name')}
-			/>
+		<div class="auth-oauth-section">
+			<Button variant="secondary" fullWidth href={`${__API_URL__}/api/v1/auth/oauth/google`}>
+				Продолжить с Google
+			</Button>
 
-			<Input
-				type="email"
-				label="Email"
-				bind:value={form.email}
-				error={fieldValidator.errors.email}
-				placeholder="anaconda@mail.ru"
-				Icon={Mail}
-				autocomplete="email"
-				disabled={authStore.isRegistering}
-				onChange={() => fieldValidator.handleFieldChange(form, 'email')}
-			/>
+			<Divider label="или" />
 
-			<div class="password-field">
+			<form class="form-fields" onsubmit={handleSubmit}>
 				<Input
-					type={showPassword ? 'text' : 'password'}
-					label="Пароль"
-					bind:value={form.password}
-					error={fieldValidator.errors.password}
-					placeholder="Str0ng!Pass"
-					Icon={showPassword ? EyeOff : Eye}
-					iconAction={() => (showPassword = !showPassword)}
-					iconLabel={showPassword ? 'Скрыть пароль' : 'Показать пароль'}
-					autocomplete="new-password"
+					type="text"
+					label="Имя"
+					bind:value={form.name}
+					error={fieldValidator.errors.name}
+					placeholder="Маргарита Александровна"
+					Icon={User}
 					disabled={authStore.isRegistering}
-					onChange={() => fieldValidator.handleFieldChange(form, 'password')}
+					onChange={() => fieldValidator.handleFieldChange(form, 'name')}
 				/>
 
-				{#if form.password}
-					<div class="password-requirements" transition:fade={{ duration: 200 }}>
-						<span class:passed={passwordChecks.length}>8+</span>
-						<span class:passed={passwordChecks.lowercase}>a-z</span>
-						<span class:passed={passwordChecks.uppercase}>A-Z</span>
-						<span class:passed={passwordChecks.number}>0-9</span>
-						<span class:passed={passwordChecks.special}>!@#</span>
-					</div>
-				{/if}
-			</div>
+				<Input
+					type="email"
+					label="Email"
+					bind:value={form.email}
+					error={fieldValidator.errors.email}
+					placeholder="anaconda@mail.ru"
+					Icon={Mail}
+					autocomplete="email"
+					disabled={authStore.isRegistering}
+					onChange={() => fieldValidator.handleFieldChange(form, 'email')}
+				/>
 
-			<Input
-				type={showConfirmPassword ? 'text' : 'password'}
-				label="Подтверждение пароля"
-				bind:value={form.confirmPassword}
-				error={fieldValidator.errors.confirmPassword}
-				placeholder="Повторите пароль"
-				Icon={showConfirmPassword ? EyeOff : Eye}
-				iconAction={() => (showConfirmPassword = !showConfirmPassword)}
-				iconLabel={showConfirmPassword ? 'Скрыть пароль' : 'Показать пароль'}
-				autocomplete="new-password"
-				disabled={authStore.isRegistering}
-				onChange={() => fieldValidator.handleFieldChange(form, 'confirmPassword')}
-			/>
+				<div class="password-field">
+					<Input
+						type={showPassword ? 'text' : 'password'}
+						label="Пароль"
+						bind:value={form.password}
+						error={fieldValidator.errors.password}
+						placeholder="Str0ng!Pass"
+						Icon={showPassword ? EyeOff : Eye}
+						iconAction={() => (showPassword = !showPassword)}
+						iconLabel={showPassword ? 'Скрыть пароль' : 'Показать пароль'}
+						autocomplete="new-password"
+						disabled={authStore.isRegistering}
+						onChange={() => fieldValidator.handleFieldChange(form, 'password')}
+					/>
 
-			<Button type="submit" variant="primary" fullWidth loading={authStore.isRegistering}>
-				Зарегистрироваться
-			</Button>
-		</form>
+					{#if form.password}
+						<div class="password-requirements" transition:fade={{ duration: 200 }}>
+							<span class:passed={passwordChecks.length}>8+</span>
+							<span class:passed={passwordChecks.lowercase}>a-z</span>
+							<span class:passed={passwordChecks.uppercase}>A-Z</span>
+							<span class:passed={passwordChecks.number}>0-9</span>
+							<span class:passed={passwordChecks.special}>!@#</span>
+						</div>
+					{/if}
+				</div>
+
+				<Input
+					type={showConfirmPassword ? 'text' : 'password'}
+					label="Подтверждение пароля"
+					bind:value={form.confirmPassword}
+					error={fieldValidator.errors.confirmPassword}
+					placeholder="Повторите пароль"
+					Icon={showConfirmPassword ? EyeOff : Eye}
+					iconAction={() => (showConfirmPassword = !showConfirmPassword)}
+					iconLabel={showConfirmPassword ? 'Скрыть пароль' : 'Показать пароль'}
+					autocomplete="new-password"
+					disabled={authStore.isRegistering}
+					onChange={() => fieldValidator.handleFieldChange(form, 'confirmPassword')}
+				/>
+
+				<Button type="submit" variant="primary" fullWidth loading={authStore.isRegistering}>
+					Зарегистрироваться
+				</Button>
+			</form>
+		</div>
 
 		{#snippet footer()}
 			<div class="form-footer">
