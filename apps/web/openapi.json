@@ -323,6 +323,34 @@
 						"schema": { "type": "string" }
 					},
 					{
+						"name": "iss",
+						"required": false,
+						"in": "query",
+						"description": "Issuer identifier (Google-specific)",
+						"schema": { "type": "string" }
+					},
+					{
+						"name": "scope",
+						"required": false,
+						"in": "query",
+						"description": "Granted scopes (Google-specific)",
+						"schema": { "type": "string" }
+					},
+					{
+						"name": "authuser",
+						"required": false,
+						"in": "query",
+						"description": "Auth user index (Google-specific)",
+						"schema": { "type": "string" }
+					},
+					{
+						"name": "prompt",
+						"required": false,
+						"in": "query",
+						"description": "Prompt type (Google-specific)",
+						"schema": { "type": "string" }
+					},
+					{
 						"name": "provider",
 						"required": true,
 						"in": "path",
