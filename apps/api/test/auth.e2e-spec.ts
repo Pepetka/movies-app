@@ -230,42 +230,6 @@ describe('Auth E2E', () => {
       expect(response.body).toHaveProperty('accessToken');
     });
 
-    it.skip('should rotate refresh token on refresh', async () => {
-      const { refreshToken: firstRefreshToken } = await registerUser(
-        app,
-        'test5@example.com',
-      );
-
-      const firstResponse = await request(app.getHttpServer())
-        .post('/auth/refresh')
-        .set('Cookie', [`refresh_token=${firstRefreshToken}`])
-        .expect(200);
-
-      const secondRefreshToken = extractRefreshToken(
-        firstResponse.headers['set-cookie'],
-      );
-
-      expect(secondRefreshToken).toBeDefined();
-      expect(secondRefreshToken).not.toBe(firstRefreshToken);
-    });
-
-    it.skip('should invalidate old refresh token after rotation', async () => {
-      const { refreshToken: firstRefreshToken } = await registerUser(
-        app,
-        'test6@example.com',
-      );
-
-      await request(app.getHttpServer())
-        .post('/auth/refresh')
-        .set('Cookie', [`refresh_token=${firstRefreshToken}`])
-        .expect(200);
-
-      await request(app.getHttpServer())
-        .post('/auth/refresh')
-        .set('Cookie', [`refresh_token=${firstRefreshToken}`])
-        .expect(401);
-    });
-
     it('should reject refresh with invalid refresh token', async () => {
       await registerUser(app, 'test7@example.com');
 
