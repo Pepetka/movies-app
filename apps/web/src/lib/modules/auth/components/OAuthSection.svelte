@@ -1,31 +1,35 @@
 <script lang="ts">
 	import { Button, Divider } from '@repo/ui';
 
+	import type { AuthProvider } from '$lib/api/generated/types';
 	import { getSafeRedirect } from '$lib/utils';
 
 	interface Props {
 		buttonText?: string;
 		showDivider?: boolean;
 		class?: string;
+		provider?: AuthProvider;
+		[key: string]: unknown;
 	}
 
 	let {
 		buttonText = 'Войти через Google',
 		showDivider = true,
 		class: className = '',
+		provider = 'google',
 		...restProps
-	}: Props & Record<string, unknown> = $props();
+	}: Props = $props();
 </script>
 
 <Button
 	variant="secondary"
 	fullWidth
 	class={className}
-	href={`${__API_URL__}/api/v1/auth/oauth/google?redirect=${encodeURIComponent(getSafeRedirect())}`}
+	href={`${__API_URL__}/api/v1/auth/oauth/${provider}?redirect=${encodeURIComponent(getSafeRedirect())}`}
 	{...restProps}
 >
 	<svg
-		class="oauth-provider-icon"
+		class="oauth-section__icon"
 		width="18"
 		height="18"
 		viewBox="0 0 24 24"
@@ -55,10 +59,3 @@
 {#if showDivider}
 	<Divider label="или" />
 {/if}
-
-<style>
-	.oauth-provider-icon {
-		margin-right: var(--space-2);
-		flex-shrink: 0;
-	}
-</style>

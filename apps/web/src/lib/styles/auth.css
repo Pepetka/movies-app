@@ -109,6 +109,11 @@
 	gap: var(--space-3);
 }
 
+.auth-oauth-section .oauth-section__icon {
+	margin-right: var(--space-2);
+	flex-shrink: 0;
+}
+
 /* ========================================
    Password Requirements
    ======================================== */
