@@ -2,8 +2,8 @@
 	import { Film } from '@lucide/svelte';
 	import { Card } from '@repo/ui';
 
-	import OAuthSection from '$lib/modules/auth/components/OAuthSection.svelte';
 	import { ROUTES, withCurrentQuery } from '$lib/utils';
+	import { OAuthSection } from '$lib/modules/auth';
 
 	import '$lib/styles/auth.css';
 

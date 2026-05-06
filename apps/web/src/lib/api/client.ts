@@ -438,10 +438,6 @@ export const httpClient = new HttpClient({
 		refreshEndpoint: '/api/v1/auth/refresh',
 		csrfEndpoint: '/api/v1/csrf/token',
 		skipRefreshPaths: ['/api/v1/auth/login', '/api/v1/auth/register'],
-		csrfPaths: [
-			'/api/v1/auth/refresh',
-			'/api/v1/auth/logout',
-			'/api/v1/auth/oauth/google/link/init'
-		]
+		csrfPaths: ['/api/v1/auth/refresh', '/api/v1/auth/logout', '/api/v1/auth/oauth/']
 	}
 });

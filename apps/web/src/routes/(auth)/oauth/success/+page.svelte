@@ -5,8 +5,6 @@
 	import { queryRegistry } from '$lib/query';
 	import { goto } from '$app/navigation';
 
-	let error = $state<string | null>(null);
-
 	$effect(() => {
 		let cancelled = false;
 
@@ -20,7 +18,6 @@
 				await goto(getSafeRedirect(ROUTES.GROUPS), { replaceState: true });
 			} catch {
 				if (cancelled) return;
-				error = 'Ошибка входа через OAuth';
 				await goto(`${ROUTES.LOGIN}?oauth_error=1`, { replaceState: true });
 			}
 		};
@@ -37,8 +34,4 @@
 	<title>Завершение входа · Movies App</title>
 </svelte:head>
 
-{#if error}
-	<p role="alert">{error}</p>
-{:else}
-	<p aria-live="polite">Завершаем вход...</p>
-{/if}
+<p aria-live="polite">Завершаем вход...</p>

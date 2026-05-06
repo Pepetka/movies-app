@@ -1,5 +1,3 @@
-import { toast } from '@repo/ui';
-
 import {
 	authControllerLoginV1,
 	authControllerLogoutV1,
@@ -41,11 +39,7 @@ export const refreshTokens = async (): Promise<AuthResponseDto> => {
 	return authControllerRefreshV1();
 };
 
-export const initLinkProvider = async (provider: AuthProvider): Promise<void> => {
-	try {
-		const { authUrl } = await authControllerOauthLinkInitV1(provider);
-		window.location.href = authUrl;
-	} catch {
-		toast.error('Не удалось начать привязку аккаунта');
-	}
+export const initLinkProvider = async (provider: AuthProvider): Promise<string> => {
+	const { authUrl } = await authControllerOauthLinkInitV1(provider);
+	return authUrl;
 };

@@ -10,8 +10,8 @@
 		EMPTY_LOGIN_FORM,
 		loginFormToDto
 	} from '$lib/modules/auth';
-	import OAuthSection from '$lib/modules/auth/components/OAuthSection.svelte';
 	import { ROUTES, withCurrentQuery, getSafeRedirect } from '$lib/utils';
+	import { OAuthSection } from '$lib/modules/auth';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 

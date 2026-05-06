@@ -5,6 +5,9 @@ export type { AuthProvider } from './api';
 // API
 export { initLinkProvider, refreshTokens } from './api';
 
+// Components
+export { OAuthSection } from './components';
+
 // Store
 export { authStore } from './stores';
 
