@@ -7,21 +7,15 @@ import {
 	type MutationResult,
 	type QueryResult
 } from '$lib/query';
-import type { AuthLoginDto, AuthRegisterDto, UserResponseDto } from '$lib/api/generated/types';
+import type { AuthLoginDto, UserResponseDto } from '$lib/api/generated/types';
 import { BaseStore } from '$lib/stores/base.svelte';
 
-import {
-	getCurrentUser,
-	login as apiLogin,
-	logout as apiLogout,
-	register as apiRegister
-} from '../api';
+import { getCurrentUser, login as apiLogin, logout as apiLogout } from '../api';
 import type { AuthStatus } from '../types';
 
 class AuthStore extends BaseStore {
 	private readonly _query: QueryResult<UserResponseDto>;
 	private readonly _loginMutation: MutationResult<void, AuthLoginDto>;
-	private readonly _registerMutation: MutationResult<void, AuthRegisterDto>;
 	private _checkAuthPromise: Promise<void> | null = null;
 
 	isInitialized = $state(false);
@@ -41,15 +35,6 @@ class AuthStore extends BaseStore {
 			tags: ['user'],
 			mutator: async (data) => {
 				await apiLogin(data);
-			},
-			debug: !__IS_PROD__
-		});
-
-		this._registerMutation = createMutation<void, AuthRegisterDto>({
-			key: ['auth', 'register'],
-			tags: ['user'],
-			mutator: async (data) => {
-				await apiRegister(data);
 			},
 			debug: !__IS_PROD__
 		});
@@ -100,25 +85,6 @@ class AuthStore extends BaseStore {
 		await untrack(() => this._loginMutation.mutate(data));
 	}
 
-	// === Register mutation ===
-
-	get isRegistering(): boolean {
-		return this._registerMutation.isSubmitting;
-	}
-
-	get isRegisterSuccess(): boolean {
-		return this._registerMutation.isSuccess;
-	}
-
-	get registerError(): string | null {
-		if (!this._registerMutation.error) return null;
-		return this._extractErrorMessage(this._registerMutation.error, 'Ошибка регистрации');
-	}
-
-	async register(data: AuthRegisterDto): Promise<void> {
-		await untrack(() => this._registerMutation.mutate(data));
-	}
-
 	// === Logout ===
 
 	async logout(): Promise<void> {
@@ -165,7 +131,6 @@ class AuthStore extends BaseStore {
 
 	resetForm(): void {
 		this._loginMutation.reset();
-		this._registerMutation.reset();
 	}
 }
 

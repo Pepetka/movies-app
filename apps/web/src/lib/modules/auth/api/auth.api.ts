@@ -3,26 +3,18 @@ import {
 	authControllerLogoutV1,
 	authControllerOauthLinkInitV1,
 	authControllerRefreshV1,
-	authControllerRegisterV1,
 	userControllerGetMeV1
 } from '$lib/api/generated/api';
 import type {
 	AuthLoginDto,
-	AuthRegisterDto,
 	AuthResponseDto,
+	AuthProvider,
 	UserResponseDto
 } from '$lib/api/generated/types';
 import { httpClient } from '$lib/api/client';
 
-export type AuthProvider = 'google';
-
 export const login = async (data: AuthLoginDto, signal?: AbortSignal): Promise<void> => {
 	const response = await authControllerLoginV1(data, { signal });
-	httpClient.setAccessToken(response.accessToken);
-};
-
-export const register = async (data: AuthRegisterDto, signal?: AbortSignal): Promise<void> => {
-	const response = await authControllerRegisterV1(data, { signal });
 	httpClient.setAccessToken(response.accessToken);
 };
 
