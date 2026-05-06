@@ -162,7 +162,7 @@ export class AuthController {
     name: 'redirect',
     required: false,
     description: 'Path to redirect after OAuth login',
-    schema: { type: 'string' },
+    type: String,
   })
   @ApiOperation({ summary: 'Redirect to OAuth provider authorization page' })
   @ApiResponse({ status: 302, description: 'Redirect to provider' })

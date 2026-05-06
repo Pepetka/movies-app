@@ -205,6 +205,7 @@ describe('OAuthService', () => {
       expect(userService.updateRefreshTokenHash).toHaveBeenCalledWith(
         mockUser.id,
         'hashed-refresh',
+        TX_SENTINEL,
       );
     });
 
@@ -429,6 +430,17 @@ describe('OAuthService', () => {
       await expect(
         service.linkProvider(linkUser.id, 'google', CODE, CODE_VERIFIER),
       ).rejects.toThrow(NotFoundException);
+    });
+
+    it('throws OAuthEmailNotVerifiedException when profile email is unverified', async () => {
+      providerImpl.exchangeCodeForProfile.mockResolvedValue({
+        ...mockProfile,
+        emailVerified: false,
+      });
+
+      await expect(
+        service.linkProvider(linkUser.id, 'google', CODE, CODE_VERIFIER),
+      ).rejects.toThrow(OAuthEmailNotVerifiedException);
     });
 
     it('propagates OAuthEmailNotVerifiedException from the provider', async () => {

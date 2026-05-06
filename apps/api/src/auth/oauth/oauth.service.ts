@@ -89,24 +89,23 @@ export class OAuthService {
       codeVerifier,
     );
 
-    const user = await this.db.transaction(async (tx) => {
-      return this._findOrCreateUser(tx, provider, profile);
+    return this.db.transaction(async (tx) => {
+      const user = await this._findOrCreateUser(tx, provider, profile);
+
+      const tokens = await this.authService.generateTokens(
+        user.id,
+        user.email,
+        user.role,
+      );
+      const tokenHash = await this.userService.hashToken(tokens.refreshToken);
+      await this.userService.updateRefreshTokenHash(user.id, tokenHash, tx);
+
+      this._logger.log(
+        `OAuth login successful: userId=${user.id}, provider=${provider}`,
+      );
+
+      return { ...tokens, user };
     });
-
-    const tokens = await this.authService.generateTokens(
-      user.id,
-      user.email,
-      user.role,
-    );
-    const tokenHash = await this.userService.hashToken(tokens.refreshToken);
-
-    await this.userService.updateRefreshTokenHash(user.id, tokenHash);
-
-    this._logger.log(
-      `OAuth login successful: userId=${user.id}, provider=${provider}`,
-    );
-
-    return { ...tokens, user };
   }
 
   /**
@@ -134,6 +133,10 @@ export class OAuthService {
       redirectUri,
       codeVerifier,
     );
+
+    if (!profile.emailVerified) {
+      throw new OAuthEmailNotVerifiedException();
+    }
 
     return this.db.transaction(async (tx) => {
       const user = await this.userService.findById(userId, tx);
