@@ -358,14 +358,16 @@ describe('AuthController', () => {
 
       await controller.oauthCallback(
         AuthProvider.GOOGLE,
-        { state: validSession.state, code: 'auth-code-789' },
+        'auth-code-789',
+        validSession.state,
+        undefined,
         request,
         mockReply,
       );
 
       expect(oauthService.processCallback).toHaveBeenCalledWith(
         AuthProvider.GOOGLE,
-        { state: validSession.state, code: 'auth-code-789' },
+        { code: 'auth-code-789', error: undefined },
         validSession,
       );
       expect(mockReply.cookie).toHaveBeenCalledWith(
@@ -392,7 +394,9 @@ describe('AuthController', () => {
 
       await controller.oauthCallback(
         AuthProvider.GOOGLE,
-        { state: validSession.state, code: 'auth-code-789' },
+        'auth-code-789',
+        validSession.state,
+        undefined,
         request,
         mockReply,
       );
@@ -413,10 +417,9 @@ describe('AuthController', () => {
 
       await controller.oauthCallback(
         AuthProvider.GOOGLE,
-        {
-          state: validSession.state,
-          error: 'access_denied',
-        },
+        undefined,
+        validSession.state,
+        'access_denied',
         request,
         mockReply,
       );
@@ -432,7 +435,9 @@ describe('AuthController', () => {
 
       await controller.oauthCallback(
         AuthProvider.GOOGLE,
-        { state: 'wrong-state', code: 'auth-code' },
+        'auth-code',
+        'wrong-state',
+        undefined,
         request,
         mockReply,
       );
@@ -451,7 +456,9 @@ describe('AuthController', () => {
 
       await controller.oauthCallback(
         AuthProvider.GOOGLE,
-        { state: validSession.state },
+        undefined,
+        validSession.state,
+        undefined,
         request,
         mockReply,
       );
@@ -467,7 +474,9 @@ describe('AuthController', () => {
 
       await controller.oauthCallback(
         AuthProvider.GOOGLE,
-        { state: validSession.state, code: 'auth-code' },
+        'auth-code',
+        validSession.state,
+        undefined,
         request,
         mockReply,
       );
@@ -486,7 +495,9 @@ describe('AuthController', () => {
 
       await controller.oauthCallback(
         AuthProvider.GOOGLE,
-        { state: validSession.state, code: 'auth-code' },
+        'auth-code',
+        validSession.state,
+        undefined,
         request,
         mockReply,
       );
@@ -507,7 +518,9 @@ describe('AuthController', () => {
 
       await controller.oauthCallback(
         AuthProvider.GOOGLE,
-        { state: validSession.state, code: 'auth-code' },
+        'auth-code',
+        validSession.state,
+        undefined,
         request,
         mockReply,
       );
@@ -534,7 +547,9 @@ describe('AuthController', () => {
 
       await controller.oauthCallback(
         AuthProvider.GOOGLE,
-        { state: validSession.state, code: 'auth-code' },
+        'auth-code',
+        validSession.state,
+        undefined,
         request,
         mockReply,
       );
@@ -558,7 +573,9 @@ describe('AuthController', () => {
 
       await controller.oauthCallback(
         AuthProvider.GOOGLE,
-        { state: validSession.state, code: 'auth-code' },
+        'auth-code',
+        validSession.state,
+        undefined,
         request,
         mockReply,
       );
@@ -583,7 +600,9 @@ describe('AuthController', () => {
 
       await controller.oauthCallback(
         AuthProvider.GOOGLE,
-        { state: validSession.state, code: 'auth-code' },
+        'auth-code',
+        validSession.state,
+        undefined,
         request,
         mockReply,
       );
@@ -610,7 +629,9 @@ describe('AuthController', () => {
 
       await controller.oauthCallback(
         AuthProvider.GOOGLE,
-        { state: validSession.state, code: 'auth-code' },
+        'auth-code',
+        validSession.state,
+        undefined,
         request,
         mockReply,
       );
