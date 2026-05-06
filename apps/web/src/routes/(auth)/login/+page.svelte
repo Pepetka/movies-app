@@ -4,6 +4,7 @@
 
 	import {
 		authStore,
+		OAuthSection,
 		type LoginFormData,
 		validateLoginForm,
 		createFormFieldValidator,
@@ -11,7 +12,6 @@
 		loginFormToDto
 	} from '$lib/modules/auth';
 	import { ROUTES, withCurrentQuery, getSafeRedirect } from '$lib/utils';
-	import { OAuthSection } from '$lib/modules/auth';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 

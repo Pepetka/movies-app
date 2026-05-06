@@ -40,8 +40,8 @@
 	</div>
 
 	<Card variant="outlined" size="responsive" class="form-card">
-		<div class="form-card-header">
-			<h2 class="form-card-title" role="alert">{reason}</h2>
+		<div class="form-card-header" role="alert">
+			<h2 class="form-card-title">{reason}</h2>
 		</div>
 
 		<a href={ROUTES.LOGIN} class="form-link">Вернуться к входу</a>

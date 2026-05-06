@@ -157,7 +157,7 @@ export class AuthController {
   @Public()
   @Get('oauth/:provider')
   @Throttle(THROTTLE.auth.oauth)
-  @ApiParam({ name: 'provider', enum: Object.values(AuthProvider) })
+  @ApiParam({ name: 'provider', enum: AuthProvider, enumName: 'AuthProvider' })
   @ApiQuery({
     name: 'redirect',
     required: false,
@@ -201,7 +201,7 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @Throttle(THROTTLE.auth.oauth)
   @ApiBearerAuth('access-token')
-  @ApiParam({ name: 'provider', enum: Object.values(AuthProvider) })
+  @ApiParam({ name: 'provider', enum: AuthProvider, enumName: 'AuthProvider' })
   @ApiOperation({
     summary: 'Init OAuth account linking — returns provider authUrl',
   })
@@ -249,7 +249,7 @@ export class AuthController {
     }),
   )
   @Throttle(THROTTLE.auth.oauth)
-  @ApiParam({ name: 'provider', enum: Object.values(AuthProvider) })
+  @ApiParam({ name: 'provider', enum: AuthProvider, enumName: 'AuthProvider' })
   @ApiOperation({ summary: 'OAuth callback — redirects to SPA after auth' })
   @ApiResponse({
     status: 302,

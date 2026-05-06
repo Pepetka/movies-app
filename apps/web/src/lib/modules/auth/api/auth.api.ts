@@ -36,7 +36,9 @@ export const getCurrentUser = async (signal?: AbortSignal): Promise<UserResponse
 };
 
 export const refreshTokens = async (): Promise<AuthResponseDto> => {
-	return authControllerRefreshV1();
+	const response = await authControllerRefreshV1();
+	httpClient.setAccessToken(response.accessToken);
+	return response;
 };
 
 export const initLinkProvider = async (provider: AuthProvider): Promise<string> => {

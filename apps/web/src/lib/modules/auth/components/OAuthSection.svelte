@@ -20,7 +20,7 @@
 <Button
 	variant="secondary"
 	fullWidth
-	class={(className ?? '') as string}
+	class={className}
 	href={`${__API_URL__}/api/v1/auth/oauth/google?redirect=${encodeURIComponent(getSafeRedirect())}`}
 	{...restProps}
 >
