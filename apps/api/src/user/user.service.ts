@@ -35,14 +35,21 @@ export class UserService {
 
     const passwordHash = await this._hashPassword(dto.password);
 
-    const user = await this.userRepository.create({
-      name: dto.name,
-      email: normalizedEmail,
-      passwordHash,
-    });
+    try {
+      const user = await this.userRepository.create({
+        name: dto.name,
+        email: normalizedEmail,
+        passwordHash,
+      });
 
-    this._logger.log(`User created with id: ${user.id}`);
-    return user;
+      this._logger.log(`User created with id: ${user.id}`);
+      return user;
+    } catch (error) {
+      if ((error as { code?: string }).code === '23505') {
+        throw new EmailAlreadyInUseException(normalizedEmail);
+      }
+      throw error;
+    }
   }
 
   /**
@@ -62,18 +69,25 @@ export class UserService {
       throw new EmailAlreadyInUseException(normalizedEmail);
     }
 
-    const user = await this.userRepository.create(
-      {
-        name: data.name,
-        email: normalizedEmail,
-        passwordHash: null,
-        avatar: data.avatar ?? null,
-      },
-      tx,
-    );
+    try {
+      const user = await this.userRepository.create(
+        {
+          name: data.name,
+          email: normalizedEmail,
+          passwordHash: null,
+          avatar: data.avatar ?? null,
+        },
+        tx,
+      );
 
-    this._logger.log(`OAuth user created with id: ${user.id}`);
-    return user;
+      this._logger.log(`OAuth user created with id: ${user.id}`);
+      return user;
+    } catch (error) {
+      if ((error as { code?: string }).code === '23505') {
+        throw new EmailAlreadyInUseException(normalizedEmail);
+      }
+      throw error;
+    }
   }
 
   /**

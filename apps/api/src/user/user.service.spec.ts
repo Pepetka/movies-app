@@ -111,6 +111,17 @@ describe('UserService', () => {
       );
       expect(userRepository.create).not.toHaveBeenCalled();
     });
+
+    it('should throw EmailAlreadyInUseException on unique constraint violation (race condition)', async () => {
+      userRepository.findByEmail.mockResolvedValue(null);
+      const dbError = new Error('Unique violation') as Error & { code: string };
+      dbError.code = '23505';
+      userRepository.create.mockRejectedValue(dbError);
+
+      await expect(service.create(createUserDto)).rejects.toThrow(
+        EmailAlreadyInUseException,
+      );
+    });
   });
 
   describe('createOAuthUser', () => {
@@ -180,6 +191,17 @@ describe('UserService', () => {
         EmailAlreadyInUseException,
       );
       expect(userRepository.create).not.toHaveBeenCalled();
+    });
+
+    it('should throw EmailAlreadyInUseException on unique constraint violation (race condition)', async () => {
+      userRepository.findByEmail.mockResolvedValue(null);
+      const dbError = new Error('Unique violation') as Error & { code: string };
+      dbError.code = '23505';
+      userRepository.create.mockRejectedValue(dbError);
+
+      await expect(service.createOAuthUser(oauthUserData)).rejects.toThrow(
+        EmailAlreadyInUseException,
+      );
     });
   });
 
