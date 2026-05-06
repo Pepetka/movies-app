@@ -23,7 +23,7 @@ export class OAuthProviderRegistry {
    * Returns the provider implementation for the given name.
    *
    * @throws UnsupportedOAuthProviderException (400) if no provider is registered under that name
-   * @throws OAuthProviderNotConfiguredException (501) if the provider exists but env is missing
+   * @throws OAuthProviderNotConfiguredException (503) if the provider exists but env is missing
    */
   get(name: AuthProvider): OAuthProvider {
     const provider = this._providers.get(name);

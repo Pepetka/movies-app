@@ -8,7 +8,16 @@ export interface OAuthSessionInit {
 }
 
 const isSafeRedirect = (redirect: string): boolean => {
-  return /^\/[a-zA-Z0-9_\-/]*$/.test(redirect);
+  try {
+    const url = new URL(redirect, 'http://localhost');
+    return (
+      url.host === 'localhost' &&
+      url.pathname.startsWith('/') &&
+      !url.pathname.startsWith('//')
+    );
+  } catch {
+    return false;
+  }
 };
 
 /**
@@ -20,7 +29,7 @@ const isSafeRedirect = (redirect: string): boolean => {
  *
  * @param intent - 'login' for new sessions, 'link' for attaching to a logged-in user
  * @param userId - required when `intent === 'link'`
- * @param redirect - optional safe redirect path (validated: must start with '/' and not '//')
+ * @param redirect - optional safe redirect path (validated: must start with '/' and not '//'; query params are allowed)
  * @throws Error when `intent === 'link'` and `userId` is missing
  */
 export const createOAuthSession = (

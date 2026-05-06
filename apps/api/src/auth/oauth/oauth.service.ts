@@ -51,7 +51,7 @@ export class OAuthService {
    * Builds the provider authorization URL for the given OAuth flow.
    *
    * @throws UnsupportedOAuthProviderException (400) if provider name is unknown
-   * @throws OAuthProviderNotConfiguredException (501) if provider env is missing
+   * @throws OAuthProviderNotConfiguredException (503) if provider env is missing
    */
   buildAuthUrl(
     provider: AuthProvider,

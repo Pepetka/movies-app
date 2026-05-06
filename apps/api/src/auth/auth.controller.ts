@@ -9,8 +9,6 @@ import {
   HttpCode,
   HttpStatus,
   UseGuards,
-  UsePipes,
-  ValidationPipe,
   Res,
   SerializeOptions,
   Inject,
@@ -39,17 +37,16 @@ import {
   OAUTH_SESSION_COOKIE_PATH,
 } from './oauth/oauth.constants';
 import {
-  AuthLoginDto,
-  AuthRegisterDto,
-  AuthResponseDto,
-  OAuthCallbackQueryDto,
-  OAuthLinkInitResponseDto,
-} from './dto';
-import {
   REFRESH_COOKIE_OPTIONS,
   REFRESH_COOKIE_NAME,
   RefreshCookieOptions,
 } from './auth.constants';
+import {
+  AuthLoginDto,
+  AuthRegisterDto,
+  AuthResponseDto,
+  OAuthLinkInitResponseDto,
+} from './dto';
 import { ParseAuthProviderPipe } from './oauth/pipes/parse-auth-provider.pipe';
 import { createOAuthSession } from './oauth/utils/create-oauth-session.util';
 import { readOAuthSession } from './oauth/utils/read-oauth-session.util';
@@ -69,6 +66,20 @@ export class AuthController {
     @Inject(REFRESH_COOKIE_OPTIONS)
     private readonly cookieOptions: RefreshCookieOptions,
   ) {}
+
+  private _setOAuthSessionCookie(
+    reply: FastifyReply,
+    session: OAuthSession,
+  ): void {
+    reply.cookie(OAUTH_SESSION_COOKIE_NAME, JSON.stringify(session), {
+      httpOnly: true,
+      signed: true,
+      secure: this.cookieOptions.secure,
+      sameSite: 'lax',
+      path: OAUTH_SESSION_COOKIE_PATH,
+      maxAge: OAUTH_SESSION_COOKIE_MAX_AGE,
+    });
+  }
 
   @Public()
   @Post('register')
@@ -179,14 +190,7 @@ export class AuthController {
       redirect,
     );
 
-    reply.cookie(OAUTH_SESSION_COOKIE_NAME, JSON.stringify(session), {
-      httpOnly: true,
-      signed: true,
-      secure: this.cookieOptions.secure,
-      sameSite: 'lax',
-      path: OAUTH_SESSION_COOKIE_PATH,
-      maxAge: OAUTH_SESSION_COOKIE_MAX_AGE,
-    });
+    this._setOAuthSessionCookie(reply, session);
 
     const redirectUrl = this.oauthService.buildAuthUrl(
       provider,
@@ -212,7 +216,7 @@ export class AuthController {
   })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 400, description: 'Unsupported provider' })
-  @ApiResponse({ status: 501, description: 'Provider not configured' })
+  @ApiResponse({ status: 503, description: 'Provider not configured' })
   @SerializeOptions({ type: OAuthLinkInitResponseDto })
   async oauthLinkInit(
     @Param('provider', ParseAuthProviderPipe) provider: AuthProvider,
@@ -221,14 +225,7 @@ export class AuthController {
   ): Promise<{ authUrl: string }> {
     const { session, codeChallenge } = createOAuthSession('link', user.id);
 
-    reply.cookie(OAUTH_SESSION_COOKIE_NAME, JSON.stringify(session), {
-      httpOnly: true,
-      signed: true,
-      secure: this.cookieOptions.secure,
-      sameSite: 'lax',
-      path: OAUTH_SESSION_COOKIE_PATH,
-      maxAge: OAUTH_SESSION_COOKIE_MAX_AGE,
-    });
+    this._setOAuthSessionCookie(reply, session);
 
     const authUrl = this.oauthService.buildAuthUrl(
       provider,
@@ -241,15 +238,11 @@ export class AuthController {
 
   @Public()
   @Get('oauth/:provider/callback')
-  @UsePipes(
-    new ValidationPipe({
-      whitelist: true,
-      forbidNonWhitelisted: false,
-      transform: true,
-    }),
-  )
   @Throttle(THROTTLE.auth.oauth)
   @ApiParam({ name: 'provider', enum: AuthProvider, enumName: 'AuthProvider' })
+  @ApiQuery({ name: 'code', required: false, type: String })
+  @ApiQuery({ name: 'state', required: false, type: String })
+  @ApiQuery({ name: 'error', required: false, type: String })
   @ApiOperation({ summary: 'OAuth callback — redirects to SPA after auth' })
   @ApiResponse({
     status: 302,
@@ -257,7 +250,9 @@ export class AuthController {
   })
   async oauthCallback(
     @Param('provider', ParseAuthProviderPipe) provider: AuthProvider,
-    @Query() query: OAuthCallbackQueryDto,
+    @Query('code') code: string | undefined,
+    @Query('state') state: string | undefined,
+    @Query('error') error: string | undefined,
     @Req() request: FastifyRequest,
     @Res({ passthrough: true }) reply: FastifyReply,
   ): Promise<void> {
@@ -276,7 +271,7 @@ export class AuthController {
       );
     }
 
-    if (session.state !== query.state) {
+    if (session.state !== state) {
       reply.clearCookie(OAUTH_SESSION_COOKIE_NAME, {
         path: OAUTH_SESSION_COOKIE_PATH,
         sameSite: 'lax',
@@ -296,7 +291,11 @@ export class AuthController {
 
     try {
       const { redirectUrl, refreshToken } =
-        await this.oauthService.processCallback(provider, query, session);
+        await this.oauthService.processCallback(
+          provider,
+          { code, error },
+          session,
+        );
 
       if (refreshToken) {
         reply.cookie(REFRESH_COOKIE_NAME, refreshToken, this.cookieOptions);

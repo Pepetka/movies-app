@@ -149,6 +149,14 @@ export class GoogleOAuthProvider implements OAuthProvider {
         name: userData.name?.trim() || normalizedEmail.split('@')[0],
         avatar: userData.picture ?? null,
       };
+    } catch (error) {
+      if (error instanceof Error && error.name === 'AbortError') {
+        this._logger.error('Google OAuth request timed out');
+        throw new OAuthCodeExchangeException(
+          'Google token/userinfo request timed out',
+        );
+      }
+      throw error;
     } finally {
       clearTimeout(tokenTimeout);
       if (userInfoTimeout) {
