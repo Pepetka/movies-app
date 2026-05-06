@@ -24,8 +24,9 @@
 
 	const registerHref = $derived(withCurrentQuery(ROUTES.REGISTER, ['redirect']));
 
+	const oauthError = $derived(page.url.searchParams.get('oauth_error'));
+
 	$effect(() => {
-		const oauthError = page.url.searchParams.get('oauth_error');
 		if (oauthError === '1') {
 			toast.error('Ошибка входа через OAuth');
 			const url = new URL(page.url);
