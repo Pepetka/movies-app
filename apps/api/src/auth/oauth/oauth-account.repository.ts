@@ -7,7 +7,7 @@ import {
   type NewOAuthAccount,
   type AuthProvider,
 } from '$db/schemas';
-import { DrizzleDb, DrizzleTx } from '$db/types/drizzle.types';
+import type { DrizzleDb, DrizzleTx } from '$db/types/drizzle.types';
 import { DRIZZLE } from '$db/db.module';
 
 @Injectable()

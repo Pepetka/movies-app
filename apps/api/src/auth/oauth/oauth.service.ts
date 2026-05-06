@@ -11,6 +11,7 @@ import type { DrizzleDb, DrizzleTx } from '$db/types/drizzle.types';
 import type { AuthProvider, User } from '$db/schemas';
 import { UserService } from '$src/user/user.service';
 import { AuthService } from '$src/auth/auth.service';
+import { parsePrimaryWebUrl } from '$common/utils';
 import { DRIZZLE } from '$db/db.module';
 
 import {
@@ -21,10 +22,14 @@ import {
   OAuthProviderNotConfiguredException,
   UnsupportedOAuthProviderException,
 } from './exceptions';
+import {
+  OAUTH_ERROR_PATH,
+  OAUTH_LINK_SUCCESS_PATH,
+  OAUTH_SUCCESS_PATH,
+} from './oauth.constants';
+import type { OAuthProfile, OAuthSession } from './types/oauth.types';
 import { OAuthAccountRepository } from './oauth-account.repository';
 import { OAuthProviderRegistry } from './oauth-provider.registry';
-import type { OAuthProfile } from './types/oauth.types';
-import { OAUTH_ERROR_PATH } from './oauth.constants';
 
 export interface OAuthCallbackResult {
   accessToken: string;
@@ -84,24 +89,24 @@ export class OAuthService {
       codeVerifier,
     );
 
-    return this.db.transaction(async (tx) => {
-      const user = await this._findOrCreateUser(tx, provider, profile);
-
-      const tokens = await this.authService.generateTokens(
-        user.id,
-        user.email,
-        user.role,
-      );
-      const tokenHash = await this.userService.hashToken(tokens.refreshToken);
-
-      await this.userService.updateRefreshTokenHash(user.id, tokenHash, tx);
-
-      this._logger.log(
-        `OAuth login successful: userId=${user.id}, provider=${provider}`,
-      );
-
-      return { ...tokens, user };
+    const user = await this.db.transaction(async (tx) => {
+      return this._findOrCreateUser(tx, provider, profile);
     });
+
+    const tokens = await this.authService.generateTokens(
+      user.id,
+      user.email,
+      user.role,
+    );
+    const tokenHash = await this.userService.hashToken(tokens.refreshToken);
+
+    await this.userService.updateRefreshTokenHash(user.id, tokenHash);
+
+    this._logger.log(
+      `OAuth login successful: userId=${user.id}, provider=${provider}`,
+    );
+
+    return { ...tokens, user };
   }
 
   /**
@@ -274,14 +279,62 @@ export class OAuthService {
   }
 
   /**
+   * Processes an OAuth callback request: validates query params,
+   * dispatches by session intent, and returns the redirect URL.
+   *
+   * @returns Object with redirectUrl and optional refreshToken (for login intent)
+   */
+  async processCallback(
+    provider: AuthProvider,
+    query: { code?: string; error?: string },
+    session: OAuthSession,
+  ): Promise<{ redirectUrl: string; refreshToken?: string }> {
+    if (query.error) {
+      return { redirectUrl: this.buildErrorUrl(query.error) };
+    }
+    if (!query.code) {
+      return { redirectUrl: this.buildErrorUrl('missing_code') };
+    }
+
+    if (session.intent === 'login') {
+      const result = await this.handleCallback(
+        provider,
+        query.code,
+        session.codeVerifier,
+      );
+      const webUrl = this.getPrimaryWebUrl();
+      const successUrl = new URL(`${webUrl}${OAUTH_SUCCESS_PATH}`);
+      if (session.redirect) {
+        successUrl.searchParams.set('redirect', session.redirect);
+      }
+      return {
+        redirectUrl: successUrl.toString(),
+        refreshToken: result.refreshToken,
+      };
+    }
+
+    if (session.intent === 'link') {
+      if (!session.userId) {
+        return { redirectUrl: this.buildErrorUrl('invalid_session') };
+      }
+      await this.linkProvider(
+        session.userId,
+        provider,
+        query.code,
+        session.codeVerifier,
+      );
+      const webUrl = this.getPrimaryWebUrl();
+      return { redirectUrl: `${webUrl}${OAUTH_LINK_SUCCESS_PATH}` };
+    }
+
+    return { redirectUrl: this.buildErrorUrl('invalid_intent') };
+  }
+
+  /**
    * Returns the primary web URL from the comma-separated WEB_URL env var.
    */
   getPrimaryWebUrl(): string {
-    return this.configService
-      .getOrThrow<string>('WEB_URL')
-      .split(',')[0]
-      .trim()
-      .replace(/\/$/, '');
+    return parsePrimaryWebUrl(this.configService.getOrThrow<string>('WEB_URL'));
   }
 
   /**
@@ -295,11 +348,22 @@ export class OAuthService {
   }
 
   /**
+   * Maps provider name to env variable prefix.
+   */
+  private _getProviderEnvPrefix(provider: AuthProvider): string {
+    const mapping: Record<AuthProvider, string> = {
+      google: 'GOOGLE',
+    };
+    return mapping[provider];
+  }
+
+  /**
    * Looks up the redirect URI for the given provider via env var
-   * `${PROVIDER_UPPERCASE}_REDIRECT_URI`. Throws 501 if not configured.
+   * `${PROVIDER_PREFIX}_REDIRECT_URI`. Throws 501 if not configured.
    */
   private _getRedirectUri(provider: AuthProvider): string {
-    const key = `${provider.toUpperCase()}_REDIRECT_URI`;
+    const envPrefix = this._getProviderEnvPrefix(provider);
+    const key = `${envPrefix}_REDIRECT_URI`;
     const uri = this.configService.get<string>(key);
     if (!uri) {
       throw new OAuthProviderNotConfiguredException(provider);

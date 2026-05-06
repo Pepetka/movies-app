@@ -205,7 +205,6 @@ describe('OAuthService', () => {
       expect(userService.updateRefreshTokenHash).toHaveBeenCalledWith(
         mockUser.id,
         'hashed-refresh',
-        expect.anything(),
       );
     });
 

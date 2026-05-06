@@ -1,10 +1,9 @@
-import { ArgumentMetadata, Injectable, PipeTransform } from '@nestjs/common';
+import { ArgumentMetadata, PipeTransform } from '@nestjs/common';
 
 import { authProviderEnum, type AuthProvider } from '$db/schemas';
 
 import { UnsupportedOAuthProviderException } from '../exceptions';
 
-@Injectable()
 export class ParseAuthProviderPipe implements PipeTransform<
   string,
   AuthProvider

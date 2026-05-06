@@ -12,6 +12,7 @@ import {
   UsePipes,
   ValidationPipe,
   Res,
+  SerializeOptions,
   Inject,
   Logger,
 } from '@nestjs/common';
@@ -33,11 +34,9 @@ import { authProviderEnum } from '$db/schemas';
 import { THROTTLE } from '$common/configs';
 
 import {
-  OAUTH_LINK_SUCCESS_PATH,
   OAUTH_SESSION_COOKIE_NAME,
   OAUTH_SESSION_COOKIE_MAX_AGE,
   OAUTH_SESSION_COOKIE_PATH,
-  OAUTH_SUCCESS_PATH,
 } from './oauth/oauth.constants';
 import {
   AuthLoginDto,
@@ -163,6 +162,7 @@ export class AuthController {
     name: 'redirect',
     required: false,
     description: 'Path to redirect after OAuth login',
+    schema: { type: 'string' },
   })
   @ApiOperation({ summary: 'Redirect to OAuth provider authorization page' })
   @ApiResponse({ status: 302, description: 'Redirect to provider' })
@@ -213,6 +213,7 @@ export class AuthController {
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 400, description: 'Unsupported provider' })
   @ApiResponse({ status: 501, description: 'Provider not configured' })
+  @SerializeOptions({ type: OAuthLinkInitResponseDto })
   async oauthLinkInit(
     @Param('provider', ParseAuthProviderPipe) provider: AuthProvider,
     @User() user: UserType,
@@ -293,65 +294,15 @@ export class AuthController {
       secure: this.cookieOptions.secure,
     });
 
-    if (query.error) {
-      return reply.redirect(
-        this.oauthService.buildErrorUrl(query.error),
-        HttpStatus.FOUND,
-      );
-    }
-    if (!query.code) {
-      return reply.redirect(
-        this.oauthService.buildErrorUrl('missing_code'),
-        HttpStatus.FOUND,
-      );
-    }
-
     try {
-      if (session.intent === 'login') {
-        const result = await this.oauthService.handleCallback(
-          provider,
-          query.code,
-          session.codeVerifier,
-        );
+      const { redirectUrl, refreshToken } =
+        await this.oauthService.processCallback(provider, query, session);
 
-        reply.cookie(
-          REFRESH_COOKIE_NAME,
-          result.refreshToken,
-          this.cookieOptions,
-        );
-
-        const webUrl = this.oauthService.getPrimaryWebUrl();
-        const successUrl = new URL(`${webUrl}${OAUTH_SUCCESS_PATH}`);
-        if (session.redirect) {
-          successUrl.searchParams.set('redirect', session.redirect);
-        }
-        reply.redirect(successUrl.toString(), HttpStatus.FOUND);
-        return;
+      if (refreshToken) {
+        reply.cookie(REFRESH_COOKIE_NAME, refreshToken, this.cookieOptions);
       }
 
-      if (session.intent === 'link') {
-        if (!session.userId) {
-          reply.redirect(
-            this.oauthService.buildErrorUrl('invalid_session'),
-            HttpStatus.FOUND,
-          );
-          return;
-        }
-        await this.oauthService.linkProvider(
-          session.userId,
-          provider,
-          query.code,
-          session.codeVerifier,
-        );
-        const webUrl = this.oauthService.getPrimaryWebUrl();
-        reply.redirect(`${webUrl}${OAUTH_LINK_SUCCESS_PATH}`, HttpStatus.FOUND);
-        return;
-      }
-
-      reply.redirect(
-        this.oauthService.buildErrorUrl('invalid_intent'),
-        HttpStatus.FOUND,
-      );
+      reply.redirect(redirectUrl, HttpStatus.FOUND);
     } catch (e) {
       const reason = this.oauthService.mapErrorToReason(e);
       if (reason === 'oauth_failed') {

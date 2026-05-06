@@ -15,6 +15,7 @@ import {
   OAUTH_SESSION_COOKIE_PATH,
   OAUTH_ERROR_PATH,
   OAUTH_LINK_SUCCESS_PATH,
+  OAUTH_SUCCESS_PATH,
 } from './oauth/oauth.constants';
 import {
   REFRESH_COOKIE_OPTIONS,
@@ -69,6 +70,7 @@ describe('AuthController', () => {
     buildAuthUrl: jest.fn(),
     handleCallback: jest.fn(),
     linkProvider: jest.fn(),
+    processCallback: jest.fn(),
     mapErrorToReason: jest.fn().mockImplementation((e: Error) => {
       if (e.constructor.name === 'OAuthEmailNotVerifiedException')
         return 'oauth_email_unverified';
@@ -340,9 +342,9 @@ describe('AuthController', () => {
 
     it('should redirect to /oauth/success on success and set refresh cookie', async () => {
       const request = mockRequest();
-      oauthService.handleCallback.mockResolvedValue({
-        ...mockTokens,
-        user: mockUser,
+      oauthService.processCallback.mockResolvedValue({
+        redirectUrl: `http://localhost:5173${OAUTH_SUCCESS_PATH}`,
+        refreshToken: mockTokens.refreshToken,
       });
 
       await controller.oauthCallback(
@@ -352,10 +354,10 @@ describe('AuthController', () => {
         mockReply,
       );
 
-      expect(oauthService.handleCallback).toHaveBeenCalledWith(
+      expect(oauthService.processCallback).toHaveBeenCalledWith(
         'google',
-        'auth-code-789',
-        validSession.codeVerifier,
+        { state: validSession.state, code: 'auth-code-789' },
+        validSession,
       );
       expect(mockReply.cookie).toHaveBeenCalledWith(
         REFRESH_COOKIE_NAME,
@@ -375,9 +377,8 @@ describe('AuthController', () => {
           redirect: '/invite/test-token',
         }),
       });
-      oauthService.handleCallback.mockResolvedValue({
-        ...mockTokens,
-        user: mockUser,
+      oauthService.processCallback.mockResolvedValue({
+        redirectUrl: `http://localhost:5173${OAUTH_SUCCESS_PATH}?redirect=%2Finvite%2Ftest-token`,
       });
 
       await controller.oauthCallback(
@@ -397,6 +398,9 @@ describe('AuthController', () => {
 
     it('should redirect to /oauth/error on access_denied', async () => {
       const request = mockRequest();
+      oauthService.processCallback.mockResolvedValue({
+        redirectUrl: `http://localhost:5173${OAUTH_ERROR_PATH}?reason=access_denied`,
+      });
 
       await controller.oauthCallback(
         'google',
@@ -432,6 +436,9 @@ describe('AuthController', () => {
 
     it('should redirect to /oauth/error on missing code', async () => {
       const request = mockRequest();
+      oauthService.processCallback.mockResolvedValue({
+        redirectUrl: `http://localhost:5173${OAUTH_ERROR_PATH}?reason=missing_code`,
+      });
 
       await controller.oauthCallback(
         'google',
@@ -464,7 +471,7 @@ describe('AuthController', () => {
 
     it('should redirect to /oauth/error on email_unverified', async () => {
       const request = mockRequest();
-      oauthService.handleCallback.mockRejectedValue(
+      oauthService.processCallback.mockRejectedValue(
         new OAuthEmailNotVerifiedException(),
       );
 
@@ -485,7 +492,7 @@ describe('AuthController', () => {
 
     it('should redirect to /oauth/error on code exchange failure', async () => {
       const request = mockRequest();
-      oauthService.handleCallback.mockRejectedValue(
+      oauthService.processCallback.mockRejectedValue(
         new OAuthCodeExchangeException('token error'),
       );
 
@@ -512,7 +519,9 @@ describe('AuthController', () => {
           userId: mockUser.id,
         }),
       });
-      oauthService.linkProvider.mockResolvedValue(mockUser);
+      oauthService.processCallback.mockResolvedValue({
+        redirectUrl: `http://localhost:5173${OAUTH_LINK_SUCCESS_PATH}`,
+      });
 
       await controller.oauthCallback(
         'google',
@@ -521,12 +530,6 @@ describe('AuthController', () => {
         mockReply,
       );
 
-      expect(oauthService.linkProvider).toHaveBeenCalledWith(
-        mockUser.id,
-        'google',
-        'auth-code',
-        validSession.codeVerifier,
-      );
       expect(mockReply.redirect).toHaveBeenCalledWith(
         expect.stringContaining(OAUTH_LINK_SUCCESS_PATH),
         302,
@@ -539,6 +542,9 @@ describe('AuthController', () => {
           ...validSession,
           intent: 'link',
         }),
+      });
+      oauthService.processCallback.mockResolvedValue({
+        redirectUrl: `http://localhost:5173${OAUTH_ERROR_PATH}?reason=invalid_session`,
       });
 
       await controller.oauthCallback(
@@ -562,7 +568,7 @@ describe('AuthController', () => {
           userId: mockUser.id,
         }),
       });
-      oauthService.linkProvider.mockRejectedValue(
+      oauthService.processCallback.mockRejectedValue(
         new OAuthLinkEmailMismatchException(),
       );
 
@@ -589,7 +595,7 @@ describe('AuthController', () => {
           userId: mockUser.id,
         }),
       });
-      oauthService.linkProvider.mockRejectedValue(
+      oauthService.processCallback.mockRejectedValue(
         new OAuthAccountAlreadyLinkedException(),
       );
 
