@@ -27,10 +27,10 @@ import {
 import type { FastifyReply, FastifyRequest } from 'fastify';
 import { Throttle } from '@nestjs/throttler';
 
-import type { User as UserType, AuthProvider } from '$db/schemas';
 import { CsrfProtected, Public, User } from '$common/decorators';
 import { Cookie } from '$common/decorators/cookie.decorator';
-import { authProviderEnum } from '$db/schemas';
+import type { User as UserType } from '$db/schemas';
+import { AuthProvider } from '$common/enums';
 import { THROTTLE } from '$common/configs';
 
 import {
@@ -52,7 +52,7 @@ import {
 } from './auth.constants';
 import { ParseAuthProviderPipe } from './oauth/pipes/parse-auth-provider.pipe';
 import { createOAuthSession } from './oauth/utils/create-oauth-session.util';
-import { readOAuthSession } from './oauth/utils/parse-oauth-session.util';
+import { readOAuthSession } from './oauth/utils/read-oauth-session.util';
 import type { OAuthSession } from './oauth/types/oauth.types';
 import { RefreshGuard } from './guards/refresh.guard';
 import { OAuthService } from './oauth/oauth.service';
@@ -157,7 +157,7 @@ export class AuthController {
   @Public()
   @Get('oauth/:provider')
   @Throttle(THROTTLE.auth.oauth)
-  @ApiParam({ name: 'provider', enum: [...authProviderEnum.enumValues] })
+  @ApiParam({ name: 'provider', enum: Object.values(AuthProvider) })
   @ApiQuery({
     name: 'redirect',
     required: false,
@@ -167,7 +167,7 @@ export class AuthController {
   @ApiOperation({ summary: 'Redirect to OAuth provider authorization page' })
   @ApiResponse({ status: 302, description: 'Redirect to provider' })
   @ApiResponse({ status: 400, description: 'Unsupported provider' })
-  @ApiResponse({ status: 501, description: 'Provider not configured' })
+  @ApiResponse({ status: 503, description: 'Provider not configured' })
   async oauthRedirect(
     @Param('provider', ParseAuthProviderPipe) provider: AuthProvider,
     @Query('redirect') redirect: string | undefined,
@@ -201,7 +201,7 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @Throttle(THROTTLE.auth.oauth)
   @ApiBearerAuth('access-token')
-  @ApiParam({ name: 'provider', enum: [...authProviderEnum.enumValues] })
+  @ApiParam({ name: 'provider', enum: Object.values(AuthProvider) })
   @ApiOperation({
     summary: 'Init OAuth account linking — returns provider authUrl',
   })
@@ -249,7 +249,7 @@ export class AuthController {
     }),
   )
   @Throttle(THROTTLE.auth.oauth)
-  @ApiParam({ name: 'provider', enum: [...authProviderEnum.enumValues] })
+  @ApiParam({ name: 'provider', enum: Object.values(AuthProvider) })
   @ApiOperation({ summary: 'OAuth callback — redirects to SPA after auth' })
   @ApiResponse({
     status: 302,

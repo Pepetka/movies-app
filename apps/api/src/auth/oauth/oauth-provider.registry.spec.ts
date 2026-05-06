@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 
-import type { AuthProvider } from '$db/schemas';
+import { AuthProvider } from '$common/enums';
 
 import {
   OAuthProviderNotConfiguredException,
@@ -10,7 +10,7 @@ import { OAuthProviderRegistry } from './oauth-provider.registry';
 import { OAUTH_PROVIDERS } from './oauth.constants';
 
 const createGoogleMock = (configured: boolean) => ({
-  name: 'google',
+  name: AuthProvider.GOOGLE,
   isConfigured: jest.fn(() => configured),
   buildAuthUrl: jest.fn(),
   exchangeCodeForProfile: jest.fn(),
@@ -34,7 +34,7 @@ describe('OAuthProviderRegistry', () => {
 
   it('returns the configured google provider', async () => {
     const { registry, googleMock } = await buildRegistry(true);
-    const provider = registry.get('google');
+    const provider = registry.get(AuthProvider.GOOGLE);
     expect(provider).toBe(googleMock);
   });
 
@@ -47,7 +47,7 @@ describe('OAuthProviderRegistry', () => {
 
   it('throws OAuthProviderNotConfiguredException when env is missing', async () => {
     const { registry } = await buildRegistry(false);
-    expect(() => registry.get('google')).toThrow(
+    expect(() => registry.get(AuthProvider.GOOGLE)).toThrow(
       OAuthProviderNotConfiguredException,
     );
   });

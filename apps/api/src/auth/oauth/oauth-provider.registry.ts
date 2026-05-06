@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 
-import type { AuthProvider } from '$db/schemas';
+import { AuthProvider } from '$common/enums';
 
 import {
   OAuthProviderNotConfiguredException,

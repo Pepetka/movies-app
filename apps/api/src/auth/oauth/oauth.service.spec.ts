@@ -2,8 +2,8 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
+import { AuthProvider, UserRole } from '$common/enums';
 import { UserService } from '$src/user/user.service';
-import { UserRole } from '$common/enums';
 import { DRIZZLE } from '$db/db.module';
 
 import {
@@ -38,7 +38,7 @@ const mockUser = {
 const mockOAuthAccount = {
   id: 10,
   userId: mockUser.id,
-  provider: 'google' as const,
+  provider: AuthProvider.GOOGLE as const,
   providerAccountId: 'google-user-123',
   avatar: 'https://example.com/avatar.jpg',
   createdAt: new Date(),
@@ -132,9 +132,13 @@ describe('OAuthService', () => {
 
   describe('buildAuthUrl', () => {
     it('delegates to the provider with the resolved redirect URI', () => {
-      const result = service.buildAuthUrl('google', 'state-1', 'challenge-1');
+      const result = service.buildAuthUrl(
+        AuthProvider.GOOGLE,
+        'state-1',
+        'challenge-1',
+      );
       expect(result).toBe('https://accounts.google.com/...');
-      expect(providerRegistry.get).toHaveBeenCalledWith('google');
+      expect(providerRegistry.get).toHaveBeenCalledWith(AuthProvider.GOOGLE);
       expect(providerImpl.buildAuthUrl).toHaveBeenCalledWith({
         redirectUri: REDIRECT_URI,
         state: 'state-1',
@@ -158,7 +162,7 @@ describe('OAuthService', () => {
       const noUriService = module.get<OAuthService>(OAuthService);
 
       expect(() =>
-        noUriService.buildAuthUrl('google', 'state', 'challenge'),
+        noUriService.buildAuthUrl(AuthProvider.GOOGLE, 'state', 'challenge'),
       ).toThrow(OAuthProviderNotConfiguredException);
     });
   });
@@ -171,12 +175,12 @@ describe('OAuthService', () => {
       userService.findById.mockResolvedValue(mockUser);
 
       const result = await service.handleCallback(
-        'google',
+        AuthProvider.GOOGLE,
         CODE,
         CODE_VERIFIER,
       );
 
-      expect(result).toEqual({ ...mockTokens, user: mockUser });
+      expect(result).toEqual({ refreshToken: mockTokens.refreshToken });
       expect(providerImpl.exchangeCodeForProfile).toHaveBeenCalledWith(
         CODE,
         REDIRECT_URI,
@@ -184,7 +188,7 @@ describe('OAuthService', () => {
       );
       expect(db.transaction).toHaveBeenCalledTimes(1);
       expect(oauthAccountRepository.findByProviderAccount).toHaveBeenCalledWith(
-        'google',
+        AuthProvider.GOOGLE,
         mockProfile.id,
         TX_SENTINEL,
       );
@@ -214,7 +218,7 @@ describe('OAuthService', () => {
       userService.findByEmail.mockResolvedValue(null);
       userService.createOAuthUser.mockResolvedValue(mockUser);
 
-      await service.handleCallback('google', CODE, CODE_VERIFIER);
+      await service.handleCallback(AuthProvider.GOOGLE, CODE, CODE_VERIFIER);
 
       expect(userService.createOAuthUser).toHaveBeenCalledWith(
         {
@@ -227,7 +231,7 @@ describe('OAuthService', () => {
       expect(oauthAccountRepository.create).toHaveBeenCalledWith(
         {
           userId: mockUser.id,
-          provider: 'google',
+          provider: AuthProvider.GOOGLE,
           providerAccountId: mockProfile.id,
           avatar: mockProfile.avatar,
         },
@@ -239,13 +243,13 @@ describe('OAuthService', () => {
       oauthAccountRepository.findByProviderAccount.mockResolvedValue(null);
       userService.findByEmail.mockResolvedValue(mockUser);
 
-      await service.handleCallback('google', CODE, CODE_VERIFIER);
+      await service.handleCallback(AuthProvider.GOOGLE, CODE, CODE_VERIFIER);
 
       expect(userService.createOAuthUser).not.toHaveBeenCalled();
       expect(oauthAccountRepository.create).toHaveBeenCalledWith(
         expect.objectContaining({
           userId: mockUser.id,
-          provider: 'google',
+          provider: AuthProvider.GOOGLE,
           providerAccountId: mockProfile.id,
         }),
         TX_SENTINEL,
@@ -258,7 +262,7 @@ describe('OAuthService', () => {
       );
 
       await expect(
-        service.handleCallback('google', CODE, CODE_VERIFIER),
+        service.handleCallback(AuthProvider.GOOGLE, CODE, CODE_VERIFIER),
       ).rejects.toThrow(OAuthCodeExchangeException);
 
       expect(db.transaction).not.toHaveBeenCalled();
@@ -276,7 +280,7 @@ describe('OAuthService', () => {
       // Note: actual rollback semantics are exercised in stage 5 e2e tests.
       // Here we only verify the error propagates and JWT issuance is skipped.
       await expect(
-        service.handleCallback('google', CODE, CODE_VERIFIER),
+        service.handleCallback(AuthProvider.GOOGLE, CODE, CODE_VERIFIER),
       ).rejects.toThrow('insert failed');
       expect(authService.generateTokens).not.toHaveBeenCalled();
     });
@@ -289,7 +293,7 @@ describe('OAuthService', () => {
       oauthAccountRepository.findByProviderAccount.mockResolvedValue(null);
 
       await expect(
-        service.handleCallback('google', CODE, CODE_VERIFIER),
+        service.handleCallback(AuthProvider.GOOGLE, CODE, CODE_VERIFIER),
       ).rejects.toThrow('OAuth provider email is not verified');
       expect(userService.createOAuthUser).not.toHaveBeenCalled();
       expect(oauthAccountRepository.create).not.toHaveBeenCalled();
@@ -306,12 +310,12 @@ describe('OAuthService', () => {
       userService.findById.mockResolvedValue(mockUser);
 
       const result = await service.handleCallback(
-        'google',
+        AuthProvider.GOOGLE,
         CODE,
         CODE_VERIFIER,
       );
 
-      expect(result).toEqual({ ...mockTokens, user: mockUser });
+      expect(result).toEqual({ refreshToken: mockTokens.refreshToken });
       expect(userService.findById).toHaveBeenCalledWith(
         mockOAuthAccount.userId,
         TX_SENTINEL,
@@ -338,7 +342,7 @@ describe('OAuthService', () => {
 
       const result = await service.linkProvider(
         linkUser.id,
-        'google',
+        AuthProvider.GOOGLE,
         CODE,
         CODE_VERIFIER,
       );
@@ -354,14 +358,14 @@ describe('OAuthService', () => {
         TX_SENTINEL,
       );
       expect(oauthAccountRepository.findByProviderAccount).toHaveBeenCalledWith(
-        'google',
+        AuthProvider.GOOGLE,
         mockProfile.id,
         TX_SENTINEL,
       );
       expect(oauthAccountRepository.create).toHaveBeenCalledWith(
         {
           userId: linkUser.id,
-          provider: 'google',
+          provider: AuthProvider.GOOGLE,
           providerAccountId: mockProfile.id,
           avatar: mockProfile.avatar,
         },
@@ -374,7 +378,12 @@ describe('OAuthService', () => {
       userService.findById.mockResolvedValue(linkUser);
 
       await expect(
-        service.linkProvider(linkUser.id, 'google', CODE, CODE_VERIFIER),
+        service.linkProvider(
+          linkUser.id,
+          AuthProvider.GOOGLE,
+          CODE,
+          CODE_VERIFIER,
+        ),
       ).rejects.toThrow(OAuthLinkEmailMismatchException);
 
       expect(oauthAccountRepository.create).not.toHaveBeenCalled();
@@ -392,7 +401,12 @@ describe('OAuthService', () => {
       });
 
       await expect(
-        service.linkProvider(linkUser.id, 'google', CODE, CODE_VERIFIER),
+        service.linkProvider(
+          linkUser.id,
+          AuthProvider.GOOGLE,
+          CODE,
+          CODE_VERIFIER,
+        ),
       ).rejects.toThrow(OAuthAccountAlreadyLinkedException);
 
       expect(oauthAccountRepository.create).not.toHaveBeenCalled();
@@ -411,7 +425,7 @@ describe('OAuthService', () => {
 
       const result = await service.linkProvider(
         linkUser.id,
-        'google',
+        AuthProvider.GOOGLE,
         CODE,
         CODE_VERIFIER,
       );
@@ -428,7 +442,12 @@ describe('OAuthService', () => {
       userService.findById.mockResolvedValue(null);
 
       await expect(
-        service.linkProvider(linkUser.id, 'google', CODE, CODE_VERIFIER),
+        service.linkProvider(
+          linkUser.id,
+          AuthProvider.GOOGLE,
+          CODE,
+          CODE_VERIFIER,
+        ),
       ).rejects.toThrow(NotFoundException);
     });
 
@@ -439,7 +458,12 @@ describe('OAuthService', () => {
       });
 
       await expect(
-        service.linkProvider(linkUser.id, 'google', CODE, CODE_VERIFIER),
+        service.linkProvider(
+          linkUser.id,
+          AuthProvider.GOOGLE,
+          CODE,
+          CODE_VERIFIER,
+        ),
       ).rejects.toThrow(OAuthEmailNotVerifiedException);
     });
 
@@ -449,7 +473,12 @@ describe('OAuthService', () => {
       );
 
       await expect(
-        service.linkProvider(linkUser.id, 'google', CODE, CODE_VERIFIER),
+        service.linkProvider(
+          linkUser.id,
+          AuthProvider.GOOGLE,
+          CODE,
+          CODE_VERIFIER,
+        ),
       ).rejects.toThrow(OAuthEmailNotVerifiedException);
     });
   });

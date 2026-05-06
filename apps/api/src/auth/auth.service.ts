@@ -57,7 +57,9 @@ export class AuthService {
    * @param dto - Registration data
    * @returns Access and refresh tokens
    */
-  async register(dto: AuthRegisterDto) {
+  async register(
+    dto: AuthRegisterDto,
+  ): Promise<{ accessToken: string; refreshToken: string }> {
     const user = await this.userService.create(dto);
     this._logger.log(`User registered: ${user.id}`);
     const tokens = await this.generateTokens(user.id, user.email, user.role);

@@ -8,19 +8,18 @@ import {
 import { ConfigService } from '@nestjs/config';
 
 import type { DrizzleDb, DrizzleTx } from '$db/types/drizzle.types';
-import type { AuthProvider, User } from '$db/schemas';
 import { UserService } from '$src/user/user.service';
 import { AuthService } from '$src/auth/auth.service';
 import { parsePrimaryWebUrl } from '$common/utils';
+import { AuthProvider } from '$common/enums';
+import type { User } from '$db/schemas';
 import { DRIZZLE } from '$db/db.module';
 
 import {
   OAuthAccountAlreadyLinkedException,
-  OAuthCodeExchangeException,
   OAuthEmailNotVerifiedException,
   OAuthLinkEmailMismatchException,
   OAuthProviderNotConfiguredException,
-  UnsupportedOAuthProviderException,
 } from './exceptions';
 import {
   OAUTH_ERROR_PATH,
@@ -32,9 +31,7 @@ import { OAuthAccountRepository } from './oauth-account.repository';
 import { OAuthProviderRegistry } from './oauth-provider.registry';
 
 export interface OAuthCallbackResult {
-  accessToken: string;
   refreshToken: string;
-  user: User;
 }
 
 @Injectable()
@@ -104,7 +101,7 @@ export class OAuthService {
         `OAuth login successful: userId=${user.id}, provider=${provider}`,
       );
 
-      return { ...tokens, user };
+      return { refreshToken: tokens.refreshToken };
     });
   }
 
@@ -260,25 +257,24 @@ export class OAuthService {
    * used for SPA redirect query parameters.
    */
   mapErrorToReason(error: unknown): string {
-    if (error instanceof OAuthEmailNotVerifiedException) {
-      return 'oauth_email_unverified';
+    const e = error as { code?: string };
+
+    switch (e.code) {
+      case 'OAUTH_EMAIL_NOT_VERIFIED':
+        return 'oauth_email_unverified';
+      case 'OAUTH_CODE_EXCHANGE_FAILED':
+        return 'oauth_code_exchange_failed';
+      case 'OAUTH_PROVIDER_NOT_CONFIGURED':
+        return 'oauth_provider_not_configured';
+      case 'OAUTH_UNSUPPORTED_PROVIDER':
+        return 'oauth_unsupported_provider';
+      case 'OAUTH_LINK_EMAIL_MISMATCH':
+        return 'oauth_link_email_mismatch';
+      case 'OAUTH_ACCOUNT_ALREADY_LINKED':
+        return 'oauth_account_already_linked';
+      default:
+        return 'oauth_failed';
     }
-    if (error instanceof OAuthCodeExchangeException) {
-      return 'oauth_code_exchange_failed';
-    }
-    if (error instanceof OAuthProviderNotConfiguredException) {
-      return 'oauth_provider_not_configured';
-    }
-    if (error instanceof UnsupportedOAuthProviderException) {
-      return 'oauth_unsupported_provider';
-    }
-    if (error instanceof OAuthLinkEmailMismatchException) {
-      return 'oauth_link_email_mismatch';
-    }
-    if (error instanceof OAuthAccountAlreadyLinkedException) {
-      return 'oauth_account_already_linked';
-    }
-    return 'oauth_failed';
   }
 
   /**

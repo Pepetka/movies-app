@@ -2,7 +2,7 @@ import { UnauthorizedException } from '@nestjs/common';
 import { FastifyReply, FastifyRequest } from 'fastify';
 import { Test, TestingModule } from '@nestjs/testing';
 
-import { UserRole } from '$common/enums';
+import { AuthProvider, UserRole } from '$common/enums';
 
 import {
   OAuthAccountAlreadyLinkedException,
@@ -71,21 +71,26 @@ describe('AuthController', () => {
     handleCallback: jest.fn(),
     linkProvider: jest.fn(),
     processCallback: jest.fn(),
-    mapErrorToReason: jest.fn().mockImplementation((e: Error) => {
-      if (e.constructor.name === 'OAuthEmailNotVerifiedException')
-        return 'oauth_email_unverified';
-      if (e.constructor.name === 'OAuthCodeExchangeException')
-        return 'oauth_code_exchange_failed';
-      if (e.constructor.name === 'OAuthProviderNotConfiguredException')
-        return 'oauth_provider_not_configured';
-      if (e.constructor.name === 'UnsupportedOAuthProviderException')
-        return 'oauth_unsupported_provider';
-      if (e.constructor.name === 'OAuthLinkEmailMismatchException')
-        return 'oauth_link_email_mismatch';
-      if (e.constructor.name === 'OAuthAccountAlreadyLinkedException')
-        return 'oauth_account_already_linked';
-      return 'oauth_failed';
-    }),
+    mapErrorToReason: jest
+      .fn()
+      .mockImplementation((e: Error & { code?: string }) => {
+        switch (e.code) {
+          case 'OAUTH_EMAIL_NOT_VERIFIED':
+            return 'oauth_email_unverified';
+          case 'OAUTH_CODE_EXCHANGE_FAILED':
+            return 'oauth_code_exchange_failed';
+          case 'OAUTH_PROVIDER_NOT_CONFIGURED':
+            return 'oauth_provider_not_configured';
+          case 'OAUTH_UNSUPPORTED_PROVIDER':
+            return 'oauth_unsupported_provider';
+          case 'OAUTH_LINK_EMAIL_MISMATCH':
+            return 'oauth_link_email_mismatch';
+          case 'OAUTH_ACCOUNT_ALREADY_LINKED':
+            return 'oauth_account_already_linked';
+          default:
+            return 'oauth_failed';
+        }
+      }),
     buildErrorUrl: jest
       .fn()
       .mockImplementation(
@@ -238,7 +243,7 @@ describe('AuthController', () => {
         'https://accounts.google.com/o/oauth2/v2/auth?client_id=test',
       );
 
-      await controller.oauthRedirect('google', undefined, mockReply);
+      await controller.oauthRedirect(AuthProvider.GOOGLE, undefined, mockReply);
 
       expect(mockReply.cookie).toHaveBeenCalledWith(
         OAUTH_SESSION_COOKIE_NAME,
@@ -252,7 +257,7 @@ describe('AuthController', () => {
         }),
       );
       expect(mockOAuthService.buildAuthUrl).toHaveBeenCalledWith(
-        'google',
+        AuthProvider.GOOGLE,
         expect.any(String),
         expect.any(String),
       );
@@ -267,7 +272,11 @@ describe('AuthController', () => {
         'https://accounts.google.com/o/oauth2/v2/auth?client_id=test',
       );
 
-      await controller.oauthRedirect('google', '/invite/test-token', mockReply);
+      await controller.oauthRedirect(
+        AuthProvider.GOOGLE,
+        '/invite/test-token',
+        mockReply,
+      );
 
       const cookieValue = JSON.parse(
         (
@@ -287,7 +296,7 @@ describe('AuthController', () => {
       );
 
       const result = await controller.oauthLinkInit(
-        'google',
+        AuthProvider.GOOGLE,
         mockUser,
         mockReply,
       );
@@ -348,14 +357,14 @@ describe('AuthController', () => {
       });
 
       await controller.oauthCallback(
-        'google',
+        AuthProvider.GOOGLE,
         { state: validSession.state, code: 'auth-code-789' },
         request,
         mockReply,
       );
 
       expect(oauthService.processCallback).toHaveBeenCalledWith(
-        'google',
+        AuthProvider.GOOGLE,
         { state: validSession.state, code: 'auth-code-789' },
         validSession,
       );
@@ -382,7 +391,7 @@ describe('AuthController', () => {
       });
 
       await controller.oauthCallback(
-        'google',
+        AuthProvider.GOOGLE,
         { state: validSession.state, code: 'auth-code-789' },
         request,
         mockReply,
@@ -403,7 +412,7 @@ describe('AuthController', () => {
       });
 
       await controller.oauthCallback(
-        'google',
+        AuthProvider.GOOGLE,
         {
           state: validSession.state,
           error: 'access_denied',
@@ -422,7 +431,7 @@ describe('AuthController', () => {
       const request = mockRequest();
 
       await controller.oauthCallback(
-        'google',
+        AuthProvider.GOOGLE,
         { state: 'wrong-state', code: 'auth-code' },
         request,
         mockReply,
@@ -441,7 +450,7 @@ describe('AuthController', () => {
       });
 
       await controller.oauthCallback(
-        'google',
+        AuthProvider.GOOGLE,
         { state: validSession.state },
         request,
         mockReply,
@@ -457,7 +466,7 @@ describe('AuthController', () => {
       const request = mockRequest({ valid: false, value: '' });
 
       await controller.oauthCallback(
-        'google',
+        AuthProvider.GOOGLE,
         { state: validSession.state, code: 'auth-code' },
         request,
         mockReply,
@@ -476,7 +485,7 @@ describe('AuthController', () => {
       );
 
       await controller.oauthCallback(
-        'google',
+        AuthProvider.GOOGLE,
         { state: validSession.state, code: 'auth-code' },
         request,
         mockReply,
@@ -497,7 +506,7 @@ describe('AuthController', () => {
       );
 
       await controller.oauthCallback(
-        'google',
+        AuthProvider.GOOGLE,
         { state: validSession.state, code: 'auth-code' },
         request,
         mockReply,
@@ -524,7 +533,7 @@ describe('AuthController', () => {
       });
 
       await controller.oauthCallback(
-        'google',
+        AuthProvider.GOOGLE,
         { state: validSession.state, code: 'auth-code' },
         request,
         mockReply,
@@ -548,7 +557,7 @@ describe('AuthController', () => {
       });
 
       await controller.oauthCallback(
-        'google',
+        AuthProvider.GOOGLE,
         { state: validSession.state, code: 'auth-code' },
         request,
         mockReply,
@@ -573,7 +582,7 @@ describe('AuthController', () => {
       );
 
       await controller.oauthCallback(
-        'google',
+        AuthProvider.GOOGLE,
         { state: validSession.state, code: 'auth-code' },
         request,
         mockReply,
@@ -600,7 +609,7 @@ describe('AuthController', () => {
       );
 
       await controller.oauthCallback(
-        'google',
+        AuthProvider.GOOGLE,
         { state: validSession.state, code: 'auth-code' },
         request,
         mockReply,

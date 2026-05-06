@@ -7,9 +7,9 @@ export interface OAuthSessionInit {
   codeChallenge: string;
 }
 
-function isSafeRedirect(redirect: string): boolean {
-  return redirect.startsWith('/') && !redirect.startsWith('//');
-}
+const isSafeRedirect = (redirect: string): boolean => {
+  return /^\/[a-zA-Z0-9_\-/]*$/.test(redirect);
+};
 
 /**
  * Creates a fresh OAuth session payload with PKCE (S256) primitives.
@@ -23,11 +23,11 @@ function isSafeRedirect(redirect: string): boolean {
  * @param redirect - optional safe redirect path (validated: must start with '/' and not '//')
  * @throws Error when `intent === 'link'` and `userId` is missing
  */
-export function createOAuthSession(
+export const createOAuthSession = (
   intent: OAuthIntent = 'login',
   userId?: number,
   redirect?: string,
-): OAuthSessionInit {
+): OAuthSessionInit => {
   if (intent === 'link' && userId == null) {
     throw new Error('createOAuthSession: userId is required for intent=link');
   }
@@ -47,4 +47,4 @@ export function createOAuthSession(
     session,
     codeChallenge,
   };
-}
+};

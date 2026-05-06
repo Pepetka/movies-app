@@ -13,7 +13,7 @@ import request from 'supertest';
 import postgres from 'postgres';
 
 import { users, oauthAccounts, groups, groupMembers } from '$db/schemas';
-import { UserRole } from '$common/enums';
+import { AuthProvider, UserRole } from '$common/enums';
 
 import { AppModule } from '../src/app.module';
 
@@ -290,7 +290,7 @@ describe('OAuth E2E', () => {
 
       const dbOAuth = await drizzleDb.select().from(oauthAccounts);
       expect(dbOAuth).toHaveLength(1);
-      expect(dbOAuth[0].provider).toBe('google');
+      expect(dbOAuth[0].provider).toBe(AuthProvider.GOOGLE);
       expect(dbOAuth[0].providerAccountId).toBe('google-user-123');
       expect(dbOAuth[0].userId).toBe(dbUsers[0].id);
     });
@@ -308,7 +308,7 @@ describe('OAuth E2E', () => {
 
       await drizzleDb.insert(oauthAccounts).values({
         userId: user.id,
-        provider: 'google',
+        provider: AuthProvider.GOOGLE,
         providerAccountId: 'google-user-123',
       });
 
@@ -505,7 +505,7 @@ describe('OAuth E2E', () => {
 
       await drizzleDb.insert(oauthAccounts).values({
         userId: user.id,
-        provider: 'google',
+        provider: AuthProvider.GOOGLE,
         providerAccountId: 'google-user-123',
       });
 
@@ -557,7 +557,7 @@ describe('OAuth E2E', () => {
 
       const dbOAuth = await drizzleDb.select().from(oauthAccounts);
       expect(dbOAuth).toHaveLength(1);
-      expect(dbOAuth[0].provider).toBe('google');
+      expect(dbOAuth[0].provider).toBe(AuthProvider.GOOGLE);
 
       const dbUsers = await drizzleDb.select().from(users);
       expect(dbUsers).toHaveLength(1);
