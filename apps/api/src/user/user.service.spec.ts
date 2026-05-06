@@ -113,6 +113,76 @@ describe('UserService', () => {
     });
   });
 
+  describe('createOAuthUser', () => {
+    const oauthUserData = {
+      name: 'OAuth User',
+      email: 'oauth@example.com',
+      avatar: 'https://example.com/avatar.png',
+    };
+
+    it('should create OAuth-only user with passwordHash: null', async () => {
+      userRepository.findByEmail.mockResolvedValue(null);
+      const oauthUser = {
+        ...mockUser,
+        passwordHash: null,
+        avatar: oauthUserData.avatar,
+      };
+      userRepository.create.mockResolvedValue(oauthUser);
+
+      const result = await service.createOAuthUser(oauthUserData);
+
+      expect(result).toEqual(oauthUser);
+      expect(userRepository.create).toHaveBeenCalledWith(
+        {
+          name: oauthUserData.name,
+          email: oauthUserData.email.toLowerCase(),
+          passwordHash: null,
+          avatar: oauthUserData.avatar,
+        },
+        undefined,
+      );
+    });
+
+    it('should normalize email to lowercase and trim', async () => {
+      userRepository.findByEmail.mockResolvedValue(null);
+      const oauthUser = {
+        ...mockUser,
+        email: 'normalized@example.com',
+        passwordHash: null,
+      };
+      userRepository.create.mockResolvedValue(oauthUser);
+
+      await service.createOAuthUser({
+        name: 'OAuth User',
+        email: '  Normalized@Example.COM  ',
+        avatar: null,
+      });
+
+      expect(userRepository.findByEmail).toHaveBeenCalledWith(
+        'normalized@example.com',
+        undefined,
+      );
+      expect(userRepository.create).toHaveBeenCalledWith(
+        {
+          name: 'OAuth User',
+          email: 'normalized@example.com',
+          passwordHash: null,
+          avatar: null,
+        },
+        undefined,
+      );
+    });
+
+    it('should throw EmailAlreadyInUseException for duplicate email', async () => {
+      userRepository.findByEmail.mockResolvedValue(mockUser);
+
+      await expect(service.createOAuthUser(oauthUserData)).rejects.toThrow(
+        EmailAlreadyInUseException,
+      );
+      expect(userRepository.create).not.toHaveBeenCalled();
+    });
+  });
+
   describe('findAll', () => {
     const mockUsers = [mockUser];
 
