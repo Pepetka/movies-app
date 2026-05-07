@@ -12,9 +12,9 @@ import type { Expires } from './types/expires.type';
 @Injectable()
 export class TokenService {
   constructor(
-    private readonly jwtService: JwtService,
-    private readonly configService: ConfigService,
-    private readonly userService: UserService,
+    private readonly _jwtService: JwtService,
+    private readonly _configService: ConfigService,
+    private readonly _userService: UserService,
   ) {}
 
   /**
@@ -26,8 +26,8 @@ export class TokenService {
     tx?: DrizzleTx,
   ): Promise<{ accessToken: string; refreshToken: string }> {
     const tokens = await this._generateTokens(user.id, user.email, user.role);
-    const tokenHash = await this.userService.hashToken(tokens.refreshToken);
-    await this.userService.updateRefreshTokenHash(user.id, tokenHash, tx);
+    const tokenHash = await this._userService.hashToken(tokens.refreshToken);
+    await this._userService.updateRefreshTokenHash(user.id, tokenHash, tx);
     return tokens;
   }
 
@@ -37,15 +37,15 @@ export class TokenService {
     role: string,
   ): Promise<{ accessToken: string; refreshToken: string }> {
     const [accessToken, refreshToken] = await Promise.all([
-      this.jwtService.signAsync({ sub: userId, email, role }),
-      this.jwtService.signAsync(
+      this._jwtService.signAsync({ sub: userId, email, role }),
+      this._jwtService.signAsync(
         { sub: userId, email, role },
         {
-          secret: this.configService.getOrThrow<string>('JWT_REFRESH_SECRET'),
-          expiresIn: this.configService.getOrThrow<Expires>(
+          secret: this._configService.getOrThrow<string>('JWT_REFRESH_SECRET'),
+          expiresIn: this._configService.getOrThrow<Expires>(
             'JWT_REFRESH_EXPIRATION',
           ),
-          issuer: this.configService.getOrThrow<string>('JWT_ISSUER'),
+          issuer: this._configService.getOrThrow<string>('JWT_ISSUER'),
           audience: JWT_REFRESH_AUDIENCE,
         },
       ),

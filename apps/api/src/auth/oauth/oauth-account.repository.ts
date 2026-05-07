@@ -12,10 +12,10 @@ import { DRIZZLE } from '$db/db.module';
 
 @Injectable()
 export class OAuthAccountRepository {
-  constructor(@Inject(DRIZZLE) private readonly db: DrizzleDb) {}
+  constructor(@Inject(DRIZZLE) private readonly _db: DrizzleDb) {}
 
   async create(data: NewOAuthAccount, tx?: DrizzleTx): Promise<OAuthAccount> {
-    const conn = tx ?? this.db;
+    const conn = tx ?? this._db;
     const [result] = await conn.insert(oauthAccounts).values(data).returning();
     return result;
   }
@@ -25,7 +25,7 @@ export class OAuthAccountRepository {
     providerAccountId: string,
     tx?: DrizzleTx,
   ): Promise<OAuthAccount | null> {
-    const conn = tx ?? this.db;
+    const conn = tx ?? this._db;
     const [result] = await conn
       .select()
       .from(oauthAccounts)

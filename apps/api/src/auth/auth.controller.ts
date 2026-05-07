@@ -56,15 +56,16 @@ import { OAuthService } from './oauth/oauth.service';
 import { AuthService } from './auth.service';
 
 @ApiTags('Auth')
+@ApiBearerAuth('access-token')
 @Controller('auth')
 export class AuthController {
   private readonly _logger = new Logger(AuthController.name);
 
   constructor(
-    private readonly authService: AuthService,
-    private readonly oauthService: OAuthService,
+    private readonly _authService: AuthService,
+    private readonly _oauthService: OAuthService,
     @Inject(REFRESH_COOKIE_OPTIONS)
-    private readonly cookieOptions: RefreshCookieOptions,
+    private readonly _cookieOptions: RefreshCookieOptions,
   ) {}
 
   private _setOAuthSessionCookie(
@@ -74,7 +75,7 @@ export class AuthController {
     reply.cookie(OAUTH_SESSION_COOKIE_NAME, JSON.stringify(session), {
       httpOnly: true,
       signed: true,
-      secure: this.cookieOptions.secure,
+      secure: this._cookieOptions.secure,
       sameSite: 'lax',
       path: OAUTH_SESSION_COOKIE_PATH,
       maxAge: OAUTH_SESSION_COOKIE_MAX_AGE,
@@ -85,7 +86,7 @@ export class AuthController {
     reply.clearCookie(OAUTH_SESSION_COOKIE_NAME, {
       path: OAUTH_SESSION_COOKIE_PATH,
       sameSite: 'lax',
-      secure: this.cookieOptions.secure,
+      secure: this._cookieOptions.secure,
     });
   }
 
@@ -99,13 +100,14 @@ export class AuthController {
     type: AuthResponseDto,
   })
   @ApiResponse({ status: 409, description: 'Email already in use' })
+  @SerializeOptions({ type: AuthResponseDto })
   async register(
     @Body() dto: AuthRegisterDto,
     @Res({ passthrough: true }) reply: FastifyReply,
   ) {
-    const tokens = await this.authService.register(dto);
+    const tokens = await this._authService.register(dto);
 
-    reply.cookie(REFRESH_COOKIE_NAME, tokens.refreshToken, this.cookieOptions);
+    reply.cookie(REFRESH_COOKIE_NAME, tokens.refreshToken, this._cookieOptions);
 
     return { accessToken: tokens.accessToken };
   }
@@ -121,13 +123,14 @@ export class AuthController {
     type: AuthResponseDto,
   })
   @ApiResponse({ status: 401, description: 'Invalid credentials' })
+  @SerializeOptions({ type: AuthResponseDto })
   async login(
     @Body() dto: AuthLoginDto,
     @Res({ passthrough: true }) reply: FastifyReply,
   ) {
-    const tokens = await this.authService.login(dto.email, dto.password);
+    const tokens = await this._authService.login(dto.email, dto.password);
 
-    reply.cookie(REFRESH_COOKIE_NAME, tokens.refreshToken, this.cookieOptions);
+    reply.cookie(REFRESH_COOKIE_NAME, tokens.refreshToken, this._cookieOptions);
 
     return { accessToken: tokens.accessToken };
   }
@@ -135,7 +138,6 @@ export class AuthController {
   @CsrfProtected()
   @Post('logout')
   @HttpCode(HttpStatus.NO_CONTENT)
-  @ApiBearerAuth('access-token')
   @ApiOperation({ summary: 'Logout user' })
   @ApiResponse({ status: 204, description: 'User successfully logged out' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
@@ -143,9 +145,9 @@ export class AuthController {
     @User() user: UserType,
     @Res({ passthrough: true }) reply: FastifyReply,
   ) {
-    await this.authService.logout(user.id);
+    await this._authService.logout(user.id);
 
-    reply.clearCookie(REFRESH_COOKIE_NAME, { path: this.cookieOptions.path });
+    reply.clearCookie(REFRESH_COOKIE_NAME, { path: this._cookieOptions.path });
   }
 
   @Public()
@@ -161,14 +163,15 @@ export class AuthController {
     type: AuthResponseDto,
   })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @SerializeOptions({ type: AuthResponseDto })
   async refresh(
     @User() user: UserType,
     @Cookie(REFRESH_COOKIE_NAME) refreshToken: string,
     @Res({ passthrough: true }) reply: FastifyReply,
   ) {
-    const tokens = await this.authService.refresh(user, refreshToken);
+    const tokens = await this._authService.refresh(user, refreshToken);
 
-    reply.cookie(REFRESH_COOKIE_NAME, tokens.refreshToken, this.cookieOptions);
+    reply.cookie(REFRESH_COOKIE_NAME, tokens.refreshToken, this._cookieOptions);
 
     return { accessToken: tokens.accessToken };
   }
@@ -200,7 +203,7 @@ export class AuthController {
 
     this._setOAuthSessionCookie(reply, session);
 
-    const redirectUrl = this.oauthService.buildAuthUrl(
+    const redirectUrl = this._oauthService.buildAuthUrl(
       provider,
       session.state,
       codeChallenge,
@@ -212,7 +215,6 @@ export class AuthController {
   @Post('oauth/:provider/link/init')
   @HttpCode(HttpStatus.OK)
   @Throttle(THROTTLE.auth.oauth)
-  @ApiBearerAuth('access-token')
   @ApiParam({ name: 'provider', enum: AuthProvider, enumName: 'AuthProvider' })
   @ApiOperation({
     summary: 'Init OAuth account linking — returns provider authUrl',
@@ -235,7 +237,7 @@ export class AuthController {
 
     this._setOAuthSessionCookie(reply, session);
 
-    const authUrl = this.oauthService.buildAuthUrl(
+    const authUrl = this._oauthService.buildAuthUrl(
       provider,
       session.state,
       codeChallenge,
@@ -270,7 +272,7 @@ export class AuthController {
     } catch {
       this._clearOAuthSessionCookie(reply);
       return reply.redirect(
-        this.oauthService.buildErrorUrl('invalid_session'),
+        this._oauthService.buildErrorUrl('invalid_session'),
         HttpStatus.FOUND,
       );
     }
@@ -278,7 +280,7 @@ export class AuthController {
     if (session.state !== state) {
       this._clearOAuthSessionCookie(reply);
       return reply.redirect(
-        this.oauthService.buildErrorUrl('invalid_state'),
+        this._oauthService.buildErrorUrl('invalid_state'),
         HttpStatus.FOUND,
       );
     }
@@ -287,23 +289,26 @@ export class AuthController {
 
     try {
       const { redirectUrl, refreshToken } =
-        await this.oauthService.processCallback(
+        await this._oauthService.processCallback(
           provider,
           { code, error },
           session,
         );
 
       if (refreshToken) {
-        reply.cookie(REFRESH_COOKIE_NAME, refreshToken, this.cookieOptions);
+        reply.cookie(REFRESH_COOKIE_NAME, refreshToken, this._cookieOptions);
       }
 
       reply.redirect(redirectUrl, HttpStatus.FOUND);
     } catch (e) {
-      const reason = this.oauthService.mapErrorToReason(e);
+      const reason = this._oauthService.mapErrorToReason(e);
       if (reason === 'oauth_failed') {
         this._logger.error('Unexpected OAuth callback error', e);
       }
-      reply.redirect(this.oauthService.buildErrorUrl(reason), HttpStatus.FOUND);
+      reply.redirect(
+        this._oauthService.buildErrorUrl(reason),
+        HttpStatus.FOUND,
+      );
     }
   }
 }

@@ -10,6 +10,7 @@ import { ConfigService } from '@nestjs/config';
 import type { DrizzleDb, DrizzleTx } from '$db/types/drizzle.types';
 import { EmailAlreadyInUseException } from '$common/exceptions';
 import { TokenService } from '$src/auth/token.service';
+import { PG_UNIQUE_VIOLATION } from '$db/db.constants';
 import { UserService } from '$src/user/user.service';
 import { parsePrimaryWebUrl } from '$common/utils';
 import { AuthProvider } from '$common/enums';
@@ -40,12 +41,12 @@ export class OAuthService {
   private readonly _logger = new Logger(OAuthService.name);
 
   constructor(
-    @Inject(DRIZZLE) private readonly db: DrizzleDb,
-    private readonly providerRegistry: OAuthProviderRegistry,
-    private readonly oauthAccountRepository: OAuthAccountRepository,
-    private readonly userService: UserService,
-    private readonly tokenService: TokenService,
-    private readonly configService: ConfigService,
+    @Inject(DRIZZLE) private readonly _db: DrizzleDb,
+    private readonly _providerRegistry: OAuthProviderRegistry,
+    private readonly _oauthAccountRepository: OAuthAccountRepository,
+    private readonly _userService: UserService,
+    private readonly _tokenService: TokenService,
+    private readonly _configService: ConfigService,
   ) {}
 
   /**
@@ -59,7 +60,7 @@ export class OAuthService {
     state: string,
     codeChallenge: string,
   ): string {
-    const impl = this.providerRegistry.get(provider);
+    const impl = this._providerRegistry.get(provider);
     const redirectUri = this._getRedirectUri(provider);
     return impl.buildAuthUrl({ redirectUri, state, codeChallenge });
   }
@@ -76,7 +77,7 @@ export class OAuthService {
     code: string,
     codeVerifier: string,
   ): Promise<OAuthCallbackResult> {
-    const impl = this.providerRegistry.get(provider);
+    const impl = this._providerRegistry.get(provider);
     const redirectUri = this._getRedirectUri(provider);
 
     this._logger.log(`Processing OAuth callback for ${provider}`);
@@ -87,9 +88,9 @@ export class OAuthService {
       codeVerifier,
     );
 
-    const result = await this.db.transaction(async (tx) => {
+    const result = await this._db.transaction(async (tx) => {
       const user = await this._findOrCreateUser(tx, provider, profile);
-      const tokens = await this.tokenService.issueTokens(user, tx);
+      const tokens = await this._tokenService.issueTokens(user, tx);
       return { user, tokens };
     });
 
@@ -117,7 +118,7 @@ export class OAuthService {
     code: string,
     codeVerifier: string,
   ): Promise<User> {
-    const impl = this.providerRegistry.get(provider);
+    const impl = this._providerRegistry.get(provider);
     const redirectUri = this._getRedirectUri(provider);
 
     const profile = await impl.exchangeCodeForProfile(
@@ -130,8 +131,8 @@ export class OAuthService {
       throw new OAuthEmailNotVerifiedException();
     }
 
-    return this.db.transaction(async (tx) => {
-      const user = await this.userService.findById(userId, tx);
+    return this._db.transaction(async (tx) => {
+      const user = await this._userService.findById(userId, tx);
       if (!user) {
         throw new NotFoundException(`User ${userId} not found`);
       }
@@ -140,7 +141,7 @@ export class OAuthService {
         throw new OAuthLinkEmailMismatchException();
       }
 
-      const existing = await this.oauthAccountRepository.findByProviderAccount(
+      const existing = await this._oauthAccountRepository.findByProviderAccount(
         provider,
         profile.id,
         tx,
@@ -162,7 +163,7 @@ export class OAuthService {
       }
 
       try {
-        await this.oauthAccountRepository.create(
+        await this._oauthAccountRepository.create(
           {
             userId,
             provider,
@@ -174,7 +175,7 @@ export class OAuthService {
       } catch (error) {
         if (this._isUniqueViolation(error)) {
           const account =
-            await this.oauthAccountRepository.findByProviderAccount(
+            await this._oauthAccountRepository.findByProviderAccount(
               provider,
               profile.id,
               tx,
@@ -206,7 +207,7 @@ export class OAuthService {
     profile: OAuthProfile,
   ): Promise<User> {
     const existingAccount =
-      await this.oauthAccountRepository.findByProviderAccount(
+      await this._oauthAccountRepository.findByProviderAccount(
         provider,
         profile.id,
         tx,
@@ -216,7 +217,7 @@ export class OAuthService {
       this._logger.debug(
         `Existing OAuth account: ${existingAccount.id}, provider=${provider}`,
       );
-      const user = await this.userService.findById(existingAccount.userId, tx);
+      const user = await this._userService.findById(existingAccount.userId, tx);
       if (!user) {
         this._logger.error(
           `OAuth account ${existingAccount.id} references missing user ${existingAccount.userId}`,
@@ -232,7 +233,7 @@ export class OAuthService {
       throw new OAuthEmailNotVerifiedException();
     }
 
-    let user = await this.userService.findByEmail(profile.email, tx);
+    let user = await this._userService.findByEmail(profile.email, tx);
 
     if (user) {
       this._logger.log(
@@ -243,7 +244,7 @@ export class OAuthService {
         `Creating new user from OAuth: email prefix=${profile.email.slice(0, 3)}***`,
       );
       try {
-        user = await this.userService.createOAuthUser(
+        user = await this._userService.createOAuthUser(
           {
             name: profile.name,
             email: profile.email,
@@ -253,7 +254,7 @@ export class OAuthService {
         );
       } catch (error) {
         if (error instanceof EmailAlreadyInUseException) {
-          user = await this.userService.findByEmail(profile.email, tx);
+          user = await this._userService.findByEmail(profile.email, tx);
           if (!user) {
             throw new InternalServerErrorException(
               'Failed to resolve OAuth user after race condition',
@@ -266,7 +267,7 @@ export class OAuthService {
     }
 
     try {
-      await this.oauthAccountRepository.create(
+      await this._oauthAccountRepository.create(
         {
           userId: user.id,
           provider,
@@ -277,13 +278,14 @@ export class OAuthService {
       );
     } catch (error) {
       if (this._isUniqueViolation(error)) {
-        const account = await this.oauthAccountRepository.findByProviderAccount(
-          provider,
-          profile.id,
-          tx,
-        );
+        const account =
+          await this._oauthAccountRepository.findByProviderAccount(
+            provider,
+            profile.id,
+            tx,
+          );
         if (account) {
-          const existingUser = await this.userService.findById(
+          const existingUser = await this._userService.findById(
             account.userId,
             tx,
           );
@@ -300,7 +302,7 @@ export class OAuthService {
     return (
       error instanceof Error &&
       'code' in error &&
-      (error as { code?: string }).code === '23505'
+      (error as { code?: string }).code === PG_UNIQUE_VIOLATION
     );
   }
 
@@ -388,7 +390,9 @@ export class OAuthService {
    * Returns the primary web URL from the comma-separated WEB_URL env var.
    */
   getPrimaryWebUrl(): string {
-    return parsePrimaryWebUrl(this.configService.getOrThrow<string>('WEB_URL'));
+    return parsePrimaryWebUrl(
+      this._configService.getOrThrow<string>('WEB_URL'),
+    );
   }
 
   /**
@@ -418,7 +422,7 @@ export class OAuthService {
   private _getRedirectUri(provider: AuthProvider): string {
     const envPrefix = this._getProviderEnvPrefix(provider);
     const key = `${envPrefix}_REDIRECT_URI`;
-    const uri = this.configService.get<string>(key);
+    const uri = this._configService.get<string>(key);
     if (!uri) {
       throw new OAuthProviderNotConfiguredException(provider);
     }

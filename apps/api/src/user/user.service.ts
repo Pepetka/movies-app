@@ -4,6 +4,7 @@ import * as bcrypt from 'bcrypt';
 
 import { EmailAlreadyInUseException } from '../common/exceptions';
 import type { DrizzleTx } from '../db/types/drizzle.types';
+import { PG_UNIQUE_VIOLATION } from '../db/db.constants';
 import { UserCreateDto, UserUpdateDto } from './dto';
 import type { User, NewUser } from '../db/schemas';
 import { UserRepository } from './user.repository';
@@ -14,10 +15,10 @@ export class UserService {
   private readonly _SALT_ROUNDS: number;
 
   constructor(
-    private readonly userRepository: UserRepository,
-    private readonly configService: ConfigService,
+    private readonly _userRepository: UserRepository,
+    private readonly _configService: ConfigService,
   ) {
-    this._SALT_ROUNDS = this.configService.get<number>('BCRYPT_ROUNDS', 12);
+    this._SALT_ROUNDS = this._configService.get<number>('BCRYPT_ROUNDS', 12);
   }
 
   /**
@@ -28,7 +29,8 @@ export class UserService {
    */
   async create(dto: UserCreateDto): Promise<User> {
     const normalizedEmail = dto.email.toLowerCase().trim();
-    const existingUser = await this.userRepository.findByEmail(normalizedEmail);
+    const existingUser =
+      await this._userRepository.findByEmail(normalizedEmail);
     if (existingUser) {
       throw new EmailAlreadyInUseException(normalizedEmail);
     }
@@ -36,7 +38,7 @@ export class UserService {
     const passwordHash = await this._hashPassword(dto.password);
 
     try {
-      const user = await this.userRepository.create({
+      const user = await this._userRepository.create({
         name: dto.name,
         email: normalizedEmail,
         passwordHash,
@@ -45,7 +47,7 @@ export class UserService {
       this._logger.log(`User created with id: ${user.id}`);
       return user;
     } catch (error) {
-      if ((error as { code?: string }).code === '23505') {
+      if ((error as { code?: string }).code === PG_UNIQUE_VIOLATION) {
         throw new EmailAlreadyInUseException(normalizedEmail);
       }
       throw error;
@@ -61,7 +63,7 @@ export class UserService {
     tx?: DrizzleTx,
   ): Promise<User> {
     const normalizedEmail = data.email.toLowerCase().trim();
-    const existingUser = await this.userRepository.findByEmail(
+    const existingUser = await this._userRepository.findByEmail(
       normalizedEmail,
       tx,
     );
@@ -70,7 +72,7 @@ export class UserService {
     }
 
     try {
-      const user = await this.userRepository.create(
+      const user = await this._userRepository.create(
         {
           name: data.name,
           email: normalizedEmail,
@@ -83,7 +85,7 @@ export class UserService {
       this._logger.log(`OAuth user created with id: ${user.id}`);
       return user;
     } catch (error) {
-      if ((error as { code?: string }).code === '23505') {
+      if ((error as { code?: string }).code === PG_UNIQUE_VIOLATION) {
         throw new EmailAlreadyInUseException(normalizedEmail);
       }
       throw error;
@@ -100,7 +102,7 @@ export class UserService {
   async findAll(
     opts: { limit?: number; offset?: number } = {},
   ): Promise<User[]> {
-    return this.userRepository.findAll(opts.limit, opts.offset);
+    return this._userRepository.findAll(opts.limit, opts.offset);
   }
 
   /**
@@ -110,7 +112,7 @@ export class UserService {
    * @throws NotFoundException if user not found
    */
   async findOne(id: number): Promise<User> {
-    const user = await this.userRepository.findById(id);
+    const user = await this._userRepository.findById(id);
     if (!user) {
       throw new NotFoundException(`User with id ${id} not found`);
     }
@@ -126,7 +128,7 @@ export class UserService {
    * @throws EmailAlreadyInUseException if email already exists
    */
   async update(id: number, dto: UserUpdateDto): Promise<User> {
-    const user = await this.userRepository.findById(id);
+    const user = await this._userRepository.findById(id);
     if (!user) {
       throw new NotFoundException(`User with id ${id} not found`);
     }
@@ -135,25 +137,24 @@ export class UserService {
 
     if (normalizedEmail && normalizedEmail !== user.email) {
       const existingUser =
-        await this.userRepository.findByEmail(normalizedEmail);
+        await this._userRepository.findByEmail(normalizedEmail);
       if (existingUser) {
         throw new EmailAlreadyInUseException(normalizedEmail);
       }
     }
 
-    const updateData: Partial<Record<string, unknown>> = { ...dto };
+    const updateData: Partial<NewUser> = {};
+    if (dto.name) {
+      updateData.name = dto.name;
+    }
     if (normalizedEmail) {
       updateData.email = normalizedEmail;
     }
     if (dto.password) {
       updateData.passwordHash = await this._hashPassword(dto.password);
-      delete updateData.password;
     }
 
-    const updatedUser = await this.userRepository.update(
-      id,
-      updateData as Partial<NewUser>,
-    );
+    const updatedUser = await this._userRepository.update(id, updateData);
     return updatedUser;
   }
 
@@ -163,11 +164,11 @@ export class UserService {
    * @throws NotFoundException if user not found
    */
   async remove(id: number): Promise<void> {
-    const user = await this.userRepository.findById(id);
+    const user = await this._userRepository.findById(id);
     if (!user) {
       throw new NotFoundException(`User with id ${id} not found`);
     }
-    await this.userRepository.delete(id);
+    await this._userRepository.delete(id);
     this._logger.log(`User deleted with id: ${id}`);
   }
 
@@ -177,7 +178,7 @@ export class UserService {
    * @returns User object or null
    */
   async findByEmail(email: string, tx?: DrizzleTx) {
-    return this.userRepository.findByEmail(email, tx);
+    return this._userRepository.findByEmail(email, tx);
   }
 
   /**
@@ -186,7 +187,7 @@ export class UserService {
    * @returns User object or null
    */
   async findById(id: number, tx?: DrizzleTx) {
-    return this.userRepository.findById(id, tx);
+    return this._userRepository.findById(id, tx);
   }
 
   /**
@@ -215,7 +216,7 @@ export class UserService {
     hash: string | null,
     tx?: DrizzleTx,
   ): Promise<void> {
-    await this.userRepository.updateRefreshTokenHash(id, hash, tx);
+    await this._userRepository.updateRefreshTokenHash(id, hash, tx);
   }
 
   /**

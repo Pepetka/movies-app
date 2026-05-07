@@ -7,16 +7,16 @@ import { DRIZZLE } from '../db/db.module';
 
 @Injectable()
 export class UserRepository {
-  constructor(@Inject(DRIZZLE) private readonly db: DrizzleDb) {}
+  constructor(@Inject(DRIZZLE) private readonly _db: DrizzleDb) {}
 
   async create(data: NewUser, tx?: DrizzleTx): Promise<User> {
-    const conn = tx ?? this.db;
+    const conn = tx ?? this._db;
     const [result] = await conn.insert(users).values(data).returning();
     return result;
   }
 
   async findById(id: number, tx?: DrizzleTx): Promise<User | null> {
-    const conn = tx ?? this.db;
+    const conn = tx ?? this._db;
     const [result] = await conn
       .select()
       .from(users)
@@ -26,7 +26,7 @@ export class UserRepository {
   }
 
   async findByEmail(email: string, tx?: DrizzleTx): Promise<User | null> {
-    const conn = tx ?? this.db;
+    const conn = tx ?? this._db;
     const [result] = await conn
       .select()
       .from(users)
@@ -36,16 +36,17 @@ export class UserRepository {
   }
 
   async findAll(limit = 100, offset = 0): Promise<User[]> {
-    return this.db
+    const safeLimit = Math.min(limit, 100);
+    return this._db
       .select()
       .from(users)
       .orderBy(asc(users.id))
-      .limit(limit)
+      .limit(safeLimit)
       .offset(offset);
   }
 
   async update(id: number, data: Partial<NewUser>): Promise<User> {
-    const [result] = await this.db
+    const [result] = await this._db
       .update(users)
       .set({ ...data })
       .where(eq(users.id, id))
@@ -54,7 +55,7 @@ export class UserRepository {
   }
 
   async delete(id: number): Promise<void> {
-    await this.db.delete(users).where(eq(users.id, id));
+    await this._db.delete(users).where(eq(users.id, id));
   }
 
   async emailExists(email: string): Promise<boolean> {
@@ -67,7 +68,7 @@ export class UserRepository {
     hash: string | null,
     tx?: DrizzleTx,
   ): Promise<void> {
-    const conn = tx ?? this.db;
+    const conn = tx ?? this._db;
     await conn
       .update(users)
       .set({ refreshTokenHash: hash })
