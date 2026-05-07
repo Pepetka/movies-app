@@ -6,7 +6,12 @@ export interface RefreshCookieOptions {
   maxAge: number;
 }
 
+export interface OAuthCookieOptions {
+  secure: boolean;
+}
+
 export const REFRESH_COOKIE_OPTIONS = Symbol('REFRESH_COOKIE_OPTIONS');
+export const OAUTH_COOKIE_OPTIONS = Symbol('OAUTH_COOKIE_OPTIONS');
 export const REFRESH_COOKIE_NAME = 'refresh_token';
 export const REFRESH_COOKIE_PATH = '/api/v1/auth/refresh';
 

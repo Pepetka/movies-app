@@ -6,18 +6,15 @@ import {
   OAUTH_SESSION_COOKIE_MAX_AGE,
   OAUTH_SESSION_COOKIE_PATH,
 } from './oauth.constants';
-import {
-  RefreshCookieOptions,
-  REFRESH_COOKIE_OPTIONS,
-} from '../auth.constants';
+import { OAuthCookieOptions, OAUTH_COOKIE_OPTIONS } from '../auth.constants';
 import { readOAuthSession } from './utils/read-oauth-session.util';
 import type { OAuthSession } from './types/oauth.types';
 
 @Injectable()
 export class OAuthCookieService {
   constructor(
-    @Inject(REFRESH_COOKIE_OPTIONS)
-    private readonly _cookieOptions: RefreshCookieOptions,
+    @Inject(OAUTH_COOKIE_OPTIONS)
+    private readonly _cookieOptions: OAuthCookieOptions,
   ) {}
 
   setOAuthSessionCookie(reply: FastifyReply, session: OAuthSession): void {

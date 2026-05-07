@@ -8,6 +8,7 @@ import { parseDuration } from '$common/utils';
 
 import {
   JWT_ACCESS_AUDIENCE,
+  OAUTH_COOKIE_OPTIONS,
   REFRESH_COOKIE_OPTIONS,
   REFRESH_COOKIE_PATH,
   RefreshCookieOptions,
@@ -71,6 +72,13 @@ import { AuthService } from './auth.service';
           maxAge: parseDuration(refreshExpiration),
         };
       },
+      inject: [ConfigService],
+    },
+    {
+      provide: OAUTH_COOKIE_OPTIONS,
+      useFactory: (configService: ConfigService) => ({
+        secure: configService.get('NODE_ENV') !== Environment.Development,
+      }),
       inject: [ConfigService],
     },
   ],

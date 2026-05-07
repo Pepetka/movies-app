@@ -18,6 +18,7 @@ import {
   OAUTH_SUCCESS_PATH,
 } from './oauth/oauth.constants';
 import {
+  OAUTH_COOKIE_OPTIONS,
   REFRESH_COOKIE_OPTIONS,
   REFRESH_COOKIE_NAME,
   RefreshCookieOptions,
@@ -106,6 +107,10 @@ describe('AuthController', () => {
         {
           provide: REFRESH_COOKIE_OPTIONS,
           useValue: mockCookieOptions,
+        },
+        {
+          provide: OAUTH_COOKIE_OPTIONS,
+          useValue: { secure: true },
         },
         OAuthCookieService,
       ],
