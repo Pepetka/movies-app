@@ -250,8 +250,15 @@ describe('OAuth E2E', () => {
       expect(sessionCookie!.length).toBeGreaterThan(20);
     });
 
-    it('should reject unsupported provider with 400', async () => {
-      await request(app.getHttpServer()).get('/auth/oauth/unknown').expect(400);
+    it('should reject unsupported provider with redirect to error page', async () => {
+      const response = await request(app.getHttpServer())
+        .get('/auth/oauth/unknown')
+        .expect(302);
+
+      expect(response.headers.location).toContain('/oauth/error');
+      expect(response.headers.location).toContain(
+        'reason=oauth_unsupported_provider',
+      );
     });
 
     it('should store redirect in oauth_session cookie when provided', async () => {
