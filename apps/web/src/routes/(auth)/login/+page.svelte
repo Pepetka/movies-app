@@ -24,14 +24,16 @@
 
 	const registerHref = $derived(withCurrentQuery(ROUTES.REGISTER, ['redirect']));
 
-	const oauthError = $derived(page.url.searchParams.get('oauth_error'));
-
 	$effect(() => {
-		if (oauthError === '1') {
+		if (page.url.searchParams.get('oauth_error') === '1') {
 			toast.error('Ошибка входа через OAuth');
 			const url = new URL(page.url);
 			url.searchParams.delete('oauth_error');
-			void goto(url.toString(), { replaceState: true, keepFocus: true, noScroll: true });
+			void goto(`${url.pathname}${url.search}`, {
+				replaceState: true,
+				keepFocus: true,
+				noScroll: true
+			});
 		}
 	});
 

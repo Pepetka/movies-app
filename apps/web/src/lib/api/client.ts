@@ -411,7 +411,7 @@ export class HttpClient {
 	private async _maybeAttachCsrf(url: string): Promise<string | null> {
 		const csrfPaths = this._config.auth.csrfPaths ?? [];
 		if (!csrfPaths.length) return null;
-		if (!csrfPaths.some((path) => url.includes(path))) return null;
+		if (!csrfPaths.some((path) => url.startsWith(path))) return null;
 
 		try {
 			return await this._getCsrfToken();
@@ -438,6 +438,6 @@ export const httpClient = new HttpClient({
 		refreshEndpoint: '/api/v1/auth/refresh',
 		csrfEndpoint: '/api/v1/csrf/token',
 		skipRefreshPaths: ['/api/v1/auth/login', '/api/v1/auth/register'],
-		csrfPaths: ['/api/v1/auth/refresh', '/api/v1/auth/logout', '/api/v1/auth/oauth/']
+		csrfPaths: ['/api/v1/auth/refresh', '/api/v1/auth/logout', '/api/v1/auth/oauth']
 	}
 });

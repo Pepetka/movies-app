@@ -4,6 +4,8 @@
 	import { ROUTES } from '$lib/utils';
 	import { page } from '$app/state';
 
+	import '$lib/styles/auth.css';
+
 	const REASON_MESSAGES: Record<string, string> = {
 		invalid_state: 'Неверный параметр state. Возможна попытка CSRF-атаки.',
 		missing_code: 'Отсутствует код авторизации от провайдера.',

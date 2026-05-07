@@ -109,7 +109,7 @@
 	gap: var(--space-3);
 }
 
-.auth-oauth-section .oauth-section__icon {
+.auth-oauth-section .auth-oauth-icon {
 	margin-right: var(--space-2);
 	flex-shrink: 0;
 }

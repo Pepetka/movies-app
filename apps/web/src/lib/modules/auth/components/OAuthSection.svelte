@@ -4,12 +4,13 @@
 	import type { AuthProvider } from '$lib/api/generated/types';
 	import { getSafeRedirect } from '$lib/utils';
 
+	import { buildOAuthRedirectUrl } from '../api';
+
 	interface Props {
 		buttonText?: string;
 		showDivider?: boolean;
 		class?: string;
 		provider?: AuthProvider;
-		[key: string]: unknown;
 	}
 
 	let {
@@ -25,11 +26,11 @@
 	variant="secondary"
 	fullWidth
 	class={className}
-	href={`${__API_URL__}/api/v1/auth/oauth/${provider}?redirect=${encodeURIComponent(getSafeRedirect())}`}
+	href={buildOAuthRedirectUrl(provider, getSafeRedirect())}
 	{...restProps}
 >
 	<svg
-		class="oauth-section__icon"
+		class="auth-oauth-icon"
 		width="18"
 		height="18"
 		viewBox="0 0 24 24"

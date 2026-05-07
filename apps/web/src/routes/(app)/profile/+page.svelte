@@ -1,8 +1,9 @@
 <script lang="ts">
-	import { Avatar } from '@repo/ui';
+	import { Avatar, toast } from '@repo/ui';
 
 	import { authStore } from '$lib/modules/auth';
 	import { topBarStore } from '$lib/stores';
+	import { page } from '$app/state';
 
 	$effect(() => {
 		topBarStore.configure({
@@ -10,6 +11,15 @@
 		});
 
 		return () => topBarStore.destroy();
+	});
+
+	$effect(() => {
+		if (page.url.searchParams.get('linked') === '1') {
+			toast.success('Аккаунт успешно привязан');
+			const url = new URL(page.url);
+			url.searchParams.delete('linked');
+			window.history.replaceState({}, '', `${url.pathname}${url.search}`);
+		}
 	});
 </script>
 

@@ -37,3 +37,7 @@ export const initLinkProvider = async (provider: AuthProvider): Promise<string> 
 	const { authUrl } = await authControllerOauthLinkInitV1(provider);
 	return authUrl;
 };
+
+export const buildOAuthRedirectUrl = (provider: AuthProvider, redirect: string): string => {
+	return `${__API_URL__}/api/v1/auth/oauth/${provider}?redirect=${encodeURIComponent(redirect)}`;
+};
