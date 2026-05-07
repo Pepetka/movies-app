@@ -34,10 +34,19 @@ export const refreshTokens = async (): Promise<AuthResponseDto> => {
 };
 
 export const initLinkProvider = async (provider: AuthProvider): Promise<string> => {
-	const { authUrl } = await authControllerOauthLinkInitV1(provider);
-	return authUrl;
+	try {
+		const { authUrl } = await authControllerOauthLinkInitV1(provider);
+		return authUrl;
+	} catch (error) {
+		if (error instanceof Error) {
+			throw new Error(`Не удалось инициализировать привязку: ${error.message}`, { cause: error });
+		}
+		throw new Error('Не удалось инициализировать привязку аккаунта', { cause: error });
+	}
 };
 
 export const buildOAuthRedirectUrl = (provider: AuthProvider, redirect: string): string => {
-	return `${__API_URL__}/api/v1/auth/oauth/${provider}?redirect=${encodeURIComponent(redirect)}`;
+	const url = new URL(`/api/v1/auth/oauth/${provider}`, __API_URL__ || window.location.origin);
+	url.searchParams.set('redirect', redirect);
+	return url.toString();
 };

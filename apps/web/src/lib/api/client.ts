@@ -411,7 +411,9 @@ export class HttpClient {
 	private async _maybeAttachCsrf(url: string): Promise<string | null> {
 		const csrfPaths = this._config.auth.csrfPaths ?? [];
 		if (!csrfPaths.length) return null;
-		if (!csrfPaths.some((path) => url.startsWith(path))) return null;
+
+		const pathname = new URL(url, 'http://localhost').pathname;
+		if (!csrfPaths.some((path) => pathname.startsWith(path))) return null;
 
 		try {
 			return await this._getCsrfToken();

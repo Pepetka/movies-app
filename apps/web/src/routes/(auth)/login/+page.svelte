@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { Eye, EyeOff, Film, Mail } from '@lucide/svelte';
 	import { Button, Card, Input, toast } from '@repo/ui';
+	import { untrack } from 'svelte';
 
 	import {
 		authStore,
@@ -27,18 +28,19 @@
 	let handledOauthError = $state(false);
 
 	$effect(() => {
-		if (handledOauthError) return;
-		if (page.url.searchParams.get('oauth_error') === '1') {
+		if (page.url.searchParams.get('oauth_error') !== '1') return;
+		if (untrack(() => handledOauthError)) return;
+		untrack(() => {
 			handledOauthError = true;
-			toast.error('Ошибка входа через OAuth');
-			const url = new URL(page.url);
-			url.searchParams.delete('oauth_error');
-			void goto(`${url.pathname}${url.search}`, {
-				replaceState: true,
-				keepFocus: true,
-				noScroll: true
-			});
-		}
+		});
+		toast.error('Ошибка входа через OAuth');
+		const url = new URL(page.url);
+		url.searchParams.delete('oauth_error');
+		void goto(`${url.pathname}${url.search}`, {
+			replaceState: true,
+			keepFocus: true,
+			noScroll: true
+		});
 	});
 
 	$effect(() => {

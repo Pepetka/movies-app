@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { Avatar, toast } from '@repo/ui';
+	import { untrack } from 'svelte';
 
 	import { authStore } from '$lib/modules/auth';
 	import { topBarStore } from '$lib/stores';
@@ -17,18 +18,19 @@
 	let handledLinked = $state(false);
 
 	$effect(() => {
-		if (handledLinked) return;
-		if (page.url.searchParams.get('linked') === '1') {
+		if (page.url.searchParams.get('linked') !== '1') return;
+		if (untrack(() => handledLinked)) return;
+		untrack(() => {
 			handledLinked = true;
-			toast.success('Аккаунт успешно привязан');
-			const url = new URL(page.url);
-			url.searchParams.delete('linked');
-			void goto(`${url.pathname}${url.search}`, {
-				replaceState: true,
-				keepFocus: true,
-				noScroll: true
-			});
-		}
+		});
+		toast.success('Аккаунт успешно привязан');
+		const url = new URL(page.url);
+		url.searchParams.delete('linked');
+		void goto(`${url.pathname}${url.search}`, {
+			replaceState: true,
+			keepFocus: true,
+			noScroll: true
+		});
 	});
 </script>
 
