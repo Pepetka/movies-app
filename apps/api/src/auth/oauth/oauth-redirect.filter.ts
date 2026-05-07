@@ -1,16 +1,11 @@
-import {
-  ArgumentsHost,
-  Catch,
-  ExceptionFilter,
-  HttpException,
-  Logger,
-} from '@nestjs/common';
+import { ArgumentsHost, Catch, ExceptionFilter, Logger } from '@nestjs/common';
 import type { FastifyReply } from 'fastify';
 
 import { OAuthCookieService } from './oauth-cookie.service';
 import { OAuthService } from './oauth.service';
+import { OAuthException } from './exceptions';
 
-@Catch(HttpException)
+@Catch(OAuthException)
 export class OAuthRedirectExceptionFilter implements ExceptionFilter {
   private readonly _logger = new Logger(OAuthRedirectExceptionFilter.name);
 
@@ -19,7 +14,7 @@ export class OAuthRedirectExceptionFilter implements ExceptionFilter {
     private readonly _cookieService: OAuthCookieService,
   ) {}
 
-  catch(exception: HttpException, host: ArgumentsHost): void {
+  catch(exception: OAuthException, host: ArgumentsHost): void {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<FastifyReply>();
 

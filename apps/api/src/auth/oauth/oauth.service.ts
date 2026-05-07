@@ -294,6 +294,7 @@ export class OAuthService {
             tx,
           );
           if (existingUser) return existingUser;
+          throw new InternalServerErrorException('Data integrity error');
         }
       }
       throw error;
@@ -307,16 +308,14 @@ export class OAuthService {
    * used for SPA redirect query parameters.
    */
   mapErrorToReason(error: unknown): string {
-    if (error instanceof NotFoundException) {
-      return 'invalid_session';
-    }
-
     const e =
       typeof error === 'object' && error !== null
         ? (error as { code?: string })
         : {};
 
     switch (e.code) {
+      case 'OAUTH_SESSION_INVALID':
+        return 'invalid_session';
       case 'OAUTH_EMAIL_NOT_VERIFIED':
         return 'oauth_email_unverified';
       case 'OAUTH_CODE_EXCHANGE_FAILED':

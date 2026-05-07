@@ -1,9 +1,9 @@
-import { UnauthorizedException } from '@nestjs/common';
+import { OAuthException } from './oauth.exception';
 
-export class OAuthCodeExchangeException extends UnauthorizedException {
+export class OAuthCodeExchangeException extends OAuthException {
   readonly code = 'OAUTH_CODE_EXCHANGE_FAILED';
 
   constructor(message = 'OAuth code exchange failed') {
-    super(message);
+    super(message, 401);
   }
 }
