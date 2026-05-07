@@ -3,6 +3,7 @@
 
 	import { authStore } from '$lib/modules/auth';
 	import { topBarStore } from '$lib/stores';
+	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 
 	$effect(() => {
@@ -13,12 +14,20 @@
 		return () => topBarStore.destroy();
 	});
 
+	let handledLinked = false;
+
 	$effect(() => {
+		if (handledLinked) return;
 		if (page.url.searchParams.get('linked') === '1') {
+			handledLinked = true;
 			toast.success('Аккаунт успешно привязан');
 			const url = new URL(page.url);
 			url.searchParams.delete('linked');
-			window.history.replaceState({}, '', `${url.pathname}${url.search}`);
+			void goto(`${url.pathname}${url.search}`, {
+				replaceState: true,
+				keepFocus: true,
+				noScroll: true
+			});
 		}
 	});
 </script>
