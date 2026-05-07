@@ -161,15 +161,33 @@ export class OAuthService {
         return user;
       }
 
-      await this.oauthAccountRepository.create(
-        {
-          userId,
-          provider,
-          providerAccountId: profile.id,
-          avatar: profile.avatar ?? null,
-        },
-        tx,
-      );
+      try {
+        await this.oauthAccountRepository.create(
+          {
+            userId,
+            provider,
+            providerAccountId: profile.id,
+            avatar: profile.avatar ?? null,
+          },
+          tx,
+        );
+      } catch (error) {
+        if (this._isUniqueViolation(error)) {
+          const account =
+            await this.oauthAccountRepository.findByProviderAccount(
+              provider,
+              profile.id,
+              tx,
+            );
+          if (account && account.userId === userId) {
+            return user;
+          }
+          if (account && account.userId !== userId) {
+            throw new OAuthAccountAlreadyLinkedException();
+          }
+        }
+        throw error;
+      }
 
       this._logger.log(`OAuth linked: userId=${userId}, provider=${provider}`);
       return user;
@@ -247,17 +265,43 @@ export class OAuthService {
       }
     }
 
-    await this.oauthAccountRepository.create(
-      {
-        userId: user.id,
-        provider,
-        providerAccountId: profile.id,
-        avatar: profile.avatar ?? null,
-      },
-      tx,
-    );
+    try {
+      await this.oauthAccountRepository.create(
+        {
+          userId: user.id,
+          provider,
+          providerAccountId: profile.id,
+          avatar: profile.avatar ?? null,
+        },
+        tx,
+      );
+    } catch (error) {
+      if (this._isUniqueViolation(error)) {
+        const account = await this.oauthAccountRepository.findByProviderAccount(
+          provider,
+          profile.id,
+          tx,
+        );
+        if (account) {
+          const existingUser = await this.userService.findById(
+            account.userId,
+            tx,
+          );
+          if (existingUser) return existingUser;
+        }
+      }
+      throw error;
+    }
 
     return user;
+  }
+
+  private _isUniqueViolation(error: unknown): boolean {
+    return (
+      error instanceof Error &&
+      'code' in error &&
+      (error as { code?: string }).code === '23505'
+    );
   }
 
   /**
@@ -265,7 +309,10 @@ export class OAuthService {
    * used for SPA redirect query parameters.
    */
   mapErrorToReason(error: unknown): string {
-    const e = error as { code?: string };
+    const e =
+      typeof error === 'object' && error !== null
+        ? (error as { code?: string })
+        : {};
 
     switch (e.code) {
       case 'OAUTH_EMAIL_NOT_VERIFIED':
@@ -366,7 +413,7 @@ export class OAuthService {
 
   /**
    * Looks up the redirect URI for the given provider via env var
-   * `${PROVIDER_PREFIX}_REDIRECT_URI`. Throws 501 if not configured.
+   * `${PROVIDER_PREFIX}_REDIRECT_URI`. Throws 503 if not configured.
    */
   private _getRedirectUri(provider: AuthProvider): string {
     const envPrefix = this._getProviderEnvPrefix(provider);
