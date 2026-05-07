@@ -1,24 +1,13 @@
 import { createHash, randomBytes } from 'crypto';
 
+import { isSafeRedirect } from '$common/utils/is-safe-redirect.util';
+
 import type { OAuthIntent, OAuthSession } from '../types/oauth.types';
 
 export interface OAuthSessionInit {
   session: OAuthSession;
   codeChallenge: string;
 }
-
-const isSafeRedirect = (redirect: string): boolean => {
-  try {
-    const url = new URL(redirect, 'http://localhost');
-    return (
-      url.host === 'localhost' &&
-      url.pathname.startsWith('/') &&
-      !url.pathname.startsWith('//')
-    );
-  } catch {
-    return false;
-  }
-};
 
 /**
  * Creates a fresh OAuth session payload with PKCE (S256) primitives.

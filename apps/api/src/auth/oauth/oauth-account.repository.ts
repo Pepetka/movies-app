@@ -38,12 +38,4 @@ export class OAuthAccountRepository {
       .limit(1);
     return result ?? null;
   }
-
-  async findByUserId(userId: number, tx?: DrizzleTx): Promise<OAuthAccount[]> {
-    const conn = tx ?? this.db;
-    return conn
-      .select()
-      .from(oauthAccounts)
-      .where(eq(oauthAccounts.userId, userId));
-  }
 }
