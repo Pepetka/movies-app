@@ -73,24 +73,9 @@ describe('AuthController', () => {
     processCallback: jest.fn(),
     mapErrorToReason: jest
       .fn()
-      .mockImplementation((e: Error & { code?: string }) => {
-        switch (e.code) {
-          case 'OAUTH_EMAIL_NOT_VERIFIED':
-            return 'oauth_email_unverified';
-          case 'OAUTH_CODE_EXCHANGE_FAILED':
-            return 'oauth_code_exchange_failed';
-          case 'OAUTH_PROVIDER_NOT_CONFIGURED':
-            return 'oauth_provider_not_configured';
-          case 'OAUTH_UNSUPPORTED_PROVIDER':
-            return 'oauth_unsupported_provider';
-          case 'OAUTH_LINK_EMAIL_MISMATCH':
-            return 'oauth_link_email_mismatch';
-          case 'OAUTH_ACCOUNT_ALREADY_LINKED':
-            return 'oauth_account_already_linked';
-          default:
-            return 'oauth_failed';
-        }
-      }),
+      .mockImplementation(
+        OAuthService.prototype.mapErrorToReason.bind({} as OAuthService),
+      ),
     buildErrorUrl: jest
       .fn()
       .mockImplementation(

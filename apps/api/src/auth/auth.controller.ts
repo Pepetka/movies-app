@@ -81,6 +81,14 @@ export class AuthController {
     });
   }
 
+  private _clearOAuthSessionCookie(reply: FastifyReply): void {
+    reply.clearCookie(OAUTH_SESSION_COOKIE_NAME, {
+      path: OAUTH_SESSION_COOKIE_PATH,
+      sameSite: 'lax',
+      secure: this.cookieOptions.secure,
+    });
+  }
+
   @Public()
   @Post('register')
   @Throttle(THROTTLE.auth.critical)
@@ -260,11 +268,7 @@ export class AuthController {
     try {
       session = readOAuthSession(request);
     } catch {
-      reply.clearCookie(OAUTH_SESSION_COOKIE_NAME, {
-        path: OAUTH_SESSION_COOKIE_PATH,
-        sameSite: 'lax',
-        secure: this.cookieOptions.secure,
-      });
+      this._clearOAuthSessionCookie(reply);
       return reply.redirect(
         this.oauthService.buildErrorUrl('invalid_session'),
         HttpStatus.FOUND,
@@ -272,22 +276,14 @@ export class AuthController {
     }
 
     if (session.state !== state) {
-      reply.clearCookie(OAUTH_SESSION_COOKIE_NAME, {
-        path: OAUTH_SESSION_COOKIE_PATH,
-        sameSite: 'lax',
-        secure: this.cookieOptions.secure,
-      });
+      this._clearOAuthSessionCookie(reply);
       return reply.redirect(
         this.oauthService.buildErrorUrl('invalid_state'),
         HttpStatus.FOUND,
       );
     }
 
-    reply.clearCookie(OAUTH_SESSION_COOKIE_NAME, {
-      path: OAUTH_SESSION_COOKIE_PATH,
-      sameSite: 'lax',
-      secure: this.cookieOptions.secure,
-    });
+    this._clearOAuthSessionCookie(reply);
 
     try {
       const { redirectUrl, refreshToken } =
