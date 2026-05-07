@@ -8,8 +8,9 @@ import {
 import { ConfigService } from '@nestjs/config';
 
 import type { DrizzleDb, DrizzleTx } from '$db/types/drizzle.types';
+import { EmailAlreadyInUseException } from '$common/exceptions';
+import { TokenService } from '$src/auth/token.service';
 import { UserService } from '$src/user/user.service';
-import { AuthService } from '$src/auth/auth.service';
 import { parsePrimaryWebUrl } from '$common/utils';
 import { AuthProvider } from '$common/enums';
 import type { User } from '$db/schemas';
@@ -43,7 +44,7 @@ export class OAuthService {
     private readonly providerRegistry: OAuthProviderRegistry,
     private readonly oauthAccountRepository: OAuthAccountRepository,
     private readonly userService: UserService,
-    private readonly authService: AuthService,
+    private readonly tokenService: TokenService,
     private readonly configService: ConfigService,
   ) {}
 
@@ -86,23 +87,17 @@ export class OAuthService {
       codeVerifier,
     );
 
-    return this.db.transaction(async (tx) => {
+    const result = await this.db.transaction(async (tx) => {
       const user = await this._findOrCreateUser(tx, provider, profile);
-
-      const tokens = await this.authService.generateTokens(
-        user.id,
-        user.email,
-        user.role,
-      );
-      const tokenHash = await this.userService.hashToken(tokens.refreshToken);
-      await this.userService.updateRefreshTokenHash(user.id, tokenHash, tx);
-
-      this._logger.log(
-        `OAuth login successful: userId=${user.id}, provider=${provider}`,
-      );
-
-      return { refreshToken: tokens.refreshToken };
+      const tokens = await this.tokenService.issueTokens(user, tx);
+      return { user, tokens };
     });
+
+    this._logger.log(
+      `OAuth login successful: userId=${result.user.id}, provider=${provider}`,
+    );
+
+    return { refreshToken: result.tokens.refreshToken };
   }
 
   /**
@@ -229,14 +224,27 @@ export class OAuthService {
       this._logger.log(
         `Creating new user from OAuth: email prefix=${profile.email.slice(0, 3)}***`,
       );
-      user = await this.userService.createOAuthUser(
-        {
-          name: profile.name,
-          email: profile.email,
-          avatar: profile.avatar ?? null,
-        },
-        tx,
-      );
+      try {
+        user = await this.userService.createOAuthUser(
+          {
+            name: profile.name,
+            email: profile.email,
+            avatar: profile.avatar ?? null,
+          },
+          tx,
+        );
+      } catch (error) {
+        if (error instanceof EmailAlreadyInUseException) {
+          user = await this.userService.findByEmail(profile.email, tx);
+          if (!user) {
+            throw new InternalServerErrorException(
+              'Failed to resolve OAuth user after race condition',
+            );
+          }
+        } else {
+          throw error;
+        }
+      }
     }
 
     await this.oauthAccountRepository.create(

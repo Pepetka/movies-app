@@ -15,8 +15,8 @@ import {
 } from './exceptions';
 import { OAuthAccountRepository } from './oauth-account.repository';
 import { OAuthProviderRegistry } from './oauth-provider.registry';
+import { TokenService } from '../token.service';
 import { OAuthService } from './oauth.service';
-import { AuthService } from '../auth.service';
 
 const TX_SENTINEL = { __tx: true } as unknown;
 const REDIRECT_URI = 'http://localhost:8080/api/v1/auth/oauth/google/callback';
@@ -72,7 +72,7 @@ describe('OAuthService', () => {
     hashToken: jest.Mock;
     updateRefreshTokenHash: jest.Mock;
   };
-  let authService: { generateTokens: jest.Mock };
+  let tokenService: { issueTokens: jest.Mock };
   let providerImpl: {
     buildAuthUrl: jest.Mock;
     exchangeCodeForProfile: jest.Mock;
@@ -98,8 +98,8 @@ describe('OAuthService', () => {
       hashToken: jest.fn().mockResolvedValue('hashed-refresh'),
       updateRefreshTokenHash: jest.fn().mockResolvedValue(undefined),
     };
-    authService = {
-      generateTokens: jest.fn().mockResolvedValue(mockTokens),
+    tokenService = {
+      issueTokens: jest.fn().mockResolvedValue(mockTokens),
     };
     db = {
       transaction: jest.fn(async (cb: (tx: unknown) => unknown) =>
@@ -120,7 +120,7 @@ describe('OAuthService', () => {
         { provide: OAuthProviderRegistry, useValue: providerRegistry },
         { provide: OAuthAccountRepository, useValue: oauthAccountRepository },
         { provide: UserService, useValue: userService },
-        { provide: AuthService, useValue: authService },
+        { provide: TokenService, useValue: tokenService },
         { provide: ConfigService, useValue: config },
       ],
     }).compile();
@@ -155,7 +155,7 @@ describe('OAuthService', () => {
           { provide: OAuthProviderRegistry, useValue: providerRegistry },
           { provide: OAuthAccountRepository, useValue: oauthAccountRepository },
           { provide: UserService, useValue: userService },
-          { provide: AuthService, useValue: authService },
+          { provide: TokenService, useValue: tokenService },
           { provide: ConfigService, useValue: config },
         ],
       }).compile();
@@ -198,17 +198,8 @@ describe('OAuthService', () => {
       );
       expect(oauthAccountRepository.create).not.toHaveBeenCalled();
       expect(userService.createOAuthUser).not.toHaveBeenCalled();
-      expect(authService.generateTokens).toHaveBeenCalledWith(
-        mockUser.id,
-        mockUser.email,
-        mockUser.role,
-      );
-      expect(userService.hashToken).toHaveBeenCalledWith(
-        mockTokens.refreshToken,
-      );
-      expect(userService.updateRefreshTokenHash).toHaveBeenCalledWith(
-        mockUser.id,
-        'hashed-refresh',
+      expect(tokenService.issueTokens).toHaveBeenCalledWith(
+        mockUser,
         TX_SENTINEL,
       );
     });
@@ -266,7 +257,7 @@ describe('OAuthService', () => {
       ).rejects.toThrow(OAuthCodeExchangeException);
 
       expect(db.transaction).not.toHaveBeenCalled();
-      expect(authService.generateTokens).not.toHaveBeenCalled();
+      expect(tokenService.issueTokens).not.toHaveBeenCalled();
     });
 
     it('propagates errors from oauthAccountRepository.create and skips token issuance', async () => {
@@ -282,7 +273,7 @@ describe('OAuthService', () => {
       await expect(
         service.handleCallback(AuthProvider.GOOGLE, CODE, CODE_VERIFIER),
       ).rejects.toThrow('insert failed');
-      expect(authService.generateTokens).not.toHaveBeenCalled();
+      expect(tokenService.issueTokens).not.toHaveBeenCalled();
     });
 
     it('rejects unverified email for new users (defense-in-depth)', async () => {
@@ -320,7 +311,10 @@ describe('OAuthService', () => {
         mockOAuthAccount.userId,
         TX_SENTINEL,
       );
-      expect(authService.generateTokens).toHaveBeenCalled();
+      expect(tokenService.issueTokens).toHaveBeenCalledWith(
+        mockUser,
+        TX_SENTINEL,
+      );
     });
   });
 

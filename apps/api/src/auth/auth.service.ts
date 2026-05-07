@@ -1,13 +1,10 @@
 import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { JwtService } from '@nestjs/jwt';
 import { hashSync } from 'bcrypt';
 
 import { UserService } from '$src/user/user.service';
 import type { User } from '$db/schemas';
 
-import { JWT_REFRESH_AUDIENCE } from './auth.constants';
-import type { Expires } from './types/expires.type';
+import { TokenService } from './token.service';
 import { AuthRegisterDto } from './dto';
 
 // Dummy hash for constant-time comparison (generated at startup)
@@ -19,8 +16,7 @@ export class AuthService {
 
   constructor(
     private readonly userService: UserService,
-    private readonly jwtService: JwtService,
-    private readonly configService: ConfigService,
+    private readonly tokenService: TokenService,
   ) {}
 
   /**
@@ -62,10 +58,7 @@ export class AuthService {
   ): Promise<{ accessToken: string; refreshToken: string }> {
     const user = await this.userService.create(dto);
     this._logger.log(`User registered: ${user.id}`);
-    const tokens = await this.generateTokens(user.id, user.email, user.role);
-    const tokenHash = await this.userService.hashToken(tokens.refreshToken);
-    await this.userService.updateRefreshTokenHash(user.id, tokenHash);
-    return tokens;
+    return this.tokenService.issueTokens(user);
   }
 
   /**
@@ -82,11 +75,7 @@ export class AuthService {
     }
 
     this._logger.log(`User logged in: ${user.id}`);
-    const tokens = await this.generateTokens(user.id, user.email, user.role);
-    const tokenHash = await this.userService.hashToken(tokens.refreshToken);
-    await this.userService.updateRefreshTokenHash(user.id, tokenHash);
-
-    return tokens;
+    return this.tokenService.issueTokens(user);
   }
 
   /**
@@ -113,11 +102,7 @@ export class AuthService {
     }
 
     this._logger.log(`Token refreshed: ${user.id}`);
-    const tokens = await this.generateTokens(user.id, user.email, user.role);
-    const tokenHash = await this.userService.hashToken(tokens.refreshToken);
-    await this.userService.updateRefreshTokenHash(user.id, tokenHash);
-
-    return tokens;
+    return this.tokenService.issueTokens(user);
   }
 
   /**
@@ -127,31 +112,5 @@ export class AuthService {
   async logout(userId: number) {
     await this.userService.updateRefreshTokenHash(userId, null);
     this._logger.log(`User logged out: ${userId}`);
-  }
-
-  /**
-   * Generates JWT access and refresh tokens
-   * @param userId - User ID
-   * @param email - User email
-   * @param role - User role
-   * @returns Object with accessToken and refreshToken
-   */
-  async generateTokens(userId: number, email: string, role: string) {
-    const [accessToken, refreshToken] = await Promise.all([
-      this.jwtService.signAsync({ sub: userId, email, role }),
-      this.jwtService.signAsync(
-        { sub: userId, email, role },
-        {
-          secret: this.configService.getOrThrow<string>('JWT_REFRESH_SECRET'),
-          expiresIn: this.configService.getOrThrow<Expires>(
-            'JWT_REFRESH_EXPIRATION',
-          ),
-          issuer: this.configService.getOrThrow<string>('JWT_ISSUER'),
-          audience: JWT_REFRESH_AUDIENCE,
-        },
-      ),
-    ]);
-
-    return { accessToken, refreshToken };
   }
 }

@@ -20,6 +20,7 @@ import { RefreshGuard } from './guards/refresh.guard';
 import { OAuthService } from './oauth/oauth.service';
 import type { Expires } from './types/expires.type';
 import { AuthController } from './auth.controller';
+import { TokenService } from './token.service';
 import { AuthService } from './auth.service';
 
 @Module({
@@ -41,6 +42,7 @@ import { AuthService } from './auth.service';
   controllers: [AuthController],
   providers: [
     AuthService,
+    TokenService,
     RefreshGuard,
     GoogleOAuthProvider,
     {
@@ -68,6 +70,12 @@ import { AuthService } from './auth.service';
       inject: [ConfigService],
     },
   ],
-  exports: [AuthService, OAuthService, REFRESH_COOKIE_OPTIONS, JwtModule],
+  exports: [
+    AuthService,
+    TokenService,
+    OAuthService,
+    REFRESH_COOKIE_OPTIONS,
+    JwtModule,
+  ],
 })
 export class AuthModule {}

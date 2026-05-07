@@ -1,11 +1,10 @@
 import { UnauthorizedException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { ConfigService } from '@nestjs/config';
-import { JwtService } from '@nestjs/jwt';
 
 import { UserService } from '$src/user/user.service';
 import { UserRole } from '$common/enums';
 
+import { TokenService } from './token.service';
 import { AuthService } from './auth.service';
 import { AuthRegisterDto } from './dto';
 
@@ -26,51 +25,12 @@ const mockTokens = {
   refreshToken: 'mock-refresh-token',
 };
 
-const createMockJwtService = () => ({
-  signAsync: jest.fn<
-    Promise<string>,
-    [unknown, { secret?: string; expiresIn?: string } | undefined]
-  >(),
-});
-
-const createMockConfigService = () => ({
-  get: jest.fn<unknown, [string]>(),
-  getOrThrow: jest.fn<unknown, [string]>(),
-});
-
 describe('AuthService', () => {
   let service: AuthService;
   let userService: jest.Mocked<UserService>;
-  let _jwtService: ReturnType<typeof createMockJwtService>;
-  let _configService: ReturnType<typeof createMockConfigService>;
+  let tokenService: jest.Mocked<TokenService>;
 
   beforeEach(async () => {
-    const mockJwt = createMockJwtService();
-    const mockConfig = createMockConfigService();
-
-    mockConfig.get.mockImplementation((key: string) => {
-      const config: Record<string, unknown> = {
-        JWT_ISSUER: 'movies-app-test',
-      };
-      return config[key] as string;
-    });
-
-    mockConfig.getOrThrow.mockImplementation((key: string) => {
-      const config: Record<string, unknown> = {
-        JWT_ACCESS_SECRET: 'test-access-secret',
-        JWT_REFRESH_SECRET: 'test-refresh-secret',
-        JWT_ACCESS_EXPIRATION: '15m',
-        JWT_REFRESH_EXPIRATION: '7d',
-      };
-      return config[key] as string;
-    });
-
-    mockJwt.signAsync.mockImplementation(async (_payload, options) => {
-      return options?.secret === 'test-refresh-secret'
-        ? mockTokens.refreshToken
-        : mockTokens.accessToken;
-    });
-
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         AuthService,
@@ -87,12 +47,10 @@ describe('AuthService', () => {
           },
         },
         {
-          provide: JwtService,
-          useValue: mockJwt,
-        },
-        {
-          provide: ConfigService,
-          useValue: mockConfig,
+          provide: TokenService,
+          useValue: {
+            issueTokens: jest.fn().mockResolvedValue(mockTokens),
+          },
         },
       ],
     }).compile();
@@ -101,8 +59,9 @@ describe('AuthService', () => {
     userService = module.get<UserService>(
       UserService,
     ) as jest.Mocked<UserService>;
-    _jwtService = mockJwt;
-    _configService = mockConfig;
+    tokenService = module.get<TokenService>(
+      TokenService,
+    ) as jest.Mocked<TokenService>;
   });
 
   afterEach(() => {
@@ -175,19 +134,12 @@ describe('AuthService', () => {
 
     it('should return tokens on successful registration', async () => {
       userService.create.mockResolvedValue(mockUser);
-      userService.hashToken.mockResolvedValue('hashed-refresh-token');
 
       const result = await service.register(registerDto);
 
       expect(result).toEqual(mockTokens);
       expect(userService.create).toHaveBeenCalledWith(registerDto);
-      expect(userService.hashToken).toHaveBeenCalledWith(
-        mockTokens.refreshToken,
-      );
-      expect(userService.updateRefreshTokenHash).toHaveBeenCalledWith(
-        mockUser.id,
-        'hashed-refresh-token',
-      );
+      expect(tokenService.issueTokens).toHaveBeenCalledWith(mockUser);
     });
   });
 
@@ -195,7 +147,6 @@ describe('AuthService', () => {
     it('should return tokens for valid credentials', async () => {
       userService.findByEmail.mockResolvedValue(mockUser);
       userService.validatePassword.mockResolvedValue(true);
-      userService.hashToken.mockResolvedValue('hashed-refresh-token');
 
       const result = await service.login('test@example.com', 'password123');
 
@@ -204,13 +155,7 @@ describe('AuthService', () => {
         'password123',
         mockUser.passwordHash,
       );
-      expect(userService.hashToken).toHaveBeenCalledWith(
-        mockTokens.refreshToken,
-      );
-      expect(userService.updateRefreshTokenHash).toHaveBeenCalledWith(
-        mockUser.id,
-        'hashed-refresh-token',
-      );
+      expect(tokenService.issueTokens).toHaveBeenCalledWith(mockUser);
     });
 
     it('should throw UnauthorizedException for invalid email', async () => {
@@ -237,7 +182,6 @@ describe('AuthService', () => {
       const hashedToken = 'hashed-refresh-token';
 
       userService.validateRefreshToken.mockResolvedValue(true);
-      userService.hashToken.mockResolvedValue('new-hashed-token');
 
       const result = await service.refresh(
         { ...mockUser, refreshTokenHash: hashedToken },
@@ -249,12 +193,11 @@ describe('AuthService', () => {
         refreshToken,
         hashedToken,
       );
-      expect(userService.hashToken).toHaveBeenCalledWith(
-        mockTokens.refreshToken,
-      );
-      expect(userService.updateRefreshTokenHash).toHaveBeenCalledWith(
-        mockUser.id,
-        'new-hashed-token',
+      expect(tokenService.issueTokens).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: mockUser.id,
+          refreshTokenHash: hashedToken,
+        }),
       );
     });
 
