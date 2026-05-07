@@ -29,4 +29,5 @@ export interface OAuthSession {
   intent: OAuthIntent;
   userId?: number;
   redirect?: string;
+  expiresAt: number;
 }

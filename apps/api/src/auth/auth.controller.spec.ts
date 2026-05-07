@@ -318,6 +318,7 @@ describe('AuthController', () => {
       state: 'test-state-123',
       codeVerifier: 'test-verifier-456',
       intent: 'login' as const,
+      expiresAt: Date.now() + 10 * 60 * 1000,
     };
 
     const mockRequest = (opts?: {

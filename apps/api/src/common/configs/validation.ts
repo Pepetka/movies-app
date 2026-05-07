@@ -6,9 +6,47 @@ import {
   IsUrl,
   Max,
   Min,
+  registerDecorator,
   validateSync,
+  type ValidationOptions,
+  type ValidatorConstraintInterface,
 } from 'class-validator';
 import { plainToInstance } from 'class-transformer';
+
+class IsCommaSeparatedUrlsConstraint implements ValidatorConstraintInterface {
+  validate(value: unknown): boolean {
+    if (typeof value !== 'string') return false;
+    const urls = value
+      .split(',')
+      .map((u) => u.trim())
+      .filter(Boolean);
+    if (urls.length === 0) return false;
+    return urls.every((url) => {
+      try {
+        new URL(url);
+        return true;
+      } catch {
+        return false;
+      }
+    });
+  }
+
+  defaultMessage(): string {
+    return 'WEB_URL must be a comma-separated list of valid URLs';
+  }
+}
+
+function IsCommaSeparatedUrls(validationOptions?: ValidationOptions) {
+  return function (object: object, propertyName: string) {
+    registerDecorator({
+      target: object.constructor,
+      propertyName,
+      options: validationOptions,
+      constraints: [],
+      validator: IsCommaSeparatedUrlsConstraint,
+    });
+  };
+}
 
 export enum Environment {
   Development = 'development',
@@ -26,7 +64,7 @@ class EnvironmentVariables {
   PORT: number;
 
   // Comma-separated list of allowed CORS origins
-  @IsString()
+  @IsCommaSeparatedUrls()
   WEB_URL: string;
 
   @IsUrl({ require_tld: false })

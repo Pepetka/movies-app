@@ -3,6 +3,7 @@ import { createHash, randomBytes } from 'crypto';
 import { isSafeRedirect } from '$common/utils/is-safe-redirect.util';
 
 import type { OAuthIntent, OAuthSession } from '../types/oauth.types';
+import { OAUTH_SESSION_COOKIE_MAX_AGE } from '../oauth.constants';
 
 export interface OAuthSessionInit {
   session: OAuthSession;
@@ -36,7 +37,13 @@ export const createOAuthSession = (
     .update(codeVerifier)
     .digest('base64url');
 
-  const session: OAuthSession = { state, codeVerifier, intent, userId };
+  const session: OAuthSession = {
+    state,
+    codeVerifier,
+    intent,
+    userId,
+    expiresAt: Date.now() + OAUTH_SESSION_COOKIE_MAX_AGE,
+  };
   if (redirect && isSafeRedirect(redirect)) {
     session.redirect = redirect;
   }
