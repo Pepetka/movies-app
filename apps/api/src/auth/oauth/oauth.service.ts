@@ -189,6 +189,11 @@ export class OAuthService {
         throw error;
       }
 
+      if (!user.avatar && profile.avatar) {
+        await this._userService.updateAvatar(userId, profile.avatar, tx);
+        user.avatar = profile.avatar;
+      }
+
       this._logger.log(`OAuth linked: userId=${userId}, provider=${provider}`);
       return user;
     });
@@ -302,6 +307,10 @@ export class OAuthService {
    * used for SPA redirect query parameters.
    */
   mapErrorToReason(error: unknown): string {
+    if (error instanceof NotFoundException) {
+      return 'invalid_session';
+    }
+
     const e =
       typeof error === 'object' && error !== null
         ? (error as { code?: string })

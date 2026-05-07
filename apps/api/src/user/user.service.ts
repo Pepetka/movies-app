@@ -191,6 +191,20 @@ export class UserService {
   }
 
   /**
+   * Updates user's avatar
+   * @param id - User ID
+   * @param avatar - Avatar URL or null
+   * @param tx - Optional transaction
+   */
+  async updateAvatar(
+    id: number,
+    avatar: string | null,
+    tx?: DrizzleTx,
+  ): Promise<User> {
+    return this._userRepository.update(id, { avatar }, tx);
+  }
+
+  /**
    * Validates plain text password against hashed password
    * @param plainPassword - Plain text password
    * @param hashedPassword - Hashed password from database

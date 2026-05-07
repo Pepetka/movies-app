@@ -154,6 +154,7 @@ export class AuthController {
   }
 
   @Public()
+  @UseFilters(OAuthRedirectExceptionFilter)
   @Get('oauth/:provider')
   @Throttle(THROTTLE.auth.oauth)
   @ApiParam({ name: 'provider', enum: AuthProvider, enumName: 'AuthProvider' })
@@ -183,6 +184,7 @@ export class AuthController {
       codeChallenge,
     );
     reply.redirect(redirectUrl, HttpStatus.FOUND);
+    return;
   }
 
   @CsrfProtected()
@@ -252,19 +254,21 @@ export class AuthController {
         'OAuth callback rejected: invalid or missing session cookie',
       );
       this._cookieService.clearOAuthSessionCookie(reply);
-      return reply.redirect(
+      reply.redirect(
         this._oauthService.buildErrorUrl('invalid_session'),
         HttpStatus.FOUND,
       );
+      return;
     }
 
     if (session.state !== state) {
       this._logger.warn('OAuth callback rejected: state mismatch');
       this._cookieService.clearOAuthSessionCookie(reply);
-      return reply.redirect(
+      reply.redirect(
         this._oauthService.buildErrorUrl('invalid_state'),
         HttpStatus.FOUND,
       );
+      return;
     }
 
     this._cookieService.clearOAuthSessionCookie(reply);
@@ -281,5 +285,6 @@ export class AuthController {
     }
 
     reply.redirect(redirectUrl, HttpStatus.FOUND);
+    return;
   }
 }
