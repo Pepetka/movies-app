@@ -4,6 +4,7 @@ import { ConfigService } from '@nestjs/config';
 import {
   OAuthCodeExchangeException,
   OAuthEmailNotVerifiedException,
+  OAuthException,
 } from '../exceptions';
 import type { OAuthProvider } from '../interfaces/oauth-provider.interface';
 import type { AuthUrlParams, OAuthProfile } from '../types/oauth.types';
@@ -161,7 +162,11 @@ export class GoogleOAuthProvider implements OAuthProvider {
           'Google token/userinfo request timed out',
         );
       }
-      throw error;
+      if (error instanceof OAuthException) {
+        throw error;
+      }
+      this._logger.error('Google OAuth request failed', error);
+      throw new OAuthCodeExchangeException('Google OAuth request failed');
     } finally {
       clearTimeout(tokenTimeout);
       if (userInfoTimeout) {
