@@ -10,12 +10,18 @@ import {
 import type { AuthLoginDto, UserResponseDto } from '$lib/api/generated/types';
 import { BaseStore } from '$lib/stores/base.svelte';
 
-import { getCurrentUser, login as apiLogin, logout as apiLogout } from '../api';
+import {
+	getCurrentUser,
+	login as apiLogin,
+	logout as apiLogout,
+	refreshTokens as apiRefreshTokens
+} from '../api';
 import type { AuthStatus } from '../types';
 
 class AuthStore extends BaseStore {
 	private readonly _query: QueryResult<UserResponseDto>;
 	private readonly _loginMutation: MutationResult<void, AuthLoginDto>;
+	private readonly _oauthSuccessMutation: MutationResult<void, void>;
 	private _checkAuthPromise: Promise<void> | null = null;
 
 	isInitialized = $state(false);
@@ -35,6 +41,15 @@ class AuthStore extends BaseStore {
 			tags: ['user'],
 			mutator: async (data) => {
 				await apiLogin(data);
+			},
+			debug: !__IS_PROD__
+		});
+
+		this._oauthSuccessMutation = createMutation<void, void>({
+			key: ['auth', 'oauthSuccess'],
+			tags: ['user'],
+			mutator: async () => {
+				await apiRefreshTokens();
 			},
 			debug: !__IS_PROD__
 		});
@@ -83,6 +98,16 @@ class AuthStore extends BaseStore {
 
 	async login(data: AuthLoginDto): Promise<void> {
 		await untrack(() => this._loginMutation.mutate(data));
+	}
+
+	// === OAuth success mutation ===
+
+	get isHandlingOAuthSuccess(): boolean {
+		return this._oauthSuccessMutation.isSubmitting;
+	}
+
+	async handleOAuthSuccess(): Promise<void> {
+		await untrack(() => this._oauthSuccessMutation.mutate());
 	}
 
 	// === Logout ===

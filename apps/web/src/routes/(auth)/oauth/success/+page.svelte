@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { getSafeRedirect, ROUTES } from '$lib/utils';
-	import { refreshTokens } from '$lib/modules/auth';
-	import { queryRegistry } from '$lib/query';
+	import { authStore } from '$lib/modules/auth';
 	import { goto } from '$app/navigation';
 
 	$effect(() => {
@@ -9,9 +8,7 @@
 
 		const authenticate = async () => {
 			try {
-				await refreshTokens();
-				if (cancelled) return;
-				queryRegistry.invalidateByTag('user');
+				await authStore.handleOAuthSuccess();
 				if (cancelled) return;
 				await goto(getSafeRedirect(ROUTES.GROUPS), { replaceState: true });
 			} catch {
