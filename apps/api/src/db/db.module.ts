@@ -3,9 +3,11 @@ import { Global, Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import postgres from 'postgres';
 
+import { DbTransactionManager } from './transaction.manager';
+import { DRIZZLE } from './db.tokens';
 import * as schema from './schemas';
 
-export const DRIZZLE = Symbol('DRIZZLE');
+export { DRIZZLE };
 
 @Global()
 @Module({
@@ -18,7 +20,8 @@ export const DRIZZLE = Symbol('DRIZZLE');
         return drizzle(client, { schema, casing: 'snake_case' });
       },
     },
+    DbTransactionManager,
   ],
-  exports: [DRIZZLE],
+  exports: [DRIZZLE, DbTransactionManager],
 })
 export class DbModule {}

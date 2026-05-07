@@ -9,6 +9,7 @@ import {
   HttpCode,
   HttpStatus,
   UseGuards,
+  UseFilters,
   Res,
   SerializeOptions,
   Inject,
@@ -32,24 +33,21 @@ import { AuthProvider } from '$common/enums';
 import { THROTTLE } from '$common/configs';
 
 import {
-  OAUTH_SESSION_COOKIE_NAME,
-  OAUTH_SESSION_COOKIE_MAX_AGE,
-  OAUTH_SESSION_COOKIE_PATH,
-} from './oauth/oauth.constants';
+  AuthLoginDto,
+  AuthRegisterDto,
+  AuthResponseDto,
+  OAuthLinkInitResponseDto,
+  OAuthRedirectQueryDto,
+} from './dto';
 import {
   REFRESH_COOKIE_OPTIONS,
   REFRESH_COOKIE_NAME,
   RefreshCookieOptions,
 } from './auth.constants';
-import {
-  AuthLoginDto,
-  AuthRegisterDto,
-  AuthResponseDto,
-  OAuthLinkInitResponseDto,
-} from './dto';
 import { ParseAuthProviderPipe } from './oauth/pipes/parse-auth-provider.pipe';
 import { createOAuthSession } from './oauth/utils/create-oauth-session.util';
-import { readOAuthSession } from './oauth/utils/read-oauth-session.util';
+import { OAuthRedirectExceptionFilter } from './oauth/oauth-redirect.filter';
+import { OAuthCookieService } from './oauth/oauth-cookie.service';
 import type { OAuthSession } from './oauth/types/oauth.types';
 import { RefreshGuard } from './guards/refresh.guard';
 import { OAuthService } from './oauth/oauth.service';
@@ -64,36 +62,15 @@ export class AuthController {
   constructor(
     private readonly _authService: AuthService,
     private readonly _oauthService: OAuthService,
+    private readonly _cookieService: OAuthCookieService,
     @Inject(REFRESH_COOKIE_OPTIONS)
     private readonly _cookieOptions: RefreshCookieOptions,
   ) {}
 
-  private _setOAuthSessionCookie(
-    reply: FastifyReply,
-    session: OAuthSession,
-  ): void {
-    reply.cookie(OAUTH_SESSION_COOKIE_NAME, JSON.stringify(session), {
-      httpOnly: true,
-      signed: true,
-      secure: this._cookieOptions.secure,
-      sameSite: 'lax',
-      path: OAUTH_SESSION_COOKIE_PATH,
-      maxAge: OAUTH_SESSION_COOKIE_MAX_AGE,
-    });
-  }
-
-  private _clearOAuthSessionCookie(reply: FastifyReply): void {
-    reply.clearCookie(OAUTH_SESSION_COOKIE_NAME, {
-      path: OAUTH_SESSION_COOKIE_PATH,
-      sameSite: 'lax',
-      secure: this._cookieOptions.secure,
-    });
-  }
-
   @Public()
   @Post('register')
   @Throttle(THROTTLE.auth.critical)
-  @ApiOperation({ summary: 'Register a new user' })
+  @ApiOperation({ summary: 'Register a new user', security: [] })
   @ApiResponse({
     status: 201,
     description: 'User successfully registered',
@@ -116,7 +93,7 @@ export class AuthController {
   @Post('login')
   @HttpCode(HttpStatus.OK)
   @Throttle(THROTTLE.auth.critical)
-  @ApiOperation({ summary: 'Login user' })
+  @ApiOperation({ summary: 'Login user', security: [] })
   @ApiResponse({
     status: 200,
     description: 'User successfully logged in',
@@ -156,7 +133,7 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @UseGuards(RefreshGuard)
   @Throttle(THROTTLE.auth.refresh)
-  @ApiOperation({ summary: 'Refresh access token' })
+  @ApiOperation({ summary: 'Refresh access token', security: [] })
   @ApiResponse({
     status: 200,
     description: 'Tokens successfully refreshed',
@@ -180,28 +157,25 @@ export class AuthController {
   @Get('oauth/:provider')
   @Throttle(THROTTLE.auth.oauth)
   @ApiParam({ name: 'provider', enum: AuthProvider, enumName: 'AuthProvider' })
-  @ApiQuery({
-    name: 'redirect',
-    required: false,
-    description: 'Path to redirect after OAuth login',
-    type: String,
+  @ApiOperation({
+    summary: 'Redirect to OAuth provider authorization page',
+    security: [],
   })
-  @ApiOperation({ summary: 'Redirect to OAuth provider authorization page' })
   @ApiResponse({ status: 302, description: 'Redirect to provider' })
   @ApiResponse({ status: 400, description: 'Unsupported provider' })
   @ApiResponse({ status: 503, description: 'Provider not configured' })
   async oauthRedirect(
     @Param('provider', ParseAuthProviderPipe) provider: AuthProvider,
-    @Query('redirect') redirect: string | undefined,
+    @Query() query: OAuthRedirectQueryDto,
     @Res({ passthrough: true }) reply: FastifyReply,
   ): Promise<void> {
     const { session, codeChallenge } = createOAuthSession(
       'login',
       undefined,
-      redirect,
+      query.redirect,
     );
 
-    this._setOAuthSessionCookie(reply, session);
+    this._cookieService.setOAuthSessionCookie(reply, session);
 
     const redirectUrl = this._oauthService.buildAuthUrl(
       provider,
@@ -232,10 +206,10 @@ export class AuthController {
     @Param('provider', ParseAuthProviderPipe) provider: AuthProvider,
     @User() user: UserType,
     @Res({ passthrough: true }) reply: FastifyReply,
-  ): Promise<{ authUrl: string }> {
+  ): Promise<OAuthLinkInitResponseDto> {
     const { session, codeChallenge } = createOAuthSession('link', user.id);
 
-    this._setOAuthSessionCookie(reply, session);
+    this._cookieService.setOAuthSessionCookie(reply, session);
 
     const authUrl = this._oauthService.buildAuthUrl(
       provider,
@@ -243,17 +217,21 @@ export class AuthController {
       codeChallenge,
     );
 
-    return { authUrl };
+    return Object.assign(new OAuthLinkInitResponseDto(), { authUrl });
   }
 
   @Public()
+  @UseFilters(OAuthRedirectExceptionFilter)
   @Get('oauth/:provider/callback')
   @Throttle(THROTTLE.auth.oauth)
   @ApiParam({ name: 'provider', enum: AuthProvider, enumName: 'AuthProvider' })
   @ApiQuery({ name: 'code', required: false, type: String })
   @ApiQuery({ name: 'state', required: false, type: String })
   @ApiQuery({ name: 'error', required: false, type: String })
-  @ApiOperation({ summary: 'OAuth callback — redirects to SPA after auth' })
+  @ApiOperation({
+    summary: 'OAuth callback — redirects to SPA after auth',
+    security: [],
+  })
   @ApiResponse({
     status: 302,
     description: 'Redirect to SPA /oauth/success or /oauth/error',
@@ -268,9 +246,12 @@ export class AuthController {
   ): Promise<void> {
     let session: OAuthSession;
     try {
-      session = readOAuthSession(request);
+      session = this._cookieService.readOAuthSession(request);
     } catch {
-      this._clearOAuthSessionCookie(reply);
+      this._logger.warn(
+        'OAuth callback rejected: invalid or missing session cookie',
+      );
+      this._cookieService.clearOAuthSessionCookie(reply);
       return reply.redirect(
         this._oauthService.buildErrorUrl('invalid_session'),
         HttpStatus.FOUND,
@@ -278,37 +259,27 @@ export class AuthController {
     }
 
     if (session.state !== state) {
-      this._clearOAuthSessionCookie(reply);
+      this._logger.warn('OAuth callback rejected: state mismatch');
+      this._cookieService.clearOAuthSessionCookie(reply);
       return reply.redirect(
         this._oauthService.buildErrorUrl('invalid_state'),
         HttpStatus.FOUND,
       );
     }
 
-    this._clearOAuthSessionCookie(reply);
+    this._cookieService.clearOAuthSessionCookie(reply);
 
-    try {
-      const { redirectUrl, refreshToken } =
-        await this._oauthService.processCallback(
-          provider,
-          { code, error },
-          session,
-        );
-
-      if (refreshToken) {
-        reply.cookie(REFRESH_COOKIE_NAME, refreshToken, this._cookieOptions);
-      }
-
-      reply.redirect(redirectUrl, HttpStatus.FOUND);
-    } catch (e) {
-      const reason = this._oauthService.mapErrorToReason(e);
-      if (reason === 'oauth_failed') {
-        this._logger.error('Unexpected OAuth callback error', e);
-      }
-      reply.redirect(
-        this._oauthService.buildErrorUrl(reason),
-        HttpStatus.FOUND,
+    const { redirectUrl, refreshToken } =
+      await this._oauthService.processCallback(
+        provider,
+        { code, error },
+        session,
       );
+
+    if (refreshToken) {
+      reply.cookie(REFRESH_COOKIE_NAME, refreshToken, this._cookieOptions);
     }
+
+    reply.redirect(redirectUrl, HttpStatus.FOUND);
   }
 }

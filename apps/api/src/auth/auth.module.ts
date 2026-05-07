@@ -12,8 +12,10 @@ import {
   REFRESH_COOKIE_PATH,
   RefreshCookieOptions,
 } from './auth.constants';
+import { OAuthRedirectExceptionFilter } from './oauth/oauth-redirect.filter';
 import { OAuthAccountRepository } from './oauth/oauth-account.repository';
 import { OAuthProviderRegistry } from './oauth/oauth-provider.registry';
+import { OAuthCookieService } from './oauth/oauth-cookie.service';
 import { OAUTH_PROVIDERS } from './oauth/oauth.constants';
 import { GoogleOAuthProvider } from './oauth/providers';
 import { RefreshGuard } from './guards/refresh.guard';
@@ -53,6 +55,8 @@ import { AuthService } from './auth.service';
     OAuthProviderRegistry,
     OAuthAccountRepository,
     OAuthService,
+    OAuthCookieService,
+    OAuthRedirectExceptionFilter,
     {
       provide: REFRESH_COOKIE_OPTIONS,
       useFactory: (configService: ConfigService): RefreshCookieOptions => {

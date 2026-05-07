@@ -22,6 +22,7 @@ import {
   REFRESH_COOKIE_NAME,
   RefreshCookieOptions,
 } from './auth.constants';
+import { OAuthCookieService } from './oauth/oauth-cookie.service';
 import { AuthLoginDto, AuthRegisterDto } from './dto';
 import { RefreshGuard } from './guards/refresh.guard';
 import { OAuthService } from './oauth/oauth.service';
@@ -106,6 +107,7 @@ describe('AuthController', () => {
           provide: REFRESH_COOKIE_OPTIONS,
           useValue: mockCookieOptions,
         },
+        OAuthCookieService,
       ],
     })
       .overrideGuard(RefreshGuard)
@@ -228,7 +230,11 @@ describe('AuthController', () => {
         'https://accounts.google.com/o/oauth2/v2/auth?client_id=test',
       );
 
-      await controller.oauthRedirect(AuthProvider.GOOGLE, undefined, mockReply);
+      await controller.oauthRedirect(
+        AuthProvider.GOOGLE,
+        { redirect: undefined },
+        mockReply,
+      );
 
       expect(mockReply.cookie).toHaveBeenCalledWith(
         OAUTH_SESSION_COOKIE_NAME,
@@ -259,7 +265,7 @@ describe('AuthController', () => {
 
       await controller.oauthRedirect(
         AuthProvider.GOOGLE,
-        '/invite/test-token',
+        { redirect: '/invite/test-token' },
         mockReply,
       );
 
@@ -473,50 +479,40 @@ describe('AuthController', () => {
       );
     });
 
-    it('should redirect to /oauth/error on email_unverified', async () => {
+    it('should throw OAuthEmailNotVerifiedException on email_unverified', async () => {
       const request = mockRequest();
       oauthService.processCallback.mockRejectedValue(
         new OAuthEmailNotVerifiedException(),
       );
 
-      await controller.oauthCallback(
-        AuthProvider.GOOGLE,
-        'auth-code',
-        validSession.state,
-        undefined,
-        request,
-        mockReply,
-      );
-
-      expect(mockReply.redirect).toHaveBeenCalledWith(
-        expect.stringContaining(
-          `${OAUTH_ERROR_PATH}?reason=oauth_email_unverified`,
+      await expect(
+        controller.oauthCallback(
+          AuthProvider.GOOGLE,
+          'auth-code',
+          validSession.state,
+          undefined,
+          request,
+          mockReply,
         ),
-        302,
-      );
+      ).rejects.toThrow(OAuthEmailNotVerifiedException);
     });
 
-    it('should redirect to /oauth/error on code exchange failure', async () => {
+    it('should throw OAuthCodeExchangeException on code exchange failure', async () => {
       const request = mockRequest();
       oauthService.processCallback.mockRejectedValue(
         new OAuthCodeExchangeException('token error'),
       );
 
-      await controller.oauthCallback(
-        AuthProvider.GOOGLE,
-        'auth-code',
-        validSession.state,
-        undefined,
-        request,
-        mockReply,
-      );
-
-      expect(mockReply.redirect).toHaveBeenCalledWith(
-        expect.stringContaining(
-          `${OAUTH_ERROR_PATH}?reason=oauth_code_exchange_failed`,
+      await expect(
+        controller.oauthCallback(
+          AuthProvider.GOOGLE,
+          'auth-code',
+          validSession.state,
+          undefined,
+          request,
+          mockReply,
         ),
-        302,
-      );
+      ).rejects.toThrow(OAuthCodeExchangeException);
     });
 
     it('should redirect to /oauth/link-success on successful link', async () => {
@@ -572,7 +568,7 @@ describe('AuthController', () => {
       );
     });
 
-    it('should redirect to /oauth/error on email mismatch during link', async () => {
+    it('should throw OAuthLinkEmailMismatchException on email mismatch during link', async () => {
       const request = mockRequest({
         value: JSON.stringify({
           ...validSession,
@@ -584,24 +580,19 @@ describe('AuthController', () => {
         new OAuthLinkEmailMismatchException(),
       );
 
-      await controller.oauthCallback(
-        AuthProvider.GOOGLE,
-        'auth-code',
-        validSession.state,
-        undefined,
-        request,
-        mockReply,
-      );
-
-      expect(mockReply.redirect).toHaveBeenCalledWith(
-        expect.stringContaining(
-          `${OAUTH_ERROR_PATH}?reason=oauth_link_email_mismatch`,
+      await expect(
+        controller.oauthCallback(
+          AuthProvider.GOOGLE,
+          'auth-code',
+          validSession.state,
+          undefined,
+          request,
+          mockReply,
         ),
-        302,
-      );
+      ).rejects.toThrow(OAuthLinkEmailMismatchException);
     });
 
-    it('should redirect to /oauth/error when account already linked to another user', async () => {
+    it('should throw OAuthAccountAlreadyLinkedException when account already linked to another user', async () => {
       const request = mockRequest({
         value: JSON.stringify({
           ...validSession,
@@ -613,21 +604,16 @@ describe('AuthController', () => {
         new OAuthAccountAlreadyLinkedException(),
       );
 
-      await controller.oauthCallback(
-        AuthProvider.GOOGLE,
-        'auth-code',
-        validSession.state,
-        undefined,
-        request,
-        mockReply,
-      );
-
-      expect(mockReply.redirect).toHaveBeenCalledWith(
-        expect.stringContaining(
-          `${OAUTH_ERROR_PATH}?reason=oauth_account_already_linked`,
+      await expect(
+        controller.oauthCallback(
+          AuthProvider.GOOGLE,
+          'auth-code',
+          validSession.state,
+          undefined,
+          request,
+          mockReply,
         ),
-        302,
-      );
+      ).rejects.toThrow(OAuthAccountAlreadyLinkedException);
     });
   });
 });
