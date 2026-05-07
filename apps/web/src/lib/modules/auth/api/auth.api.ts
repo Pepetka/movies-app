@@ -1,7 +1,6 @@
 import {
 	authControllerLoginV1,
 	authControllerLogoutV1,
-	authControllerOauthLinkInitV1,
 	authControllerRefreshV1,
 	userControllerGetMeV1
 } from '$lib/api/generated/api';
@@ -33,20 +32,9 @@ export const refreshTokens = async (): Promise<AuthResponseDto> => {
 	return response;
 };
 
-export const initLinkProvider = async (provider: AuthProvider): Promise<string> => {
-	try {
-		const { authUrl } = await authControllerOauthLinkInitV1(provider);
-		return authUrl;
-	} catch (error) {
-		if (error instanceof Error) {
-			throw new Error(`Не удалось инициализировать привязку: ${error.message}`, { cause: error });
-		}
-		throw new Error('Не удалось инициализировать привязку аккаунта', { cause: error });
-	}
-};
-
 export const buildOAuthRedirectUrl = (provider: AuthProvider, redirect: string): string => {
-	const url = new URL(`/api/v1/auth/oauth/${provider}`, __API_URL__ || window.location.origin);
+	const base = __API_URL__ || (typeof window !== 'undefined' ? window.location.origin : '');
+	const url = new URL(`/api/v1/auth/oauth/${provider}`, base || 'http://localhost');
 	url.searchParams.set('redirect', redirect);
-	return url.toString();
+	return base ? url.toString() : url.pathname + url.search;
 };

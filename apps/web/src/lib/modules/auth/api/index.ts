@@ -1,8 +1,1 @@
-export {
-	login,
-	logout,
-	getCurrentUser,
-	refreshTokens,
-	initLinkProvider,
-	buildOAuthRedirectUrl
-} from './auth.api';
+export { login, logout, getCurrentUser, refreshTokens, buildOAuthRedirectUrl } from './auth.api';

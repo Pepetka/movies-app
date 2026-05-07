@@ -3,7 +3,7 @@ export type { AuthStatus, ValidationResult } from './types';
 export type { AuthProvider } from '$lib/api/generated/types';
 
 // API
-export { initLinkProvider, refreshTokens, buildOAuthRedirectUrl } from './api';
+export { refreshTokens, buildOAuthRedirectUrl } from './api';
 
 // Components
 export { OAuthSection } from './components';
