@@ -1,15 +1,16 @@
 <script lang="ts">
 	import { Button, Divider } from '@repo/ui';
 
+	import type { AuthProvider } from '$lib/api/generated/types';
 	import { getSafeRedirect } from '$lib/utils';
 
 	import { buildOAuthRedirectUrl } from '../api';
 
-	interface Props {
+	interface IProps {
 		buttonText?: string;
 		showDivider?: boolean;
 		class?: string;
-		provider?: 'google';
+		provider?: AuthProvider;
 	}
 
 	let {
@@ -18,16 +19,12 @@
 		class: className = '',
 		provider = 'google',
 		...restProps
-	}: Props = $props();
+	}: IProps = $props();
+
+	const oauthUrl = $derived(buildOAuthRedirectUrl(provider, getSafeRedirect()));
 </script>
 
-<Button
-	variant="secondary"
-	fullWidth
-	class={className}
-	href={buildOAuthRedirectUrl(provider, getSafeRedirect())}
-	{...restProps}
->
+<Button variant="secondary" fullWidth class={className} href={oauthUrl} {...restProps}>
 	<svg
 		class="auth-oauth-icon"
 		width="18"

@@ -14,7 +14,7 @@
 		return () => topBarStore.destroy();
 	});
 
-	let handledLinked = false;
+	let handledLinked = $state(false);
 
 	$effect(() => {
 		if (handledLinked) return;

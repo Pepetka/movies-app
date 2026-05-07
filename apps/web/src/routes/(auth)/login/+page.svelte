@@ -24,7 +24,7 @@
 
 	const registerHref = $derived(withCurrentQuery(ROUTES.REGISTER, ['redirect']));
 
-	let handledOauthError = false;
+	let handledOauthError = $state(false);
 
 	$effect(() => {
 		if (handledOauthError) return;
