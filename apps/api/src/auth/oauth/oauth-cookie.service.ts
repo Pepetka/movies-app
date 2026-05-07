@@ -36,6 +36,7 @@ export class OAuthCookieService {
       path: OAUTH_SESSION_COOKIE_PATH,
       sameSite: 'lax',
       secure: this._cookieOptions.secure,
+      httpOnly: true,
     });
   }
 

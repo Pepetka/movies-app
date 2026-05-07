@@ -16,7 +16,18 @@ export const readOAuthSession = (request: FastifyRequest): OAuthSession => {
   }
 
   try {
-    const session = JSON.parse(unsigned.value) as OAuthSession;
+    const parsed = JSON.parse(unsigned.value);
+    if (
+      typeof parsed !== 'object' ||
+      parsed === null ||
+      typeof parsed.state !== 'string' ||
+      typeof parsed.codeVerifier !== 'string' ||
+      typeof parsed.intent !== 'string' ||
+      typeof parsed.expiresAt !== 'number'
+    ) {
+      throw new BadRequestException('OAuth session cookie invalid format');
+    }
+    const session = parsed as OAuthSession;
     if (session.expiresAt < Date.now()) {
       throw new BadRequestException('OAuth session expired');
     }

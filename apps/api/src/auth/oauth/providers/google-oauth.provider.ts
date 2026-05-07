@@ -143,9 +143,7 @@ export class GoogleOAuthProvider implements OAuthProvider {
       const normalizedEmail = userData.email.toLowerCase().trim();
 
       const avatar =
-        userData.picture &&
-        (userData.picture.startsWith('https://') ||
-          userData.picture.startsWith('http://'))
+        userData.picture && userData.picture.startsWith('https://')
           ? userData.picture
           : null;
 
