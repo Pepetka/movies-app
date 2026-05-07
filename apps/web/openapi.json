@@ -191,6 +191,7 @@
 					},
 					"409": { "description": "Email already in use" }
 				},
+				"security": [{ "access-token": [] }],
 				"summary": "Register a new user",
 				"tags": ["Auth"]
 			}
@@ -214,6 +215,7 @@
 					},
 					"401": { "description": "Invalid credentials" }
 				},
+				"security": [{ "access-token": [] }],
 				"summary": "Login user",
 				"tags": ["Auth"]
 			}
@@ -244,6 +246,7 @@
 					},
 					"401": { "description": "Unauthorized" }
 				},
+				"security": [{ "access-token": [] }],
 				"summary": "Refresh access token",
 				"tags": ["Auth"]
 			}
@@ -271,6 +274,7 @@
 					"400": { "description": "Unsupported provider" },
 					"503": { "description": "Provider not configured" }
 				},
+				"security": [{ "access-token": [] }],
 				"summary": "Redirect to OAuth provider authorization page",
 				"tags": ["Auth"]
 			}
@@ -319,6 +323,7 @@
 					{ "name": "code", "required": false, "in": "query", "schema": { "type": "string" } }
 				],
 				"responses": { "302": { "description": "Redirect to SPA /oauth/success or /oauth/error" } },
+				"security": [{ "access-token": [] }],
 				"summary": "OAuth callback — redirects to SPA after auth",
 				"tags": ["Auth"]
 			}
