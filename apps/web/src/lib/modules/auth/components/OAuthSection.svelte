@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { Button, Divider } from '@repo/ui';
 
-	import type { AuthProvider } from '$lib/api/generated/types';
 	import { getSafeRedirect } from '$lib/utils';
 
 	import { buildOAuthRedirectUrl } from '../api';
@@ -10,7 +9,7 @@
 		buttonText?: string;
 		showDivider?: boolean;
 		class?: string;
-		provider?: AuthProvider;
+		provider?: 'google';
 	}
 
 	let {
