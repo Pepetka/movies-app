@@ -45,8 +45,13 @@ export class UserRepository {
       .offset(offset);
   }
 
-  async update(id: number, data: Partial<NewUser>): Promise<User> {
-    const [result] = await this._db
+  async update(
+    id: number,
+    data: Partial<NewUser>,
+    tx?: DrizzleTx,
+  ): Promise<User> {
+    const conn = tx ?? this._db;
+    const [result] = await conn
       .update(users)
       .set({ ...data })
       .where(eq(users.id, id))

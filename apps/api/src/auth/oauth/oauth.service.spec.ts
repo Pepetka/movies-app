@@ -2,9 +2,9 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
+import { DbTransactionManager } from '$db/transaction.manager';
 import { AuthProvider, UserRole } from '$common/enums';
 import { UserService } from '$src/user/user.service';
-import { DRIZZLE } from '$db/db.module';
 
 import {
   OAuthAccountAlreadyLinkedException,
@@ -77,7 +77,7 @@ describe('OAuthService', () => {
     buildAuthUrl: jest.Mock;
     exchangeCodeForProfile: jest.Mock;
   };
-  let db: { transaction: jest.Mock };
+  let transactionManager: { transaction: jest.Mock };
 
   beforeEach(async () => {
     providerImpl = {
@@ -101,7 +101,7 @@ describe('OAuthService', () => {
     tokenService = {
       issueTokens: jest.fn().mockResolvedValue(mockTokens),
     };
-    db = {
+    transactionManager = {
       transaction: jest.fn(async (cb: (tx: unknown) => unknown) =>
         cb(TX_SENTINEL),
       ),
@@ -116,7 +116,7 @@ describe('OAuthService', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         OAuthService,
-        { provide: DRIZZLE, useValue: db },
+        { provide: DbTransactionManager, useValue: transactionManager },
         { provide: OAuthProviderRegistry, useValue: providerRegistry },
         { provide: OAuthAccountRepository, useValue: oauthAccountRepository },
         { provide: UserService, useValue: userService },
@@ -151,7 +151,7 @@ describe('OAuthService', () => {
       const module: TestingModule = await Test.createTestingModule({
         providers: [
           OAuthService,
-          { provide: DRIZZLE, useValue: db },
+          { provide: DbTransactionManager, useValue: transactionManager },
           { provide: OAuthProviderRegistry, useValue: providerRegistry },
           { provide: OAuthAccountRepository, useValue: oauthAccountRepository },
           { provide: UserService, useValue: userService },
@@ -186,7 +186,7 @@ describe('OAuthService', () => {
         REDIRECT_URI,
         CODE_VERIFIER,
       );
-      expect(db.transaction).toHaveBeenCalledTimes(1);
+      expect(transactionManager.transaction).toHaveBeenCalledTimes(1);
       expect(oauthAccountRepository.findByProviderAccount).toHaveBeenCalledWith(
         AuthProvider.GOOGLE,
         mockProfile.id,
@@ -256,7 +256,7 @@ describe('OAuthService', () => {
         service.handleCallback(AuthProvider.GOOGLE, CODE, CODE_VERIFIER),
       ).rejects.toThrow(OAuthCodeExchangeException);
 
-      expect(db.transaction).not.toHaveBeenCalled();
+      expect(transactionManager.transaction).not.toHaveBeenCalled();
       expect(tokenService.issueTokens).not.toHaveBeenCalled();
     });
 

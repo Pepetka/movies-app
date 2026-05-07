@@ -15,8 +15,8 @@ export class AuthService {
   private readonly _logger = new Logger(AuthService.name);
 
   constructor(
-    private readonly userService: UserService,
-    private readonly tokenService: TokenService,
+    private readonly _userService: UserService,
+    private readonly _tokenService: TokenService,
   ) {}
 
   /**
@@ -26,7 +26,7 @@ export class AuthService {
    * @returns User object if valid, null otherwise
    */
   async validateUser(email: string, password: string): Promise<User | null> {
-    const user = await this.userService.findByEmail(email);
+    const user = await this._userService.findByEmail(email);
 
     // OAuth-only пользователь без пароля
     if (user && !user.passwordHash) {
@@ -38,7 +38,7 @@ export class AuthService {
 
     if (
       user &&
-      (await this.userService.validatePassword(password, user.passwordHash))
+      (await this._userService.validatePassword(password, user.passwordHash))
     ) {
       return user;
     }
@@ -56,9 +56,9 @@ export class AuthService {
   async register(
     dto: AuthRegisterDto,
   ): Promise<{ accessToken: string; refreshToken: string }> {
-    const user = await this.userService.create(dto);
+    const user = await this._userService.create(dto);
     this._logger.log(`User registered: ${user.id}`);
-    return this.tokenService.issueTokens(user);
+    return this._tokenService.issueTokens(user);
   }
 
   /**
@@ -75,7 +75,7 @@ export class AuthService {
     }
 
     this._logger.log(`User logged in: ${user.id}`);
-    return this.tokenService.issueTokens(user);
+    return this._tokenService.issueTokens(user);
   }
 
   /**
@@ -89,7 +89,7 @@ export class AuthService {
     const storedHash = user.refreshTokenHash ?? DUMMY_REFRESH_HASH;
 
     // Constant-time: bcrypt.compare() всегда выполняется
-    const isValid = await this.userService.validateRefreshToken(
+    const isValid = await this._userService.validateRefreshToken(
       refreshToken,
       storedHash,
     );
@@ -97,12 +97,12 @@ export class AuthService {
     if (!isValid) {
       this._logger.warn(`Failed refresh token: userId=${user.id}`);
       // Dummy operation to align response time (timing attack prevention)
-      await this.userService.hashToken('dummy');
+      await this._userService.hashToken('dummy');
       throw new UnauthorizedException();
     }
 
     this._logger.log(`Token refreshed: ${user.id}`);
-    return this.tokenService.issueTokens(user);
+    return this._tokenService.issueTokens(user);
   }
 
   /**
@@ -110,7 +110,7 @@ export class AuthService {
    * @param userId - User ID
    */
   async logout(userId: number) {
-    await this.userService.updateRefreshTokenHash(userId, null);
+    await this._userService.updateRefreshTokenHash(userId, null);
     this._logger.log(`User logged out: ${userId}`);
   }
 }

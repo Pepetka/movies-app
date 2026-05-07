@@ -36,7 +36,7 @@ const ALLOWED_REDIRECTS: ReadonlyArray<string | RegExp> = [
  * - Length limit (DoS protection)
  */
 export const isSafeRedirect = (redirect: string): boolean => {
-  if (!redirect || typeof redirect !== 'string') return false;
+  if (!redirect) return false;
   if (redirect.length === 0 || redirect.length > 2048) return false;
 
   // Extract pathname — ignore query string for validation

@@ -142,12 +142,19 @@ export class GoogleOAuthProvider implements OAuthProvider {
 
       const normalizedEmail = userData.email.toLowerCase().trim();
 
+      const avatar =
+        userData.picture &&
+        (userData.picture.startsWith('https://') ||
+          userData.picture.startsWith('http://'))
+          ? userData.picture
+          : null;
+
       return {
         id: userData.sub,
         email: normalizedEmail,
         emailVerified: userData.email_verified,
         name: userData.name?.trim() || normalizedEmail.split('@')[0],
-        avatar: userData.picture ?? null,
+        avatar,
       };
     } catch (error) {
       if (error instanceof Error && error.name === 'AbortError') {

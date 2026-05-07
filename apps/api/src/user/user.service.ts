@@ -4,8 +4,8 @@ import * as bcrypt from 'bcrypt';
 
 import { EmailAlreadyInUseException } from '../common/exceptions';
 import type { DrizzleTx } from '../db/types/drizzle.types';
-import { PG_UNIQUE_VIOLATION } from '../db/db.constants';
 import { UserCreateDto, UserUpdateDto } from './dto';
+import { isUniqueViolation } from '../common/utils';
 import type { User, NewUser } from '../db/schemas';
 import { UserRepository } from './user.repository';
 
@@ -47,7 +47,7 @@ export class UserService {
       this._logger.log(`User created with id: ${user.id}`);
       return user;
     } catch (error) {
-      if ((error as { code?: string }).code === PG_UNIQUE_VIOLATION) {
+      if (isUniqueViolation(error)) {
         throw new EmailAlreadyInUseException(normalizedEmail);
       }
       throw error;
@@ -85,7 +85,7 @@ export class UserService {
       this._logger.log(`OAuth user created with id: ${user.id}`);
       return user;
     } catch (error) {
-      if ((error as { code?: string }).code === PG_UNIQUE_VIOLATION) {
+      if (isUniqueViolation(error)) {
         throw new EmailAlreadyInUseException(normalizedEmail);
       }
       throw error;

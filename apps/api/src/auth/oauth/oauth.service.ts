@@ -1,5 +1,4 @@
 import {
-  Inject,
   Injectable,
   InternalServerErrorException,
   Logger,
@@ -7,15 +6,15 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
-import type { DrizzleDb, DrizzleTx } from '$db/types/drizzle.types';
 import { EmailAlreadyInUseException } from '$common/exceptions';
+import { DbTransactionManager } from '$db/transaction.manager';
+import type { DrizzleTx } from '$db/types/drizzle.types';
 import { TokenService } from '$src/auth/token.service';
-import { PG_UNIQUE_VIOLATION } from '$db/db.constants';
 import { UserService } from '$src/user/user.service';
 import { parsePrimaryWebUrl } from '$common/utils';
+import { isUniqueViolation } from '$common/utils';
 import { AuthProvider } from '$common/enums';
 import type { User } from '$db/schemas';
-import { DRIZZLE } from '$db/db.module';
 
 import {
   OAuthAccountAlreadyLinkedException,
@@ -41,7 +40,7 @@ export class OAuthService {
   private readonly _logger = new Logger(OAuthService.name);
 
   constructor(
-    @Inject(DRIZZLE) private readonly _db: DrizzleDb,
+    private readonly _transactionManager: DbTransactionManager,
     private readonly _providerRegistry: OAuthProviderRegistry,
     private readonly _oauthAccountRepository: OAuthAccountRepository,
     private readonly _userService: UserService,
@@ -88,7 +87,7 @@ export class OAuthService {
       codeVerifier,
     );
 
-    const result = await this._db.transaction(async (tx) => {
+    const result = await this._transactionManager.transaction(async (tx) => {
       const user = await this._findOrCreateUser(tx, provider, profile);
       const tokens = await this._tokenService.issueTokens(user, tx);
       return { user, tokens };
@@ -131,7 +130,7 @@ export class OAuthService {
       throw new OAuthEmailNotVerifiedException();
     }
 
-    return this._db.transaction(async (tx) => {
+    return this._transactionManager.transaction(async (tx) => {
       const user = await this._userService.findById(userId, tx);
       if (!user) {
         throw new NotFoundException(`User ${userId} not found`);
@@ -173,7 +172,7 @@ export class OAuthService {
           tx,
         );
       } catch (error) {
-        if (this._isUniqueViolation(error)) {
+        if (isUniqueViolation(error)) {
           const account =
             await this._oauthAccountRepository.findByProviderAccount(
               provider,
@@ -277,7 +276,7 @@ export class OAuthService {
         tx,
       );
     } catch (error) {
-      if (this._isUniqueViolation(error)) {
+      if (isUniqueViolation(error)) {
         const account =
           await this._oauthAccountRepository.findByProviderAccount(
             provider,
@@ -296,14 +295,6 @@ export class OAuthService {
     }
 
     return user;
-  }
-
-  private _isUniqueViolation(error: unknown): boolean {
-    return (
-      error instanceof Error &&
-      'code' in error &&
-      (error as { code?: string }).code === PG_UNIQUE_VIOLATION
-    );
   }
 
   /**
