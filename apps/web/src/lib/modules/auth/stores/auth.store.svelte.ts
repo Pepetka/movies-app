@@ -106,6 +106,15 @@ class AuthStore extends BaseStore {
 		return this._oauthSuccessMutation.isSubmitting;
 	}
 
+	get isOAuthSuccess(): boolean {
+		return this._oauthSuccessMutation.isSuccess;
+	}
+
+	get oauthError(): string | null {
+		if (!this._oauthSuccessMutation.error) return null;
+		return this._extractErrorMessage(this._oauthSuccessMutation.error, 'Ошибка OAuth');
+	}
+
 	async handleOAuthSuccess(): Promise<void> {
 		await untrack(() => this._oauthSuccessMutation.mutate());
 	}

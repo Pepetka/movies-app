@@ -7,12 +7,12 @@
 		let cancelled = false;
 
 		const authenticate = async () => {
-			try {
-				await authStore.handleOAuthSuccess();
-				if (cancelled) return;
+			await authStore.handleOAuthSuccess();
+			if (cancelled) return;
+
+			if (authStore.isOAuthSuccess) {
 				await goto(getSafeRedirect(ROUTES.GROUPS), { replaceState: true });
-			} catch {
-				if (cancelled) return;
+			} else {
 				await goto(`${ROUTES.LOGIN}?oauth_error=1`, { replaceState: true });
 			}
 		};
