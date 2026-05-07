@@ -165,6 +165,7 @@ class AuthStore extends BaseStore {
 
 	resetForm(): void {
 		this._loginMutation.reset();
+		this._oauthSuccessMutation.reset();
 	}
 }
 

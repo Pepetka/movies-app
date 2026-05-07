@@ -39,7 +39,7 @@
 <div class="profile-page">
 	{#if authStore.user}
 		<div class="user-info">
-			<Avatar name={authStore.user.name} size="xl" />
+			<Avatar src={authStore.user.avatar} name={authStore.user.name} size="xl" />
 			<p class="name">{authStore.user.name}</p>
 			<p class="email">{authStore.user.email}</p>
 		</div>

@@ -14,12 +14,16 @@
 	}
 
 	let {
-		buttonText = 'Войти через Google',
+		buttonText: buttonTextProp,
 		showDivider = true,
 		class: className = '',
 		provider = 'google',
 		...restProps
 	}: IProps = $props();
+
+	const buttonText = $derived(
+		buttonTextProp ?? (provider === 'google' ? 'Войти через Google' : 'Войти через провайдер')
+	);
 
 	const oauthUrl = $derived(buildOAuthRedirectUrl(provider, getSafeRedirect()));
 </script>
