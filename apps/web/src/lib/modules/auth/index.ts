@@ -1,5 +1,12 @@
 // Types
 export type { AuthStatus, ValidationResult } from './types';
+export type { AuthProvider } from '$lib/api/generated/types';
+
+// API
+export { refreshTokens, buildOAuthRedirectUrl } from './api';
+
+// Components
+export { OAuthSection } from './components';
 
 // Store
 export { authStore } from './stores';
@@ -10,14 +17,10 @@ export { requireAuth, redirectIfAuthenticated } from './navigation';
 // Validation
 export {
 	validateLoginForm,
-	validateRegisterForm,
 	checkPasswordStrength,
 	EMPTY_LOGIN_FORM,
-	EMPTY_REGISTER_FORM,
 	loginFormToDto,
-	registerFormToDto,
-	type LoginFormData,
-	type RegisterFormData
+	type LoginFormData
 } from './validation';
 
 // Re-export createFormFieldValidator for convenience

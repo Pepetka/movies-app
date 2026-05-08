@@ -4,6 +4,7 @@ import { goto } from '$app/navigation';
 import { page } from '$app/state';
 
 import { ROUTES, type Route, type RouteValue } from './routes';
+import { isSafeRedirect } from './is-safe-redirect';
 
 export const goBack = (fallback: Route): void => {
 	if (window.history.length > 1) {
@@ -15,7 +16,7 @@ export const goBack = (fallback: Route): void => {
 
 export const getSafeRedirect = (fallback: RouteValue = ROUTES.GROUPS): Route => {
 	const redirect = page.url.searchParams.get('redirect');
-	if (redirect && redirect.startsWith('/') && !redirect.startsWith('//')) {
+	if (redirect && isSafeRedirect(redirect)) {
 		return redirect as RouteValue;
 	}
 	return fallback;

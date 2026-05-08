@@ -49,7 +49,8 @@ export class HttpClient {
 			auth: {
 				refreshEndpoint: config.auth.refreshEndpoint,
 				csrfEndpoint: config.auth.csrfEndpoint,
-				skipRefreshPaths: config.auth.skipRefreshPaths ?? []
+				skipRefreshPaths: config.auth.skipRefreshPaths ?? [],
+				csrfPaths: config.auth.csrfPaths ?? []
 			}
 		};
 	}
@@ -184,7 +185,11 @@ export class HttpClient {
 			signal.addEventListener('abort', abortHandler);
 		}
 
+		const csrfToken = await this._maybeAttachCsrf(url);
 		const requestHeaders = this._buildHeaders(headers, !!body);
+		if (csrfToken) {
+			requestHeaders['X-CSRF-Token'] = csrfToken;
+		}
 
 		try {
 			this._log('[%s] %s %s', attempt, method, url);
@@ -403,6 +408,20 @@ export class HttpClient {
 		return false;
 	}
 
+	private async _maybeAttachCsrf(url: string): Promise<string | null> {
+		const csrfPaths = this._config.auth.csrfPaths ?? [];
+		if (!csrfPaths.length) return null;
+
+		const pathname = new URL(url, 'http://localhost').pathname;
+		if (!csrfPaths.some((path) => pathname.startsWith(path))) return null;
+
+		try {
+			return await this._getCsrfToken();
+		} catch {
+			return null;
+		}
+	}
+
 	private _delay(ms: number): Promise<void> {
 		return new Promise((resolve) => setTimeout(resolve, ms));
 	}
@@ -420,6 +439,7 @@ export const httpClient = new HttpClient({
 	auth: {
 		refreshEndpoint: '/api/v1/auth/refresh',
 		csrfEndpoint: '/api/v1/csrf/token',
-		skipRefreshPaths: ['/api/v1/auth/login', '/api/v1/auth/register']
+		skipRefreshPaths: ['/api/v1/auth/login', '/api/v1/auth/register'],
+		csrfPaths: ['/api/v1/auth/refresh', '/api/v1/auth/logout', '/api/v1/auth/oauth']
 	}
 });

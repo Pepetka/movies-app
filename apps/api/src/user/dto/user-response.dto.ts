@@ -26,9 +26,13 @@ export class UserResponseDto {
   @ApiProperty()
   updatedAt: Date;
 
-  @Exclude()
-  passwordHash: string;
+  @Expose()
+  @ApiProperty({ type: String, nullable: true })
+  avatar: string | null;
 
   @Exclude()
-  refreshTokenHash: string;
+  passwordHash: string | null;
+
+  @Exclude()
+  refreshTokenHash: string | null;
 }

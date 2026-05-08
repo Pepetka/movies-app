@@ -1,13 +1,10 @@
 import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { JwtService } from '@nestjs/jwt';
 import { hashSync } from 'bcrypt';
 
 import { UserService } from '$src/user/user.service';
 import type { User } from '$db/schemas';
 
-import { JWT_REFRESH_AUDIENCE } from './auth.constants';
-import type { Expires } from './types/expires.type';
+import { TokenService } from './token.service';
 import { AuthRegisterDto } from './dto';
 
 // Dummy hash for constant-time comparison (generated at startup)
@@ -18,9 +15,8 @@ export class AuthService {
   private readonly _logger = new Logger(AuthService.name);
 
   constructor(
-    private readonly userService: UserService,
-    private readonly jwtService: JwtService,
-    private readonly configService: ConfigService,
+    private readonly _userService: UserService,
+    private readonly _tokenService: TokenService,
   ) {}
 
   /**
@@ -30,10 +26,19 @@ export class AuthService {
    * @returns User object if valid, null otherwise
    */
   async validateUser(email: string, password: string): Promise<User | null> {
-    const user = await this.userService.findByEmail(email);
+    const user = await this._userService.findByEmail(email);
+
+    // OAuth-only пользователь без пароля
+    if (user && !user.passwordHash) {
+      this._logger.warn(
+        `Login attempt for OAuth-only user: ${email.slice(0, 3)}***`,
+      );
+      return null;
+    }
+
     if (
       user &&
-      (await this.userService.validatePassword(password, user.passwordHash))
+      (await this._userService.validatePassword(password, user.passwordHash))
     ) {
       return user;
     }
@@ -48,13 +53,12 @@ export class AuthService {
    * @param dto - Registration data
    * @returns Access and refresh tokens
    */
-  async register(dto: AuthRegisterDto) {
-    const user = await this.userService.create(dto);
+  async register(
+    dto: AuthRegisterDto,
+  ): Promise<{ accessToken: string; refreshToken: string }> {
+    const user = await this._userService.create(dto);
     this._logger.log(`User registered: ${user.id}`);
-    const tokens = await this._generateTokens(user.id, user.email, user.role);
-    const tokenHash = await this.userService.hashToken(tokens.refreshToken);
-    await this.userService.updateRefreshTokenHash(user.id, tokenHash);
-    return tokens;
+    return this._tokenService.issueTokens(user);
   }
 
   /**
@@ -71,11 +75,7 @@ export class AuthService {
     }
 
     this._logger.log(`User logged in: ${user.id}`);
-    const tokens = await this._generateTokens(user.id, user.email, user.role);
-    const tokenHash = await this.userService.hashToken(tokens.refreshToken);
-    await this.userService.updateRefreshTokenHash(user.id, tokenHash);
-
-    return tokens;
+    return this._tokenService.issueTokens(user);
   }
 
   /**
@@ -89,7 +89,7 @@ export class AuthService {
     const storedHash = user.refreshTokenHash ?? DUMMY_REFRESH_HASH;
 
     // Constant-time: bcrypt.compare() всегда выполняется
-    const isValid = await this.userService.validateRefreshToken(
+    const isValid = await this._userService.validateRefreshToken(
       refreshToken,
       storedHash,
     );
@@ -97,16 +97,12 @@ export class AuthService {
     if (!isValid) {
       this._logger.warn(`Failed refresh token: userId=${user.id}`);
       // Dummy operation to align response time (timing attack prevention)
-      await this.userService.hashToken('dummy');
+      await this._userService.hashToken('dummy');
       throw new UnauthorizedException();
     }
 
     this._logger.log(`Token refreshed: ${user.id}`);
-    const tokens = await this._generateTokens(user.id, user.email, user.role);
-    const tokenHash = await this.userService.hashToken(tokens.refreshToken);
-    await this.userService.updateRefreshTokenHash(user.id, tokenHash);
-
-    return tokens;
+    return this._tokenService.issueTokens(user);
   }
 
   /**
@@ -114,33 +110,7 @@ export class AuthService {
    * @param userId - User ID
    */
   async logout(userId: number) {
-    await this.userService.updateRefreshTokenHash(userId, null);
+    await this._userService.updateRefreshTokenHash(userId, null);
     this._logger.log(`User logged out: ${userId}`);
-  }
-
-  /**
-   * Generates JWT access and refresh tokens
-   * @param userId - User ID
-   * @param email - User email
-   * @param role - User role
-   * @returns Object with accessToken and refreshToken
-   */
-  private async _generateTokens(userId: number, email: string, role: string) {
-    const [accessToken, refreshToken] = await Promise.all([
-      this.jwtService.signAsync({ sub: userId, email, role }),
-      this.jwtService.signAsync(
-        { sub: userId, email, role },
-        {
-          secret: this.configService.getOrThrow<string>('JWT_REFRESH_SECRET'),
-          expiresIn: this.configService.getOrThrow<Expires>(
-            'JWT_REFRESH_EXPIRATION',
-          ),
-          issuer: this.configService.getOrThrow<string>('JWT_ISSUER'),
-          audience: JWT_REFRESH_AUDIENCE,
-        },
-      ),
-    ]);
-
-    return { accessToken, refreshToken };
   }
 }

@@ -1,9 +1,11 @@
 <script lang="ts">
 	import { Eye, EyeOff, Film, Mail } from '@lucide/svelte';
 	import { Button, Card, Input, toast } from '@repo/ui';
+	import { untrack } from 'svelte';
 
 	import {
 		authStore,
+		OAuthSection,
 		type LoginFormData,
 		validateLoginForm,
 		createFormFieldValidator,
@@ -12,6 +14,7 @@
 	} from '$lib/modules/auth';
 	import { ROUTES, withCurrentQuery, getSafeRedirect } from '$lib/utils';
 	import { goto } from '$app/navigation';
+	import { page } from '$app/state';
 
 	import '$lib/styles/auth.css';
 
@@ -21,6 +24,24 @@
 	const fieldValidator = createFormFieldValidator(validateLoginForm);
 
 	const registerHref = $derived(withCurrentQuery(ROUTES.REGISTER, ['redirect']));
+
+	let handledOauthError = $state(false);
+
+	$effect(() => {
+		if (page.url.searchParams.get('oauth_error') !== '1') return;
+		if (untrack(() => handledOauthError)) return;
+		untrack(() => {
+			handledOauthError = true;
+		});
+		toast.error('Ошибка входа через OAuth');
+		const url = new URL(page.url);
+		url.searchParams.delete('oauth_error');
+		void goto(`${url.pathname}${url.search}`, {
+			replaceState: true,
+			keepFocus: true,
+			noScroll: true
+		});
+	});
 
 	$effect(() => {
 		return () => {
@@ -72,36 +93,40 @@
 			</div>
 		{/snippet}
 
-		<form class="form-fields" onsubmit={handleSubmit}>
-			<Input
-				type="email"
-				label="Email"
-				bind:value={form.email}
-				error={fieldValidator.errors.email}
-				Icon={Mail}
-				placeholder="anaconda@mail.ru"
-				disabled={authStore.isLoggingIn}
-				onChange={() => fieldValidator.handleFieldChange(form, 'email')}
-			/>
+		<div class="auth-oauth-section">
+			<OAuthSection buttonText="Войти через Google" />
 
-			<Input
-				type={showPassword ? 'text' : 'password'}
-				label="Пароль"
-				bind:value={form.password}
-				error={fieldValidator.errors.password}
-				placeholder="Введите пароль"
-				Icon={showPassword ? EyeOff : Eye}
-				iconAction={() => (showPassword = !showPassword)}
-				iconLabel={showPassword ? 'Скрыть пароль' : 'Показать пароль'}
-				autocomplete="current-password"
-				disabled={authStore.isLoggingIn}
-				onChange={() => fieldValidator.handleFieldChange(form, 'password')}
-			/>
+			<form class="form-fields" onsubmit={handleSubmit}>
+				<Input
+					type="email"
+					label="Email"
+					bind:value={form.email}
+					error={fieldValidator.errors.email}
+					Icon={Mail}
+					placeholder="anaconda@mail.ru"
+					disabled={authStore.isLoggingIn}
+					onChange={() => fieldValidator.handleFieldChange(form, 'email')}
+				/>
 
-			<Button type="submit" variant="primary" fullWidth loading={authStore.isLoggingIn}
-				>Войти</Button
-			>
-		</form>
+				<Input
+					type={showPassword ? 'text' : 'password'}
+					label="Пароль"
+					bind:value={form.password}
+					error={fieldValidator.errors.password}
+					placeholder="Введите пароль"
+					Icon={showPassword ? EyeOff : Eye}
+					iconAction={() => (showPassword = !showPassword)}
+					iconLabel={showPassword ? 'Скрыть пароль' : 'Показать пароль'}
+					autocomplete="current-password"
+					disabled={authStore.isLoggingIn}
+					onChange={() => fieldValidator.handleFieldChange(form, 'password')}
+				/>
+
+				<Button type="submit" variant="primary" fullWidth loading={authStore.isLoggingIn}
+					>Войти</Button
+				>
+			</form>
+		</div>
 
 		{#snippet footer()}
 			<div class="form-footer">

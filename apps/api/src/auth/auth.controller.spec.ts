@@ -1,22 +1,39 @@
 import { UnauthorizedException } from '@nestjs/common';
+import { FastifyReply, FastifyRequest } from 'fastify';
 import { Test, TestingModule } from '@nestjs/testing';
-import { FastifyReply } from 'fastify';
 
-import { UserRole } from '$common/enums';
+import { AuthProvider, UserRole } from '$common/enums';
 
 import {
+  OAuthAccountAlreadyLinkedException,
+  OAuthCodeExchangeException,
+  OAuthEmailNotVerifiedException,
+  OAuthLinkEmailMismatchException,
+} from './oauth/exceptions';
+import {
+  OAUTH_SESSION_COOKIE_NAME,
+  OAUTH_SESSION_COOKIE_PATH,
+  OAUTH_ERROR_PATH,
+  OAUTH_LINK_SUCCESS_PATH,
+  OAUTH_SUCCESS_PATH,
+} from './oauth/oauth.constants';
+import {
+  OAUTH_COOKIE_OPTIONS,
   REFRESH_COOKIE_OPTIONS,
   REFRESH_COOKIE_NAME,
   RefreshCookieOptions,
 } from './auth.constants';
+import { OAuthCookieService } from './oauth/oauth-cookie.service';
 import { AuthLoginDto, AuthRegisterDto } from './dto';
 import { RefreshGuard } from './guards/refresh.guard';
+import { OAuthService } from './oauth/oauth.service';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 
 describe('AuthController', () => {
   let controller: AuthController;
   let authService: jest.Mocked<AuthService>;
+  let oauthService: jest.Mocked<OAuthService>;
 
   const mockTokens = {
     accessToken: 'mock-access-token',
@@ -38,6 +55,7 @@ describe('AuthController', () => {
     role: UserRole.USER,
     passwordHash: '$2b$12$hashedPassword',
     refreshTokenHash: null,
+    avatar: null,
     createdAt: new Date(),
     updatedAt: new Date(),
   };
@@ -45,9 +63,29 @@ describe('AuthController', () => {
   const mockReply = {
     cookie: jest.fn(),
     clearCookie: jest.fn(),
+    redirect: jest.fn(),
     code: jest.fn().mockReturnThis(),
     send: jest.fn().mockReturnThis(),
   } as unknown as FastifyReply;
+
+  const mockOAuthService = {
+    buildAuthUrl: jest.fn(),
+    handleCallback: jest.fn(),
+    linkProvider: jest.fn(),
+    processCallback: jest.fn(),
+    mapErrorToReason: jest
+      .fn()
+      .mockImplementation(
+        OAuthService.prototype.mapErrorToReason.bind({} as OAuthService),
+      ),
+    buildErrorUrl: jest
+      .fn()
+      .mockImplementation(
+        (reason: string) =>
+          `http://localhost:5173/oauth/error?reason=${reason}`,
+      ),
+    getPrimaryWebUrl: jest.fn().mockReturnValue('http://localhost:5173'),
+  };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -63,9 +101,18 @@ describe('AuthController', () => {
           }),
         },
         {
+          provide: OAuthService,
+          useValue: mockOAuthService,
+        },
+        {
           provide: REFRESH_COOKIE_OPTIONS,
           useValue: mockCookieOptions,
         },
+        {
+          provide: OAUTH_COOKIE_OPTIONS,
+          useValue: { secure: true },
+        },
+        OAuthCookieService,
       ],
     })
       .overrideGuard(RefreshGuard)
@@ -76,6 +123,9 @@ describe('AuthController', () => {
     authService = module.get<AuthService>(
       AuthService,
     ) as jest.Mocked<AuthService>;
+    oauthService = module.get<OAuthService>(
+      OAuthService,
+    ) as jest.Mocked<OAuthService>;
 
     jest.clearAllMocks();
   });
@@ -176,6 +226,399 @@ describe('AuthController', () => {
         controller.refresh(mockUser, refreshToken, mockReply),
       ).rejects.toThrow(UnauthorizedException);
       expect(mockReply.cookie).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('GET /oauth/:provider', () => {
+    it('should set signed oauth_session cookie and redirect to provider URL', async () => {
+      mockOAuthService.buildAuthUrl.mockReturnValue(
+        'https://accounts.google.com/o/oauth2/v2/auth?client_id=test',
+      );
+
+      await controller.oauthRedirect(
+        AuthProvider.GOOGLE,
+        { redirect: undefined },
+        mockReply,
+      );
+
+      expect(mockReply.cookie).toHaveBeenCalledWith(
+        OAUTH_SESSION_COOKIE_NAME,
+        expect.any(String),
+        expect.objectContaining({
+          httpOnly: true,
+          signed: true,
+          sameSite: 'lax',
+          path: OAUTH_SESSION_COOKIE_PATH,
+          maxAge: 600000,
+        }),
+      );
+      expect(mockOAuthService.buildAuthUrl).toHaveBeenCalledWith(
+        AuthProvider.GOOGLE,
+        expect.any(String),
+        expect.any(String),
+      );
+      expect(mockReply.redirect).toHaveBeenCalledWith(
+        expect.stringContaining('accounts.google.com'),
+        302,
+      );
+    });
+
+    it('should store redirect in oauth_session cookie when provided', async () => {
+      mockOAuthService.buildAuthUrl.mockReturnValue(
+        'https://accounts.google.com/o/oauth2/v2/auth?client_id=test',
+      );
+
+      await controller.oauthRedirect(
+        AuthProvider.GOOGLE,
+        { redirect: '/invite/test-token' },
+        mockReply,
+      );
+
+      const cookieValue = JSON.parse(
+        (
+          (mockReply.cookie as jest.Mock).mock.calls.find(
+            (call: [string, string]) => call[0] === OAUTH_SESSION_COOKIE_NAME,
+          ) as [string, string]
+        )[1],
+      );
+      expect(cookieValue.redirect).toBe('/invite/test-token');
+    });
+  });
+
+  describe('POST /oauth/:provider/link/init', () => {
+    it('should require auth and return authUrl with intent=link session', async () => {
+      mockOAuthService.buildAuthUrl.mockReturnValue(
+        'https://accounts.google.com/o/oauth2/v2/auth?client_id=test',
+      );
+
+      const result = await controller.oauthLinkInit(
+        AuthProvider.GOOGLE,
+        mockUser,
+        mockReply,
+      );
+
+      expect(result).toEqual({
+        authUrl: expect.stringContaining('accounts.google.com'),
+      });
+      expect(mockReply.cookie).toHaveBeenCalledWith(
+        OAUTH_SESSION_COOKIE_NAME,
+        expect.any(String),
+        expect.objectContaining({
+          httpOnly: true,
+          signed: true,
+          sameSite: 'lax',
+          path: OAUTH_SESSION_COOKIE_PATH,
+          maxAge: 600000,
+        }),
+      );
+
+      const cookieValue = JSON.parse(
+        (
+          (mockReply.cookie as jest.Mock).mock.calls.find(
+            (call: [string, string]) => call[0] === OAUTH_SESSION_COOKIE_NAME,
+          ) as [string, string]
+        )[1],
+      );
+      expect(cookieValue.intent).toBe('link');
+      expect(cookieValue.userId).toBe(mockUser.id);
+    });
+  });
+
+  describe('GET /oauth/:provider/callback', () => {
+    const validSession = {
+      state: 'test-state-123',
+      codeVerifier: 'test-verifier-456',
+      intent: 'login' as const,
+      expiresAt: Date.now() + 10 * 60 * 1000,
+    };
+
+    const mockRequest = (opts?: {
+      valid?: boolean;
+      value?: string;
+    }): FastifyRequest =>
+      ({
+        cookies: {
+          [OAUTH_SESSION_COOKIE_NAME]: 'signed-cookie-value',
+        },
+        unsignCookie: jest.fn().mockReturnValue({
+          valid: opts?.valid ?? true,
+          value: opts?.value ?? JSON.stringify(validSession),
+        }),
+      }) as unknown as FastifyRequest;
+
+    it('should redirect to /oauth/success on success and set refresh cookie', async () => {
+      const request = mockRequest();
+      oauthService.processCallback.mockResolvedValue({
+        redirectUrl: `http://localhost:5173${OAUTH_SUCCESS_PATH}`,
+        refreshToken: mockTokens.refreshToken,
+      });
+
+      await controller.oauthCallback(
+        AuthProvider.GOOGLE,
+        'auth-code-789',
+        validSession.state,
+        undefined,
+        request,
+        mockReply,
+      );
+
+      expect(oauthService.processCallback).toHaveBeenCalledWith(
+        AuthProvider.GOOGLE,
+        { code: 'auth-code-789', error: undefined },
+        validSession,
+      );
+      expect(mockReply.cookie).toHaveBeenCalledWith(
+        REFRESH_COOKIE_NAME,
+        mockTokens.refreshToken,
+        mockCookieOptions,
+      );
+      expect(mockReply.redirect).toHaveBeenCalledWith(
+        expect.stringContaining('/oauth/success'),
+        302,
+      );
+    });
+
+    it('should append redirect query param to /oauth/success when session has redirect', async () => {
+      const request = mockRequest({
+        value: JSON.stringify({
+          ...validSession,
+          redirect: '/invite/test-token',
+        }),
+      });
+      oauthService.processCallback.mockResolvedValue({
+        redirectUrl: `http://localhost:5173${OAUTH_SUCCESS_PATH}?redirect=%2Finvite%2Ftest-token`,
+      });
+
+      await controller.oauthCallback(
+        AuthProvider.GOOGLE,
+        'auth-code-789',
+        validSession.state,
+        undefined,
+        request,
+        mockReply,
+      );
+
+      expect(mockReply.redirect).toHaveBeenCalledWith(
+        expect.stringContaining(
+          '/oauth/success?redirect=%2Finvite%2Ftest-token',
+        ),
+        302,
+      );
+    });
+
+    it('should redirect to /oauth/error on access_denied', async () => {
+      const request = mockRequest();
+      oauthService.processCallback.mockResolvedValue({
+        redirectUrl: `http://localhost:5173${OAUTH_ERROR_PATH}?reason=access_denied`,
+      });
+
+      await controller.oauthCallback(
+        AuthProvider.GOOGLE,
+        undefined,
+        validSession.state,
+        'access_denied',
+        request,
+        mockReply,
+      );
+
+      expect(mockReply.redirect).toHaveBeenCalledWith(
+        expect.stringContaining(`${OAUTH_ERROR_PATH}?reason=access_denied`),
+        302,
+      );
+    });
+
+    it('should redirect to /oauth/error on invalid state', async () => {
+      const request = mockRequest();
+
+      await controller.oauthCallback(
+        AuthProvider.GOOGLE,
+        'auth-code',
+        'wrong-state',
+        undefined,
+        request,
+        mockReply,
+      );
+
+      expect(mockReply.redirect).toHaveBeenCalledWith(
+        expect.stringContaining(`${OAUTH_ERROR_PATH}?reason=invalid_state`),
+        302,
+      );
+    });
+
+    it('should redirect to /oauth/error on missing code', async () => {
+      const request = mockRequest();
+      oauthService.processCallback.mockResolvedValue({
+        redirectUrl: `http://localhost:5173${OAUTH_ERROR_PATH}?reason=missing_code`,
+      });
+
+      await controller.oauthCallback(
+        AuthProvider.GOOGLE,
+        undefined,
+        validSession.state,
+        undefined,
+        request,
+        mockReply,
+      );
+
+      expect(mockReply.redirect).toHaveBeenCalledWith(
+        expect.stringContaining(`${OAUTH_ERROR_PATH}?reason=missing_code`),
+        302,
+      );
+    });
+
+    it('should redirect to /oauth/error on tampered cookie', async () => {
+      const request = mockRequest({ valid: false, value: '' });
+
+      await controller.oauthCallback(
+        AuthProvider.GOOGLE,
+        'auth-code',
+        validSession.state,
+        undefined,
+        request,
+        mockReply,
+      );
+
+      expect(mockReply.redirect).toHaveBeenCalledWith(
+        expect.stringContaining(`${OAUTH_ERROR_PATH}?reason=invalid_session`),
+        302,
+      );
+    });
+
+    it('should throw OAuthEmailNotVerifiedException on email_unverified', async () => {
+      const request = mockRequest();
+      oauthService.processCallback.mockRejectedValue(
+        new OAuthEmailNotVerifiedException(),
+      );
+
+      await expect(
+        controller.oauthCallback(
+          AuthProvider.GOOGLE,
+          'auth-code',
+          validSession.state,
+          undefined,
+          request,
+          mockReply,
+        ),
+      ).rejects.toThrow(OAuthEmailNotVerifiedException);
+    });
+
+    it('should throw OAuthCodeExchangeException on code exchange failure', async () => {
+      const request = mockRequest();
+      oauthService.processCallback.mockRejectedValue(
+        new OAuthCodeExchangeException('token error'),
+      );
+
+      await expect(
+        controller.oauthCallback(
+          AuthProvider.GOOGLE,
+          'auth-code',
+          validSession.state,
+          undefined,
+          request,
+          mockReply,
+        ),
+      ).rejects.toThrow(OAuthCodeExchangeException);
+    });
+
+    it('should redirect to /oauth/link-success on successful link', async () => {
+      const request = mockRequest({
+        value: JSON.stringify({
+          ...validSession,
+          intent: 'link',
+          userId: mockUser.id,
+        }),
+      });
+      oauthService.processCallback.mockResolvedValue({
+        redirectUrl: `http://localhost:5173${OAUTH_LINK_SUCCESS_PATH}`,
+      });
+
+      await controller.oauthCallback(
+        AuthProvider.GOOGLE,
+        'auth-code',
+        validSession.state,
+        undefined,
+        request,
+        mockReply,
+      );
+
+      expect(mockReply.redirect).toHaveBeenCalledWith(
+        expect.stringContaining(OAUTH_LINK_SUCCESS_PATH),
+        302,
+      );
+    });
+
+    it('should redirect to /oauth/error when link session lacks userId', async () => {
+      const request = mockRequest({
+        value: JSON.stringify({
+          ...validSession,
+          intent: 'link',
+        }),
+      });
+      oauthService.processCallback.mockResolvedValue({
+        redirectUrl: `http://localhost:5173${OAUTH_ERROR_PATH}?reason=invalid_session`,
+      });
+
+      await controller.oauthCallback(
+        AuthProvider.GOOGLE,
+        'auth-code',
+        validSession.state,
+        undefined,
+        request,
+        mockReply,
+      );
+
+      expect(mockReply.redirect).toHaveBeenCalledWith(
+        expect.stringContaining(`${OAUTH_ERROR_PATH}?reason=invalid_session`),
+        302,
+      );
+    });
+
+    it('should throw OAuthLinkEmailMismatchException on email mismatch during link', async () => {
+      const request = mockRequest({
+        value: JSON.stringify({
+          ...validSession,
+          intent: 'link',
+          userId: mockUser.id,
+        }),
+      });
+      oauthService.processCallback.mockRejectedValue(
+        new OAuthLinkEmailMismatchException(),
+      );
+
+      await expect(
+        controller.oauthCallback(
+          AuthProvider.GOOGLE,
+          'auth-code',
+          validSession.state,
+          undefined,
+          request,
+          mockReply,
+        ),
+      ).rejects.toThrow(OAuthLinkEmailMismatchException);
+    });
+
+    it('should throw OAuthAccountAlreadyLinkedException when account already linked to another user', async () => {
+      const request = mockRequest({
+        value: JSON.stringify({
+          ...validSession,
+          intent: 'link',
+          userId: mockUser.id,
+        }),
+      });
+      oauthService.processCallback.mockRejectedValue(
+        new OAuthAccountAlreadyLinkedException(),
+      );
+
+      await expect(
+        controller.oauthCallback(
+          AuthProvider.GOOGLE,
+          'auth-code',
+          validSession.state,
+          undefined,
+          request,
+          mockReply,
+        ),
+      ).rejects.toThrow(OAuthAccountAlreadyLinkedException);
     });
   });
 });

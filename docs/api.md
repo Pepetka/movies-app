@@ -30,6 +30,53 @@ API-запрос с заголовком Authorization
 - `GET /csrf/token` — получить токен (публичный endpoint)
 - Передавать в заголовке `X-CSRF-Token` для POST/PUT/PATCH/DELETE
 
+## OAuth Flow
+
+### Поддерживаемые провайдеры
+
+| Провайдер | Статус |
+| --------- | ------ |
+| Google    | ✅     |
+
+### Login flow
+
+1. SPA: `window.location.href = ${API}/auth/oauth/google`
+2. API: 302 → Google + `oauth_session` cookie (signed, contains state + code_verifier + intent=login)
+3. Google: consent screen
+4. Google: 302 → `/auth/oauth/google/callback?code=...&state=...`
+5. API: validates state, exchanges code (PKCE), creates/links user, sets `refresh_token` cookie
+6. API: 302 → `${WEB_URL}/oauth/success`
+7. SPA `/oauth/success`: `POST /auth/refresh` → access token → goto('/')
+
+### Link flow
+
+1. SPA: `POST /auth/oauth/google/link/init` (Auth + CSRF) → `{ authUrl }` + `oauth_session` cookie (intent=link, userId)
+2. SPA: `window.location.href = authUrl`
+3. Google → callback (тот же `/callback` endpoint)
+4. API: видит `intent=link`, проверяет email match, создаёт `oauth_accounts`
+5. API: 302 → `${WEB_URL}/oauth/link-success`
+
+### Защита
+
+- **CSRF на OAuth flow:** signed cookie `oauth_session` с `state` (RFC 6749 §10.12).
+- **PKCE (S256):** обязателен в OAuth 2.1, защищает от authorization code injection.
+- **CSRF на /link/init:** стандартный CSRF token (как другие POST).
+- **email_verified check:** провайдер бракует профили без подтверждённого email.
+- **email match при link:** OAuth-профиль должен совпадать по email с текущим пользователем.
+
+### Возможные ошибки (redirect на /oauth/error?reason=...)
+
+| reason                               | Что произошло                              |
+| ------------------------------------ | ------------------------------------------ |
+| `access_denied`                      | Пользователь отказал на стороне провайдера |
+| `oauth_email_unverified`             | Провайдер вернул `email_verified: false`   |
+| `oauth_code_exchange_failed`         | Token endpoint провайдера упал             |
+| `oauth_link_email_mismatch`          | Email профиля != email user (link-flow)    |
+| `oauth_account_already_linked`       | OAuth account уже привязан другому user    |
+| `invalid_intent` / `invalid_session` | Целостность сессии нарушена                |
+| `missing_code`                       | Callback без `code` и без `error`          |
+| `invalid_state`                      | State cookie не совпал с query param       |
+
 ## Guards (порядок выполнения)
 
 1. **ThrottlerGuard** — Rate limiting (отключён в test)
@@ -81,12 +128,15 @@ API-запрос с заголовком Authorization
 
 ### Auth (`/auth`)
 
-| Метод | Endpoint  | Доступ  | Описание                      |
-| ----- | --------- | ------- | ----------------------------- |
-| POST  | /register | Public  | Создание аккаунта             |
-| POST  | /login    | Public  | Получение токенов             |
-| POST  | /refresh  | Public  | Обновление access (cookie)    |
-| POST  | /logout   | Auth    | Аннулирование сессии          |
+| Метод | Endpoint                   | Доступ | Описание                                      |
+| ----- | -------------------------- | ------ | --------------------------------------------- |
+| POST  | /register                  | Public | Создание аккаунта (email + password)          |
+| POST  | /login                     | Public | Получение токенов (email + password)          |
+| POST  | /refresh                   | Public | Обновление access (cookie)                    |
+| POST  | /logout                    | Auth   | Аннулирование сессии                          |
+| GET   | /oauth/:provider           | Public | Редирект на OAuth-провайдера (с PKCE + state) |
+| GET   | /oauth/:provider/callback  | Public | Callback → 302 на ${WEB_URL}/oauth/success    |
+| POST  | /oauth/:provider/link/init | Auth   | Init link-flow, возвращает provider authUrl   |
 
 ### Users (`/users`)
 
@@ -158,6 +208,11 @@ API-запрос с заголовком Authorization
 | GET   | /:id      | Auth    | Детали фильма          |
 | PATCH | /:id      | Admin   | Обновить фильм         |
 | DELETE| /:id      | Admin   | Удалить фильм          |
+
+## Известные ограничения
+
+- `refresh_token` cookie использует `sameSite=strict`. При cross-site развёртывании (SPA на `app.example.com`, API на `api.example.com`) браузер не отправит cookie на `POST /auth/refresh`. Это **pre-existing** баг текущей auth-системы, не специфичен OAuth. При едином origin через reverse-proxy — не актуален.
+- Auto-link по email защищён только для провайдеров с гарантированным `email_verified` (Google). При добавлении GitHub/Microsoft — требуется дополнительная верификация.
 
 ## Примеры запросов
 

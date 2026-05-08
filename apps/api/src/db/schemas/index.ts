@@ -3,6 +3,7 @@ import {
   movieSourceEnum,
   groupMovieStatusEnum,
 } from './group-movies';
+import { oauthAccounts } from './oauth-accounts';
 import { groupMembers } from './group-members';
 import { movies } from './movies';
 import { groups } from './groups';
@@ -13,6 +14,8 @@ export * from './movies';
 export * from './groups';
 export * from './group-members';
 export * from './group-movies';
+export * from './auth-providers';
+export * from './oauth-accounts';
 
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
@@ -28,6 +31,9 @@ export type NewGroupMember = typeof groupMembers.$inferInsert;
 
 export type GroupMovie = typeof groupMovies.$inferSelect;
 export type NewGroupMovie = typeof groupMovies.$inferInsert;
+
+export type OAuthAccount = typeof oauthAccounts.$inferSelect;
+export type NewOAuthAccount = typeof oauthAccounts.$inferInsert;
 
 export type MovieSource = typeof movieSourceEnum;
 export type GroupMovieStatus = typeof groupMovieStatusEnum;

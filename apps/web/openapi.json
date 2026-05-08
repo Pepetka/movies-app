@@ -191,6 +191,7 @@
 					},
 					"409": { "description": "Email already in use" }
 				},
+				"security": [],
 				"summary": "Register a new user",
 				"tags": ["Auth"]
 			}
@@ -214,6 +215,7 @@
 					},
 					"401": { "description": "Invalid credentials" }
 				},
+				"security": [],
 				"summary": "Login user",
 				"tags": ["Auth"]
 			}
@@ -244,7 +246,85 @@
 					},
 					"401": { "description": "Unauthorized" }
 				},
+				"security": [],
 				"summary": "Refresh access token",
+				"tags": ["Auth"]
+			}
+		},
+		"/api/v1/auth/oauth/{provider}": {
+			"get": {
+				"operationId": "AuthController_oauthRedirect_v1",
+				"parameters": [
+					{
+						"name": "provider",
+						"required": true,
+						"in": "path",
+						"schema": { "$ref": "#/components/schemas/AuthProvider" }
+					},
+					{
+						"name": "redirect",
+						"required": false,
+						"in": "query",
+						"description": "Path to redirect after OAuth login",
+						"schema": { "type": "string" }
+					}
+				],
+				"responses": {
+					"302": { "description": "Redirect to provider" },
+					"400": { "description": "Unsupported provider" },
+					"503": { "description": "Provider not configured" }
+				},
+				"security": [],
+				"summary": "Redirect to OAuth provider authorization page",
+				"tags": ["Auth"]
+			}
+		},
+		"/api/v1/auth/oauth/{provider}/link/init": {
+			"post": {
+				"operationId": "AuthController_oauthLinkInit_v1",
+				"parameters": [
+					{
+						"name": "provider",
+						"required": true,
+						"in": "path",
+						"schema": { "$ref": "#/components/schemas/AuthProvider" }
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Auth URL ready, cookie set",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/OAuthLinkInitResponseDto" }
+							}
+						}
+					},
+					"400": { "description": "Unsupported provider" },
+					"401": { "description": "Unauthorized" },
+					"503": { "description": "Provider not configured" }
+				},
+				"security": [{ "access-token": [] }],
+				"summary": "Init OAuth account linking — returns provider authUrl",
+				"tags": ["Auth"]
+			}
+		},
+		"/api/v1/auth/oauth/{provider}/callback": {
+			"get": {
+				"operationId": "AuthController_oauthCallback_v1",
+				"parameters": [
+					{
+						"name": "provider",
+						"required": true,
+						"in": "path",
+						"schema": { "$ref": "#/components/schemas/AuthProvider" }
+					},
+					{ "name": "error", "required": false, "in": "query", "schema": { "type": "string" } },
+					{ "name": "state", "required": false, "in": "query", "schema": { "type": "string" } },
+					{ "name": "code", "required": false, "in": "query", "schema": { "type": "string" } }
+				],
+				"responses": { "302": { "description": "Redirect to SPA /oauth/success or /oauth/error" } },
+				"security": [],
+				"summary": "OAuth callback — redirects to SPA after auth",
 				"tags": ["Auth"]
 			}
 		},
@@ -1312,9 +1392,10 @@
 					"email": { "type": "string" },
 					"role": { "type": "string" },
 					"createdAt": { "format": "date-time", "type": "string" },
-					"updatedAt": { "format": "date-time", "type": "string" }
+					"updatedAt": { "format": "date-time", "type": "string" },
+					"avatar": { "type": "string", "nullable": true }
 				},
-				"required": ["id", "name", "email", "role", "createdAt", "updatedAt"]
+				"required": ["id", "name", "email", "role", "createdAt", "updatedAt", "avatar"]
 			},
 			"UserUpdateDto": {
 				"type": "object",
@@ -1345,6 +1426,14 @@
 					"password": { "type": "string", "example": "SecurePass123!" }
 				},
 				"required": ["email", "password"]
+			},
+			"AuthProvider": { "type": "string", "enum": ["google"] },
+			"OAuthLinkInitResponseDto": {
+				"type": "object",
+				"properties": {
+					"authUrl": { "type": "string", "description": "OAuth provider authorization URL" }
+				},
+				"required": ["authUrl"]
 			},
 			"CsrfResponseDto": {
 				"type": "object",

@@ -1,8 +1,11 @@
 <script lang="ts">
-	import { Avatar } from '@repo/ui';
+	import { Avatar, toast } from '@repo/ui';
+	import { untrack } from 'svelte';
 
 	import { authStore } from '$lib/modules/auth';
 	import { topBarStore } from '$lib/stores';
+	import { goto } from '$app/navigation';
+	import { page } from '$app/state';
 
 	$effect(() => {
 		topBarStore.configure({
@@ -10,6 +13,24 @@
 		});
 
 		return () => topBarStore.destroy();
+	});
+
+	let handledLinked = $state(false);
+
+	$effect(() => {
+		if (page.url.searchParams.get('linked') !== '1') return;
+		if (untrack(() => handledLinked)) return;
+		untrack(() => {
+			handledLinked = true;
+		});
+		toast.success('Аккаунт успешно привязан');
+		const url = new URL(page.url);
+		url.searchParams.delete('linked');
+		void goto(`${url.pathname}${url.search}`, {
+			replaceState: true,
+			keepFocus: true,
+			noScroll: true
+		});
 	});
 </script>
 
@@ -20,7 +41,7 @@
 <div class="profile-page">
 	{#if authStore.user}
 		<div class="user-info">
-			<Avatar name={authStore.user.name} size="xl" />
+			<Avatar src={authStore.user.avatar} name={authStore.user.name} size="xl" />
 			<p class="name">{authStore.user.name}</p>
 			<p class="email">{authStore.user.email}</p>
 		</div>

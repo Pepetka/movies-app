@@ -16,6 +16,7 @@ export interface HttpClientConfig {
 		refreshEndpoint: string;
 		csrfEndpoint: string;
 		skipRefreshPaths?: string[];
+		csrfPaths?: string[];
 	};
 
 	retry?: {

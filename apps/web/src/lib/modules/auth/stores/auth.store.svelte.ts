@@ -7,21 +7,21 @@ import {
 	type MutationResult,
 	type QueryResult
 } from '$lib/query';
-import type { AuthLoginDto, AuthRegisterDto, UserResponseDto } from '$lib/api/generated/types';
+import type { AuthLoginDto, UserResponseDto } from '$lib/api/generated/types';
 import { BaseStore } from '$lib/stores/base.svelte';
 
 import {
 	getCurrentUser,
 	login as apiLogin,
 	logout as apiLogout,
-	register as apiRegister
+	refreshTokens as apiRefreshTokens
 } from '../api';
 import type { AuthStatus } from '../types';
 
 class AuthStore extends BaseStore {
 	private readonly _query: QueryResult<UserResponseDto>;
 	private readonly _loginMutation: MutationResult<void, AuthLoginDto>;
-	private readonly _registerMutation: MutationResult<void, AuthRegisterDto>;
+	private readonly _oauthSuccessMutation: MutationResult<void, void>;
 	private _checkAuthPromise: Promise<void> | null = null;
 
 	isInitialized = $state(false);
@@ -45,11 +45,11 @@ class AuthStore extends BaseStore {
 			debug: !__IS_PROD__
 		});
 
-		this._registerMutation = createMutation<void, AuthRegisterDto>({
-			key: ['auth', 'register'],
+		this._oauthSuccessMutation = createMutation<void, void>({
+			key: ['auth', 'oauthSuccess'],
 			tags: ['user'],
-			mutator: async (data) => {
-				await apiRegister(data);
+			mutator: async () => {
+				await apiRefreshTokens();
 			},
 			debug: !__IS_PROD__
 		});
@@ -100,23 +100,23 @@ class AuthStore extends BaseStore {
 		await untrack(() => this._loginMutation.mutate(data));
 	}
 
-	// === Register mutation ===
+	// === OAuth success mutation ===
 
-	get isRegistering(): boolean {
-		return this._registerMutation.isSubmitting;
+	get isHandlingOAuthSuccess(): boolean {
+		return this._oauthSuccessMutation.isSubmitting;
 	}
 
-	get isRegisterSuccess(): boolean {
-		return this._registerMutation.isSuccess;
+	get isOAuthSuccess(): boolean {
+		return this._oauthSuccessMutation.isSuccess;
 	}
 
-	get registerError(): string | null {
-		if (!this._registerMutation.error) return null;
-		return this._extractErrorMessage(this._registerMutation.error, 'Ошибка регистрации');
+	get oauthError(): string | null {
+		if (!this._oauthSuccessMutation.error) return null;
+		return this._extractErrorMessage(this._oauthSuccessMutation.error, 'Ошибка OAuth');
 	}
 
-	async register(data: AuthRegisterDto): Promise<void> {
-		await untrack(() => this._registerMutation.mutate(data));
+	async handleOAuthSuccess(): Promise<void> {
+		await untrack(() => this._oauthSuccessMutation.mutate());
 	}
 
 	// === Logout ===
@@ -165,7 +165,7 @@ class AuthStore extends BaseStore {
 
 	resetForm(): void {
 		this._loginMutation.reset();
-		this._registerMutation.reset();
+		this._oauthSuccessMutation.reset();
 	}
 }
 

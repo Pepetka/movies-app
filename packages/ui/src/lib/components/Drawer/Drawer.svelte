@@ -132,12 +132,20 @@
 		const ac = new AbortController();
 		const { signal } = ac;
 
-		document.addEventListener('mousemove', (e: MouseEvent) => {
-			updateDrag(e.clientY);
-		}, { signal });
-		document.addEventListener('mouseup', () => {
-			endDrag();
-		}, { signal });
+		document.addEventListener(
+			'mousemove',
+			(e: MouseEvent) => {
+				updateDrag(e.clientY);
+			},
+			{ signal }
+		);
+		document.addEventListener(
+			'mouseup',
+			() => {
+				endDrag();
+			},
+			{ signal }
+		);
 
 		return () => ac.abort();
 	});
@@ -157,9 +165,7 @@
 	});
 
 	const drawerSize = $derived(size ?? defaultSizes[position]);
-	const dragTransform = $derived(
-		dragOffset !== 0 ? `translateY(${dragOffset}px)` : ''
-	);
+	const dragTransform = $derived(dragOffset !== 0 ? `translateY(${dragOffset}px)` : '');
 	const overlayOpacity = $derived.by(() => {
 		if (!isDragging || drawerHeight === 0) return 1;
 		const progress = Math.max(0, Math.min(1, 1 - dragOffset / drawerHeight));

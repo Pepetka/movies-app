@@ -14,6 +14,7 @@ const mockUser = {
   role: UserRole.USER,
   passwordHash: '$2b$12$hashedPassword',
   refreshTokenHash: null,
+  avatar: null,
   createdAt: new Date(),
   updatedAt: new Date(),
 };

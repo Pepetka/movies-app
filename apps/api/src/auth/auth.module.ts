@@ -8,13 +8,22 @@ import { parseDuration } from '$common/utils';
 
 import {
   JWT_ACCESS_AUDIENCE,
+  OAUTH_COOKIE_OPTIONS,
   REFRESH_COOKIE_OPTIONS,
   REFRESH_COOKIE_PATH,
   RefreshCookieOptions,
 } from './auth.constants';
+import { OAuthRedirectExceptionFilter } from './oauth/oauth-redirect.filter';
+import { OAuthAccountRepository } from './oauth/oauth-account.repository';
+import { OAuthProviderRegistry } from './oauth/oauth-provider.registry';
+import { OAuthCookieService } from './oauth/oauth-cookie.service';
+import { OAUTH_PROVIDERS } from './oauth/oauth.constants';
+import { GoogleOAuthProvider } from './oauth/providers';
 import { RefreshGuard } from './guards/refresh.guard';
+import { OAuthService } from './oauth/oauth.service';
 import type { Expires } from './types/expires.type';
 import { AuthController } from './auth.controller';
+import { TokenService } from './token.service';
 import { AuthService } from './auth.service';
 
 @Module({
@@ -36,7 +45,19 @@ import { AuthService } from './auth.service';
   controllers: [AuthController],
   providers: [
     AuthService,
+    TokenService,
     RefreshGuard,
+    GoogleOAuthProvider,
+    {
+      provide: OAUTH_PROVIDERS,
+      useFactory: (google: GoogleOAuthProvider) => [google],
+      inject: [GoogleOAuthProvider],
+    },
+    OAuthProviderRegistry,
+    OAuthAccountRepository,
+    OAuthService,
+    OAuthCookieService,
+    OAuthRedirectExceptionFilter,
     {
       provide: REFRESH_COOKIE_OPTIONS,
       useFactory: (configService: ConfigService): RefreshCookieOptions => {
@@ -53,7 +74,20 @@ import { AuthService } from './auth.service';
       },
       inject: [ConfigService],
     },
+    {
+      provide: OAUTH_COOKIE_OPTIONS,
+      useFactory: (configService: ConfigService) => ({
+        secure: configService.get('NODE_ENV') !== Environment.Development,
+      }),
+      inject: [ConfigService],
+    },
   ],
-  exports: [AuthService, REFRESH_COOKIE_OPTIONS, JwtModule],
+  exports: [
+    AuthService,
+    TokenService,
+    OAuthService,
+    REFRESH_COOKIE_OPTIONS,
+    JwtModule,
+  ],
 })
 export class AuthModule {}
