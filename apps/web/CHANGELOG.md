@@ -1,5 +1,15 @@
 # web
 
+## 0.19.0
+
+### Minor Changes
+
+- 751cd98: Replace registration with OAuth-only authentication and enhance UI flow
+  - Add OAuthSection component and integrate into login and auth pages
+  - Implement OAuth redirect flow with automatic CSRF handling in API client
+  - Improve OAuth store API, success handling, and SvelteKit navigation
+  - Harden OAuth security, types, and remove legacy registration code
+
 ## 0.18.0
 
 ### Minor Changes
