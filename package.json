@@ -29,7 +29,7 @@
     "husky": "^9.1.7",
     "lint-staged": "^16.4.0",
     "prettier-plugin-svelte": "catalog:",
-    "syncpack": "14.3.1",
+    "syncpack": "15.1.2",
     "typescript": "catalog:",
     "turbo": "^2.9.8"
   },
