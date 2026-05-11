@@ -6,4 +6,6 @@ export interface IProps extends Omit<HTMLAttributes<HTMLDivElement>, 'children'>
 	movies: UnifiedMovie[];
 	isLoading?: boolean;
 	onMovieClick?: (movie: UnifiedMovie) => void;
+	emptyTitle?: string;
+	emptyDescription?: string;
 }

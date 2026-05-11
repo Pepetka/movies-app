@@ -3,7 +3,8 @@ import {
 	groupsControllerCreateV1,
 	groupsControllerUpdateV1,
 	groupsControllerFindOneV1,
-	groupsControllerRemoveV1
+	groupsControllerRemoveV1,
+	groupsControllerLeaveGroupV1
 } from '$lib/api/generated/api';
 import type { GroupCreateDto, GroupResponseDto, GroupUpdateDto } from '$lib/api/generated/types';
 
@@ -25,4 +26,8 @@ export const updateGroup = async (id: number, data: GroupUpdateDto): Promise<Gro
 
 export const deleteGroup = async (id: number): Promise<void> => {
 	return groupsControllerRemoveV1(id);
+};
+
+export const leaveGroup = async (id: number): Promise<void> => {
+	return groupsControllerLeaveGroupV1(id);
 };
