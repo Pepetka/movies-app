@@ -20,7 +20,7 @@
     "eslint-plugin-turbo": "^2.9.12",
     "eslint-plugin-unused-imports": "^4.4.1",
     "globals": "^17.6.0",
-    "typescript-eslint": "^8.59.1",
+    "typescript-eslint": "^8.59.3",
     "eslint-plugin-storybook": "^10.3.6"
   }
 }
