@@ -1,5 +1,12 @@
 # api
 
+## 0.11.1
+
+### Patch Changes
+
+- a026423: Allow deleting users who previously added movies to groups
+  - Relaxed `group_movies.added_by` foreign key constraint from `onDelete: 'restrict'` to `onDelete: 'set null'`, preventing deletion failures due to referential integrity
+
 ## 0.11.0
 
 ### Minor Changes
