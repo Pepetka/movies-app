@@ -304,6 +304,7 @@
 		font-size: var(--text-sm);
 		color: var(--text-primary);
 		line-height: var(--leading-relaxed);
+		white-space: pre-wrap;
 	}
 
 	@media (min-width: 480px) {
