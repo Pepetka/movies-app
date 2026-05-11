@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { Button, FAB, Sheet, Tabs, Avatar, toast } from '@repo/ui';
-	import { Plus, Pencil, Trash2, Users } from '@lucide/svelte';
+	import { LogOut, Pencil, Plus, Search, Trash2, Users } from '@lucide/svelte';
+	import { Avatar, Button, FAB, Input, Sheet, Tabs, toast } from '@repo/ui';
 
 	import {
 		groupMoviesStore,
@@ -15,6 +15,7 @@
 		withCurrentQuery,
 		buildPath,
 		goBack,
+		debounce,
 		type RouteValue
 	} from '$lib/utils';
 	import { groupStore } from '$lib/modules/groups';
@@ -23,8 +24,15 @@
 	import { page } from '$app/state';
 
 	const groupId = $derived(Number(page.params.id));
+	let inputValue = $state('');
+	let searchQuery = $state('');
+
+	const setSearchQuery = debounce((value: string) => {
+		searchQuery = value;
+	}, 300);
 
 	let showDeleteModal = $state(false);
+	let showLeaveModal = $state(false);
 
 	const openDeleteModal = () => {
 		showDeleteModal = true;
@@ -33,6 +41,27 @@
 	const closeDeleteModal = () => {
 		showDeleteModal = false;
 		groupStore.resetDelete();
+	};
+
+	const openLeaveModal = () => {
+		showLeaveModal = true;
+	};
+
+	const closeLeaveModal = () => {
+		showLeaveModal = false;
+		groupStore.resetLeave();
+	};
+
+	const handleLeave = async () => {
+		await groupStore.leaveGroup(groupId);
+
+		if (groupStore.isLeaveSuccess) {
+			toast.success('Вы покинули группу');
+			groupStore.reset();
+			await goto(ROUTES.GROUPS);
+		} else {
+			toast.error(groupStore.leaveError ?? 'Ошибка выхода из группы');
+		}
 	};
 
 	const handleDelete = async () => {
@@ -86,7 +115,12 @@
 							]
 						: [])
 				]
-			: [])
+			: []),
+		{
+			Icon: LogOut,
+			label: 'Покинуть группу',
+			onclick: openLeaveModal
+		}
 	]);
 
 	$effect(() => {
@@ -111,15 +145,18 @@
 				? groupMoviesStore.movies
 				: groupMoviesStore.getMoviesByStatus(activeFilter);
 
-		if (activeFilter === 'planned' && movies.length > 1) {
-			return sortByDateField(movies, 'watchDate', 'asc');
+		const term = searchQuery.trim().toLowerCase();
+		const searched = term ? movies.filter((m) => m.title.toLowerCase().includes(term)) : movies;
+
+		if (activeFilter === 'planned' && searched.length > 1) {
+			return sortByDateField(searched, 'watchDate', 'asc');
 		}
 
-		if (activeFilter === 'watched' && movies.length > 1) {
-			return sortByDateField(movies, 'watchDate', 'desc');
+		if (activeFilter === 'watched' && searched.length > 1) {
+			return sortByDateField(searched, 'watchDate', 'desc');
 		}
 
-		return movies;
+		return searched;
 	});
 
 	const handleFilterChange = (tabId: string) => {
@@ -171,6 +208,21 @@
 	</div>
 
 	<div class="group-page__content">
+		<div class="group-page__search">
+			<Input
+				type="text"
+				label="Поиск"
+				placeholder="Поиск фильмов..."
+				value={inputValue}
+				hideMessage
+				Icon={Search}
+				onChange={(value) => {
+					inputValue = value;
+					setSearchQuery(value);
+				}}
+			/>
+		</div>
+
 		<Tabs
 			tabs={filterTabs.map((tab) => ({
 				...tab,
@@ -185,6 +237,8 @@
 				movies={filteredMovies}
 				isLoading={groupMoviesStore.isFetching}
 				onMovieClick={handleMovieClick}
+				emptyTitle={searchQuery.trim() ? 'Ничего не найдено' : undefined}
+				emptyDescription={searchQuery.trim() ? 'Попробуйте изменить запрос' : undefined}
 			/>
 		</div>
 	</div>
@@ -195,6 +249,23 @@
 		<Plus size={20} />
 	</FAB>
 {/if}
+
+<Sheet bind:open={showLeaveModal} size="sm">
+	{#snippet header()}
+		<h2>Покинуть группу?</h2>
+	{/snippet}
+
+	<p class="modal-text">
+		Вы уверены, что хотите покинуть группу "{groupStore.currentGroup?.name}"?
+	</p>
+
+	{#snippet footer()}
+		<Button variant="secondary" onclick={closeLeaveModal} disabled={groupStore.isLeaving}>
+			Отмена
+		</Button>
+		<Button variant="danger" onclick={handleLeave} loading={groupStore.isLeaving}>Покинуть</Button>
+	{/snippet}
+</Sheet>
 
 <Sheet bind:open={showDeleteModal} size="sm">
 	{#snippet header()}
@@ -256,6 +327,10 @@
 
 	.group-page__content {
 		flex: 1;
+	}
+
+	.group-page__search {
+		margin-bottom: var(--space-4);
 	}
 
 	.group-page__movies {

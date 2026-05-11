@@ -9,6 +9,8 @@
 		movies,
 		isLoading = false,
 		onMovieClick,
+		emptyTitle,
+		emptyDescription,
 		class: className,
 		...restProps
 	}: IProps = $props();
@@ -32,7 +34,11 @@
 			{/each}
 		</Grid>
 	{:else if movies.length === 0}
-		<EmptyState Icon={Film} title="Нет фильмов" description="Добавьте первый фильм в группу" />
+		<EmptyState
+			Icon={Film}
+			title={emptyTitle ?? 'Нет фильмов'}
+			description={emptyDescription ?? 'Добавьте первый фильм в группу'}
+		/>
 	{:else}
 		<Grid cols={[2, 3, 4]} gap="md">
 			{#each movies as movie (movie.id)}

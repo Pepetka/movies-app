@@ -24,6 +24,7 @@ class MoviesSearchStore extends BaseStore {
 		cancel: () => void;
 		pending: () => boolean;
 	};
+	private _isPending = $state(false);
 
 	constructor() {
 		super();
@@ -50,19 +51,16 @@ class MoviesSearchStore extends BaseStore {
 
 		this._debouncedSearch = debounce(
 			(groupId: number, query: string, yearFrom?: number, yearTo?: number) => {
-				if (query.trim()) {
-					const key = ['movies', 'search', groupId, query];
-					if (yearFrom !== undefined) key.push(yearFrom);
-					if (yearTo !== undefined) key.push(yearTo);
-					void this._query.revalidate(key, {
-						groupId,
-						query,
-						yearFrom,
-						yearTo
-					});
-				} else {
-					this._query.reset();
-				}
+				this._isPending = false;
+				const key = ['movies', 'search', groupId, query];
+				if (yearFrom !== undefined) key.push(yearFrom);
+				if (yearTo !== undefined) key.push(yearTo);
+				void this._query.revalidate(key, {
+					groupId,
+					query,
+					yearFrom,
+					yearTo
+				});
 			},
 			DEBOUNCE
 		);
@@ -117,17 +115,25 @@ class MoviesSearchStore extends BaseStore {
 	}
 
 	get isPending(): boolean {
-		return this._debouncedSearch.pending();
+		return this._isPending;
 	}
 
 	search(groupId: number, query: string, yearFrom?: number, yearTo?: number): void {
 		untrack(() => {
+			if (!query.trim()) {
+				this._debouncedSearch.cancel();
+				this._isPending = false;
+				this._query.reset();
+				return;
+			}
+
 			const key = ['movies', 'search', groupId, query];
 			if (yearFrom !== undefined) key.push(yearFrom);
 			if (yearTo !== undefined) key.push(yearTo);
 			if (this._query.isCurrentKey(key) && (this.isLoaded || this.isFetching)) {
 				return;
 			}
+			this._isPending = true;
 			this._debouncedSearch(groupId, query, yearFrom, yearTo);
 		});
 	}
@@ -135,17 +141,22 @@ class MoviesSearchStore extends BaseStore {
 	clear(): void {
 		untrack(() => {
 			this._debouncedSearch.cancel();
+			this._isPending = false;
 			this._query.reset();
 		});
 	}
 
 	cancel(): void {
-		untrack(() => this._debouncedSearch.cancel());
+		untrack(() => {
+			this._debouncedSearch.cancel();
+			this._isPending = false;
+		});
 	}
 
 	reset(): void {
 		untrack(() => {
 			this._debouncedSearch.cancel();
+			this._isPending = false;
 			this._query.reset();
 		});
 	}

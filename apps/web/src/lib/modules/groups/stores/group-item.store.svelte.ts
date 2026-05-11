@@ -20,7 +20,8 @@ import {
 	createGroup as createGroupApi,
 	getGroup as getGroupApi,
 	updateGroup as updateGroupApi,
-	deleteGroup as deleteGroupApi
+	deleteGroup as deleteGroupApi,
+	leaveGroup as leaveGroupApi
 } from '../api';
 
 class GroupStore extends BaseStore {
@@ -31,6 +32,7 @@ class GroupStore extends BaseStore {
 		{ id: number; data: GroupUpdateDto }
 	>;
 	private readonly _deleteMutation: MutationResult<void, number>;
+	private readonly _leaveMutation: MutationResult<void, number>;
 
 	constructor() {
 		super();
@@ -64,6 +66,14 @@ class GroupStore extends BaseStore {
 			key: ['group', 'delete'],
 			tags: ['groups'],
 			mutator: (id) => deleteGroupApi(id),
+			debug: !__IS_PROD__
+		});
+
+		this._leaveMutation = createMutation<void, number>({
+			key: ['group', 'leave'],
+			tags: ['groups'],
+			mutator: (id) => leaveGroupApi(id),
+			invalidateKeys: (_, id) => [['group', id]],
 			debug: !__IS_PROD__
 		});
 	}
@@ -205,6 +215,33 @@ class GroupStore extends BaseStore {
 		this._deleteMutation.reset();
 	}
 
+	// Leave mutation
+
+	get leaveStatus(): PostStatus {
+		return this._leaveMutation.status;
+	}
+
+	get leaveError(): string | null {
+		if (!this._leaveMutation.error) return null;
+		return this._extractErrorMessage(this._leaveMutation.error, 'Ошибка выхода из группы');
+	}
+
+	get isLeaving(): boolean {
+		return this._leaveMutation.isSubmitting;
+	}
+
+	get isLeaveSuccess(): boolean {
+		return this._leaveMutation.isSuccess;
+	}
+
+	async leaveGroup(id: number): Promise<void> {
+		await untrack(() => this._leaveMutation.mutate(id));
+	}
+
+	resetLeave(): void {
+		this._leaveMutation.reset();
+	}
+
 	reset(): void {
 		this._query.reset();
 	}
@@ -213,6 +250,7 @@ class GroupStore extends BaseStore {
 		this._createMutation.reset();
 		this._updateMutation.reset();
 		this._deleteMutation.reset();
+		this._leaveMutation.reset();
 	}
 }
 
