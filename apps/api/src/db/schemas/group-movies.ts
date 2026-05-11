@@ -43,9 +43,7 @@ export const groupMovies = pgTable(
     rating: decimal({ precision: 3, scale: 1 }),
     status: groupMovieStatusEnum('status').notNull().default('tracking'),
     watchDate: timestamp(),
-    addedBy: integer()
-      .references(() => users.id, { onDelete: 'restrict' })
-      .notNull(),
+    addedBy: integer().references(() => users.id, { onDelete: 'set null' }),
     ...timestamps,
   },
   (table) => [
