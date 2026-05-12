@@ -19,18 +19,24 @@ export class GroupMovieReviewsRepository {
   constructor(@Inject(DRIZZLE) private readonly db: DrizzleDb) {}
 
   async create(data: NewGroupMovieReview): Promise<GroupMovieReviewWithUser> {
-    const inserted = this.db
-      .$with('inserted')
-      .as(this.db.insert(groupMovieReviews).values(data).returning());
+    const [inserted] = await this.db
+      .insert(groupMovieReviews)
+      .values(data)
+      .returning();
+
+    if (!inserted) {
+      throw new Error('Review not found after create');
+    }
 
     const [result] = await this.db
-      .with(inserted)
       .select({
         ...getTableColumns(groupMovieReviews),
         userName: users.name,
       })
-      .from(inserted)
-      .innerJoin(users, eq(inserted.userId, users.id));
+      .from(groupMovieReviews)
+      .innerJoin(users, eq(groupMovieReviews.userId, users.id))
+      .where(eq(groupMovieReviews.id, inserted.id))
+      .limit(1);
 
     if (!result) {
       throw new Error('Review not found after create');
@@ -99,22 +105,25 @@ export class GroupMovieReviewsRepository {
     id: number,
     data: Partial<NewGroupMovieReview>,
   ): Promise<GroupMovieReviewWithUser> {
-    const updated = this.db.$with('updated').as(
-      this.db
-        .update(groupMovieReviews)
-        .set({ ...data })
-        .where(eq(groupMovieReviews.id, id))
-        .returning(),
-    );
+    const [updated] = await this.db
+      .update(groupMovieReviews)
+      .set(data)
+      .where(eq(groupMovieReviews.id, id))
+      .returning();
+
+    if (!updated) {
+      throw new Error('Review not found after update');
+    }
 
     const [result] = await this.db
-      .with(updated)
       .select({
         ...getTableColumns(groupMovieReviews),
         userName: users.name,
       })
-      .from(updated)
-      .innerJoin(users, eq(updated.userId, users.id));
+      .from(groupMovieReviews)
+      .innerJoin(users, eq(groupMovieReviews.userId, users.id))
+      .where(eq(groupMovieReviews.id, id))
+      .limit(1);
 
     if (!result) {
       throw new Error('Review not found after update');
