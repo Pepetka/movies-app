@@ -38,3 +38,18 @@ export function AtLeastOneOf(
     });
   };
 }
+
+export function AtLeastOneOfClass(
+  properties: string[],
+  validationOptions?: ValidationOptions,
+) {
+  return function (target: new (...args: unknown[]) => unknown) {
+    registerDecorator({
+      target: target as any,
+      propertyName: '',
+      options: validationOptions,
+      constraints: [properties],
+      validator: AtLeastOneOfConstraint,
+    });
+  };
+}

@@ -16,3 +16,7 @@ export * from './movie-already-exists.exception';
 export * from './movie-already-in-group.exception';
 export * from './insufficient-role.exception';
 export * from './invite-not-found.exception';
+export * from './review-not-found.exception';
+export * from './review-already-exists.exception';
+export * from './not-review-author.exception';
+export * from './movie-not-watched.exception';

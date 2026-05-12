@@ -127,6 +127,13 @@
       "when": 1778500490925,
       "tag": "0017_magenta_wild_child",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1778525883659,
+      "tag": "0018_optimal_vector",
+      "breakpoints": true
     }
   ]
 }
