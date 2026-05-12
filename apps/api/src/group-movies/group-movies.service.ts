@@ -4,7 +4,6 @@ import { ProviderSearchResult } from '$src/movies/providers/interfaces/provider-
 import { MovieAlreadyInGroupException } from '$common/exceptions';
 import { MoviesService } from '$src/movies/movies.service';
 import { GroupMovie, NewGroupMovie } from '$db/schemas';
-import { GroupMemberRole } from '$common/enums';
 
 import {
   AddMovieDto,
@@ -104,28 +103,18 @@ export class GroupMoviesService {
   async searchInGroup(
     groupId: number,
     dto: MovieSearchGroupDto,
-  ): Promise<{ provider: ProviderSearchResult; currentGroup: GroupMovie[] }> {
-    const [providerResults, groupMovies] = await Promise.all([
+  ): Promise<{
+    provider: ProviderSearchResult;
+    currentGroup: GroupMovie[];
+  }> {
+    const [providerResults, movies] = await Promise.all([
       this.moviesService.search(dto),
       this.groupMoviesRepository.findByGroup(groupId, { query: dto.query }),
     ]);
 
     return {
       provider: providerResults,
-      currentGroup: groupMovies,
-    };
-  }
-
-  async findOne(
-    groupId: number,
-    id: number,
-    currentUserRole: GroupMemberRole,
-  ): Promise<GroupMovie & { currentUserRole: GroupMemberRole }> {
-    const groupMovie = await this._findOneOrThrow(groupId, id);
-
-    return {
-      ...groupMovie,
-      currentUserRole,
+      currentGroup: movies,
     };
   }
 
