@@ -1,13 +1,13 @@
 <script lang="ts">
-	import { Pencil, Trash2, Calendar, Clock } from '@lucide/svelte';
+	import { Pencil, Trash2, Calendar, Clock, Star } from '@lucide/svelte';
 	import { Button, Image, Sheet, Spinner, toast } from '@repo/ui';
 
 	import {
 		groupMovieDetailStore,
 		groupMovieStore,
-		MovieRating,
 		MovieStatusBadge,
-		MovieStatusModal
+		MovieStatusModal,
+		ReviewList
 	} from '$lib/modules/movies';
 	import { ROUTES, formatDate, formatRuntime, withCurrentQuery, goBack } from '$lib/utils';
 	import { PagePlaceholder } from '$lib/ui';
@@ -118,8 +118,11 @@
 								{formatRuntime(movie.runtime)}
 							</span>
 						{/if}
-						{#if movie.rating}
-							<MovieRating rating={movie.rating} />
+						{#if movie.averageRating != null}
+							<span class="movie-header__meta-item movie-header__rating">
+								<Star size={14} fill="var(--rating-gold)" color="var(--rating-gold)" />
+								{movie.averageRating.toFixed(1)}
+							</span>
 						{/if}
 					</div>
 				</div>
@@ -160,6 +163,25 @@
 				</div>
 				<div class="movie-section__content">
 					<p class="movie-overview">{movie.overview}</p>
+				</div>
+			</section>
+		{/if}
+
+		<!-- Reviews Section -->
+		{#if movie.status === 'watched' || groupMovieDetailStore.reviews.length > 0}
+			<section class="movie-section">
+				<div class="movie-section__header">
+					<h2 class="movie-section__title">Отзывы</h2>
+				</div>
+				<div class="movie-section__content">
+					<ReviewList
+						{groupId}
+						{movieId}
+						status={movie.status}
+						reviews={groupMovieDetailStore.reviews}
+						myReview={groupMovieDetailStore.myReview}
+						isLoading={groupMovieDetailStore.isLoading}
+					/>
 				</div>
 			</section>
 		{/if}
@@ -321,6 +343,10 @@
 		.movie-header__poster {
 			width: 200px;
 		}
+	}
+
+	.movie-header__rating {
+		color: var(--rating-gold);
 	}
 
 	.modal-text {

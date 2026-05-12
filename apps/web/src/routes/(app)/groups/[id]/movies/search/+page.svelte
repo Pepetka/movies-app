@@ -13,7 +13,7 @@
 	import { Search } from '@lucide/svelte';
 
 	import { MOVIE_SEARCH_YEAR_FILTER } from '$lib/modules/movies/config/movies-search.config';
-	import { moviesSearchStore, groupMovieStore, MovieRating } from '$lib/modules/movies';
+	import { moviesSearchStore, groupMovieStore } from '$lib/modules/movies';
 	import type { ProviderMovieSummary } from '$lib/api/generated/types';
 	import { groupStore } from '$lib/modules/groups';
 	import { goBack, ROUTES } from '$lib/utils';
@@ -161,11 +161,7 @@
 								objectFit="cover"
 							/>
 						{/snippet}
-						{#snippet trailing()}
-							{#if movie.rating}
-								<MovieRating rating={movie.rating} size={12} />
-							{/if}
-						{/snippet}
+						{#snippet trailing()}{/snippet}
 					</ListItem>
 				{/each}
 			</List>
