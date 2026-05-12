@@ -4,3 +4,7 @@ export { default as MovieGrid } from './MovieGrid.svelte';
 export { default as MovieRating } from './MovieRating.svelte';
 export { default as MovieStatusBadge } from './MovieStatusBadge.svelte';
 export { default as MovieStatusModal } from './MovieStatusModal.svelte';
+export { default as StarRatingInput } from './StarRatingInput.svelte';
+export { default as ReviewCard } from './ReviewCard.svelte';
+export { default as ReviewForm } from './ReviewForm.svelte';
+export { default as ReviewList } from './ReviewList.svelte';

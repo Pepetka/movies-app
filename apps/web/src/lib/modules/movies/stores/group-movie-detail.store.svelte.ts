@@ -1,7 +1,7 @@
 import { untrack } from 'svelte';
 
+import type { GroupMovieResponseDto, ReviewResponseDto } from '$lib/api/generated/types';
 import { createQuery, type FetchStatus, type QueryResult } from '$lib/query';
-import type { GroupMovieResponseDto } from '$lib/api/generated/types';
 import { BaseStore } from '$lib/stores/base.svelte';
 
 import { mapToUnified, type UnifiedMovie } from '../types';
@@ -48,6 +48,22 @@ class GroupMovieDetailStore extends BaseStore {
 
 	get isAdmin(): boolean {
 		return this.currentUserRole === 'admin';
+	}
+
+	get reviews(): ReviewResponseDto[] {
+		return this._query.data?.reviews ?? [];
+	}
+
+	get myReview(): ReviewResponseDto | null {
+		return this._query.data?.reviews?.find((r) => r.isOwn) ?? null;
+	}
+
+	get averageRating(): number | null {
+		return this._query.data?.averageRating ?? null;
+	}
+
+	get reviewCount(): number {
+		return this._query.data?.reviewCount ?? 0;
 	}
 
 	get status(): FetchStatus {

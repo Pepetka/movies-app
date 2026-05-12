@@ -5,7 +5,7 @@ import type {
 	ProviderSearchResult,
 	SearchInGroupResponseDto
 } from '$lib/api/generated/types';
-import { groupMoviesControllerSearchInGroupV1 } from '$lib/api/generated/api';
+import { groupMovieDetailsControllerSearchInGroupV1 } from '$lib/api/generated/api';
 import { createQuery, type FetchStatus, type QueryResult } from '$lib/query';
 import { BaseStore } from '$lib/stores/base.svelte';
 import { DEBOUNCE, debounce } from '$lib/utils';
@@ -40,7 +40,7 @@ class MoviesSearchStore extends BaseStore {
 					throw new Error('No group id');
 				}
 				const { groupId, query, yearFrom, yearTo } = params;
-				return groupMoviesControllerSearchInGroupV1(
+				return groupMovieDetailsControllerSearchInGroupV1(
 					groupId,
 					{ query, yearFrom, yearTo },
 					{ signal }

@@ -3,7 +3,8 @@ export {
 	groupMoviesStore,
 	groupMovieStore,
 	groupMovieDetailStore,
-	moviesSearchStore
+	moviesSearchStore,
+	groupMovieReviewsStore
 } from './stores';
 
 // Types
@@ -27,7 +28,14 @@ export {
 	EMPTY_CUSTOM_MOVIE_FORM,
 	EMPTY_STATUS_FORM,
 	type CustomMovieFormData,
-	type MovieStatusFormData
+	type MovieStatusFormData,
+	validateReviewForm,
+	reviewFormToCreateDto,
+	reviewFormToUpdateDto,
+	reviewFormFromEntity,
+	EMPTY_REVIEW_FORM,
+	type ReviewFormData,
+	type ReviewFormProps
 } from './validation';
 
 // Components
@@ -37,5 +45,9 @@ export {
 	MovieGrid,
 	MovieRating,
 	MovieStatusBadge,
-	MovieStatusModal
+	MovieStatusModal,
+	StarRatingInput,
+	ReviewCard,
+	ReviewForm,
+	ReviewList
 } from './components';

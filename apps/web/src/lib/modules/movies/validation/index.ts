@@ -18,3 +18,14 @@ export {
 	movieStatusFormFromEntity,
 	type MovieStatusFormData
 } from './movie-status.validation.svelte';
+
+export {
+	reviewFormSchema,
+	EMPTY_REVIEW_FORM,
+	validateReviewForm,
+	reviewFormToCreateDto,
+	reviewFormToUpdateDto,
+	reviewFormFromEntity,
+	type ReviewFormData,
+	type ReviewFormProps
+} from './review.validation.svelte';

@@ -1,4 +1,4 @@
-import type { GroupMovieResponseDto } from '$lib/api/generated/types';
+import type { GroupMovieResponseDto, ReviewResponseDto } from '$lib/api/generated/types';
 
 export type MovieStatus = 'tracking' | 'planned' | 'watched';
 
@@ -13,11 +13,13 @@ export interface UnifiedMovie {
 	overview?: string;
 	releaseYear?: number;
 	runtime?: number;
-	rating?: number;
 	status: MovieStatus;
 	watchDate?: string;
 	createdAt: string;
 	updatedAt: string;
+	reviews?: ReviewResponseDto[];
+	averageRating?: number | null;
+	reviewCount?: number;
 }
 
 export const mapToUnified = (movie: GroupMovieResponseDto): UnifiedMovie => ({
@@ -29,14 +31,13 @@ export const mapToUnified = (movie: GroupMovieResponseDto): UnifiedMovie => ({
 	overview: movie.overview ?? undefined,
 	releaseYear: movie.releaseYear ?? undefined,
 	runtime: movie.runtime ?? undefined,
-	rating:
-		movie.rating != null && Number.isFinite(Number(movie.rating))
-			? Number(movie.rating)
-			: undefined,
 	status: movie.status,
 	watchDate: movie.watchDate ?? undefined,
 	createdAt: movie.createdAt,
-	updatedAt: movie.updatedAt
+	updatedAt: movie.updatedAt,
+	reviews: movie.reviews ?? undefined,
+	averageRating: movie.averageRating ?? undefined,
+	reviewCount: movie.reviewCount ?? undefined
 });
 
 export const getStatusLabel = (status: MovieStatus): string => {

@@ -7,3 +7,5 @@ export {
 	updateMovie,
 	removeMovie
 } from './movies.api';
+
+export { createReview, updateReview, deleteReview } from './reviews.api';

@@ -1045,9 +1045,229 @@
 				"tags": ["Invites"]
 			}
 		},
+		"/api/v1/groups/{groupId}/movies": {
+			"post": {
+				"operationId": "GroupMoviesController_addProviderMovie_v1",
+				"parameters": [
+					{
+						"name": "groupId",
+						"required": true,
+						"in": "path",
+						"description": "Group ID",
+						"schema": { "type": "number" }
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": { "schema": { "$ref": "#/components/schemas/AddMovieDto" } }
+					}
+				},
+				"responses": {
+					"201": {
+						"description": "Movie added to group",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/GroupMovieResponseDto" }
+							}
+						}
+					},
+					"403": { "description": "Forbidden - Not a group moderator" },
+					"409": { "description": "Movie already added to this group" }
+				},
+				"security": [{ "access-token": [] }],
+				"summary": "Add provider movie to group (Group moderators only)",
+				"tags": ["Groups / Movies"]
+			},
+			"get": {
+				"operationId": "GroupMovieDetailsController_findAll_v1",
+				"parameters": [
+					{
+						"name": "groupId",
+						"required": true,
+						"in": "path",
+						"description": "Group ID",
+						"schema": { "type": "number" }
+					},
+					{
+						"name": "status",
+						"required": false,
+						"in": "query",
+						"description": "Filter by movie status",
+						"schema": { "type": "string", "enum": ["tracking", "planned", "watched"] }
+					},
+					{
+						"name": "query",
+						"required": false,
+						"in": "query",
+						"description": "Search query for movie title",
+						"schema": { "type": "string" }
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "List of group movies",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "array",
+									"items": { "$ref": "#/components/schemas/GroupMovieResponseDto" }
+								}
+							}
+						}
+					},
+					"400": { "description": "Invalid query parameters" },
+					"403": { "description": "Forbidden - Not a group member" }
+				},
+				"security": [{ "access-token": [] }],
+				"summary": "Get all movies in group (Group members only)",
+				"tags": ["Groups / Movies"]
+			}
+		},
+		"/api/v1/groups/{groupId}/movies/custom": {
+			"post": {
+				"operationId": "GroupMoviesController_createCustomMovie_v1",
+				"parameters": [
+					{
+						"name": "groupId",
+						"required": true,
+						"in": "path",
+						"description": "Group ID",
+						"schema": { "type": "number" }
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": { "$ref": "#/components/schemas/CreateCustomMovieDto" }
+						}
+					}
+				},
+				"responses": {
+					"201": {
+						"description": "Custom movie created",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/GroupMovieResponseDto" }
+							}
+						}
+					},
+					"400": { "description": "Invalid status/date combination" },
+					"403": { "description": "Forbidden - Not a group moderator" }
+				},
+				"security": [{ "access-token": [] }],
+				"summary": "Create custom movie in group (Group moderators only)",
+				"tags": ["Groups / Movies"]
+			}
+		},
+		"/api/v1/groups/{groupId}/movies/{id}": {
+			"patch": {
+				"operationId": "GroupMoviesController_update_v1",
+				"parameters": [
+					{
+						"name": "groupId",
+						"required": true,
+						"in": "path",
+						"description": "Group ID",
+						"schema": { "type": "number" }
+					},
+					{
+						"name": "id",
+						"required": true,
+						"in": "path",
+						"description": "Group Movie ID",
+						"schema": { "type": "number" }
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": { "schema": { "$ref": "#/components/schemas/GroupMovieUpdateDto" } }
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Movie updated",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/GroupMovieResponseDto" }
+							}
+						}
+					},
+					"400": { "description": "Invalid status/date combination" },
+					"403": { "description": "Forbidden - Not a group moderator" },
+					"404": { "description": "Movie not found in group" }
+				},
+				"security": [{ "access-token": [] }],
+				"summary": "Update movie in group (Group moderators only)",
+				"tags": ["Groups / Movies"]
+			},
+			"delete": {
+				"operationId": "GroupMoviesController_remove_v1",
+				"parameters": [
+					{
+						"name": "groupId",
+						"required": true,
+						"in": "path",
+						"description": "Group ID",
+						"schema": { "type": "number" }
+					},
+					{
+						"name": "id",
+						"required": true,
+						"in": "path",
+						"description": "Group Movie ID",
+						"schema": { "type": "number" }
+					}
+				],
+				"responses": {
+					"204": { "description": "Movie removed from group" },
+					"403": { "description": "Forbidden - Not a group moderator" },
+					"404": { "description": "Movie not found in group" }
+				},
+				"security": [{ "access-token": [] }],
+				"summary": "Remove movie from group (Group moderators only)",
+				"tags": ["Groups / Movies"]
+			},
+			"get": {
+				"operationId": "GroupMovieDetailsController_findOne_v1",
+				"parameters": [
+					{
+						"name": "groupId",
+						"required": true,
+						"in": "path",
+						"description": "Group ID",
+						"schema": { "type": "number" }
+					},
+					{
+						"name": "id",
+						"required": true,
+						"in": "path",
+						"description": "Group Movie ID",
+						"schema": { "type": "number" }
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Group movie found",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/GroupMovieResponseDto" }
+							}
+						}
+					},
+					"403": { "description": "Forbidden - Not a group member" },
+					"404": { "description": "Movie not found in group" }
+				},
+				"security": [{ "access-token": [] }],
+				"summary": "Get movie details in group (Group members only)",
+				"tags": ["Groups / Movies"]
+			}
+		},
 		"/api/v1/groups/{groupId}/movies/search": {
 			"get": {
-				"operationId": "GroupMoviesController_searchInGroup_v1",
+				"operationId": "GroupMovieDetailsController_searchInGroup_v1",
 				"parameters": [
 					{
 						"name": "groupId",
@@ -1126,9 +1346,9 @@
 				"tags": ["Groups / Movies"]
 			}
 		},
-		"/api/v1/groups/{groupId}/movies": {
+		"/api/v1/groups/{groupId}/movies/{groupMovieId}/reviews": {
 			"get": {
-				"operationId": "GroupMoviesController_findAll_v1",
+				"operationId": "GroupMovieReviewsController_findAll_v1",
 				"parameters": [
 					{
 						"name": "groupId",
@@ -1138,41 +1358,30 @@
 						"schema": { "type": "number" }
 					},
 					{
-						"name": "status",
-						"required": false,
-						"in": "query",
-						"description": "Filter by movie status",
-						"schema": { "type": "string", "enum": ["tracking", "planned", "watched"] }
-					},
-					{
-						"name": "query",
-						"required": false,
-						"in": "query",
-						"description": "Search query for movie title",
-						"schema": { "type": "string" }
+						"name": "groupMovieId",
+						"required": true,
+						"in": "path",
+						"description": "Group Movie ID",
+						"schema": { "type": "number" }
 					}
 				],
 				"responses": {
 					"200": {
-						"description": "List of group movies",
+						"description": "List of reviews with average rating",
 						"content": {
 							"application/json": {
-								"schema": {
-									"type": "array",
-									"items": { "$ref": "#/components/schemas/GroupMovieResponseDto" }
-								}
+								"schema": { "$ref": "#/components/schemas/ReviewListResponseDto" }
 							}
 						}
 					},
-					"400": { "description": "Invalid query parameters" },
 					"403": { "description": "Forbidden - Not a group member" }
 				},
 				"security": [{ "access-token": [] }],
-				"summary": "Get all movies in group (Group members only)",
-				"tags": ["Groups / Movies"]
+				"summary": "Get all reviews for a group movie (Group members only)",
+				"tags": ["Groups / Movie Reviews"]
 			},
 			"post": {
-				"operationId": "GroupMoviesController_addProviderMovie_v1",
+				"operationId": "GroupMovieReviewsController_create_v1",
 				"parameters": [
 					{
 						"name": "groupId",
@@ -1180,71 +1389,40 @@
 						"in": "path",
 						"description": "Group ID",
 						"schema": { "type": "number" }
-					}
-				],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": { "schema": { "$ref": "#/components/schemas/AddMovieDto" } }
-					}
-				},
-				"responses": {
-					"201": {
-						"description": "Movie added to group",
-						"content": {
-							"application/json": {
-								"schema": { "$ref": "#/components/schemas/GroupMovieResponseDto" }
-							}
-						}
 					},
-					"403": { "description": "Forbidden - Not a group moderator" },
-					"409": { "description": "Movie already added to this group" }
-				},
-				"security": [{ "access-token": [] }],
-				"summary": "Add provider movie to group (Group moderators only)",
-				"tags": ["Groups / Movies"]
-			}
-		},
-		"/api/v1/groups/{groupId}/movies/custom": {
-			"post": {
-				"operationId": "GroupMoviesController_createCustomMovie_v1",
-				"parameters": [
 					{
-						"name": "groupId",
+						"name": "groupMovieId",
 						"required": true,
 						"in": "path",
-						"description": "Group ID",
+						"description": "Group Movie ID",
 						"schema": { "type": "number" }
 					}
 				],
 				"requestBody": {
 					"required": true,
 					"content": {
-						"application/json": {
-							"schema": { "$ref": "#/components/schemas/CreateCustomMovieDto" }
-						}
+						"application/json": { "schema": { "$ref": "#/components/schemas/CreateReviewDto" } }
 					}
 				},
 				"responses": {
 					"201": {
-						"description": "Custom movie created",
+						"description": "Review created",
 						"content": {
-							"application/json": {
-								"schema": { "$ref": "#/components/schemas/GroupMovieResponseDto" }
-							}
+							"application/json": { "schema": { "$ref": "#/components/schemas/ReviewResponseDto" } }
 						}
 					},
-					"400": { "description": "Invalid status/date combination" },
-					"403": { "description": "Forbidden - Not a group moderator" }
+					"400": { "description": "Invalid rating or text" },
+					"403": { "description": "Forbidden - Not a group member" },
+					"409": { "description": "You have already reviewed this movie or movie not watched" }
 				},
 				"security": [{ "access-token": [] }],
-				"summary": "Create custom movie in group (Group moderators only)",
-				"tags": ["Groups / Movies"]
+				"summary": "Create a review for a group movie (Group members only)",
+				"tags": ["Groups / Movie Reviews"]
 			}
 		},
-		"/api/v1/groups/{groupId}/movies/{id}": {
+		"/api/v1/groups/{groupId}/movies/{groupMovieId}/reviews/my": {
 			"get": {
-				"operationId": "GroupMoviesController_findOne_v1",
+				"operationId": "GroupMovieReviewsController_findMyReview_v1",
 				"parameters": [
 					{
 						"name": "groupId",
@@ -1254,7 +1432,7 @@
 						"schema": { "type": "number" }
 					},
 					{
-						"name": "id",
+						"name": "groupMovieId",
 						"required": true,
 						"in": "path",
 						"description": "Group Movie ID",
@@ -1263,22 +1441,22 @@
 				],
 				"responses": {
 					"200": {
-						"description": "Group movie found",
+						"description": "Current user review",
 						"content": {
-							"application/json": {
-								"schema": { "$ref": "#/components/schemas/GroupMovieResponseDto" }
-							}
+							"application/json": { "schema": { "$ref": "#/components/schemas/ReviewResponseDto" } }
 						}
 					},
 					"403": { "description": "Forbidden - Not a group member" },
-					"404": { "description": "Movie not found in group" }
+					"404": { "description": "Review not found" }
 				},
 				"security": [{ "access-token": [] }],
-				"summary": "Get movie details in group (Group members only)",
-				"tags": ["Groups / Movies"]
-			},
+				"summary": "Get current user review for a group movie (Group members only)",
+				"tags": ["Groups / Movie Reviews"]
+			}
+		},
+		"/api/v1/groups/{groupId}/movies/{groupMovieId}/reviews/{id}": {
 			"patch": {
-				"operationId": "GroupMoviesController_update_v1",
+				"operationId": "GroupMovieReviewsController_update_v1",
 				"parameters": [
 					{
 						"name": "groupId",
@@ -1288,38 +1466,44 @@
 						"schema": { "type": "number" }
 					},
 					{
-						"name": "id",
+						"name": "groupMovieId",
 						"required": true,
 						"in": "path",
 						"description": "Group Movie ID",
+						"schema": { "type": "number" }
+					},
+					{
+						"name": "id",
+						"required": true,
+						"in": "path",
+						"description": "Review ID",
 						"schema": { "type": "number" }
 					}
 				],
 				"requestBody": {
 					"required": true,
 					"content": {
-						"application/json": { "schema": { "$ref": "#/components/schemas/GroupMovieUpdateDto" } }
+						"application/json": { "schema": { "$ref": "#/components/schemas/UpdateReviewDto" } }
 					}
 				},
 				"responses": {
 					"200": {
-						"description": "Movie updated",
+						"description": "Review updated",
 						"content": {
-							"application/json": {
-								"schema": { "$ref": "#/components/schemas/GroupMovieResponseDto" }
-							}
+							"application/json": { "schema": { "$ref": "#/components/schemas/ReviewResponseDto" } }
 						}
 					},
-					"400": { "description": "Invalid status/date combination" },
-					"403": { "description": "Forbidden - Not a group moderator" },
-					"404": { "description": "Movie not found in group" }
+					"400": { "description": "Invalid request body" },
+					"403": { "description": "Forbidden" },
+					"404": { "description": "Review not found" },
+					"409": { "description": "Movie not watched" }
 				},
 				"security": [{ "access-token": [] }],
-				"summary": "Update movie in group (Group moderators only)",
-				"tags": ["Groups / Movies"]
+				"summary": "Update a review (Author or global admin only)",
+				"tags": ["Groups / Movie Reviews"]
 			},
 			"delete": {
-				"operationId": "GroupMoviesController_remove_v1",
+				"operationId": "GroupMovieReviewsController_delete_v1",
 				"parameters": [
 					{
 						"name": "groupId",
@@ -1329,21 +1513,28 @@
 						"schema": { "type": "number" }
 					},
 					{
-						"name": "id",
+						"name": "groupMovieId",
 						"required": true,
 						"in": "path",
 						"description": "Group Movie ID",
 						"schema": { "type": "number" }
+					},
+					{
+						"name": "id",
+						"required": true,
+						"in": "path",
+						"description": "Review ID",
+						"schema": { "type": "number" }
 					}
 				],
 				"responses": {
-					"204": { "description": "Movie removed from group" },
-					"403": { "description": "Forbidden - Not a group moderator" },
-					"404": { "description": "Movie not found in group" }
+					"204": { "description": "Review deleted" },
+					"403": { "description": "Forbidden" },
+					"404": { "description": "Review not found" }
 				},
 				"security": [{ "access-token": [] }],
-				"summary": "Remove movie from group (Group moderators only)",
-				"tags": ["Groups / Movies"]
+				"summary": "Delete a review (Author or global admin only)",
+				"tags": ["Groups / Movie Reviews"]
 			}
 		}
 	},
@@ -1658,6 +1849,45 @@
 				"properties": { "groupId": { "type": "number" } },
 				"required": ["groupId"]
 			},
+			"AddMovieDto": {
+				"type": "object",
+				"properties": {
+					"imdbId": {
+						"type": "string",
+						"description": "IMDb ID (universal, takes priority)",
+						"example": "tt0133093"
+					},
+					"externalId": {
+						"type": "string",
+						"description": "Provider external ID",
+						"example": "301"
+					}
+				}
+			},
+			"ReviewResponseDto": {
+				"type": "object",
+				"properties": {
+					"id": { "type": "number" },
+					"groupMovieId": { "type": "number" },
+					"userId": { "type": "number" },
+					"userName": { "type": "string", "nullable": true },
+					"rating": { "type": "string" },
+					"text": { "type": "string", "nullable": true },
+					"createdAt": { "format": "date-time", "type": "string" },
+					"updatedAt": { "format": "date-time", "type": "string" },
+					"isOwn": { "type": "boolean" }
+				},
+				"required": [
+					"id",
+					"groupMovieId",
+					"userId",
+					"userName",
+					"rating",
+					"text",
+					"createdAt",
+					"updatedAt"
+				]
+			},
 			"GroupMovieResponseDto": {
 				"type": "object",
 				"properties": {
@@ -1676,7 +1906,13 @@
 					"watchDate": { "format": "date-time", "type": "string", "nullable": true },
 					"createdAt": { "format": "date-time", "type": "string" },
 					"updatedAt": { "format": "date-time", "type": "string" },
-					"currentUserRole": { "type": "string", "enum": ["admin", "moderator", "member"] }
+					"currentUserRole": { "type": "string", "enum": ["admin", "moderator", "member"] },
+					"reviews": {
+						"type": "array",
+						"items": { "$ref": "#/components/schemas/ReviewResponseDto" }
+					},
+					"averageRating": { "type": "number", "nullable": true },
+					"reviewCount": { "type": "number" }
 				},
 				"required": [
 					"id",
@@ -1695,32 +1931,6 @@
 					"createdAt",
 					"updatedAt"
 				]
-			},
-			"SearchInGroupResponseDto": {
-				"type": "object",
-				"properties": {
-					"provider": { "$ref": "#/components/schemas/ProviderSearchResult" },
-					"currentGroup": {
-						"type": "array",
-						"items": { "$ref": "#/components/schemas/GroupMovieResponseDto" }
-					}
-				},
-				"required": ["provider", "currentGroup"]
-			},
-			"AddMovieDto": {
-				"type": "object",
-				"properties": {
-					"imdbId": {
-						"type": "string",
-						"description": "IMDb ID (universal, takes priority)",
-						"example": "tt0133093"
-					},
-					"externalId": {
-						"type": "string",
-						"description": "Provider external ID",
-						"example": "301"
-					}
-				}
 			},
 			"CreateCustomMovieDto": {
 				"type": "object",
@@ -1764,6 +1974,54 @@
 					"overview": { "type": "string", "description": "Movie overview" },
 					"releaseYear": { "type": "number", "description": "Release year" },
 					"runtime": { "type": "number", "description": "Runtime in minutes" }
+				}
+			},
+			"SearchInGroupResponseDto": {
+				"type": "object",
+				"properties": {
+					"provider": { "$ref": "#/components/schemas/ProviderSearchResult" },
+					"currentGroup": {
+						"type": "array",
+						"items": { "$ref": "#/components/schemas/GroupMovieResponseDto" }
+					}
+				},
+				"required": ["provider", "currentGroup"]
+			},
+			"ReviewListResponseDto": {
+				"type": "object",
+				"properties": {
+					"items": {
+						"type": "array",
+						"items": { "$ref": "#/components/schemas/ReviewResponseDto" }
+					},
+					"averageRating": { "type": "number", "nullable": true },
+					"totalCount": { "type": "number" }
+				},
+				"required": ["items", "averageRating", "totalCount"]
+			},
+			"CreateReviewDto": {
+				"type": "object",
+				"properties": {
+					"rating": {
+						"type": "number",
+						"description": "Rating 0.5–5.0, step 0.5",
+						"minimum": 0.5,
+						"maximum": 5
+					},
+					"text": { "type": "string", "description": "Review text", "maxLength": 2000 }
+				},
+				"required": ["rating"]
+			},
+			"UpdateReviewDto": {
+				"type": "object",
+				"properties": {
+					"rating": {
+						"type": "number",
+						"description": "Rating 0.5–5.0, step 0.5",
+						"minimum": 0.5,
+						"maximum": 5
+					},
+					"text": { "type": "string", "description": "Review text", "maxLength": 2000 }
 				}
 			}
 		}

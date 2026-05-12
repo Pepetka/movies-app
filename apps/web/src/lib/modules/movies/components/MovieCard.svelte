@@ -1,12 +1,11 @@
 <script lang="ts">
-	import { Calendar } from '@lucide/svelte';
+	import { Calendar, Star } from '@lucide/svelte';
 	import { Card, Image } from '@repo/ui';
 
 	import { formatDate } from '$lib/utils';
 
 	import MovieStatusBadge from './MovieStatusBadge.svelte';
 	import type { IProps } from './MovieCard.types';
-	import MovieRating from './MovieRating.svelte';
 
 	let { movie, onclick, ...restProps }: IProps = $props();
 
@@ -30,8 +29,11 @@
 				{#if yearDisplay}
 					<span class="movie-card__year">{yearDisplay}</span>
 				{/if}
-				{#if movie.rating}
-					<MovieRating rating={movie.rating} size={12} />
+				{#if movie.averageRating != null}
+					<span class="movie-card__rating">
+						<Star size={10} fill="var(--rating-gold)" color="var(--rating-gold)" />
+						{movie.averageRating.toFixed(1)}
+					</span>
 				{/if}
 			</div>
 			{#if dateDisplay}
@@ -99,5 +101,14 @@
 		gap: var(--space-1);
 		font-size: var(--text-xs);
 		color: var(--text-tertiary);
+	}
+
+	.movie-card__rating {
+		display: flex;
+		align-items: center;
+		gap: var(--space-1);
+		font-size: var(--text-xs);
+		color: var(--rating-gold);
+		font-weight: var(--font-semibold);
 	}
 </style>
