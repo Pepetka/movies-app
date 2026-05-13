@@ -31,7 +31,7 @@ const createMockServices = () => ({
     findById: jest.fn(),
   },
   groupMovieReviewsService: {
-    findByGroupMovie: jest.fn(),
+    findByGroupMovieUnsafe: jest.fn(),
     getAverageRating: jest.fn(),
     getStatsByGroupMovieIds: jest.fn(),
   },
@@ -178,7 +178,7 @@ describe('GroupMovieDetailsService', () => {
         updatedAt: new Date(),
       };
       mocks.groupMoviesService.findById.mockResolvedValue(mockGroupMovie);
-      mocks.groupMovieReviewsService.findByGroupMovie.mockResolvedValue([
+      mocks.groupMovieReviewsService.findByGroupMovieUnsafe.mockResolvedValue([
         review,
       ]);
       mocks.groupMovieReviewsService.getAverageRating.mockResolvedValue(4.5);
@@ -206,14 +206,14 @@ describe('GroupMovieDetailsService', () => {
         updatedAt: new Date(),
       };
       mocks.groupMoviesService.findById.mockResolvedValue(mockGroupMovie);
-      mocks.groupMovieReviewsService.findByGroupMovie.mockResolvedValue([
+      mocks.groupMovieReviewsService.findByGroupMovieUnsafe.mockResolvedValue([
         review,
       ]);
       mocks.groupMovieReviewsService.getAverageRating.mockResolvedValue(4.5);
 
       const result = await service.findOne(1, 1, GroupMemberRole.MEMBER, 1);
 
-      expect(result.reviews[0].isOwn).toBe(false);
+      expect(result.reviews?.[0].isOwn).toBe(false);
     });
   });
 });

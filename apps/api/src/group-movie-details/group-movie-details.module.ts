@@ -11,6 +11,5 @@ import { GroupMovieDetailsService } from './group-movie-details.service';
   imports: [GroupMoviesModule, GroupMovieReviewsModule, GroupsModule],
   controllers: [GroupMovieDetailsController],
   providers: [GroupMovieDetailsService],
-  exports: [GroupMovieDetailsService],
 })
 export class GroupMovieDetailsModule {}

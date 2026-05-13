@@ -1,14 +1,20 @@
 import { Injectable } from '@nestjs/common';
 
-import { GroupMovieReviewsService } from '$src/group-movie-reviews/group-movie-reviews.service';
-import { ProviderSearchResult } from '$src/movies/providers/interfaces/provider-result.dto';
 import {
   FindAllGroupMoviesDto,
   MovieSearchGroupDto,
+  GroupMovieResponseDto,
 } from '$src/group-movies/dto';
+import { GroupMovieReviewsService } from '$src/group-movie-reviews/group-movie-reviews.service';
+import { ProviderSearchResult } from '$src/movies/providers/interfaces/provider-result.dto';
 import { GroupMoviesService } from '$src/group-movies/group-movies.service';
 import { GroupMemberRole } from '$common/enums';
 import { GroupMovie } from '$db/schemas';
+
+export type EnrichedGroupMovie = GroupMovie & {
+  averageRating?: number | null;
+  reviewCount?: number;
+};
 
 @Injectable()
 export class GroupMovieDetailsService {
@@ -20,9 +26,7 @@ export class GroupMovieDetailsService {
   async findAll(
     groupId: number,
     options?: FindAllGroupMoviesDto,
-  ): Promise<
-    (GroupMovie & { averageRating?: number | null; reviewCount?: number })[]
-  > {
+  ): Promise<EnrichedGroupMovie[]> {
     const movies = await this.groupMoviesService.findByGroup(groupId, options);
     return this._enrichWithReviewStats(movies);
   }
@@ -32,10 +36,7 @@ export class GroupMovieDetailsService {
     dto: MovieSearchGroupDto,
   ): Promise<{
     provider: ProviderSearchResult;
-    currentGroup: (GroupMovie & {
-      averageRating?: number | null;
-      reviewCount?: number;
-    })[];
+    currentGroup: EnrichedGroupMovie[];
   }> {
     const result = await this.groupMoviesService.searchInGroup(groupId, dto);
     return {
@@ -49,11 +50,11 @@ export class GroupMovieDetailsService {
     id: number,
     currentUserRole: GroupMemberRole,
     userId: number,
-  ) {
+  ): Promise<GroupMovieResponseDto> {
     const groupMovie = await this.groupMoviesService.findById(groupId, id);
 
     const [reviews, averageRating] = await Promise.all([
-      this.groupMovieReviewsService.findByGroupMovie(groupId, id, true),
+      this.groupMovieReviewsService.findByGroupMovieUnsafe(id),
       this.groupMovieReviewsService.getAverageRating(id),
     ]);
 
@@ -63,14 +64,12 @@ export class GroupMovieDetailsService {
       reviews: reviews.map((r) => ({ ...r, isOwn: r.userId === userId })),
       averageRating,
       reviewCount: reviews.length,
-    };
+    } as GroupMovieResponseDto;
   }
 
   private async _enrichWithReviewStats(
     movies: GroupMovie[],
-  ): Promise<
-    (GroupMovie & { averageRating?: number | null; reviewCount?: number })[]
-  > {
+  ): Promise<EnrichedGroupMovie[]> {
     if (movies.length === 0) return [];
 
     const ids = movies.map((m) => m.id);
