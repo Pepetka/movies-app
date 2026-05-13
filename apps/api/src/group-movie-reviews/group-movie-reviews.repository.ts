@@ -1,5 +1,9 @@
+import {
+  Inject,
+  Injectable,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { eq, and, desc, sql, getTableColumns, inArray } from 'drizzle-orm';
-import { Inject, Injectable } from '@nestjs/common';
 
 import {
   groupMovieReviews,
@@ -25,7 +29,7 @@ export class GroupMovieReviewsRepository {
       .returning();
 
     if (!inserted) {
-      throw new Error('Review not found after create');
+      throw new InternalServerErrorException('Review not found after create');
     }
 
     const [result] = await this.db
@@ -112,7 +116,7 @@ export class GroupMovieReviewsRepository {
       .returning();
 
     if (!updated) {
-      throw new Error('Review not found after update');
+      throw new InternalServerErrorException('Review not found after update');
     }
 
     const [result] = await this.db
@@ -126,7 +130,7 @@ export class GroupMovieReviewsRepository {
       .limit(1);
 
     if (!result) {
-      throw new Error('Review not found after update');
+      throw new InternalServerErrorException('Review not found after update');
     }
     return result;
   }

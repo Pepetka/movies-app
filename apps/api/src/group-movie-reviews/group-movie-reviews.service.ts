@@ -1,15 +1,14 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 
 import {
   ReviewNotFoundException,
   ReviewAlreadyExistsException,
-  NotReviewAuthorException,
   MovieNotWatchedException,
 } from '$common/exceptions';
 import { GroupMoviesService } from '$src/group-movies/group-movies.service';
-import { GroupMovieReview, NewGroupMovieReview } from '$db/schemas';
-import { UserRole, GroupMovieStatus } from '$common/enums';
+import { GroupMovie, NewGroupMovieReview } from '$db/schemas';
 import { isUniqueViolation } from '$common/utils';
+import { GroupMovieStatus } from '$common/enums';
 
 import {
   GroupMovieReviewsRepository,
@@ -29,11 +28,8 @@ export class GroupMovieReviewsService {
   async findByGroupMovie(
     groupId: number,
     groupMovieId: number,
-    skipVerification = false,
   ): Promise<GroupMovieReviewWithUser[]> {
-    if (!skipVerification) {
-      await this._verifyGroupMovieOrThrow(groupId, groupMovieId);
-    }
+    await this._verifyGroupMovieOrThrow(groupId, groupMovieId);
     return this.groupMovieReviewsRepository.findByGroupMovie(groupMovieId);
   }
 
@@ -41,11 +37,8 @@ export class GroupMovieReviewsService {
     groupId: number,
     groupMovieId: number,
     userId: number,
-    skipVerification = false,
   ): Promise<GroupMovieReviewWithUser | null> {
-    if (!skipVerification) {
-      await this._verifyGroupMovieOrThrow(groupId, groupMovieId);
-    }
+    await this._verifyGroupMovieOrThrow(groupId, groupMovieId);
     return this.groupMovieReviewsRepository.findByUserAndGroupMovie(
       userId,
       groupMovieId,
@@ -115,7 +108,6 @@ export class GroupMovieReviewsService {
     groupId: number,
     groupMovieId: number,
     userId: number,
-    userRole: UserRole,
     dto: UpdateReviewDto,
   ): Promise<GroupMovieReviewWithUser> {
     const groupMovie = await this._verifyGroupMovieOrThrow(
@@ -132,8 +124,6 @@ export class GroupMovieReviewsService {
     if (!review || review.groupMovieId !== groupMovieId) {
       throw new ReviewNotFoundException();
     }
-
-    this._ensureOwnership(review, userId, userRole);
 
     const updateData: Partial<NewGroupMovieReview> = {};
 
@@ -158,7 +148,6 @@ export class GroupMovieReviewsService {
     groupId: number,
     groupMovieId: number,
     userId: number,
-    userRole: UserRole,
   ): Promise<void> {
     await this._verifyGroupMovieOrThrow(groupId, groupMovieId);
 
@@ -167,8 +156,6 @@ export class GroupMovieReviewsService {
     if (!review || review.groupMovieId !== groupMovieId) {
       throw new ReviewNotFoundException();
     }
-
-    this._ensureOwnership(review, userId, userRole);
 
     await this.groupMovieReviewsRepository.delete(id);
 
@@ -205,27 +192,26 @@ export class GroupMovieReviewsService {
     };
   }
 
+  async findByGroupMovieUnsafe(
+    groupMovieId: number,
+  ): Promise<GroupMovieReviewWithUser[]> {
+    return this.groupMovieReviewsRepository.findByGroupMovie(groupMovieId);
+  }
+
+  async findMyReviewUnsafe(
+    userId: number,
+    groupMovieId: number,
+  ): Promise<GroupMovieReviewWithUser | null> {
+    return this.groupMovieReviewsRepository.findByUserAndGroupMovie(
+      userId,
+      groupMovieId,
+    );
+  }
+
   private async _verifyGroupMovieOrThrow(
     groupId: number,
     groupMovieId: number,
-  ): Promise<{ status: string }> {
-    const groupMovie = await this.groupMoviesService.findById(
-      groupId,
-      groupMovieId,
-    );
-    if (!groupMovie) {
-      throw new NotFoundException('Group movie not found');
-    }
-    return groupMovie;
-  }
-
-  private _ensureOwnership(
-    review: GroupMovieReview,
-    userId: number,
-    userRole: UserRole,
-  ): void {
-    if (review.userId !== userId && userRole !== UserRole.ADMIN) {
-      throw new NotReviewAuthorException();
-    }
+  ): Promise<GroupMovie> {
+    return this.groupMoviesService.findById(groupId, groupMovieId);
   }
 }

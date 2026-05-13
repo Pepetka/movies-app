@@ -3,11 +3,9 @@ import { Test, TestingModule } from '@nestjs/testing';
 import {
   ReviewNotFoundException,
   ReviewAlreadyExistsException,
-  NotReviewAuthorException,
   MovieNotWatchedException,
 } from '$common/exceptions';
 import { GroupMoviesService } from '$src/group-movies/group-movies.service';
-import { UserRole } from '$common/enums';
 
 import { GroupMovieReviewsRepository } from './group-movie-reviews.repository';
 import { GroupMovieReviewsService } from './group-movie-reviews.service';
@@ -28,7 +26,7 @@ const createMockRepositories = () => ({
     findByGroupMovie: jest.fn(),
     findByUserAndGroupMovie: jest.fn(),
     findOne: jest.fn(),
-    findOneWithUser: jest.fn(),
+
     create: jest.fn(),
     update: jest.fn(),
     delete: jest.fn(),
@@ -182,7 +180,7 @@ describe('GroupMovieReviewsService', () => {
         text: 'Updated text',
       });
 
-      const result = await service.update(1, 1, 1, 1, UserRole.USER, {
+      const result = await service.update(1, 1, 1, 1, {
         rating: 5.0,
         text: 'Updated text',
       });
@@ -204,9 +202,9 @@ describe('GroupMovieReviewsService', () => {
       });
       mocks.groupMovieReviewsRepository.findOne.mockResolvedValue(null);
 
-      await expect(
-        service.update(1, 1, 1, 1, UserRole.USER, { rating: 5.0 }),
-      ).rejects.toThrow(ReviewNotFoundException);
+      await expect(service.update(1, 1, 1, 1, { rating: 5.0 })).rejects.toThrow(
+        ReviewNotFoundException,
+      );
     });
 
     it('should throw MovieNotWatchedException if movie is not watched', async () => {
@@ -214,9 +212,9 @@ describe('GroupMovieReviewsService', () => {
         status: 'planned',
       });
 
-      await expect(
-        service.update(1, 1, 1, 1, UserRole.USER, { rating: 5.0 }),
-      ).rejects.toThrow(MovieNotWatchedException);
+      await expect(service.update(1, 1, 1, 1, { rating: 5.0 })).rejects.toThrow(
+        MovieNotWatchedException,
+      );
     });
 
     it('should throw ReviewNotFoundException if review belongs to another group movie', async () => {
@@ -228,44 +226,9 @@ describe('GroupMovieReviewsService', () => {
         groupMovieId: 999,
       });
 
-      await expect(
-        service.update(1, 1, 1, 1, UserRole.USER, { rating: 5.0 }),
-      ).rejects.toThrow(ReviewNotFoundException);
-    });
-
-    it('should throw NotReviewAuthorException for non-owner non-admin', async () => {
-      mocks.groupMoviesService.findById.mockResolvedValue({
-        status: 'watched',
-      });
-      mocks.groupMovieReviewsRepository.findOne.mockResolvedValue({
-        ...mockReview,
-        userId: 2,
-      });
-
-      await expect(
-        service.update(1, 1, 1, 1, UserRole.USER, { rating: 5.0 }),
-      ).rejects.toThrow(NotReviewAuthorException);
-    });
-
-    it('should allow admin to update any review', async () => {
-      mocks.groupMoviesService.findById.mockResolvedValue({
-        status: 'watched',
-      });
-      mocks.groupMovieReviewsRepository.findOne.mockResolvedValue({
-        ...mockReview,
-        userId: 2,
-      });
-      mocks.groupMovieReviewsRepository.update.mockResolvedValue({
-        ...mockReview,
-        userId: 2,
-        rating: '5.0',
-      });
-
-      const result = await service.update(1, 1, 1, 1, UserRole.ADMIN, {
-        rating: 5.0,
-      });
-
-      expect(result.rating).toBe('5.0');
+      await expect(service.update(1, 1, 1, 1, { rating: 5.0 })).rejects.toThrow(
+        ReviewNotFoundException,
+      );
     });
   });
 
@@ -277,7 +240,7 @@ describe('GroupMovieReviewsService', () => {
       mocks.groupMovieReviewsRepository.findOne.mockResolvedValue(mockReview);
       mocks.groupMovieReviewsRepository.delete.mockResolvedValue(undefined);
 
-      await service.delete(1, 1, 1, 1, UserRole.USER);
+      await service.delete(1, 1, 1, 1);
 
       expect(mocks.groupMovieReviewsRepository.delete).toHaveBeenCalledWith(1);
     });
@@ -288,7 +251,7 @@ describe('GroupMovieReviewsService', () => {
       });
       mocks.groupMovieReviewsRepository.findOne.mockResolvedValue(null);
 
-      await expect(service.delete(1, 1, 1, 1, UserRole.USER)).rejects.toThrow(
+      await expect(service.delete(1, 1, 1, 1)).rejects.toThrow(
         ReviewNotFoundException,
       );
     });
@@ -302,38 +265,9 @@ describe('GroupMovieReviewsService', () => {
         groupMovieId: 999,
       });
 
-      await expect(service.delete(1, 1, 1, 1, UserRole.USER)).rejects.toThrow(
+      await expect(service.delete(1, 1, 1, 1)).rejects.toThrow(
         ReviewNotFoundException,
       );
-    });
-
-    it('should throw NotReviewAuthorException for non-owner non-admin', async () => {
-      mocks.groupMoviesService.findById.mockResolvedValue({
-        status: 'watched',
-      });
-      mocks.groupMovieReviewsRepository.findOne.mockResolvedValue({
-        ...mockReview,
-        userId: 2,
-      });
-
-      await expect(service.delete(1, 1, 1, 1, UserRole.USER)).rejects.toThrow(
-        NotReviewAuthorException,
-      );
-    });
-
-    it('should allow admin to delete any review', async () => {
-      mocks.groupMoviesService.findById.mockResolvedValue({
-        status: 'watched',
-      });
-      mocks.groupMovieReviewsRepository.findOne.mockResolvedValue({
-        ...mockReview,
-        userId: 2,
-      });
-      mocks.groupMovieReviewsRepository.delete.mockResolvedValue(undefined);
-
-      await service.delete(1, 1, 1, 1, UserRole.ADMIN);
-
-      expect(mocks.groupMovieReviewsRepository.delete).toHaveBeenCalledWith(1);
     });
   });
 

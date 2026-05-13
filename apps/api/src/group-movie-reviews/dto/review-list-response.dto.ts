@@ -10,6 +10,7 @@ export class ReviewListResponseDto {
   items: ReviewResponseDto[];
 
   @Expose()
+  @Type(() => Number)
   @ApiProperty({ type: Number, nullable: true })
   averageRating: number | null;
 

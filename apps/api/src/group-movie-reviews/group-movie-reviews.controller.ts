@@ -22,7 +22,6 @@ import {
 
 import { GroupMemberGuard } from '$src/groups/guards';
 import { User } from '$common/decorators';
-import { UserRole } from '$common/enums';
 
 import {
   CreateReviewDto,
@@ -31,6 +30,7 @@ import {
   ReviewListResponseDto,
 } from './dto';
 import { GroupMovieReviewsService } from './group-movie-reviews.service';
+import { ReviewAuthorGuard } from './guards';
 
 @ApiTags('Groups / Movie Reviews')
 @ApiBearerAuth('access-token')
@@ -90,6 +90,7 @@ export class GroupMovieReviewsController {
 
   @Post()
   @UseGuards(GroupMemberGuard)
+  @HttpCode(HttpStatus.CREATED)
   @SerializeOptions({ type: ReviewResponseDto })
   @ApiOperation({
     summary: 'Create a review for a group movie (Group members only)',
@@ -122,7 +123,7 @@ export class GroupMovieReviewsController {
   }
 
   @Patch(':id')
-  @UseGuards(GroupMemberGuard)
+  @UseGuards(GroupMemberGuard, ReviewAuthorGuard)
   @SerializeOptions({ type: ReviewResponseDto })
   @ApiOperation({
     summary: 'Update a review (Author or global admin only)',
@@ -148,20 +149,18 @@ export class GroupMovieReviewsController {
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: UpdateReviewDto,
     @User('id') userId: number,
-    @User('role') userRole: UserRole,
   ): Promise<ReviewResponseDto> {
     return this.groupMovieReviewsService.update(
       id,
       groupId,
       groupMovieId,
       userId,
-      userRole,
       dto,
     );
   }
 
   @Delete(':id')
-  @UseGuards(GroupMemberGuard)
+  @UseGuards(GroupMemberGuard, ReviewAuthorGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({
     summary: 'Delete a review (Author or global admin only)',
@@ -177,14 +176,12 @@ export class GroupMovieReviewsController {
     @Param('groupMovieId', ParseIntPipe) groupMovieId: number,
     @Param('id', ParseIntPipe) id: number,
     @User('id') userId: number,
-    @User('role') userRole: UserRole,
   ): Promise<void> {
     return this.groupMovieReviewsService.delete(
       id,
       groupId,
       groupMovieId,
       userId,
-      userRole,
     );
   }
 }
