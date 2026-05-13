@@ -28,12 +28,11 @@
 
 	const currentYear = new Date().getFullYear();
 	const maxYear = currentYear + MOVIE_SEARCH_YEAR_FILTER.futureOffset;
-	const yearOptions = Array.from(
-		{ length: maxYear - (MOVIE_SEARCH_YEAR_FILTER.minYear - 1) },
-		(_, i) => {
+	const yearOptions = $derived(
+		Array.from({ length: maxYear - (MOVIE_SEARCH_YEAR_FILTER.minYear - 1) }, (_, i) => {
 			const year = String(maxYear - i);
 			return { value: year, label: year };
-		}
+		})
 	);
 
 	const yearFilter = $derived<{ yearFrom?: number; yearTo?: number }>(
