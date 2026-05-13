@@ -10,8 +10,8 @@
 	interface Props {
 		review: ReviewResponseDto;
 		isOwn: boolean;
-		onEdit: () => void;
-		onDelete: () => void;
+		onEdit?: () => void;
+		onDelete?: () => void;
 	}
 
 	let { review, isOwn, onEdit, onDelete }: Props = $props();
@@ -33,6 +33,7 @@
 					class="review-card__icon-btn"
 					onclick={onEdit}
 					aria-label="Редактировать отзыв"
+					disabled={!onEdit}
 				>
 					<Pencil size={14} />
 				</button>
@@ -41,6 +42,7 @@
 					class="review-card__icon-btn"
 					onclick={onDelete}
 					aria-label="Удалить отзыв"
+					disabled={!onDelete}
 				>
 					<Trash2 size={14} />
 				</button>
@@ -49,7 +51,7 @@
 	</div>
 
 	<div class="review-card__rating">
-		<StarRatingInput value={Number(review.rating)} size={20} disabled />
+		<StarRatingInput value={review.rating} size={20} disabled />
 	</div>
 
 	{#if review.text}

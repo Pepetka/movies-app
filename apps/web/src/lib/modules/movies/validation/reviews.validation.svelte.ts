@@ -21,7 +21,7 @@ export type ReviewFormData = z.infer<typeof reviewFormSchema>;
 export interface ReviewFormProps {
 	mode?: 'create' | 'edit';
 	isSubmitting?: boolean;
-	onSubmit?: (data: ReviewFormData) => void | Promise<void>;
+	onSubmit?: () => void | Promise<void>;
 	onCancel?: () => void;
 	form?: ReviewFormData;
 }
@@ -35,12 +35,12 @@ export const validateReviewForm = createValidator(reviewFormSchema);
 
 export const reviewFormToCreateDto = (form: ReviewFormData): CreateReviewDto => ({
 	rating: form.rating,
-	text: form.text || undefined
+	text: form.text
 });
 
 export const reviewFormToUpdateDto = (form: ReviewFormData): UpdateReviewDto => ({
 	rating: form.rating,
-	text: form.text || undefined
+	text: form.text
 });
 
 export const reviewFormFromEntity = (review: ReviewResponseDto): ReviewFormData => ({

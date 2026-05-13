@@ -14,35 +14,30 @@
 		onCancel
 	}: ReviewFormProps = $props();
 
-	const validator = validateReviewForm;
-	const fieldValidator = createFormFieldValidator(validator);
-
-	let ratingError = $state('');
+	const fieldValidator = createFormFieldValidator(validateReviewForm);
 
 	const handleSubmit = async () => {
 		if (isSubmitting) return;
 
-		const result = validator(form);
+		const result = validateReviewForm(form);
 
 		if (!result.isValid) {
 			fieldValidator.setErrors(result.errors);
-			ratingError = result.errors.rating ?? '';
 			return;
 		}
 
-		ratingError = '';
-		await onSubmit?.(form);
+		fieldValidator.reset();
+		await onSubmit?.();
 	};
 
 	const handleRatingChange = (value: number) => {
 		form = { ...form, rating: value };
-		ratingError = '';
+		fieldValidator.reset();
 	};
 
 	$effect(() => {
 		return () => {
 			fieldValidator.reset();
-			ratingError = '';
 		};
 	});
 </script>
@@ -55,7 +50,7 @@
 	}}
 >
 	<div class="review-form__rating">
-		<label class="review-form__label" for="rating-input">Ваша оценка</label>
+		<span id="rating-label" class="review-form__label">Ваша оценка</span>
 		<StarRatingInput
 			id="rating-input"
 			value={form.rating}
@@ -63,8 +58,8 @@
 			disabled={isSubmitting}
 			onChange={handleRatingChange}
 		/>
-		{#if ratingError}
-			<span class="review-form__error">{ratingError}</span>
+		{#if fieldValidator.errors.rating}
+			<span class="review-form__error">{fieldValidator.errors.rating}</span>
 		{/if}
 	</div>
 

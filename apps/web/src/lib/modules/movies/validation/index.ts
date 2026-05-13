@@ -28,4 +28,4 @@ export {
 	reviewFormFromEntity,
 	type ReviewFormData,
 	type ReviewFormProps
-} from './review.validation.svelte';
+} from './reviews.validation.svelte';

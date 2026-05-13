@@ -31,28 +31,36 @@
 	let showDeleteSheet = $state(false);
 	let editForm = $state<ReviewFormData>({ ...EMPTY_REVIEW_FORM });
 
-	const otherReviews = $derived.by(() => {
-		return reviews.filter((r) => r.id !== myReview?.id);
-	});
-
 	const hasMyReview = $derived(myReview !== null);
+	const otherReviews = $derived(reviews.filter((r) => r.id !== myReview?.id));
 
-	const handleCreate = async (form: ReviewFormData) => {
-		await groupMovieReviewsStore.createReview(groupId, movieId, reviewFormToCreateDto(form));
+	const showCreateForm = $derived(status === 'watched' && !hasMyReview);
+	const showEditForm = $derived(status === 'watched' && hasMyReview && isEditing);
+	const showMyReviewCard = $derived(status === 'watched' && hasMyReview && !isEditing);
+	const showMyReviewWhenNotWatched = $derived(status !== 'watched' && myReview !== null);
+	const showEmptyState = $derived(
+		status === 'watched' && !hasMyReview && otherReviews.length === 0
+	);
+
+	const handleCreate = async () => {
+		groupMovieReviewsStore.reset();
+		await groupMovieReviewsStore.createReview(groupId, movieId, reviewFormToCreateDto(editForm));
 		if (groupMovieReviewsStore.isCreateSuccess) {
 			toast.success('Отзыв отправлен');
+			editForm = { ...EMPTY_REVIEW_FORM };
 		} else {
 			toast.error(groupMovieReviewsStore.createError ?? 'Ошибка отправки отзыва');
 		}
 	};
 
-	const handleUpdate = async (form: ReviewFormData) => {
+	const handleUpdate = async () => {
 		if (!myReview) return;
+		groupMovieReviewsStore.reset();
 		await groupMovieReviewsStore.updateReview(
 			groupId,
 			movieId,
 			myReview.id,
-			reviewFormToUpdateDto(form)
+			reviewFormToUpdateDto(editForm)
 		);
 		if (groupMovieReviewsStore.isUpdateSuccess) {
 			toast.success('Отзыв обновлён');
@@ -93,10 +101,6 @@
 		isEditing = false;
 		editForm = { ...EMPTY_REVIEW_FORM };
 	};
-
-	$effect(() => {
-		return () => groupMovieReviewsStore.reset();
-	});
 </script>
 
 <div class="review-list">
@@ -109,35 +113,38 @@
 			{/each}
 		</div>
 	{:else}
-		{#if status === 'watched'}
-			{#if !hasMyReview}
-				<ReviewForm
-					mode="create"
-					onSubmit={handleCreate}
-					isSubmitting={groupMovieReviewsStore.isCreating}
-				/>
-			{:else if isEditing}
-				<ReviewForm
-					form={editForm}
-					mode="edit"
-					onSubmit={handleUpdate}
-					onCancel={cancelEdit}
-					isSubmitting={groupMovieReviewsStore.isUpdating}
-				/>
-			{:else if myReview}
+		{#if showCreateForm}
+			<ReviewForm
+				bind:form={editForm}
+				mode="create"
+				onSubmit={handleCreate}
+				isSubmitting={groupMovieReviewsStore.isCreating}
+			/>
+		{:else if showEditForm}
+			<ReviewForm
+				bind:form={editForm}
+				mode="edit"
+				onSubmit={handleUpdate}
+				onCancel={cancelEdit}
+				isSubmitting={groupMovieReviewsStore.isUpdating}
+			/>
+		{:else if showMyReviewCard}
+			{#if myReview}
 				<ReviewCard review={myReview} isOwn={true} onEdit={startEdit} onDelete={openDeleteSheet} />
 			{/if}
-		{:else if myReview}
-			<ReviewCard review={myReview} isOwn={true} onEdit={startEdit} onDelete={openDeleteSheet} />
+		{:else if showMyReviewWhenNotWatched}
+			{#if myReview}
+				<ReviewCard review={myReview} isOwn={true} onEdit={startEdit} onDelete={openDeleteSheet} />
+			{/if}
 		{/if}
 
 		{#if otherReviews.length > 0}
 			<div class="review-list__others">
 				{#each otherReviews as review (review.id)}
-					<ReviewCard {review} isOwn={false} onEdit={() => {}} onDelete={() => {}} />
+					<ReviewCard {review} isOwn={false} />
 				{/each}
 			</div>
-		{:else if status === 'watched' && !hasMyReview}
+		{:else if showEmptyState}
 			<div class="review-list__empty">
 				<MessageSquare size={32} />
 				<p>Пока нет отзывов. Будьте первым!</p>
@@ -151,7 +158,7 @@
 		<h2>Удалить отзыв?</h2>
 	{/snippet}
 
-	<p class="delete-text">Отзыв будет удалён безвозвратно.</p>
+	<p class="review-list__delete-text">Отзыв будет удалён безвозвратно.</p>
 
 	{#snippet footer()}
 		<Button
@@ -202,7 +209,7 @@
 		text-align: center;
 	}
 
-	.delete-text {
+	.review-list__delete-text {
 		margin: 0;
 		color: var(--text-secondary);
 		line-height: var(--leading-relaxed);

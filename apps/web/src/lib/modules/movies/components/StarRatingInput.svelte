@@ -9,7 +9,7 @@
 
 	let { id, value = 0, size = 32, disabled = false, onChange }: Props = $props();
 
-	let starsRef = $state.raw<HTMLDivElement | null>(null);
+	let starsRef = $state<HTMLDivElement | null>(null);
 	let hoverValue = $state(0);
 	let isDragging = $state(false);
 
@@ -121,14 +121,16 @@
 	role="slider"
 	aria-valuemin={0.5}
 	aria-valuemax={5}
-	aria-valuenow={value > 0 ? value : undefined}
+	aria-valuenow={value}
+	aria-valuetext={value > 0 ? `${value.toFixed(1)} из 5` : 'Оценка не выставлена'}
 	aria-disabled={disabled}
 	aria-label="Оценка фильма"
+	aria-labelledby={id ? `${id}-label` : undefined}
 	tabindex={disabled ? -1 : 0}
 	onkeydown={handleKeyDown}
 >
 	<div
-		class="stars-track"
+		class="star-rating-input__track"
 		role="none"
 		bind:this={starsRef}
 		onpointerdown={handlePointerDown}
@@ -138,9 +140,9 @@
 		onpointercancel={handlePointerCancel}
 	>
 		{#each Array(STAR_COUNT) as _, starIndex (starIndex)}
-			<div class="star-wrapper" style="--star-size: {size}px;">
+			<div class="star-rating-input__wrapper" style="--star-size: {size}px;">
 				<!-- Background star (empty) -->
-				<svg viewBox="0 0 24 24" fill="none" class="star-bg" aria-hidden="true">
+				<svg viewBox="0 0 24 24" fill="none" class="star-rating-input__bg" aria-hidden="true">
 					<path
 						d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
 						stroke="currentColor"
@@ -153,7 +155,7 @@
 					<svg
 						viewBox="0 0 24 24"
 						fill="currentColor"
-						class="star-value"
+						class="star-rating-input__star-value"
 						aria-hidden="true"
 						style="clip-path: {getValueFill(starIndex) === 0.5 ? 'inset(0 50% 0 0)' : 'none'};"
 					>
@@ -168,7 +170,7 @@
 					<svg
 						viewBox="0 0 24 24"
 						fill="currentColor"
-						class="star-fill"
+						class="star-rating-input__fill"
 						aria-hidden="true"
 						style="clip-path: {getStarFill(starIndex) === 0.5 ? 'inset(0 50% 0 0)' : 'none'};"
 					>
@@ -182,7 +184,7 @@
 	</div>
 
 	{#if displayValue > 0}
-		<span class="star-rating-input__value" aria-hidden="true">{displayValue.toFixed(1)}/5</span>
+		<span class="star-rating-input__text" aria-hidden="true">{displayValue.toFixed(1)}/5</span>
 	{/if}
 </div>
 
@@ -192,23 +194,31 @@
 		align-items: center;
 		user-select: none;
 		-webkit-user-select: none;
+		cursor: pointer;
 	}
 
 	.star-rating-input.disabled {
 		pointer-events: none;
+		cursor: default;
 	}
 
 	.star-rating-input.dragging {
 		cursor: grabbing;
 	}
 
-	.stars-track {
+	.star-rating-input:focus-visible {
+		outline: 2px solid var(--color-primary);
+		outline-offset: 2px;
+		border-radius: var(--radius-sm);
+	}
+
+	.star-rating-input__track {
 		display: inline-flex;
 		align-items: center;
 		touch-action: none;
 	}
 
-	.star-wrapper {
+	.star-rating-input__wrapper {
 		position: relative;
 		flex-shrink: 0;
 		width: var(--star-size);
@@ -216,9 +226,9 @@
 		padding: 0 calc(var(--space-1) / 2);
 	}
 
-	.star-bg,
-	.star-value,
-	.star-fill {
+	.star-rating-input__bg,
+	.star-rating-input__star-value,
+	.star-rating-input__fill {
 		position: absolute;
 		left: 50%;
 		top: 50%;
@@ -227,22 +237,22 @@
 		height: var(--star-size);
 	}
 
-	.star-bg {
+	.star-rating-input__bg {
 		color: var(--text-tertiary);
 	}
 
-	.star-value {
+	.star-rating-input__star-value {
 		color: var(--rating-gold, #f59e0b);
 		opacity: 0.3;
 		transition: clip-path 0.15s ease;
 	}
 
-	.star-fill {
+	.star-rating-input__fill {
 		color: var(--rating-gold, #f59e0b);
 		transition: clip-path 0.15s ease;
 	}
 
-	.star-rating-input__value {
+	.star-rating-input__text {
 		margin-left: var(--space-2);
 		font-size: var(--text-sm);
 		font-weight: var(--font-semibold);
