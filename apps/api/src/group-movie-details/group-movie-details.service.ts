@@ -11,6 +11,12 @@ import { GroupMoviesService } from '$src/group-movies/group-movies.service';
 import { GroupMemberRole } from '$common/enums';
 import { GroupMovie } from '$db/schemas';
 
+const calculateAverageRating = (ratings: number[]): number | null => {
+  if (ratings.length === 0) return null;
+  const avg = ratings.reduce((sum, r) => sum + r, 0) / ratings.length;
+  return Number(avg.toFixed(2));
+};
+
 export type EnrichedGroupMovie = GroupMovie & {
   averageRating?: number | null;
   reviewCount?: number;
@@ -53,12 +59,13 @@ export class GroupMovieDetailsService {
   ): Promise<GroupMovieResponseDto> {
     const groupMovie = await this.groupMoviesService.findById(groupId, id);
 
-    const [reviews, averageRating] = await Promise.all([
-      this.groupMovieReviewsService.findByGroupMovieUnsafe(id),
-      this.groupMovieReviewsService.getAverageRating(id),
-    ]);
+    const reviews =
+      await this.groupMovieReviewsService.findByGroupMovieUnsafe(id);
+    const averageRating = calculateAverageRating(
+      reviews.map((r) => Number(r.rating)),
+    );
 
-    return {
+    return Object.assign(new GroupMovieResponseDto(), {
       ...groupMovie,
       currentUserRole,
       reviews: reviews.map((r) => ({
@@ -68,7 +75,7 @@ export class GroupMovieDetailsService {
       })),
       averageRating,
       reviewCount: reviews.length,
-    } as GroupMovieResponseDto;
+    });
   }
 
   private async _enrichWithReviewStats(
