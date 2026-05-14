@@ -1380,6 +1380,7 @@
 					},
 					"400": { "description": "Invalid rating or text" },
 					"403": { "description": "Forbidden - Not a group member" },
+					"404": { "description": "Movie not found in group" },
 					"409": { "description": "Review already exists" },
 					"422": { "description": "Movie not watched" }
 				},
