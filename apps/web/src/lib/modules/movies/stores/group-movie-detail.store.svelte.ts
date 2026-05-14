@@ -14,6 +14,8 @@ interface MovieParams {
 
 class GroupMovieDetailStore extends BaseStore {
 	private readonly _query: QueryResult<GroupMovieResponseDto, MovieParams>;
+	private _cachedMovie: UnifiedMovie | null = null;
+	private _cachedRawMovie: GroupMovieResponseDto | null = null;
 
 	constructor() {
 		super();
@@ -29,7 +31,11 @@ class GroupMovieDetailStore extends BaseStore {
 	}
 
 	get movie(): UnifiedMovie | null {
-		return this._query.data ? mapToUnified(this._query.data) : null;
+		const raw = this._query.data;
+		if (raw === this._cachedRawMovie) return this._cachedMovie;
+		this._cachedRawMovie = raw ?? null;
+		this._cachedMovie = raw ? mapToUnified(raw) : null;
+		return this._cachedMovie;
 	}
 
 	get rawMovie(): GroupMovieResponseDto | null {
@@ -96,6 +102,10 @@ class GroupMovieDetailStore extends BaseStore {
 			if (this._query.isCurrentKey(key) && (this.isLoaded || this.isFetching)) return;
 			await this._query.revalidate(key, { groupId, movieId });
 		});
+	}
+
+	abort(): void {
+		this._query.abort();
 	}
 
 	reset(): void {
