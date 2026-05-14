@@ -40,8 +40,10 @@
 		(status === 'watched' && hasMyReview && !isEditing) || (status !== 'watched' && hasMyReview)
 	);
 	const showEmptyState = $derived(
-		status === 'watched' && !hasMyReview && otherReviews.length === 0
+		status === 'watched' && !hasMyReview && otherReviews.length === 0 && !showCreateForm
 	);
+
+	const SKELETON_ITEMS = [0, 1, 2];
 
 	const handleCreate = async () => {
 		await groupMovieReviewsStore.createReview(groupId, movieId, reviewFormToCreateDto(editForm));
@@ -100,12 +102,18 @@
 		isEditing = false;
 		editForm = { ...EMPTY_REVIEW_FORM };
 	};
+
+	$effect(() => {
+		return () => {
+			groupMovieReviewsStore.reset();
+		};
+	});
 </script>
 
 <div class="review-list">
 	{#if isLoading}
 		<div class="review-list__skeletons">
-			{#each Array(3) as _, i (i)}
+			{#each SKELETON_ITEMS as i (i)}
 				<div class="review-list__skeleton">
 					<Skeleton height={80} />
 				</div>
@@ -128,9 +136,7 @@
 				isSubmitting={groupMovieReviewsStore.isUpdating}
 			/>
 		{:else if showMyReview}
-			{#if myReview}
-				<ReviewCard review={myReview} isOwn={true} onEdit={startEdit} onDelete={openDeleteSheet} />
-			{/if}
+			<ReviewCard review={myReview!} isOwn={true} onEdit={startEdit} onDelete={openDeleteSheet} />
 		{/if}
 
 		{#if otherReviews.length > 0}

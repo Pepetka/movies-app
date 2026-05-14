@@ -30,7 +30,7 @@ class GroupMovieReviewsStore extends BaseStore {
 			ReviewParams & { data: CreateReviewDto }
 		>({
 			key: ['group-movie-reviews', 'create'],
-			tags: ['group-movie-reviews'],
+			tags: ['group-movies'],
 			mutator: ({ groupId, movieId, data }) => createReview(groupId, movieId, data),
 			invalidateKeys: (_, { groupId, movieId }) => [
 				['group-movie', groupId, movieId],
@@ -44,7 +44,7 @@ class GroupMovieReviewsStore extends BaseStore {
 			ReviewParams & { reviewId: number; data: UpdateReviewDto }
 		>({
 			key: ['group-movie-reviews', 'update'],
-			tags: ['group-movie-reviews'],
+			tags: ['group-movies'],
 			mutator: ({ groupId, movieId, reviewId, data }) =>
 				updateReview(groupId, movieId, reviewId, data),
 			invalidateKeys: (_, { groupId, movieId }) => [
@@ -56,7 +56,7 @@ class GroupMovieReviewsStore extends BaseStore {
 
 		this._deleteMutation = createMutation<void, ReviewParams & { reviewId: number }>({
 			key: ['group-movie-reviews', 'delete'],
-			tags: ['group-movie-reviews'],
+			tags: ['group-movies'],
 			mutator: ({ groupId, movieId, reviewId }) => deleteReview(groupId, movieId, reviewId),
 			invalidateKeys: (_, { groupId, movieId }) => [
 				['group-movie', groupId, movieId],
@@ -150,10 +150,6 @@ class GroupMovieReviewsStore extends BaseStore {
 		this._createMutation.reset();
 		this._updateMutation.reset();
 		this._deleteMutation.reset();
-	}
-
-	resetForm(): void {
-		this.reset();
 	}
 }
 
