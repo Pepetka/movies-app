@@ -1,3 +1,4 @@
+import { plainToInstance } from 'class-transformer';
 import { Injectable } from '@nestjs/common';
 
 import {
@@ -58,13 +59,13 @@ export class GroupMovieDetailsService {
       this.groupMovieReviewsService.getAverageRating(id),
     ]);
 
-    return {
+    return plainToInstance(GroupMovieResponseDto, {
       ...groupMovie,
       currentUserRole,
       reviews: reviews.map((r) => ({ ...r, isOwn: r.userId === userId })),
       averageRating,
       reviewCount: reviews.length,
-    } as GroupMovieResponseDto;
+    });
   }
 
   private async _enrichWithReviewStats(

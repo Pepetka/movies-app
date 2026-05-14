@@ -5,8 +5,11 @@ import {
   Injectable,
 } from '@nestjs/common';
 
+import {
+  NotReviewAuthorException,
+  ReviewNotFoundException,
+} from '$common/exceptions';
 import type { UserRequest } from '$src/auth/types/user-request.type';
-import { NotReviewAuthorException } from '$common/exceptions';
 import { UserRole } from '$common/enums';
 
 import { GroupMovieReviewsRepository } from '../group-movie-reviews.repository';
@@ -40,8 +43,14 @@ export class ReviewAuthorGuard implements CanActivate {
     const review = await this.groupMovieReviewsRepository.findOne(reviewId);
 
     if (!review) {
-      throw new ForbiddenException('Review not found');
+      throw new ReviewNotFoundException();
     }
+
+    if (review.groupMovieId !== Number(params.groupMovieId)) {
+      throw new ReviewNotFoundException();
+    }
+
+    request.review = review;
 
     if (review.userId !== userId && userRole !== UserRole.ADMIN) {
       throw new NotReviewAuthorException();

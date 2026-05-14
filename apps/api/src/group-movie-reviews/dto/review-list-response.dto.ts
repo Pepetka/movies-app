@@ -15,6 +15,7 @@ export class ReviewListResponseDto {
   averageRating: number | null;
 
   @Expose()
+  @Type(() => Number)
   @ApiProperty()
   totalCount: number;
 }

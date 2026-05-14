@@ -2,10 +2,8 @@ import { Expose, Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
 
 import { ProviderSearchResult } from '$src/movies/providers/interfaces/provider-result.dto';
-// Cross-module DTO import: group-movies depends on group-movie-reviews for review embedding.
-// This is intentional as GroupMovieResponseDto embeds review data.
-import { ReviewResponseDto } from '$src/group-movie-reviews/dto/review-response.dto';
 import { GroupMemberRole, GroupMovieStatus } from '$common/enums';
+import { ReviewResponseDto } from '$src/group-movie-reviews/dto';
 
 export const MovieSource = {
   PROVIDER: 'provider',
@@ -100,5 +98,6 @@ export class SearchInGroupResponseDto {
 
   @Expose()
   @ApiProperty({ type: [GroupMovieResponseDto] })
+  @Type(() => GroupMovieResponseDto)
   currentGroup: GroupMovieResponseDto[];
 }
