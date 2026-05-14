@@ -17,7 +17,7 @@
 		onChange
 	}: Props = $props();
 
-	let starsRef = $state<HTMLDivElement | null>(null);
+	let starsRef = $state.raw<HTMLDivElement | null>(null);
 	let hoverValue = $state(0);
 	let isDragging = $state(false);
 

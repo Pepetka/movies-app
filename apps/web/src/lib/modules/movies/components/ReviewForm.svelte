@@ -33,7 +33,7 @@
 
 	const handleRatingChange = (value: number) => {
 		form = { ...form, rating: value };
-		fieldValidator.reset();
+		fieldValidator.handleFieldChange(form, 'rating');
 	};
 
 	$effect(() => {

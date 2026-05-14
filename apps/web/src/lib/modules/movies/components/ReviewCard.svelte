@@ -28,24 +28,26 @@
 		<div class="review-card__meta">
 			<span class="review-card__date">{formatDate(review.createdAt, 'short')}</span>
 			{#if isOwn}
-				<button
-					type="button"
-					class="review-card__icon-btn"
-					onclick={onEdit}
-					aria-label="Редактировать отзыв"
-					disabled={!onEdit}
-				>
-					<Pencil size={14} />
-				</button>
-				<button
-					type="button"
-					class="review-card__icon-btn"
-					onclick={onDelete}
-					aria-label="Удалить отзыв"
-					disabled={!onDelete}
-				>
-					<Trash2 size={14} />
-				</button>
+				{#if onEdit}
+					<button
+						type="button"
+						class="review-card__icon-btn"
+						onclick={onEdit}
+						aria-label="Редактировать отзыв"
+					>
+						<Pencil size={14} />
+					</button>
+				{/if}
+				{#if onDelete}
+					<button
+						type="button"
+						class="review-card__icon-btn"
+						onclick={onDelete}
+						aria-label="Удалить отзыв"
+					>
+						<Trash2 size={14} />
+					</button>
+				{/if}
 			{/if}
 		</div>
 	</div>
