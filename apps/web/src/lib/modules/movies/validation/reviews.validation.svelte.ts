@@ -7,7 +7,7 @@ export const reviewFormSchema = z.object({
 	rating: z
 		.number()
 		.refine(
-			(val) => val >= 0.5 && val <= 5.0 && (val * 10) % 5 === 0,
+			(val) => val === 0 || (val >= 0.5 && val <= 5.0 && (val * 10) % 5 === 0),
 			'Оценка от 0.5 до 5.0 с шагом 0.5'
 		),
 	text: z.preprocess(

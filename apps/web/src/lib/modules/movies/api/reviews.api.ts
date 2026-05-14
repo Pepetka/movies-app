@@ -8,24 +8,27 @@ import type { CreateReviewDto, ReviewResponseDto, UpdateReviewDto } from '$lib/a
 export const createReview = async (
 	groupId: number,
 	movieId: number,
-	data: CreateReviewDto
+	data: CreateReviewDto,
+	signal?: AbortSignal
 ): Promise<ReviewResponseDto> => {
-	return groupMovieReviewsControllerCreateV1(groupId, movieId, data);
+	return groupMovieReviewsControllerCreateV1(groupId, movieId, data, { signal });
 };
 
 export const updateReview = async (
 	groupId: number,
 	movieId: number,
 	reviewId: number,
-	data: UpdateReviewDto
+	data: UpdateReviewDto,
+	signal?: AbortSignal
 ): Promise<ReviewResponseDto> => {
-	return groupMovieReviewsControllerUpdateV1(groupId, movieId, reviewId, data);
+	return groupMovieReviewsControllerUpdateV1(groupId, movieId, reviewId, data, { signal });
 };
 
 export const deleteReview = async (
 	groupId: number,
 	movieId: number,
-	reviewId: number
+	reviewId: number,
+	signal?: AbortSignal
 ): Promise<void> => {
-	return groupMovieReviewsControllerDeleteV1(groupId, movieId, reviewId);
+	return groupMovieReviewsControllerDeleteV1(groupId, movieId, reviewId, { signal });
 };

@@ -1413,7 +1413,8 @@
 					},
 					"400": { "description": "Invalid rating or text" },
 					"403": { "description": "Forbidden - Not a group member" },
-					"409": { "description": "You have already reviewed this movie or movie not watched" }
+					"409": { "description": "Review already exists" },
+					"422": { "description": "Movie not watched" }
 				},
 				"security": [{ "access-token": [] }],
 				"summary": "Create a review for a group movie (Group members only)",
@@ -1496,7 +1497,7 @@
 					"400": { "description": "Invalid request body" },
 					"403": { "description": "Forbidden" },
 					"404": { "description": "Review not found" },
-					"409": { "description": "Movie not watched" }
+					"422": { "description": "Movie not watched" }
 				},
 				"security": [{ "access-token": [] }],
 				"summary": "Update a review (Author or global admin only)",

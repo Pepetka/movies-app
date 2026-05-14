@@ -16,8 +16,14 @@
 
 	const fieldValidator = createFormFieldValidator(validateReviewForm);
 
-	const handleSubmit = async () => {
+	const handleSubmit = async (e: SubmitEvent) => {
+		e.preventDefault();
 		if (isSubmitting) return;
+
+		if (form.rating === 0) {
+			fieldValidator.setErrors({ rating: 'Выберите оценку' });
+			return;
+		}
 
 		const result = validateReviewForm(form);
 
@@ -45,12 +51,11 @@
 <form
 	class="review-form"
 	onsubmit={(e) => {
-		e.preventDefault();
-		void handleSubmit();
+		void handleSubmit(e);
 	}}
 >
 	<div class="review-form__rating">
-		<span id="rating-label" class="review-form__label">Ваша оценка</span>
+		<span id="rating-input-label" class="review-form__label">Ваша оценка</span>
 		<StarRatingInput
 			id="rating-input"
 			value={form.rating}

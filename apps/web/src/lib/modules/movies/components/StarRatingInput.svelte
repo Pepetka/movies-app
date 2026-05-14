@@ -119,7 +119,7 @@
 	class:disabled
 	class:dragging={isDragging}
 	role="slider"
-	aria-valuemin={0.5}
+	aria-valuemin={0}
 	aria-valuemax={5}
 	aria-valuenow={value}
 	aria-valuetext={value > 0 ? `${value.toFixed(1)} из 5` : 'Оценка не выставлена'}
@@ -151,34 +151,32 @@
 				</svg>
 
 				<!-- Value star (persisted rating, dimmed) -->
-				{#if getValueFill(starIndex) > 0}
-					<svg
-						viewBox="0 0 24 24"
-						fill="currentColor"
-						class="star-rating-input__star-value"
-						aria-hidden="true"
-						style="clip-path: {getValueFill(starIndex) === 0.5 ? 'inset(0 50% 0 0)' : 'none'};"
-					>
-						<path
-							d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
-						/>
-					</svg>
-				{/if}
+				<svg
+					viewBox="0 0 24 24"
+					fill="currentColor"
+					class="star-rating-input__star-value"
+					class:hidden={getValueFill(starIndex) === 0}
+					aria-hidden="true"
+					style="clip-path: {getValueFill(starIndex) === 0.5 ? 'inset(0 50% 0 0)' : 'none'};"
+				>
+					<path
+						d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
+					/>
+				</svg>
 
 				<!-- Filled star (hover / active) -->
-				{#if getStarFill(starIndex) > 0}
-					<svg
-						viewBox="0 0 24 24"
-						fill="currentColor"
-						class="star-rating-input__fill"
-						aria-hidden="true"
-						style="clip-path: {getStarFill(starIndex) === 0.5 ? 'inset(0 50% 0 0)' : 'none'};"
-					>
-						<path
-							d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
-						/>
-					</svg>
-				{/if}
+				<svg
+					viewBox="0 0 24 24"
+					fill="currentColor"
+					class="star-rating-input__fill"
+					class:hidden={getStarFill(starIndex) === 0}
+					aria-hidden="true"
+					style="clip-path: {getStarFill(starIndex) === 0.5 ? 'inset(0 50% 0 0)' : 'none'};"
+				>
+					<path
+						d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
+					/>
+				</svg>
 			</div>
 		{/each}
 	</div>
@@ -250,6 +248,10 @@
 	.star-rating-input__fill {
 		color: var(--rating-gold, #f59e0b);
 		transition: clip-path 0.15s ease;
+	}
+
+	.hidden {
+		opacity: 0;
 	}
 
 	.star-rating-input__text {
