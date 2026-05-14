@@ -13,7 +13,7 @@
 	import { Search } from '@lucide/svelte';
 
 	import { MOVIE_SEARCH_YEAR_FILTER } from '$lib/modules/movies/config/movies-search.config';
-	import { moviesSearchStore, groupMovieStore, MovieRating } from '$lib/modules/movies';
+	import { moviesSearchStore, groupMovieStore } from '$lib/modules/movies';
 	import type { ProviderMovieSummary } from '$lib/api/generated/types';
 	import { groupStore } from '$lib/modules/groups';
 	import { goBack, ROUTES } from '$lib/utils';
@@ -28,12 +28,11 @@
 
 	const currentYear = new Date().getFullYear();
 	const maxYear = currentYear + MOVIE_SEARCH_YEAR_FILTER.futureOffset;
-	const yearOptions = Array.from(
-		{ length: maxYear - (MOVIE_SEARCH_YEAR_FILTER.minYear - 1) },
-		(_, i) => {
+	const yearOptions = $derived(
+		Array.from({ length: maxYear - (MOVIE_SEARCH_YEAR_FILTER.minYear - 1) }, (_, i) => {
 			const year = String(maxYear - i);
 			return { value: year, label: year };
-		}
+		})
 	);
 
 	const yearFilter = $derived<{ yearFrom?: number; yearTo?: number }>(
@@ -86,6 +85,7 @@
 	};
 
 	const handleMovieClick = async (movie: ProviderMovieSummary) => {
+		if (groupMovieStore.isAdding) return;
 		const imdbId = typeof movie.imdbId === 'string' ? movie.imdbId : undefined;
 		await groupMovieStore.addMovie(groupId, {
 			imdbId,
@@ -161,11 +161,7 @@
 								objectFit="cover"
 							/>
 						{/snippet}
-						{#snippet trailing()}
-							{#if movie.rating}
-								<MovieRating rating={movie.rating} size={12} />
-							{/if}
-						{/snippet}
+						{#snippet trailing()}{/snippet}
 					</ListItem>
 				{/each}
 			</List>

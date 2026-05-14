@@ -3,7 +3,7 @@ import { NotFoundException } from '@nestjs/common';
 
 import { ProviderSearchResult } from '$src/movies/providers/interfaces/provider-result.dto';
 import { MovieAlreadyInGroupException } from '$common/exceptions';
-import { GroupMemberRole, GroupMovieStatus } from '$common/enums';
+import { GroupMovieStatus } from '$common/enums';
 
 import { GroupMoviesRepository } from './group-movies.repository';
 import { GroupMoviesService } from './group-movies.service';
@@ -292,7 +292,7 @@ describe('GroupMoviesService', () => {
 
       const result = await service.findByGroup(1);
 
-      expect(result).toEqual(mockGroupMovies);
+      expect(result).toEqual([mockGroupMovie]);
       expect(mocks.groupMoviesRepository.findByGroup).toHaveBeenCalledWith(
         1,
         undefined,
@@ -383,36 +383,6 @@ describe('GroupMoviesService', () => {
 
       expect(mocks.moviesService.search).toHaveBeenCalledTimes(1);
       expect(mocks.groupMoviesRepository.findByGroup).toHaveBeenCalledTimes(1);
-    });
-  });
-
-  describe('findOne', () => {
-    it('should return group movie with user role', async () => {
-      mocks.groupMoviesRepository.findOne.mockResolvedValue(mockGroupMovie);
-
-      const result = await service.findOne(1, 100, GroupMemberRole.ADMIN);
-
-      expect(result).toEqual({
-        ...mockGroupMovie,
-        currentUserRole: GroupMemberRole.ADMIN,
-      });
-      expect(mocks.groupMoviesRepository.findOne).toHaveBeenCalledWith(1, 100);
-    });
-
-    it('should return default role for non-member', async () => {
-      mocks.groupMoviesRepository.findOne.mockResolvedValue(mockGroupMovie);
-
-      const result = await service.findOne(1, 100, GroupMemberRole.MEMBER);
-
-      expect(result.currentUserRole).toBe(GroupMemberRole.MEMBER);
-    });
-
-    it('should throw NotFoundException if not found', async () => {
-      mocks.groupMoviesRepository.findOne.mockResolvedValue(null);
-
-      await expect(
-        service.findOne(1, 999, GroupMemberRole.MEMBER),
-      ).rejects.toThrow(NotFoundException);
     });
   });
 

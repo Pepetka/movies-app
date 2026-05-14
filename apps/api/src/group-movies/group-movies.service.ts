@@ -4,7 +4,7 @@ import { ProviderSearchResult } from '$src/movies/providers/interfaces/provider-
 import { MovieAlreadyInGroupException } from '$common/exceptions';
 import { MoviesService } from '$src/movies/movies.service';
 import { GroupMovie, NewGroupMovie } from '$db/schemas';
-import { GroupMemberRole } from '$common/enums';
+import { GroupMovieStatus } from '$common/enums';
 
 import {
   AddMovieDto,
@@ -47,7 +47,7 @@ export class GroupMoviesService {
       runtime: movie.runtime,
       rating: movie.rating,
       addedBy,
-      status: 'tracking',
+      status: GroupMovieStatus.TRACKING,
     });
 
     this._logger.log(
@@ -72,7 +72,7 @@ export class GroupMoviesService {
       runtime: dto.runtime ?? null,
       rating: null,
       addedBy: createdById,
-      status: dto.status ?? 'tracking',
+      status: dto.status ?? GroupMovieStatus.TRACKING,
       watchDate: dto.watchDate ? new Date(dto.watchDate) : null,
     });
 
@@ -104,28 +104,18 @@ export class GroupMoviesService {
   async searchInGroup(
     groupId: number,
     dto: MovieSearchGroupDto,
-  ): Promise<{ provider: ProviderSearchResult; currentGroup: GroupMovie[] }> {
-    const [providerResults, groupMovies] = await Promise.all([
+  ): Promise<{
+    provider: ProviderSearchResult;
+    currentGroup: GroupMovie[];
+  }> {
+    const [providerResults, movies] = await Promise.all([
       this.moviesService.search(dto),
       this.groupMoviesRepository.findByGroup(groupId, { query: dto.query }),
     ]);
 
     return {
       provider: providerResults,
-      currentGroup: groupMovies,
-    };
-  }
-
-  async findOne(
-    groupId: number,
-    id: number,
-    currentUserRole: GroupMemberRole,
-  ): Promise<GroupMovie & { currentUserRole: GroupMemberRole }> {
-    const groupMovie = await this._findOneOrThrow(groupId, id);
-
-    return {
-      ...groupMovie,
-      currentUserRole,
+      currentGroup: movies,
     };
   }
 

@@ -1,7 +1,7 @@
 import { untrack } from 'svelte';
 
+import type { GroupMovieResponseDto, ReviewResponseDto } from '$lib/api/generated/types';
 import { createQuery, type FetchStatus, type QueryResult } from '$lib/query';
-import type { GroupMovieResponseDto } from '$lib/api/generated/types';
 import { BaseStore } from '$lib/stores/base.svelte';
 
 import { mapToUnified, type UnifiedMovie } from '../types';
@@ -17,7 +17,6 @@ class GroupMovieDetailStore extends BaseStore {
 
 	constructor() {
 		super();
-
 		this._query = createQuery<GroupMovieResponseDto, MovieParams>({
 			key: ['group-movie'],
 			tags: ['group-movie'],
@@ -30,7 +29,8 @@ class GroupMovieDetailStore extends BaseStore {
 	}
 
 	get movie(): UnifiedMovie | null {
-		return this._query.data ? mapToUnified(this._query.data) : null;
+		const raw = this._query.data;
+		return raw ? mapToUnified(raw) : null;
 	}
 
 	get rawMovie(): GroupMovieResponseDto | null {
@@ -48,6 +48,22 @@ class GroupMovieDetailStore extends BaseStore {
 
 	get isAdmin(): boolean {
 		return this.currentUserRole === 'admin';
+	}
+
+	get reviews(): ReviewResponseDto[] {
+		return this._query.data?.reviews ?? [];
+	}
+
+	get myReview(): ReviewResponseDto | null {
+		return this._query.data?.reviews?.find((r) => r.isOwn) ?? null;
+	}
+
+	get averageRating(): number | null {
+		return this._query.data?.averageRating ?? null;
+	}
+
+	get reviewCount(): number {
+		return this._query.data?.reviewCount ?? 0;
 	}
 
 	get status(): FetchStatus {
@@ -81,6 +97,10 @@ class GroupMovieDetailStore extends BaseStore {
 			if (this._query.isCurrentKey(key) && (this.isLoaded || this.isFetching)) return;
 			await this._query.revalidate(key, { groupId, movieId });
 		});
+	}
+
+	abort(): void {
+		this._query.abort();
 	}
 
 	reset(): void {

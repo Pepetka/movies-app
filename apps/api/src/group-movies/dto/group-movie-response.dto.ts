@@ -1,8 +1,9 @@
+import { Expose, Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
-import { Expose } from 'class-transformer';
 
 import { ProviderSearchResult } from '$src/movies/providers/interfaces/provider-result.dto';
 import { GroupMemberRole, GroupMovieStatus } from '$common/enums';
+import { ReviewResponseDto } from '$src/group-movie-reviews/dto';
 
 export const MovieSource = {
   PROVIDER: 'provider',
@@ -75,6 +76,21 @@ export class GroupMovieResponseDto {
   @Expose()
   @ApiProperty({ enum: GroupMemberRole, required: false })
   currentUserRole?: GroupMemberRole;
+
+  @Expose()
+  @ApiProperty({ type: [ReviewResponseDto], required: false })
+  @Type(() => ReviewResponseDto)
+  reviews?: ReviewResponseDto[];
+
+  @Expose()
+  @Type(() => Number)
+  @ApiProperty({ type: Number, nullable: true, required: false })
+  averageRating?: number | null;
+
+  @Expose()
+  @Type(() => Number)
+  @ApiProperty({ type: Number, required: false })
+  reviewCount?: number;
 }
 
 export class SearchInGroupResponseDto {
@@ -84,5 +100,6 @@ export class SearchInGroupResponseDto {
 
   @Expose()
   @ApiProperty({ type: [GroupMovieResponseDto] })
+  @Type(() => GroupMovieResponseDto)
   currentGroup: GroupMovieResponseDto[];
 }

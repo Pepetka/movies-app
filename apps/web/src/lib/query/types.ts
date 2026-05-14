@@ -30,6 +30,7 @@ export interface QueryResult<T, K = never> extends QueryState<T> {
 	refetch: (newParams?: K | null) => Promise<void>;
 	reset: () => void;
 	destroy: () => void;
+	abort: () => void;
 	revalidate: (newKey: unknown[], newParams?: K | null) => Promise<void>;
 	status: FetchStatus;
 	isCurrentKey: (key: unknown[]) => boolean;

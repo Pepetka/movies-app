@@ -115,6 +115,10 @@ class Query<T, K = never> implements QueryResult<T, K> {
 		this._state.isFetching = false;
 	}
 
+	abort(): void {
+		this._controller?.abort();
+	}
+
 	destroy(): void {
 		this._controller?.abort();
 		this.reset();
