@@ -9,7 +9,6 @@ import {
   NotReviewAuthorException,
   ReviewNotFoundException,
 } from '$common/exceptions';
-import { GroupMoviesService } from '$src/group-movies/group-movies.service';
 import type { UserRequest } from '$src/auth/types/user-request.type';
 import { UserRole } from '$common/enums';
 
@@ -19,7 +18,6 @@ import { GroupMovieReviewsRepository } from '../group-movie-reviews.repository';
 export class ReviewAuthorGuard implements CanActivate {
   constructor(
     private readonly groupMovieReviewsRepository: GroupMovieReviewsRepository,
-    private readonly groupMoviesService: GroupMoviesService,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -49,15 +47,6 @@ export class ReviewAuthorGuard implements CanActivate {
     }
 
     if (review.groupMovieId !== Number(params.groupMovieId)) {
-      throw new ReviewNotFoundException();
-    }
-
-    try {
-      await this.groupMoviesService.findById(
-        Number(params.groupId),
-        review.groupMovieId,
-      );
-    } catch {
       throw new ReviewNotFoundException();
     }
 
