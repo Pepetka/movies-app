@@ -1,5 +1,13 @@
 # web
 
+## 0.21.0
+
+### Minor Changes
+
+- 5cc4ca9: Added review UI components and integrated reviews into movie pages
+  • Added review components (card, list, star rating, form) with validation and stores
+  • Integrated reviews into movie detail and search pages
+
 ## 0.20.0
 
 ### Minor Changes
