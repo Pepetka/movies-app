@@ -1,5 +1,9 @@
+import {
+  Inject,
+  Injectable,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { eq, and, desc, sql, getTableColumns, inArray } from 'drizzle-orm';
-import { Inject, Injectable } from '@nestjs/common';
 
 import {
   groupMovieReviews,
@@ -35,7 +39,12 @@ export class GroupMovieReviewsRepository {
         .where(eq(groupMovieReviews.id, inserted.id))
         .limit(1);
 
-      return result!;
+      if (!result) {
+        throw new InternalServerErrorException(
+          'Failed to fetch review after mutation',
+        );
+      }
+      return result;
     });
   }
 
@@ -117,7 +126,12 @@ export class GroupMovieReviewsRepository {
         .where(eq(groupMovieReviews.id, updated.id))
         .limit(1);
 
-      return result!;
+      if (!result) {
+        throw new InternalServerErrorException(
+          'Failed to fetch review after mutation',
+        );
+      }
+      return result;
     });
   }
 
@@ -158,7 +172,10 @@ export class GroupMovieReviewsRepository {
     >();
     for (const r of results) {
       map.set(r.groupMovieId, {
-        averageRating: r.average == null ? null : Number(r.average) || null,
+        averageRating:
+          r.average == null
+            ? null
+            : Number(Number(r.average).toFixed(2)) || null,
         count: Number(r.count),
       });
     }

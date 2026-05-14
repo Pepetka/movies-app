@@ -23,14 +23,12 @@ const mockReview = {
 
 const createMockRepositories = () => ({
   groupMovieReviewsRepository: {
-    findByGroupMovie: jest.fn(),
     findByUserAndGroupMovie: jest.fn(),
     findOne: jest.fn(),
 
     create: jest.fn(),
     update: jest.fn(),
     delete: jest.fn(),
-    getAverageRating: jest.fn(),
     getStatsByGroupMovieIds: jest.fn(),
   },
   groupMoviesService: {
@@ -64,25 +62,6 @@ describe('GroupMovieReviewsService', () => {
 
   afterEach(() => {
     jest.clearAllMocks();
-  });
-
-  describe('findByGroupMovie', () => {
-    it('should return reviews for a group movie', async () => {
-      mocks.groupMoviesService.findById.mockResolvedValue({
-        status: 'watched',
-      });
-      mocks.groupMovieReviewsRepository.findByGroupMovie.mockResolvedValue([
-        mockReview,
-      ]);
-
-      const result = await service.findByGroupMovie(1, 1);
-
-      expect(result).toEqual([mockReview]);
-      expect(mocks.groupMoviesService.findById).toHaveBeenCalledWith(1, 1);
-      expect(
-        mocks.groupMovieReviewsRepository.findByGroupMovie,
-      ).toHaveBeenCalledWith(1);
-    });
   });
 
   describe('create', () => {
@@ -222,26 +201,6 @@ describe('GroupMovieReviewsService', () => {
       await expect(
         service.delete(1, 1, 1, 1, { ...mockReview, groupMovieId: 999 }),
       ).rejects.toThrow(ReviewNotFoundException);
-    });
-  });
-
-  describe('getAverageRating', () => {
-    it('should return average rating', async () => {
-      mocks.groupMovieReviewsRepository.getAverageRating.mockResolvedValue(4.5);
-
-      const result = await service.getAverageRating(1);
-
-      expect(result).toBe(4.5);
-    });
-
-    it('should return null if no reviews', async () => {
-      mocks.groupMovieReviewsRepository.getAverageRating.mockResolvedValue(
-        null,
-      );
-
-      const result = await service.getAverageRating(1);
-
-      expect(result).toBeNull();
     });
   });
 

@@ -25,23 +25,15 @@ export class GroupMovieReviewsService {
     private readonly groupMoviesService: GroupMoviesService,
   ) {}
 
-  async findByGroupMovie(
-    groupId: number,
-    groupMovieId: number,
-  ): Promise<GroupMovieReviewWithUser[]> {
-    await this._verifyGroupMovieOrThrow(groupId, groupMovieId);
-    return this.groupMovieReviewsRepository.findByGroupMovie(groupMovieId);
-  }
-
   private _mapToResponseDto(
     review: GroupMovieReviewWithUser,
     userId?: number,
   ): ReviewResponseDto {
-    return {
+    return Object.assign(new ReviewResponseDto(), {
       ...review,
       rating: Number(review.rating),
       isOwn: userId !== undefined ? review.userId === userId : undefined,
-    } as ReviewResponseDto;
+    });
   }
 
   async create(
@@ -145,10 +137,6 @@ export class GroupMovieReviewsService {
     await this.groupMovieReviewsRepository.delete(id);
 
     this._logger.log(`Review ${id} deleted by user ${userId}`);
-  }
-
-  async getAverageRating(groupMovieId: number): Promise<number | null> {
-    return this.groupMovieReviewsRepository.getAverageRating(groupMovieId);
   }
 
   async getStatsByGroupMovieIds(
