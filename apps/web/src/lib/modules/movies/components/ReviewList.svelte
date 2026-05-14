@@ -31,12 +31,6 @@
 	let showDeleteSheet = $state(false);
 	let editForm = $state<ReviewFormData>({ ...EMPTY_REVIEW_FORM });
 
-	$effect(() => {
-		return () => {
-			groupMovieReviewsStore.reset();
-		};
-	});
-
 	const hasMyReview = $derived(myReview !== null);
 	const otherReviews = $derived(reviews.filter((r) => r.id !== myReview?.id));
 

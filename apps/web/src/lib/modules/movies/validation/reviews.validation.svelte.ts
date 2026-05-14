@@ -11,7 +11,7 @@ export const reviewFormSchema = z.object({
 			'Оценка от 0.5 до 5.0 с шагом 0.5'
 		),
 	text: z.preprocess(
-		(val) => trimToUndefined(val as string),
+		(val) => trimToUndefined(typeof val === 'string' ? val : undefined),
 		z.string().max(2000, 'Максимум 2000 символов').optional()
 	)
 });

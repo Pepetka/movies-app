@@ -71,6 +71,7 @@
 		autoGrow
 		helper="Опишите свои впечатления"
 		error={fieldValidator.errors.text}
+		disabled={isSubmitting}
 		onChange={() => fieldValidator.handleFieldChange(form, 'text')}
 	/>
 

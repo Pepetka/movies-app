@@ -14,8 +14,6 @@ interface MovieParams {
 
 class GroupMovieDetailStore extends BaseStore {
 	private readonly _query: QueryResult<GroupMovieResponseDto, MovieParams>;
-	private _cachedMovie: UnifiedMovie | null = null;
-	private _cachedRawMovie: GroupMovieResponseDto | null = null;
 
 	constructor() {
 		super();
@@ -32,10 +30,7 @@ class GroupMovieDetailStore extends BaseStore {
 
 	get movie(): UnifiedMovie | null {
 		const raw = this._query.data;
-		if (raw === this._cachedRawMovie) return this._cachedMovie;
-		this._cachedRawMovie = raw ?? null;
-		this._cachedMovie = raw ? mapToUnified(raw) : null;
-		return this._cachedMovie;
+		return raw ? mapToUnified(raw) : null;
 	}
 
 	get rawMovie(): GroupMovieResponseDto | null {
