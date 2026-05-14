@@ -145,17 +145,23 @@ describe('GroupMovieReviewsService', () => {
       mocks.groupMoviesService.findById.mockResolvedValue({
         status: 'watched',
       });
-      mocks.groupMovieReviewsRepository.findOne.mockResolvedValue(mockReview);
       mocks.groupMovieReviewsRepository.update.mockResolvedValue({
         ...mockReview,
         rating: '5.0',
         text: 'Updated text',
       });
 
-      const result = await service.update(1, 1, 1, 1, {
-        rating: 5.0,
-        text: 'Updated text',
-      });
+      const result = await service.update(
+        1,
+        1,
+        1,
+        1,
+        {
+          rating: 5.0,
+          text: 'Updated text',
+        },
+        mockReview,
+      );
 
       expect(result.rating).toBe(5);
       expect(result.text).toBe('Updated text');
@@ -168,39 +174,31 @@ describe('GroupMovieReviewsService', () => {
       );
     });
 
-    it('should throw ReviewNotFoundException if review not found', async () => {
-      mocks.groupMoviesService.findById.mockResolvedValue({
-        status: 'watched',
-      });
-      mocks.groupMovieReviewsRepository.findOne.mockResolvedValue(null);
-
-      await expect(service.update(1, 1, 1, 1, { rating: 5.0 })).rejects.toThrow(
-        ReviewNotFoundException,
-      );
-    });
-
     it('should throw MovieNotWatchedException if movie is not watched', async () => {
       mocks.groupMoviesService.findById.mockResolvedValue({
         status: 'planned',
       });
 
-      await expect(service.update(1, 1, 1, 1, { rating: 5.0 })).rejects.toThrow(
-        MovieNotWatchedException,
-      );
+      await expect(
+        service.update(1, 1, 1, 1, { rating: 5.0 }, mockReview),
+      ).rejects.toThrow(MovieNotWatchedException);
     });
 
     it('should throw ReviewNotFoundException if review belongs to another group movie', async () => {
       mocks.groupMoviesService.findById.mockResolvedValue({
         status: 'watched',
       });
-      mocks.groupMovieReviewsRepository.findOne.mockResolvedValue({
-        ...mockReview,
-        groupMovieId: 999,
-      });
 
-      await expect(service.update(1, 1, 1, 1, { rating: 5.0 })).rejects.toThrow(
-        ReviewNotFoundException,
-      );
+      await expect(
+        service.update(
+          1,
+          1,
+          1,
+          1,
+          { rating: 5.0 },
+          { ...mockReview, groupMovieId: 999 },
+        ),
+      ).rejects.toThrow(ReviewNotFoundException);
     });
   });
 
@@ -209,37 +207,21 @@ describe('GroupMovieReviewsService', () => {
       mocks.groupMoviesService.findById.mockResolvedValue({
         status: 'watched',
       });
-      mocks.groupMovieReviewsRepository.findOne.mockResolvedValue(mockReview);
       mocks.groupMovieReviewsRepository.delete.mockResolvedValue(undefined);
 
-      await service.delete(1, 1, 1, 1);
+      await service.delete(1, 1, 1, 1, mockReview);
 
       expect(mocks.groupMovieReviewsRepository.delete).toHaveBeenCalledWith(1);
-    });
-
-    it('should throw ReviewNotFoundException if review not found', async () => {
-      mocks.groupMoviesService.findById.mockResolvedValue({
-        status: 'watched',
-      });
-      mocks.groupMovieReviewsRepository.findOne.mockResolvedValue(null);
-
-      await expect(service.delete(1, 1, 1, 1)).rejects.toThrow(
-        ReviewNotFoundException,
-      );
     });
 
     it('should throw ReviewNotFoundException if review belongs to another group movie', async () => {
       mocks.groupMoviesService.findById.mockResolvedValue({
         status: 'watched',
       });
-      mocks.groupMovieReviewsRepository.findOne.mockResolvedValue({
-        ...mockReview,
-        groupMovieId: 999,
-      });
 
-      await expect(service.delete(1, 1, 1, 1)).rejects.toThrow(
-        ReviewNotFoundException,
-      );
+      await expect(
+        service.delete(1, 1, 1, 1, { ...mockReview, groupMovieId: 999 }),
+      ).rejects.toThrow(ReviewNotFoundException);
     });
   });
 

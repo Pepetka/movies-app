@@ -96,7 +96,7 @@ export class GroupMovieReviewsService {
     groupMovieId: number,
     userId: number,
     dto: UpdateReviewDto,
-    existingReview?: GroupMovieReview,
+    existingReview: GroupMovieReview,
   ): Promise<ReviewResponseDto> {
     const groupMovie = await this._verifyGroupMovieOrThrow(
       groupId,
@@ -107,12 +107,8 @@ export class GroupMovieReviewsService {
       throw new MovieNotWatchedException();
     }
 
-    if (!existingReview || existingReview.groupMovieId !== groupMovieId) {
-      const review = await this.groupMovieReviewsRepository.findOne(id);
-
-      if (!review || review.groupMovieId !== groupMovieId) {
-        throw new ReviewNotFoundException();
-      }
+    if (existingReview.groupMovieId !== groupMovieId) {
+      throw new ReviewNotFoundException();
     }
 
     const updateData: Partial<NewGroupMovieReview> = {};
@@ -138,16 +134,12 @@ export class GroupMovieReviewsService {
     groupId: number,
     groupMovieId: number,
     userId: number,
-    existingReview?: GroupMovieReview,
+    existingReview: GroupMovieReview,
   ): Promise<void> {
     await this._verifyGroupMovieOrThrow(groupId, groupMovieId);
 
-    if (!existingReview || existingReview.groupMovieId !== groupMovieId) {
-      const review = await this.groupMovieReviewsRepository.findOne(id);
-
-      if (!review || review.groupMovieId !== groupMovieId) {
-        throw new ReviewNotFoundException();
-      }
+    if (existingReview.groupMovieId !== groupMovieId) {
+      throw new ReviewNotFoundException();
     }
 
     await this.groupMovieReviewsRepository.delete(id);

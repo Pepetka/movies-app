@@ -1,9 +1,5 @@
-import {
-  Inject,
-  Injectable,
-  InternalServerErrorException,
-} from '@nestjs/common';
 import { eq, and, desc, sql, getTableColumns, inArray } from 'drizzle-orm';
+import { Inject, Injectable } from '@nestjs/common';
 
 import {
   groupMovieReviews,
@@ -29,10 +25,6 @@ export class GroupMovieReviewsRepository {
         .values(data)
         .returning();
 
-      if (!inserted) {
-        throw new InternalServerErrorException('Review not found after create');
-      }
-
       const [result] = await tx
         .select({
           ...getTableColumns(groupMovieReviews),
@@ -43,10 +35,7 @@ export class GroupMovieReviewsRepository {
         .where(eq(groupMovieReviews.id, inserted.id))
         .limit(1);
 
-      if (!result) {
-        throw new InternalServerErrorException('Review not found after create');
-      }
-      return result;
+      return result!;
     });
   }
 
@@ -118,10 +107,6 @@ export class GroupMovieReviewsRepository {
         .where(eq(groupMovieReviews.id, id))
         .returning();
 
-      if (!updated) {
-        throw new InternalServerErrorException('Review not found after update');
-      }
-
       const [result] = await tx
         .select({
           ...getTableColumns(groupMovieReviews),
@@ -129,13 +114,10 @@ export class GroupMovieReviewsRepository {
         })
         .from(groupMovieReviews)
         .innerJoin(users, eq(groupMovieReviews.userId, users.id))
-        .where(eq(groupMovieReviews.id, id))
+        .where(eq(groupMovieReviews.id, updated.id))
         .limit(1);
 
-      if (!result) {
-        throw new InternalServerErrorException('Review not found after update');
-      }
-      return result;
+      return result!;
     });
   }
 
