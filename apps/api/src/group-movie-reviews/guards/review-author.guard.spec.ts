@@ -5,6 +5,7 @@ import {
   NotReviewAuthorException,
   ReviewNotFoundException,
 } from '$common/exceptions';
+import { GroupMovieReview } from '$db/schemas';
 import { UserRole } from '$common/enums';
 
 import { GroupMovieReviewsRepository } from '../group-movie-reviews.repository';
@@ -56,7 +57,7 @@ describe('ReviewAuthorGuard', () => {
       id: 1,
       groupMovieId: 1,
       userId: 1,
-    } as any);
+    } as GroupMovieReview);
 
     const result = await guard.canActivate(createMockExecutionContext());
 
@@ -68,7 +69,7 @@ describe('ReviewAuthorGuard', () => {
       id: 1,
       groupMovieId: 1,
       userId: 2,
-    } as any);
+    } as GroupMovieReview);
 
     const result = await guard.canActivate(
       createMockExecutionContext({
@@ -100,7 +101,7 @@ describe('ReviewAuthorGuard', () => {
       id: 1,
       groupMovieId: 999,
       userId: 1,
-    } as any);
+    } as GroupMovieReview);
 
     await expect(
       guard.canActivate(createMockExecutionContext()),
@@ -112,7 +113,7 @@ describe('ReviewAuthorGuard', () => {
       id: 1,
       groupMovieId: 1,
       userId: 2,
-    } as any);
+    } as GroupMovieReview);
 
     await expect(
       guard.canActivate(createMockExecutionContext()),

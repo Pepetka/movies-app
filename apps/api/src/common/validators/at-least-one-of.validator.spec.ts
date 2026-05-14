@@ -1,3 +1,5 @@
+import { ValidationArguments } from 'class-validator';
+
 import {
   AtLeastOneOfConstraint,
   AtLeastOneOfClass,
@@ -12,7 +14,7 @@ describe('AtLeastOneOfConstraint', () => {
       constraints: [['rating', 'text']],
       property: '',
       targetName: 'TestDto',
-    } as any);
+    } as ValidationArguments);
 
     expect(result).toBe(true);
   });
@@ -23,7 +25,7 @@ describe('AtLeastOneOfConstraint', () => {
       constraints: [['rating', 'text']],
       property: '',
       targetName: 'TestDto',
-    } as any);
+    } as ValidationArguments);
 
     expect(result).toBe(true);
   });
@@ -34,7 +36,7 @@ describe('AtLeastOneOfConstraint', () => {
       constraints: [['rating', 'text']],
       property: '',
       targetName: 'TestDto',
-    } as any);
+    } as ValidationArguments);
 
     expect(result).toBe(false);
   });
@@ -45,7 +47,7 @@ describe('AtLeastOneOfConstraint', () => {
       constraints: [['rating', 'text']],
       property: '',
       targetName: 'TestDto',
-    } as any);
+    } as ValidationArguments);
 
     expect(result).toBe(false);
   });
@@ -56,7 +58,7 @@ describe('AtLeastOneOfConstraint', () => {
       constraints: [['rating', 'text']],
       property: '',
       targetName: 'TestDto',
-    } as any);
+    } as ValidationArguments);
 
     expect(result).toBe(false);
   });
@@ -68,7 +70,7 @@ describe('AtLeastOneOfConstraint', () => {
       targetName: 'TestDto',
       object: {},
       value: undefined,
-    } as any);
+    } as ValidationArguments);
 
     expect(message).toBe('At least one of rating, text must be provided');
   });

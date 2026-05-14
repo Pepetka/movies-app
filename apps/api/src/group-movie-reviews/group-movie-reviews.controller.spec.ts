@@ -2,10 +2,12 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { CanActivate } from '@nestjs/common';
 
 import { GroupMemberGuard } from '$src/groups/guards';
+import { GroupMovieReview } from '$db/schemas';
 
 import { GroupMovieReviewsController } from './group-movie-reviews.controller';
 import { GroupMovieReviewsService } from './group-movie-reviews.service';
 import { ReviewAuthorGuard } from './guards';
+import { ReviewResponseDto } from './dto';
 
 class MockGuard implements CanActivate {
   canActivate() {
@@ -50,7 +52,7 @@ describe('GroupMovieReviewsController', () => {
   describe('create', () => {
     it('should call service.create with correct arguments', async () => {
       const dto = { rating: 4.5, text: 'Great' };
-      service.create.mockResolvedValue({ id: 1 } as any);
+      service.create.mockResolvedValue({ id: 1 } as ReviewResponseDto);
 
       const result = await controller.create(1, 1, dto, 1);
 
@@ -62,11 +64,11 @@ describe('GroupMovieReviewsController', () => {
   describe('update', () => {
     it('should call service.update with correct arguments', async () => {
       const dto = { rating: 5.0 };
-      service.update.mockResolvedValue({ id: 1 } as any);
+      service.update.mockResolvedValue({ id: 1 } as ReviewResponseDto);
 
       const result = await controller.update(1, 1, 1, dto, 1, {
         id: 1,
-      } as any);
+      } as GroupMovieReview);
 
       expect(service.update).toHaveBeenCalledWith(1, 1, 1, 1, dto, { id: 1 });
       expect(result).toEqual({ id: 1 });
@@ -77,7 +79,7 @@ describe('GroupMovieReviewsController', () => {
     it('should call service.delete with correct arguments', async () => {
       service.delete.mockResolvedValue(undefined);
 
-      await controller.delete(1, 1, 1, 1, { id: 1 } as any);
+      await controller.delete(1, 1, 1, 1, { id: 1 } as GroupMovieReview);
 
       expect(service.delete).toHaveBeenCalledWith(1, 1, 1, 1, { id: 1 });
     });

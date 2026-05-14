@@ -1,7 +1,14 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { CanActivate } from '@nestjs/common';
 
+import {
+  GroupMovieResponseDto,
+  SearchInGroupResponseDto,
+} from '$src/group-movies/dto/group-movie-response.dto';
+import { MovieSearchGroupDto } from '$src/group-movies/dto/movie-search-group.dto';
 import { GroupMemberGuard, GroupModeratorGuard } from '$src/groups/guards';
+import { FindAllGroupMoviesDto } from '$src/group-movies/dto';
+import { GroupMember } from '$db/schemas';
 
 import { GroupMovieDetailsController } from './group-movie-details.controller';
 import { GroupMovieDetailsService } from './group-movie-details.service';
@@ -50,7 +57,7 @@ describe('GroupMovieDetailsController', () => {
     it('should call service.findAll with correct arguments', async () => {
       service.findAll.mockResolvedValue([]);
 
-      const result = await controller.findAll(1, {} as any);
+      const result = await controller.findAll(1, {} as FindAllGroupMoviesDto);
 
       expect(service.findAll).toHaveBeenCalledWith(1, {});
       expect(result).toEqual([]);
@@ -59,12 +66,12 @@ describe('GroupMovieDetailsController', () => {
 
   describe('findOne', () => {
     it('should call service.findOne with correct arguments', async () => {
-      service.findOne.mockResolvedValue({ id: 1 } as any);
+      service.findOne.mockResolvedValue({ id: 1 } as GroupMovieResponseDto);
 
       const result = await controller.findOne(
         1,
         1,
-        { role: 'member' } as any,
+        { role: 'member' } as GroupMember,
         1,
       );
 
@@ -76,14 +83,20 @@ describe('GroupMovieDetailsController', () => {
   describe('searchInGroup', () => {
     it('should call service.searchInGroup with correct arguments', async () => {
       service.searchInGroup.mockResolvedValue({
-        provider: { results: [] },
+        provider: { page: 1, totalPages: 1, totalResults: 0, results: [] },
         currentGroup: [],
-      } as any);
+      } as SearchInGroupResponseDto);
 
-      const result = await controller.searchInGroup(1, {} as any);
+      const result = await controller.searchInGroup(
+        1,
+        {} as MovieSearchGroupDto,
+      );
 
       expect(service.searchInGroup).toHaveBeenCalledWith(1, {});
-      expect(result).toEqual({ provider: { results: [] }, currentGroup: [] });
+      expect(result).toEqual({
+        provider: { page: 1, totalPages: 1, totalResults: 0, results: [] },
+        currentGroup: [],
+      });
     });
   });
 });
