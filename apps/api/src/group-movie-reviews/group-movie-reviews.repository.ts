@@ -23,29 +23,31 @@ export class GroupMovieReviewsRepository {
   constructor(@Inject(DRIZZLE) private readonly db: DrizzleDb) {}
 
   async create(data: NewGroupMovieReview): Promise<GroupMovieReviewWithUser> {
-    const [inserted] = await this.db
-      .insert(groupMovieReviews)
-      .values(data)
-      .returning();
+    return this.db.transaction(async (tx) => {
+      const [inserted] = await tx
+        .insert(groupMovieReviews)
+        .values(data)
+        .returning();
 
-    if (!inserted) {
-      throw new InternalServerErrorException('Review not found after create');
-    }
+      if (!inserted) {
+        throw new InternalServerErrorException('Review not found after create');
+      }
 
-    const [result] = await this.db
-      .select({
-        ...getTableColumns(groupMovieReviews),
-        userName: users.name,
-      })
-      .from(groupMovieReviews)
-      .innerJoin(users, eq(groupMovieReviews.userId, users.id))
-      .where(eq(groupMovieReviews.id, inserted.id))
-      .limit(1);
+      const [result] = await tx
+        .select({
+          ...getTableColumns(groupMovieReviews),
+          userName: users.name,
+        })
+        .from(groupMovieReviews)
+        .innerJoin(users, eq(groupMovieReviews.userId, users.id))
+        .where(eq(groupMovieReviews.id, inserted.id))
+        .limit(1);
 
-    if (!result) {
-      throw new InternalServerErrorException('Review not found after create');
-    }
-    return result;
+      if (!result) {
+        throw new InternalServerErrorException('Review not found after create');
+      }
+      return result;
+    });
   }
 
   async findByGroupMovie(
@@ -109,30 +111,32 @@ export class GroupMovieReviewsRepository {
     id: number,
     data: Partial<NewGroupMovieReview>,
   ): Promise<GroupMovieReviewWithUser> {
-    const [updated] = await this.db
-      .update(groupMovieReviews)
-      .set(data)
-      .where(eq(groupMovieReviews.id, id))
-      .returning();
+    return this.db.transaction(async (tx) => {
+      const [updated] = await tx
+        .update(groupMovieReviews)
+        .set(data)
+        .where(eq(groupMovieReviews.id, id))
+        .returning();
 
-    if (!updated) {
-      throw new InternalServerErrorException('Review not found after update');
-    }
+      if (!updated) {
+        throw new InternalServerErrorException('Review not found after update');
+      }
 
-    const [result] = await this.db
-      .select({
-        ...getTableColumns(groupMovieReviews),
-        userName: users.name,
-      })
-      .from(groupMovieReviews)
-      .innerJoin(users, eq(groupMovieReviews.userId, users.id))
-      .where(eq(groupMovieReviews.id, id))
-      .limit(1);
+      const [result] = await tx
+        .select({
+          ...getTableColumns(groupMovieReviews),
+          userName: users.name,
+        })
+        .from(groupMovieReviews)
+        .innerJoin(users, eq(groupMovieReviews.userId, users.id))
+        .where(eq(groupMovieReviews.id, id))
+        .limit(1);
 
-    if (!result) {
-      throw new InternalServerErrorException('Review not found after update');
-    }
-    return result;
+      if (!result) {
+        throw new InternalServerErrorException('Review not found after update');
+      }
+      return result;
+    });
   }
 
   async delete(id: number): Promise<void> {

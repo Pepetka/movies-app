@@ -83,10 +83,12 @@ export class GroupMovieResponseDto {
   reviews?: ReviewResponseDto[];
 
   @Expose()
+  @Type(() => Number)
   @ApiProperty({ type: Number, nullable: true, required: false })
   averageRating?: number | null;
 
   @Expose()
+  @Type(() => Number)
   @ApiProperty({ type: Number, required: false })
   reviewCount?: number;
 }

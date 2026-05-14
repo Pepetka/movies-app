@@ -21,11 +21,8 @@ import {
   MovieSearchGroupDto,
   SearchInGroupResponseDto,
 } from '$src/group-movies/dto';
-import type {
-  GroupMember as GroupMemberType,
-  User as UserType,
-} from '$db/schemas';
 import { GroupMemberGuard, GroupModeratorGuard } from '$src/groups/guards';
+import type { GroupMember as GroupMemberType } from '$db/schemas';
 import { GroupMember, User } from '$common/decorators';
 import { GroupMemberRole } from '$common/enums';
 
@@ -100,13 +97,13 @@ export class GroupMovieDetailsController {
     @Param('groupId', ParseIntPipe) groupId: number,
     @Param('id', ParseIntPipe) id: number,
     @GroupMember() member: GroupMemberType,
-    @User() user: UserType,
+    @User('id') userId: number,
   ) {
     return this.groupMovieDetailsService.findOne(
       groupId,
       id,
       member.role as GroupMemberRole,
-      user.id,
+      userId,
     );
   }
 }
