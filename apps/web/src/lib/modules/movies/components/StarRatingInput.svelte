@@ -22,6 +22,7 @@
 	let isDragging = $state(false);
 
 	const STAR_COUNT = 5;
+	const STAR_INDICES = Array.from({ length: STAR_COUNT }, (_, i) => i);
 
 	const displayValue = $derived(hoverValue || value);
 
@@ -147,7 +148,7 @@
 		onpointerleave={handlePointerLeave}
 		onpointercancel={handlePointerCancel}
 	>
-		{#each Array(STAR_COUNT) as _, starIndex (starIndex)}
+		{#each STAR_INDICES as starIndex (starIndex)}
 			<div class="star-rating-input__wrapper" style="--star-size: {size}px;">
 				<!-- Background star (empty) -->
 				<svg viewBox="0 0 24 24" fill="none" class="star-rating-input__bg" aria-hidden="true">
