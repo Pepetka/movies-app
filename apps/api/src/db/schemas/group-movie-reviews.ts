@@ -2,7 +2,7 @@ import {
   pgTable,
   serial,
   integer,
-  text,
+  varchar,
   decimal,
   unique,
   index,
@@ -25,7 +25,7 @@ export const groupMovieReviews = pgTable(
       .references(() => users.id, { onDelete: 'cascade' })
       .notNull(),
     rating: decimal({ precision: 2, scale: 1 }).notNull(),
-    text: text(),
+    text: varchar({ length: 2000 }),
     ...timestamps,
   },
   (table) => [

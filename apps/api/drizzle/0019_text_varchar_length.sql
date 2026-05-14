@@ -1,0 +1,1 @@
+ALTER TABLE "group_movie_reviews" ALTER COLUMN "text" SET DATA TYPE varchar(2000);

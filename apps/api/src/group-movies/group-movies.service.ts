@@ -4,6 +4,7 @@ import { ProviderSearchResult } from '$src/movies/providers/interfaces/provider-
 import { MovieAlreadyInGroupException } from '$common/exceptions';
 import { MoviesService } from '$src/movies/movies.service';
 import { GroupMovie, NewGroupMovie } from '$db/schemas';
+import { GroupMovieStatus } from '$common/enums';
 
 import {
   AddMovieDto,
@@ -46,7 +47,7 @@ export class GroupMoviesService {
       runtime: movie.runtime,
       rating: movie.rating,
       addedBy,
-      status: 'tracking',
+      status: GroupMovieStatus.TRACKING,
     });
 
     this._logger.log(
@@ -71,7 +72,7 @@ export class GroupMoviesService {
       runtime: dto.runtime ?? null,
       rating: null,
       addedBy: createdById,
-      status: dto.status ?? 'tracking',
+      status: dto.status ?? GroupMovieStatus.TRACKING,
       watchDate: dto.watchDate ? new Date(dto.watchDate) : null,
     });
 
