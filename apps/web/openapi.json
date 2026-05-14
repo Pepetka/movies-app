@@ -1347,39 +1347,6 @@
 			}
 		},
 		"/api/v1/groups/{groupId}/movies/{groupMovieId}/reviews": {
-			"get": {
-				"operationId": "GroupMovieReviewsController_findAll_v1",
-				"parameters": [
-					{
-						"name": "groupId",
-						"required": true,
-						"in": "path",
-						"description": "Group ID",
-						"schema": { "type": "number" }
-					},
-					{
-						"name": "groupMovieId",
-						"required": true,
-						"in": "path",
-						"description": "Group Movie ID",
-						"schema": { "type": "number" }
-					}
-				],
-				"responses": {
-					"200": {
-						"description": "List of reviews with average rating",
-						"content": {
-							"application/json": {
-								"schema": { "$ref": "#/components/schemas/ReviewListResponseDto" }
-							}
-						}
-					},
-					"403": { "description": "Forbidden - Not a group member" }
-				},
-				"security": [{ "access-token": [] }],
-				"summary": "Get all reviews for a group movie (Group members only)",
-				"tags": ["Groups / Movie Reviews"]
-			},
 			"post": {
 				"operationId": "GroupMovieReviewsController_create_v1",
 				"parameters": [
@@ -1418,40 +1385,6 @@
 				},
 				"security": [{ "access-token": [] }],
 				"summary": "Create a review for a group movie (Group members only)",
-				"tags": ["Groups / Movie Reviews"]
-			}
-		},
-		"/api/v1/groups/{groupId}/movies/{groupMovieId}/reviews/my": {
-			"get": {
-				"operationId": "GroupMovieReviewsController_findMyReview_v1",
-				"parameters": [
-					{
-						"name": "groupId",
-						"required": true,
-						"in": "path",
-						"description": "Group ID",
-						"schema": { "type": "number" }
-					},
-					{
-						"name": "groupMovieId",
-						"required": true,
-						"in": "path",
-						"description": "Group Movie ID",
-						"schema": { "type": "number" }
-					}
-				],
-				"responses": {
-					"200": {
-						"description": "Current user review",
-						"content": {
-							"application/json": { "schema": { "$ref": "#/components/schemas/ReviewResponseDto" } }
-						}
-					},
-					"403": { "description": "Forbidden - Not a group member" },
-					"404": { "description": "Review not found" }
-				},
-				"security": [{ "access-token": [] }],
-				"summary": "Get current user review for a group movie (Group members only)",
 				"tags": ["Groups / Movie Reviews"]
 			}
 		},
@@ -1987,18 +1920,6 @@
 					}
 				},
 				"required": ["provider", "currentGroup"]
-			},
-			"ReviewListResponseDto": {
-				"type": "object",
-				"properties": {
-					"items": {
-						"type": "array",
-						"items": { "$ref": "#/components/schemas/ReviewResponseDto" }
-					},
-					"averageRating": { "type": "number", "nullable": true },
-					"totalCount": { "type": "number" }
-				},
-				"required": ["items", "averageRating", "totalCount"]
 			},
 			"CreateReviewDto": {
 				"type": "object",
