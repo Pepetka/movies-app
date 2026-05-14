@@ -5,7 +5,6 @@ import {
   NotReviewAuthorException,
   ReviewNotFoundException,
 } from '$common/exceptions';
-import { GroupMoviesService } from '$src/group-movies/group-movies.service';
 import { UserRole } from '$common/enums';
 
 import { GroupMovieReviewsRepository } from '../group-movie-reviews.repository';
@@ -30,7 +29,6 @@ const createMockExecutionContext = (
 describe('ReviewAuthorGuard', () => {
   let guard: ReviewAuthorGuard;
   let repository: jest.Mocked<GroupMovieReviewsRepository>;
-  let groupMoviesService: jest.Mocked<GroupMoviesService>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -42,18 +40,11 @@ describe('ReviewAuthorGuard', () => {
             findOne: jest.fn(),
           },
         },
-        {
-          provide: GroupMoviesService,
-          useValue: {
-            findById: jest.fn(),
-          },
-        },
       ],
     }).compile();
 
     guard = module.get<ReviewAuthorGuard>(ReviewAuthorGuard);
     repository = module.get(GroupMovieReviewsRepository);
-    groupMoviesService = module.get(GroupMoviesService);
   });
 
   afterEach(() => {
@@ -66,7 +57,6 @@ describe('ReviewAuthorGuard', () => {
       groupMovieId: 1,
       userId: 1,
     } as any);
-    groupMoviesService.findById.mockResolvedValue({ id: 1 } as any);
 
     const result = await guard.canActivate(createMockExecutionContext());
 
@@ -79,7 +69,6 @@ describe('ReviewAuthorGuard', () => {
       groupMovieId: 1,
       userId: 2,
     } as any);
-    groupMoviesService.findById.mockResolvedValue({ id: 1 } as any);
 
     const result = await guard.canActivate(
       createMockExecutionContext({
@@ -124,7 +113,6 @@ describe('ReviewAuthorGuard', () => {
       groupMovieId: 1,
       userId: 2,
     } as any);
-    groupMoviesService.findById.mockResolvedValue({ id: 1 } as any);
 
     await expect(
       guard.canActivate(createMockExecutionContext()),

@@ -93,11 +93,7 @@ export class GroupMovieReviewsController {
   })
   @ApiResponse({ status: 400, description: 'Invalid request body' })
   @ApiResponse({ status: 403, description: 'Forbidden' })
-  @ApiResponse({ status: 404, description: 'Review not found' })
-  @ApiResponse({
-    status: 404,
-    description: 'Movie not found in group',
-  })
+  @ApiResponse({ status: 404, description: 'Review or movie not found' })
   @ApiResponse({
     status: 422,
     description: 'Movie not watched',
@@ -130,8 +126,7 @@ export class GroupMovieReviewsController {
   @ApiParam({ name: 'groupMovieId', description: 'Group Movie ID' })
   @ApiParam({ name: 'id', description: 'Review ID' })
   @ApiResponse({ status: 204, description: 'Review deleted' })
-  @ApiResponse({ status: 404, description: 'Review not found' })
-  @ApiResponse({ status: 404, description: 'Movie not found in group' })
+  @ApiResponse({ status: 404, description: 'Review or movie not found' })
   @ApiResponse({ status: 403, description: 'Forbidden' })
   async delete(
     @Param('groupId', ParseIntPipe) groupId: number,
