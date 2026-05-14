@@ -1430,7 +1430,7 @@
 					},
 					"400": { "description": "Invalid request body" },
 					"403": { "description": "Forbidden" },
-					"404": { "description": "Review not found" },
+					"404": { "description": "Review or movie not found" },
 					"422": { "description": "Movie not watched" }
 				},
 				"security": [{ "access-token": [] }],
@@ -1465,7 +1465,7 @@
 				"responses": {
 					"204": { "description": "Review deleted" },
 					"403": { "description": "Forbidden" },
-					"404": { "description": "Review not found" }
+					"404": { "description": "Review or movie not found" }
 				},
 				"security": [{ "access-token": [] }],
 				"summary": "Delete a review (Author or global admin only)",
