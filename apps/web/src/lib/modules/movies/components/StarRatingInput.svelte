@@ -163,7 +163,7 @@
 					viewBox="0 0 24 24"
 					fill="currentColor"
 					class="star-rating-input__star-value"
-					class:star-hidden={getValueFill(starIndex) === 0}
+					class:star-rating-input__star--hidden={getValueFill(starIndex) === 0}
 					aria-hidden="true"
 					style="clip-path: {getValueFill(starIndex) === 0.5 ? 'inset(0 50% 0 0)' : 'none'};"
 				>
@@ -177,7 +177,7 @@
 					viewBox="0 0 24 24"
 					fill="currentColor"
 					class="star-rating-input__fill"
-					class:star-hidden={getStarFill(starIndex) === 0}
+					class:star-rating-input__star--hidden={getStarFill(starIndex) === 0}
 					aria-hidden="true"
 					style="clip-path: {getStarFill(starIndex) === 0.5 ? 'inset(0 50% 0 0)' : 'none'};"
 				>
@@ -258,7 +258,7 @@
 		transition: clip-path 0.15s ease;
 	}
 
-	.star-hidden {
+	.star-rating-input__star--hidden {
 		opacity: 0;
 	}
 

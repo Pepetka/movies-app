@@ -85,6 +85,7 @@
 	};
 
 	const handleMovieClick = async (movie: ProviderMovieSummary) => {
+		if (groupMovieStore.isAdding) return;
 		const imdbId = typeof movie.imdbId === 'string' ? movie.imdbId : undefined;
 		await groupMovieStore.addMovie(groupId, {
 			imdbId,

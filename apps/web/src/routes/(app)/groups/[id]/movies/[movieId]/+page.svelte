@@ -340,6 +340,10 @@
 		white-space: pre-wrap;
 	}
 
+	.movie-header__rating {
+		color: var(--rating-gold);
+	}
+
 	@media (min-width: 480px) {
 		.movie-header__poster {
 			width: 160px;
@@ -354,10 +358,6 @@
 		.movie-header__poster {
 			width: 200px;
 		}
-	}
-
-	.movie-header__rating {
-		color: var(--rating-gold);
 	}
 
 	.modal-text {

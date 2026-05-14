@@ -36,8 +36,9 @@
 
 	const showCreateForm = $derived(status === 'watched' && !hasMyReview);
 	const showEditForm = $derived(status === 'watched' && hasMyReview && isEditing);
-	const showMyReviewCard = $derived(status === 'watched' && hasMyReview && !isEditing);
-	const showMyReviewWhenNotWatched = $derived(status !== 'watched' && myReview !== null);
+	const showMyReview = $derived(
+		(status === 'watched' && hasMyReview && !isEditing) || (status !== 'watched' && hasMyReview)
+	);
 	const showEmptyState = $derived(
 		status === 'watched' && !hasMyReview && otherReviews.length === 0
 	);
@@ -126,11 +127,7 @@
 				onCancel={cancelEdit}
 				isSubmitting={groupMovieReviewsStore.isUpdating}
 			/>
-		{:else if showMyReviewCard}
-			{#if myReview}
-				<ReviewCard review={myReview} isOwn={true} onEdit={startEdit} onDelete={openDeleteSheet} />
-			{/if}
-		{:else if showMyReviewWhenNotWatched}
+		{:else if showMyReview}
 			{#if myReview}
 				<ReviewCard review={myReview} isOwn={true} onEdit={startEdit} onDelete={openDeleteSheet} />
 			{/if}
