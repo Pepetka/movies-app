@@ -24,7 +24,6 @@ import {
 import { GroupMemberGuard, GroupModeratorGuard } from '$src/groups/guards';
 import type { GroupMember as GroupMemberType } from '$db/schemas';
 import { GroupMember, User } from '$common/decorators';
-import { GroupMemberRole } from '$common/enums';
 
 import { GroupMovieDetailsService } from './group-movie-details.service';
 
@@ -102,7 +101,7 @@ export class GroupMovieDetailsController {
     return this.groupMovieDetailsService.findOne(
       groupId,
       id,
-      member.role as GroupMemberRole,
+      member.role,
       userId,
     );
   }

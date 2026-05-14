@@ -8,7 +8,7 @@ import {
 import { GroupMovieReviewsService } from '$src/group-movie-reviews/group-movie-reviews.service';
 import { ProviderSearchResult } from '$src/movies/providers/interfaces/provider-result.dto';
 import { GroupMoviesService } from '$src/group-movies/group-movies.service';
-import { GroupMemberRole } from '$common/enums';
+import { ReviewResponseDto } from '$src/group-movie-reviews/dto';
 import { GroupMovie } from '$db/schemas';
 
 const calculateAverageRating = (ratings: number[]): number | null => {
@@ -54,7 +54,7 @@ export class GroupMovieDetailsService {
   async findOne(
     groupId: number,
     id: number,
-    currentUserRole: GroupMemberRole,
+    currentUserRole: string,
     userId: number,
   ): Promise<GroupMovieResponseDto> {
     const groupMovie = await this.groupMoviesService.findById(groupId, id);
@@ -68,11 +68,13 @@ export class GroupMovieDetailsService {
     return Object.assign(new GroupMovieResponseDto(), {
       ...groupMovie,
       currentUserRole,
-      reviews: reviews.map((r) => ({
-        ...r,
-        rating: Number(r.rating),
-        isOwn: r.userId === userId,
-      })),
+      reviews: reviews.map((r) =>
+        Object.assign(new ReviewResponseDto(), {
+          ...r,
+          rating: Number(r.rating),
+          isOwn: r.userId === userId,
+        }),
+      ),
       averageRating,
       reviewCount: reviews.length,
     });
