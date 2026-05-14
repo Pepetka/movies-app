@@ -83,3 +83,22 @@
 | status     | group_movie_status   | not null, default pending          |
 | createdAt  | timestamp            | default now()                      |
 | updatedAt  | timestamp            | default now()                      |
+
+## group_movie_reviews
+
+| Поле         | Тип          | Constraints                              |
+| ------------ | ------------ | ---------------------------------------- |
+| id           | serial       | PK                                       |
+| groupMovieId | integer      | FK → group_movies.id, onDelete cascade   |
+| userId       | integer      | FK → users.id, onDelete cascade          |
+| rating       | numeric(2,1) | not null                                 |
+| text         | text         | nullable                                 |
+| createdAt    | timestamp    | default now()                            |
+| updatedAt    | timestamp    | default now()                            |
+
+**Constraints:**
+- Unique: `(groupMovieId, userId)` — один отзыв на фильм от пользователя
+
+**Примечания:**
+- `rating` хранится с шагом 0.5 (например, 3.5).
+- `text` — опциональный текстовый комментарий.

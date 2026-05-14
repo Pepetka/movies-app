@@ -87,6 +87,7 @@ API-запрос с заголовком Authorization
 6. **GroupMemberGuard** — Проверка членства в группе
 7. **GroupModeratorGuard** — Модератор или админ группы
 8. **GroupAdminGuard** — Только админ группы
+9. **ReviewAuthorGuard** — Проверка авторства отзыва (автор или глобальный ADMIN)
 
 ## Роли
 
@@ -191,6 +192,14 @@ API-запрос с заголовком Authorization
 | GET   | /:id                  | Member       | Детали фильма                     |
 | PATCH | /:id                  | Moderator+   | Обновить статус/данные            |
 | DELETE| /:id                  | Moderator+   | Удалить фильм                     |
+
+### Group Movie Reviews (`/groups/:groupId/movies/:groupMovieId/reviews`)
+
+| Метод | Endpoint  | Доступ     | Описание                              |
+| ----- | --------- | ---------- | ------------------------------------- |
+| POST  | /         | Member     | Создать отзыв (только для watched)    |
+| PATCH | /:id      | Author/Admin| Обновить свой отзыв                  |
+| DELETE| /:id      | Author/Admin| Удалить свой отзыв                   |
 
 ### Transfer Ownership (`/groups/:id`)
 
