@@ -1,5 +1,15 @@
 # api
 
+## 0.12.0
+
+### Minor Changes
+
+- 5cc4ca9: Added group movie reviews module with endpoints and ownership guards
+  • Added database schema, CRUD endpoints, and repository layer for group movie reviews
+  • Integrated reviews into group movie details aggregator
+  • Added ReviewAuthorGuard, @Review decorator, and ownership validation
+  • Added controller and guard unit tests
+
 ## 0.11.1
 
 ### Patch Changes
