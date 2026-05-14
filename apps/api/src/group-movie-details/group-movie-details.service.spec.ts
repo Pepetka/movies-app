@@ -32,7 +32,6 @@ const createMockServices = () => ({
   },
   groupMovieReviewsService: {
     findByGroupMovieUnsafe: jest.fn(),
-    getAverageRating: jest.fn(),
     getStatsByGroupMovieIds: jest.fn(),
   },
 });
@@ -181,8 +180,6 @@ describe('GroupMovieDetailsService', () => {
       mocks.groupMovieReviewsService.findByGroupMovieUnsafe.mockResolvedValue([
         review,
       ]);
-      mocks.groupMovieReviewsService.getAverageRating.mockResolvedValue(4.5);
-
       const result = await service.findOne(1, 1, GroupMemberRole.MEMBER, 1);
 
       expect(result).toMatchObject({
@@ -209,8 +206,6 @@ describe('GroupMovieDetailsService', () => {
       mocks.groupMovieReviewsService.findByGroupMovieUnsafe.mockResolvedValue([
         review,
       ]);
-      mocks.groupMovieReviewsService.getAverageRating.mockResolvedValue(4.5);
-
       const result = await service.findOne(1, 1, GroupMemberRole.MEMBER, 1);
 
       expect(result.reviews?.[0].isOwn).toBe(false);

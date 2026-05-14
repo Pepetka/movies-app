@@ -139,18 +139,6 @@ export class GroupMovieReviewsRepository {
     await this.db.delete(groupMovieReviews).where(eq(groupMovieReviews.id, id));
   }
 
-  async getAverageRating(groupMovieId: number): Promise<number | null> {
-    const [result] = await this.db
-      .select({
-        average: sql<number>`AVG(${groupMovieReviews.rating})`,
-      })
-      .from(groupMovieReviews)
-      .where(eq(groupMovieReviews.groupMovieId, groupMovieId));
-
-    if (result?.average == null) return null;
-    return Number(result.average) || null;
-  }
-
   async getStatsByGroupMovieIds(
     groupMovieIds: number[],
   ): Promise<Map<number, { averageRating: number | null; count: number }>> {
