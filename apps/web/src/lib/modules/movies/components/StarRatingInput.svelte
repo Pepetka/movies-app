@@ -4,10 +4,18 @@
 		value?: number;
 		size?: number;
 		disabled?: boolean;
+		label?: string;
 		onChange?: (value: number) => void;
 	}
 
-	let { id, value = 0, size = 32, disabled = false, onChange }: Props = $props();
+	let {
+		id,
+		value = 0,
+		size = 32,
+		disabled = false,
+		label = 'Оценка фильма',
+		onChange
+	}: Props = $props();
 
 	let starsRef = $state<HTMLDivElement | null>(null);
 	let hoverValue = $state(0);
@@ -124,7 +132,7 @@
 	aria-valuenow={value}
 	aria-valuetext={value > 0 ? `${value.toFixed(1)} из 5` : 'Оценка не выставлена'}
 	aria-disabled={disabled}
-	aria-label="Оценка фильма"
+	aria-label={label}
 	aria-labelledby={id ? `${id}-label` : undefined}
 	tabindex={disabled ? -1 : 0}
 	onkeydown={handleKeyDown}
@@ -155,7 +163,7 @@
 					viewBox="0 0 24 24"
 					fill="currentColor"
 					class="star-rating-input__star-value"
-					class:hidden={getValueFill(starIndex) === 0}
+					class:star-hidden={getValueFill(starIndex) === 0}
 					aria-hidden="true"
 					style="clip-path: {getValueFill(starIndex) === 0.5 ? 'inset(0 50% 0 0)' : 'none'};"
 				>
@@ -169,7 +177,7 @@
 					viewBox="0 0 24 24"
 					fill="currentColor"
 					class="star-rating-input__fill"
-					class:hidden={getStarFill(starIndex) === 0}
+					class:star-hidden={getStarFill(starIndex) === 0}
 					aria-hidden="true"
 					style="clip-path: {getStarFill(starIndex) === 0.5 ? 'inset(0 50% 0 0)' : 'none'};"
 				>
@@ -250,7 +258,7 @@
 		transition: clip-path 0.15s ease;
 	}
 
-	.hidden {
+	.star-hidden {
 		opacity: 0;
 	}
 

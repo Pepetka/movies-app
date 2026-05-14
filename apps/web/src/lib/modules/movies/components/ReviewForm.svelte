@@ -20,11 +20,6 @@
 		e.preventDefault();
 		if (isSubmitting) return;
 
-		if (form.rating === 0) {
-			fieldValidator.setErrors({ rating: 'Выберите оценку' });
-			return;
-		}
-
 		const result = validateReviewForm(form);
 
 		if (!result.isValid) {
