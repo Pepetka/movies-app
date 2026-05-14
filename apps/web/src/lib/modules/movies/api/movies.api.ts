@@ -29,32 +29,42 @@ export const getGroupMovie = async (
 	return groupMovieDetailsControllerFindOneV1(groupId, movieId, { signal });
 };
 
-export const searchMovies = async (query: string, signal?: AbortSignal) => {
+export const searchMovies = async (
+	query: string,
+	signal?: AbortSignal
+): Promise<ReturnType<typeof moviesControllerSearchV1>> => {
 	return moviesControllerSearchV1({ query }, { signal });
 };
 
 export const addProviderMovie = async (
 	groupId: number,
-	data: AddMovieDto
+	data: AddMovieDto,
+	signal?: AbortSignal
 ): Promise<GroupMovieResponseDto> => {
-	return groupMoviesControllerAddProviderMovieV1(groupId, data);
+	return groupMoviesControllerAddProviderMovieV1(groupId, data, { signal });
 };
 
 export const createCustomMovie = async (
 	groupId: number,
-	data: CreateCustomMovieDto
+	data: CreateCustomMovieDto,
+	signal?: AbortSignal
 ): Promise<GroupMovieResponseDto> => {
-	return groupMoviesControllerCreateCustomMovieV1(groupId, data);
+	return groupMoviesControllerCreateCustomMovieV1(groupId, data, { signal });
 };
 
 export const updateMovie = async (
 	groupId: number,
 	movieId: number,
-	data: GroupMovieUpdateDto
+	data: GroupMovieUpdateDto,
+	signal?: AbortSignal
 ): Promise<GroupMovieResponseDto> => {
-	return groupMoviesControllerUpdateV1(groupId, movieId, data);
+	return groupMoviesControllerUpdateV1(groupId, movieId, data, { signal });
 };
 
-export const removeMovie = async (groupId: number, movieId: number): Promise<void> => {
-	return groupMoviesControllerRemoveV1(groupId, movieId);
+export const removeMovie = async (
+	groupId: number,
+	movieId: number,
+	signal?: AbortSignal
+): Promise<void> => {
+	return groupMoviesControllerRemoveV1(groupId, movieId, { signal });
 };

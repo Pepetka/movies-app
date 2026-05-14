@@ -1,6 +1,6 @@
 <script lang="ts">
+	import { Button, EmptyState, Image, Sheet, Spinner, toast } from '@repo/ui';
 	import { Pencil, Trash2, Calendar, Clock, Star } from '@lucide/svelte';
-	import { Button, Image, Sheet, Spinner, toast } from '@repo/ui';
 
 	import {
 		groupMovieDetailStore,
@@ -71,9 +71,6 @@
 			onBack: () => goBack(withCurrentQuery(ROUTES.GROUP_DETAIL(groupId), ['tab'])),
 			trailingActions
 		});
-	});
-
-	$effect(() => {
 		return () => topBarStore.destroy();
 	});
 
@@ -81,6 +78,7 @@
 		if (groupId && movieId) {
 			void groupMovieDetailStore.fetchMovie(groupId, movieId);
 		}
+		return () => groupMovieDetailStore.abort();
 	});
 
 	const handleEditStatus = () => {
@@ -97,10 +95,20 @@
 		<Spinner size="lg" />
 	</div>
 {:else if groupMovieDetailStore.isError}
-	<PagePlaceholder
-		title="Ошибка"
-		hint={groupMovieDetailStore.error ?? 'Не удалось загрузить фильм'}
-	/>
+	<EmptyState
+		variant="error"
+		title="Ошибка загрузки"
+		description={groupMovieDetailStore.error ?? 'Не удалось загрузить фильм'}
+	>
+		{#snippet action()}
+			<Button
+				variant="secondary"
+				onclick={() => groupMovieDetailStore.fetchMovie(groupId, movieId)}
+			>
+				Повторить
+			</Button>
+		{/snippet}
+	</EmptyState>
 {:else if movie}
 	<div class="movie-page">
 		<!-- Header with poster and info -->

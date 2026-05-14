@@ -33,7 +33,7 @@
 
 	$effect(() => {
 		return () => {
-			groupMovieReviewsStore.resetForm();
+			groupMovieReviewsStore.reset();
 		};
 	});
 
