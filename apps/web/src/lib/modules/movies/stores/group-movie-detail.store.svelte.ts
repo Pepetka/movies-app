@@ -17,7 +17,6 @@ class GroupMovieDetailStore extends BaseStore {
 
 	constructor() {
 		super();
-
 		this._query = createQuery<GroupMovieResponseDto, MovieParams>({
 			key: ['group-movie'],
 			tags: ['group-movie'],

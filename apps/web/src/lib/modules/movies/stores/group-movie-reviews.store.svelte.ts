@@ -151,6 +151,10 @@ class GroupMovieReviewsStore extends BaseStore {
 		this._updateMutation.reset();
 		this._deleteMutation.reset();
 	}
+
+	resetForm(): void {
+		this.reset();
+	}
 }
 
 export const groupMovieReviewsStore = new GroupMovieReviewsStore();

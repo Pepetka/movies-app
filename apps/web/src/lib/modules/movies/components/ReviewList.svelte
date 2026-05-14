@@ -31,6 +31,12 @@
 	let showDeleteSheet = $state(false);
 	let editForm = $state<ReviewFormData>({ ...EMPTY_REVIEW_FORM });
 
+	$effect(() => {
+		return () => {
+			groupMovieReviewsStore.resetForm();
+		};
+	});
+
 	const hasMyReview = $derived(myReview !== null);
 	const otherReviews = $derived(reviews.filter((r) => r.id !== myReview?.id));
 
@@ -43,7 +49,6 @@
 	);
 
 	const handleCreate = async () => {
-		groupMovieReviewsStore.reset();
 		await groupMovieReviewsStore.createReview(groupId, movieId, reviewFormToCreateDto(editForm));
 		if (groupMovieReviewsStore.isCreateSuccess) {
 			toast.success('Отзыв отправлен');
@@ -55,7 +60,6 @@
 
 	const handleUpdate = async () => {
 		if (!myReview) return;
-		groupMovieReviewsStore.reset();
 		await groupMovieReviewsStore.updateReview(
 			groupId,
 			movieId,

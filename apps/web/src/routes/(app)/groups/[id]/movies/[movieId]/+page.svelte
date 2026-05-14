@@ -71,6 +71,9 @@
 			onBack: () => goBack(withCurrentQuery(ROUTES.GROUP_DETAIL(groupId), ['tab'])),
 			trailingActions
 		});
+	});
+
+	$effect(() => {
 		return () => topBarStore.destroy();
 	});
 
