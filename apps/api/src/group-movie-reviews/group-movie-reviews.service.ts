@@ -14,12 +14,7 @@ import {
   GroupMovieReviewsRepository,
   type GroupMovieReviewWithUser,
 } from './group-movie-reviews.repository';
-import {
-  CreateReviewDto,
-  UpdateReviewDto,
-  ReviewListResponseDto,
-  ReviewResponseDto,
-} from './dto';
+import { CreateReviewDto, UpdateReviewDto, ReviewResponseDto } from './dto';
 
 @Injectable()
 export class GroupMovieReviewsService {
@@ -38,38 +33,15 @@ export class GroupMovieReviewsService {
     return this.groupMovieReviewsRepository.findByGroupMovie(groupMovieId);
   }
 
-  async findMyReview(
-    groupId: number,
-    groupMovieId: number,
-    userId: number,
-  ): Promise<GroupMovieReviewWithUser | null> {
-    await this._verifyGroupMovieOrThrow(groupId, groupMovieId);
-    return this.groupMovieReviewsRepository.findByUserAndGroupMovie(
-      userId,
-      groupMovieId,
-    );
-  }
-
   private _mapToResponseDto(
     review: GroupMovieReviewWithUser,
     userId?: number,
   ): ReviewResponseDto {
     return {
       ...review,
+      rating: Number(review.rating),
       isOwn: userId !== undefined ? review.userId === userId : undefined,
     } as ReviewResponseDto;
-  }
-
-  async findMyReviewOrThrow(
-    groupId: number,
-    groupMovieId: number,
-    userId: number,
-  ): Promise<ReviewResponseDto> {
-    const review = await this.findMyReview(groupId, groupMovieId, userId);
-    if (!review) {
-      throw new ReviewNotFoundException();
-    }
-    return this._mapToResponseDto(review, userId);
   }
 
   async create(
@@ -77,7 +49,7 @@ export class GroupMovieReviewsService {
     groupMovieId: number,
     userId: number,
     dto: CreateReviewDto,
-  ): Promise<GroupMovieReviewWithUser> {
+  ): Promise<ReviewResponseDto> {
     const groupMovie = await this._verifyGroupMovieOrThrow(
       groupId,
       groupMovieId,
@@ -109,7 +81,7 @@ export class GroupMovieReviewsService {
       this._logger.log(
         `Review created for group movie ${groupMovieId} by user ${userId}`,
       );
-      return review;
+      return this._mapToResponseDto(review, userId);
     } catch (error) {
       if (isUniqueViolation(error)) {
         throw new ReviewAlreadyExistsException();
@@ -125,7 +97,7 @@ export class GroupMovieReviewsService {
     userId: number,
     dto: UpdateReviewDto,
     existingReview?: GroupMovieReview,
-  ): Promise<GroupMovieReviewWithUser> {
+  ): Promise<ReviewResponseDto> {
     const groupMovie = await this._verifyGroupMovieOrThrow(
       groupId,
       groupMovieId,
@@ -145,7 +117,7 @@ export class GroupMovieReviewsService {
 
     const updateData: Partial<NewGroupMovieReview> = {};
 
-    if (dto.rating !== undefined) {
+    if (dto.rating != null) {
       updateData.rating = dto.rating.toString();
     }
     if (dto.text !== undefined) {
@@ -158,7 +130,7 @@ export class GroupMovieReviewsService {
     );
 
     this._logger.log(`Review ${id} updated by user ${userId}`);
-    return updated;
+    return this._mapToResponseDto(updated, userId);
   }
 
   async delete(
@@ -195,39 +167,10 @@ export class GroupMovieReviewsService {
     );
   }
 
-  async findAll(
-    groupId: number,
-    groupMovieId: number,
-    userId?: number,
-  ): Promise<ReviewListResponseDto> {
-    await this._verifyGroupMovieOrThrow(groupId, groupMovieId);
-
-    const [items, averageRating] = await Promise.all([
-      this.groupMovieReviewsRepository.findByGroupMovie(groupMovieId),
-      this.groupMovieReviewsRepository.getAverageRating(groupMovieId),
-    ]);
-
-    return {
-      items: items.map((r) => this._mapToResponseDto(r, userId)),
-      averageRating,
-      totalCount: items.length,
-    };
-  }
-
   async findByGroupMovieUnsafe(
     groupMovieId: number,
   ): Promise<GroupMovieReviewWithUser[]> {
     return this.groupMovieReviewsRepository.findByGroupMovie(groupMovieId);
-  }
-
-  async findMyReviewUnsafe(
-    userId: number,
-    groupMovieId: number,
-  ): Promise<GroupMovieReviewWithUser | null> {
-    return this.groupMovieReviewsRepository.findByUserAndGroupMovie(
-      userId,
-      groupMovieId,
-    );
   }
 
   private async _verifyGroupMovieOrThrow(

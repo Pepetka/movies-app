@@ -190,7 +190,7 @@ describe('GroupMovieDetailsService', () => {
         currentUserRole: GroupMemberRole.MEMBER,
         averageRating: 4.5,
         reviewCount: 1,
-        reviews: [{ ...review, isOwn: true }],
+        reviews: [{ ...review, rating: 4.5, isOwn: true }],
       });
     });
 
@@ -214,6 +214,7 @@ describe('GroupMovieDetailsService', () => {
       const result = await service.findOne(1, 1, GroupMemberRole.MEMBER, 1);
 
       expect(result.reviews?.[0].isOwn).toBe(false);
+      expect(result.reviews?.[0].rating).toBe(4.5);
     });
   });
 });

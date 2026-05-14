@@ -85,38 +85,6 @@ describe('GroupMovieReviewsService', () => {
     });
   });
 
-  describe('findMyReview', () => {
-    it('should return user review', async () => {
-      mocks.groupMoviesService.findById.mockResolvedValue({
-        status: 'watched',
-      });
-      mocks.groupMovieReviewsRepository.findByUserAndGroupMovie.mockResolvedValue(
-        mockReview,
-      );
-
-      const result = await service.findMyReview(1, 1, 1);
-
-      expect(result).toEqual(mockReview);
-      expect(mocks.groupMoviesService.findById).toHaveBeenCalledWith(1, 1);
-      expect(
-        mocks.groupMovieReviewsRepository.findByUserAndGroupMovie,
-      ).toHaveBeenCalledWith(1, 1);
-    });
-
-    it('should return null if review not found', async () => {
-      mocks.groupMoviesService.findById.mockResolvedValue({
-        status: 'watched',
-      });
-      mocks.groupMovieReviewsRepository.findByUserAndGroupMovie.mockResolvedValue(
-        null,
-      );
-
-      const result = await service.findMyReview(1, 1, 1);
-
-      expect(result).toBeNull();
-    });
-  });
-
   describe('create', () => {
     it('should create a review', async () => {
       mocks.groupMoviesService.findById.mockResolvedValue({
@@ -132,7 +100,11 @@ describe('GroupMovieReviewsService', () => {
         text: 'Great movie',
       });
 
-      expect(result).toEqual(mockReview);
+      expect(result).toEqual({
+        ...mockReview,
+        rating: 4.5,
+        isOwn: true,
+      });
       expect(mocks.groupMoviesService.findById).toHaveBeenCalledWith(1, 1);
       expect(mocks.groupMovieReviewsRepository.create).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -185,7 +157,7 @@ describe('GroupMovieReviewsService', () => {
         text: 'Updated text',
       });
 
-      expect(result.rating).toBe('5.0');
+      expect(result.rating).toBe(5);
       expect(result.text).toBe('Updated text');
       expect(mocks.groupMovieReviewsRepository.update).toHaveBeenCalledWith(
         1,
@@ -307,44 +279,6 @@ describe('GroupMovieReviewsService', () => {
       expect(
         mocks.groupMovieReviewsRepository.getStatsByGroupMovieIds,
       ).toHaveBeenCalledWith([1, 2, 3]);
-    });
-  });
-
-  describe('findAll', () => {
-    it('should return review list with average rating', async () => {
-      mocks.groupMoviesService.findById.mockResolvedValue({
-        status: 'watched',
-      });
-      mocks.groupMovieReviewsRepository.findByGroupMovie.mockResolvedValue([
-        mockReview,
-      ]);
-      mocks.groupMovieReviewsRepository.getAverageRating.mockResolvedValue(4.5);
-
-      const result = await service.findAll(1, 1);
-
-      expect(result).toEqual({
-        items: [mockReview],
-        averageRating: 4.5,
-        totalCount: 1,
-      });
-    });
-
-    it('should return null averageRating if no reviews', async () => {
-      mocks.groupMoviesService.findById.mockResolvedValue({
-        status: 'watched',
-      });
-      mocks.groupMovieReviewsRepository.findByGroupMovie.mockResolvedValue([]);
-      mocks.groupMovieReviewsRepository.getAverageRating.mockResolvedValue(
-        null,
-      );
-
-      const result = await service.findAll(1, 1);
-
-      expect(result).toEqual({
-        items: [],
-        averageRating: null,
-        totalCount: 0,
-      });
     });
   });
 });

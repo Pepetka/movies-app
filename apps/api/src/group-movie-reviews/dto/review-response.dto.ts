@@ -1,4 +1,4 @@
-import { Expose, Transform } from 'class-transformer';
+import { Expose, Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class ReviewResponseDto {
@@ -19,9 +19,9 @@ export class ReviewResponseDto {
   userName: string;
 
   @Expose()
-  @Transform(({ value }) => parseFloat(value), { toPlainOnly: true })
+  @Type(() => Number)
   @ApiProperty({ type: Number })
-  rating: string;
+  rating: number;
 
   @Expose()
   @ApiProperty({ type: String, nullable: true })

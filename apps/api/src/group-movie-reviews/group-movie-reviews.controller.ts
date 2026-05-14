@@ -1,6 +1,5 @@
 import {
   Controller,
-  Get,
   Post,
   Patch,
   Delete,
@@ -24,12 +23,7 @@ import { GroupMemberGuard } from '$src/groups/guards';
 import type { GroupMovieReview } from '$db/schemas';
 import { User, Review } from '$common/decorators';
 
-import {
-  CreateReviewDto,
-  UpdateReviewDto,
-  ReviewResponseDto,
-  ReviewListResponseDto,
-} from './dto';
+import { CreateReviewDto, UpdateReviewDto, ReviewResponseDto } from './dto';
 import { GroupMovieReviewsService } from './group-movie-reviews.service';
 import { ReviewAuthorGuard } from './guards';
 
@@ -40,55 +34,6 @@ export class GroupMovieReviewsController {
   constructor(
     private readonly groupMovieReviewsService: GroupMovieReviewsService,
   ) {}
-
-  @Get()
-  @UseGuards(GroupMemberGuard)
-  @SerializeOptions({ type: ReviewListResponseDto })
-  @ApiOperation({
-    summary: 'Get all reviews for a group movie (Group members only)',
-  })
-  @ApiParam({ name: 'groupId', description: 'Group ID' })
-  @ApiParam({ name: 'groupMovieId', description: 'Group Movie ID' })
-  @ApiResponse({
-    status: 200,
-    description: 'List of reviews with average rating',
-    type: ReviewListResponseDto,
-  })
-  @ApiResponse({ status: 403, description: 'Forbidden - Not a group member' })
-  async findAll(
-    @Param('groupId', ParseIntPipe) groupId: number,
-    @Param('groupMovieId', ParseIntPipe) groupMovieId: number,
-    @User('id') userId: number,
-  ): Promise<ReviewListResponseDto> {
-    return this.groupMovieReviewsService.findAll(groupId, groupMovieId, userId);
-  }
-
-  @Get('my')
-  @UseGuards(GroupMemberGuard)
-  @SerializeOptions({ type: ReviewResponseDto })
-  @ApiOperation({
-    summary: 'Get current user review for a group movie (Group members only)',
-  })
-  @ApiParam({ name: 'groupId', description: 'Group ID' })
-  @ApiParam({ name: 'groupMovieId', description: 'Group Movie ID' })
-  @ApiResponse({
-    status: 200,
-    description: 'Current user review',
-    type: ReviewResponseDto,
-  })
-  @ApiResponse({ status: 404, description: 'Review not found' })
-  @ApiResponse({ status: 403, description: 'Forbidden - Not a group member' })
-  async findMyReview(
-    @Param('groupId', ParseIntPipe) groupId: number,
-    @Param('groupMovieId', ParseIntPipe) groupMovieId: number,
-    @User('id') userId: number,
-  ): Promise<ReviewResponseDto> {
-    return this.groupMovieReviewsService.findMyReviewOrThrow(
-      groupId,
-      groupMovieId,
-      userId,
-    );
-  }
 
   @Post()
   @UseGuards(GroupMemberGuard)

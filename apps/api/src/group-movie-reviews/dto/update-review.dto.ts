@@ -1,4 +1,10 @@
-import { IsNumber, IsOptional, IsString, MaxLength } from 'class-validator';
+import {
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+  MaxLength,
+} from 'class-validator';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 
@@ -13,6 +19,7 @@ export class UpdateReviewDto {
   @ValidateUpdateReview()
   @Type(() => Number)
   @IsOptional()
+  @IsNotEmpty()
   @IsNumber()
   @IsValidReviewRating()
   rating?: number;
