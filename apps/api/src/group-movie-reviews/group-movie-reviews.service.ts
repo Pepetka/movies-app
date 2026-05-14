@@ -5,8 +5,8 @@ import {
   ReviewAlreadyExistsException,
   MovieNotWatchedException,
 } from '$common/exceptions';
+import { GroupMovie, NewGroupMovieReview, GroupMovieReview } from '$db/schemas';
 import { GroupMoviesService } from '$src/group-movies/group-movies.service';
-import { GroupMovie, NewGroupMovieReview } from '$db/schemas';
 import { isUniqueViolation } from '$common/utils';
 import { GroupMovieStatus } from '$common/enums';
 
@@ -14,7 +14,12 @@ import {
   GroupMovieReviewsRepository,
   type GroupMovieReviewWithUser,
 } from './group-movie-reviews.repository';
-import { CreateReviewDto, UpdateReviewDto, ReviewListResponseDto } from './dto';
+import {
+  CreateReviewDto,
+  UpdateReviewDto,
+  ReviewListResponseDto,
+  ReviewResponseDto,
+} from './dto';
 
 @Injectable()
 export class GroupMovieReviewsService {
@@ -45,16 +50,26 @@ export class GroupMovieReviewsService {
     );
   }
 
+  private _mapToResponseDto(
+    review: GroupMovieReviewWithUser,
+    userId?: number,
+  ): ReviewResponseDto {
+    return {
+      ...review,
+      isOwn: userId !== undefined ? review.userId === userId : undefined,
+    } as ReviewResponseDto;
+  }
+
   async findMyReviewOrThrow(
     groupId: number,
     groupMovieId: number,
     userId: number,
-  ): Promise<GroupMovieReviewWithUser> {
+  ): Promise<ReviewResponseDto> {
     const review = await this.findMyReview(groupId, groupMovieId, userId);
     if (!review) {
       throw new ReviewNotFoundException();
     }
-    return review;
+    return this._mapToResponseDto(review, userId);
   }
 
   async create(
@@ -109,6 +124,7 @@ export class GroupMovieReviewsService {
     groupMovieId: number,
     userId: number,
     dto: UpdateReviewDto,
+    existingReview?: GroupMovieReview,
   ): Promise<GroupMovieReviewWithUser> {
     const groupMovie = await this._verifyGroupMovieOrThrow(
       groupId,
@@ -119,10 +135,12 @@ export class GroupMovieReviewsService {
       throw new MovieNotWatchedException();
     }
 
-    const review = await this.groupMovieReviewsRepository.findOne(id);
+    if (!existingReview || existingReview.groupMovieId !== groupMovieId) {
+      const review = await this.groupMovieReviewsRepository.findOne(id);
 
-    if (!review || review.groupMovieId !== groupMovieId) {
-      throw new ReviewNotFoundException();
+      if (!review || review.groupMovieId !== groupMovieId) {
+        throw new ReviewNotFoundException();
+      }
     }
 
     const updateData: Partial<NewGroupMovieReview> = {};
@@ -148,13 +166,16 @@ export class GroupMovieReviewsService {
     groupId: number,
     groupMovieId: number,
     userId: number,
+    existingReview?: GroupMovieReview,
   ): Promise<void> {
     await this._verifyGroupMovieOrThrow(groupId, groupMovieId);
 
-    const review = await this.groupMovieReviewsRepository.findOne(id);
+    if (!existingReview || existingReview.groupMovieId !== groupMovieId) {
+      const review = await this.groupMovieReviewsRepository.findOne(id);
 
-    if (!review || review.groupMovieId !== groupMovieId) {
-      throw new ReviewNotFoundException();
+      if (!review || review.groupMovieId !== groupMovieId) {
+        throw new ReviewNotFoundException();
+      }
     }
 
     await this.groupMovieReviewsRepository.delete(id);
@@ -177,6 +198,7 @@ export class GroupMovieReviewsService {
   async findAll(
     groupId: number,
     groupMovieId: number,
+    userId?: number,
   ): Promise<ReviewListResponseDto> {
     await this._verifyGroupMovieOrThrow(groupId, groupMovieId);
 
@@ -186,7 +208,7 @@ export class GroupMovieReviewsService {
     ]);
 
     return {
-      items,
+      items: items.map((r) => this._mapToResponseDto(r, userId)),
       averageRating,
       totalCount: items.length,
     };

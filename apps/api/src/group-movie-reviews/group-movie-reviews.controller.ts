@@ -21,7 +21,8 @@ import {
 } from '@nestjs/swagger';
 
 import { GroupMemberGuard } from '$src/groups/guards';
-import { User } from '$common/decorators';
+import type { GroupMovieReview } from '$db/schemas';
+import { User, Review } from '$common/decorators';
 
 import {
   CreateReviewDto,
@@ -57,8 +58,9 @@ export class GroupMovieReviewsController {
   async findAll(
     @Param('groupId', ParseIntPipe) groupId: number,
     @Param('groupMovieId', ParseIntPipe) groupMovieId: number,
+    @User('id') userId: number,
   ): Promise<ReviewListResponseDto> {
-    return this.groupMovieReviewsService.findAll(groupId, groupMovieId);
+    return this.groupMovieReviewsService.findAll(groupId, groupMovieId, userId);
   }
 
   @Get('my')
@@ -106,7 +108,11 @@ export class GroupMovieReviewsController {
   @ApiResponse({ status: 403, description: 'Forbidden - Not a group member' })
   @ApiResponse({
     status: 409,
-    description: 'You have already reviewed this movie or movie not watched',
+    description: 'Review already exists',
+  })
+  @ApiResponse({
+    status: 422,
+    description: 'Movie not watched',
   })
   async create(
     @Param('groupId', ParseIntPipe) groupId: number,
@@ -140,7 +146,7 @@ export class GroupMovieReviewsController {
   @ApiResponse({ status: 403, description: 'Forbidden' })
   @ApiResponse({ status: 404, description: 'Review not found' })
   @ApiResponse({
-    status: 409,
+    status: 422,
     description: 'Movie not watched',
   })
   async update(
@@ -149,6 +155,7 @@ export class GroupMovieReviewsController {
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: UpdateReviewDto,
     @User('id') userId: number,
+    @Review() review: GroupMovieReview,
   ): Promise<ReviewResponseDto> {
     return this.groupMovieReviewsService.update(
       id,
@@ -156,6 +163,7 @@ export class GroupMovieReviewsController {
       groupMovieId,
       userId,
       dto,
+      review,
     );
   }
 
@@ -176,12 +184,14 @@ export class GroupMovieReviewsController {
     @Param('groupMovieId', ParseIntPipe) groupMovieId: number,
     @Param('id', ParseIntPipe) id: number,
     @User('id') userId: number,
+    @Review() review: GroupMovieReview,
   ): Promise<void> {
     return this.groupMovieReviewsService.delete(
       id,
       groupId,
       groupMovieId,
       userId,
+      review,
     );
   }
 }

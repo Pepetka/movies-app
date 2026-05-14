@@ -43,7 +43,7 @@ export class GroupMovieReviewsRepository {
       .limit(1);
 
     if (!result) {
-      throw new Error('Review not found after create');
+      throw new InternalServerErrorException('Review not found after create');
     }
     return result;
   }
