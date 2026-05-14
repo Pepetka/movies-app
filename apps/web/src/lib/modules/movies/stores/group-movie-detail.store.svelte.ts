@@ -92,12 +92,11 @@ class GroupMovieDetailStore extends BaseStore {
 	}
 
 	async fetchMovie(groupId: number, movieId: number): Promise<void> {
-		const shouldSkip = untrack(() => {
+		return untrack(async () => {
 			const key = ['group-movie', groupId, movieId];
-			return this._query.isCurrentKey(key) && (this.isLoaded || this.isFetching);
+			if (this._query.isCurrentKey(key) && (this.isLoaded || this.isFetching)) return;
+			await this._query.revalidate(key, { groupId, movieId });
 		});
-		if (shouldSkip) return;
-		await this._query.revalidate(['group-movie', groupId, movieId], { groupId, movieId });
 	}
 
 	abort(): void {
