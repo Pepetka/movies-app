@@ -300,7 +300,7 @@
 		left: 0;
 		right: 0;
 		bottom: calc(-1 * var(--drawer-bottom-offset));
-		max-height: 95dvh;
+		max-height: calc(95dvh + var(--drawer-bottom-offset));
 		width: 100%;
 		padding-bottom: var(--drawer-bottom-offset);
 		border-radius: var(--radius-2xl) var(--radius-2xl) 0 0;

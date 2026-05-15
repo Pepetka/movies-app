@@ -336,18 +336,21 @@ describe('Group Movies E2E', () => {
         .expect(400);
     });
 
-    it('should reject planned status without watchDate', async () => {
+    it('should allow planned status without watchDate', async () => {
       const { accessToken } = await registerUserViaApi(
         app,
         'nodate@example.com',
       );
       const group = await createGroup(app, accessToken, 'No Date Group');
 
-      await request(app.getHttpServer())
+      const res = await request(app.getHttpServer())
         .post(`/groups/${group.id}/movies/custom`)
         .set('Authorization', `Bearer ${accessToken}`)
         .send({ title: 'No Date Movie', status: 'planned' })
-        .expect(400);
+        .expect(201);
+
+      expect(res.body.status).toBe('planned');
+      expect(res.body.watchDate).toBeNull();
     });
 
     it('should reject watched status without watchDate', async () => {
