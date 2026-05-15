@@ -1,5 +1,18 @@
 # web
 
+## 0.22.0
+
+### Minor Changes
+
+- 44af4d5: Relaxed planned date validation and fixed text overflow across pages
+  - Status form now allows setting `planned` without specifying a watch date
+  - Fixed long words breaking layout in group descriptions, movie overviews, and review comments
+
+### Patch Changes
+
+- Updated dependencies [44af4d5]
+  - @repo/ui@0.12.0
+
 ## 0.21.0
 
 ### Minor Changes
