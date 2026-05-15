@@ -1,5 +1,12 @@
 # api
 
+## 0.13.0
+
+### Minor Changes
+
+- 44af4d5: Made planned movie watchDate optional
+  - `planned` status no longer requires a `watchDate`; only `watched` enforces the date constraint
+
 ## 0.12.0
 
 ### Minor Changes
