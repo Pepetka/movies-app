@@ -323,6 +323,7 @@
 		line-clamp: 2;
 		-webkit-box-orient: vertical;
 		overflow: hidden;
+		overflow-wrap: anywhere;
 	}
 
 	.group-page__content {
@@ -341,5 +342,6 @@
 		margin: 0;
 		color: var(--text-secondary);
 		line-height: var(--leading-relaxed);
+		overflow-wrap: anywhere;
 	}
 </style>

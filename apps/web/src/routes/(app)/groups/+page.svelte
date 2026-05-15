@@ -138,6 +138,7 @@
 		line-clamp: 2;
 		-webkit-box-orient: vertical;
 		overflow: hidden;
+		overflow-wrap: anywhere;
 	}
 
 	.group-item__subtitle {
@@ -147,6 +148,7 @@
 		overflow: hidden;
 		text-overflow: ellipsis;
 		white-space: nowrap;
+		overflow-wrap: anywhere;
 	}
 
 	.group-item__skeleton {

@@ -338,6 +338,7 @@
 		color: var(--text-primary);
 		line-height: var(--leading-relaxed);
 		white-space: pre-wrap;
+		overflow-wrap: anywhere;
 	}
 
 	.movie-header__rating {
@@ -364,5 +365,6 @@
 		margin: 0;
 		color: var(--text-secondary);
 		line-height: var(--leading-relaxed);
+		overflow-wrap: anywhere;
 	}
 </style>

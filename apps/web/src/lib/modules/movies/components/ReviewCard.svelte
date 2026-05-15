@@ -149,5 +149,6 @@
 		color: var(--text-primary);
 		line-height: var(--leading-relaxed);
 		white-space: pre-wrap;
+		overflow-wrap: anywhere;
 	}
 </style>
