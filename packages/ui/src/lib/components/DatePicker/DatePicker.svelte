@@ -87,9 +87,14 @@
 
 	const selectDate = (day: Date) => {
 		if (calendarLogic.isDateDisabled(day)) return;
-		value = new Date(day);
-		onChange?.(value);
-		if (!inline) isOpen = false;
+		if (value && calendarLogic.isSameDay(day, value)) {
+			value = null;
+			onChange?.(null);
+		} else {
+			value = new Date(day);
+			onChange?.(value);
+			if (!inline) isOpen = false;
+		}
 	};
 
 	const { handleKeydown } = useKeyboardNavigation({
