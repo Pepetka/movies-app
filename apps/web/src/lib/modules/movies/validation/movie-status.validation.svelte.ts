@@ -17,7 +17,7 @@ export const movieStatusSchema = z
 		status: z.enum(['tracking', 'planned', 'watched']),
 		watchDate: z.date().nullable()
 	})
-	.refine((data) => !['planned', 'watched'].includes(data.status) || data.watchDate, {
+	.refine((data) => data.status !== 'watched' || data.watchDate, {
 		message: 'Укажите дату просмотра',
 		path: ['watchDate']
 	})
