@@ -1,0 +1,1 @@
+ALTER TABLE "group_movies" DROP CONSTRAINT "planned_requires_watch_date";

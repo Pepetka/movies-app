@@ -24,11 +24,7 @@ export class IsValidMovieStatusConstraint implements ValidatorConstraintInterfac
 
     const { status, watchDate } = object;
 
-    if (
-      (status === GroupMovieStatus.PLANNED ||
-        status === GroupMovieStatus.WATCHED) &&
-      !watchDate
-    ) {
+    if (status === GroupMovieStatus.WATCHED && !watchDate) {
       return false;
     }
 
@@ -44,7 +40,7 @@ export class IsValidMovieStatusConstraint implements ValidatorConstraintInterfac
   }
 
   defaultMessage(): string {
-    return 'Invalid status/date combination: planned and watched require watchDate, tracking cannot have a date';
+    return 'Invalid status/date combination: watched requires watchDate, tracking cannot have a date';
   }
 }
 

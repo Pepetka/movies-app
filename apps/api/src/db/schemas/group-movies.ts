@@ -61,10 +61,6 @@ export const groupMovies = pgTable(
       sql`((${table.source} = 'provider' AND ${table.movieId} IS NOT NULL) OR (${table.source} = 'custom' AND ${table.movieId} IS NULL))`,
     ),
     check(
-      'planned_requires_watch_date',
-      sql`(${table.status} != 'planned' OR ${table.watchDate} IS NOT NULL)`,
-    ),
-    check(
       'watched_requires_watch_date',
       sql`(${table.status} != 'watched' OR ${table.watchDate} IS NOT NULL)`,
     ),
