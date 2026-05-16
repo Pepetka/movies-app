@@ -69,10 +69,10 @@ export const validateProfileForm = createValidator(profileSchema);
 
 export const profileFormToDto = (form: ProfileFormData): UserUpdateDto => ({
 	name: form.name,
-	avatar: trimToUndefined(form.avatarUrl)
+	avatar: form.avatarUrl?.trim() || null
 });
 
 export const profileFormFromEntity = (user: UserResponseDto): ProfileFormData => ({
-	name: user.name ?? '',
+	name: user.name,
 	avatarUrl: user.avatar ?? ''
 });

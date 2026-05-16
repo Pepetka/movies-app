@@ -1,18 +1,17 @@
 <script lang="ts">
 	import { Avatar, Button, Card, Input, toast } from '@repo/ui';
 	import { Pencil, Save, Undo2, Image } from '@lucide/svelte';
-	import { untrack } from 'svelte';
+	import { onDestroy, untrack } from 'svelte';
 
 	import {
 		EMPTY_PROFILE_FORM,
 		profileFormFromEntity,
 		profileFormToDto,
 		validateProfileForm,
-		type ProfileFormData
+		type ProfileFormData,
+		authStore
 	} from '$lib/modules/auth';
 	import { createFormFieldValidator } from '$lib/utils';
-	import { authStore } from '$lib/modules/auth';
-	import { queryRegistry } from '$lib/query';
 	import { topBarStore } from '$lib/stores';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
@@ -49,24 +48,11 @@
 
 	let isEditing = $state(false);
 	let form = $state<ProfileFormData>({ ...EMPTY_PROFILE_FORM });
-	let isFormInitialized = $state(false);
 	const fieldValidator = createFormFieldValidator(validateProfileForm);
 
-	$effect(() => {
-		if (authStore.user && isEditing && !isFormInitialized) {
-			untrack(() => {
-				form = profileFormFromEntity(authStore.user!);
-				isFormInitialized = true;
-			});
-		}
-	});
-
-	$effect(() => {
-		return () => {
-			fieldValidator.cancel();
-			authStore.resetProfileForm();
-			isFormInitialized = false;
-		};
+	onDestroy(() => {
+		fieldValidator.cancel();
+		authStore.resetProfileForm();
 	});
 
 	const handleEdit = () => {
@@ -81,7 +67,6 @@
 		isEditing = false;
 		fieldValidator.reset();
 		authStore.resetProfileForm();
-		isFormInitialized = false;
 	};
 
 	const handleSubmit = async (e: Event) => {
@@ -97,7 +82,6 @@
 		if (authStore.isUpdateProfileSuccess) {
 			toast.success('Профиль обновлён');
 			isEditing = false;
-			queryRegistry.invalidateByKey(['currentUser']);
 		} else {
 			toast.error(authStore.updateProfileError ?? 'Ошибка обновления профиля');
 		}
@@ -111,11 +95,11 @@
 <div class="profile-page">
 	{#if authStore.user}
 		{#if !isEditing}
-			<div class="view-mode">
-				<div class="user-info">
+			<div class="profile-page__view-mode">
+				<div class="profile-page__user-info">
 					<Avatar src={authStore.user.avatar} name={authStore.user.name} size="xl" />
-					<p class="name">{authStore.user.name}</p>
-					<p class="email">{authStore.user.email}</p>
+					<p class="profile-page__name">{authStore.user.name}</p>
+					<p class="profile-page__email">{authStore.user.email}</p>
 				</div>
 				<Button variant="secondary" onclick={handleEdit}>
 					<Pencil size={16} />
@@ -125,7 +109,7 @@
 		{:else}
 			<div class="form-page">
 				<div class="form-branding">
-					<div class="profile-form-avatar-header">
+					<div class="profile-page__avatar-header">
 						<Avatar src={form.avatarUrl || undefined} name={form.name} size="xl" />
 					</div>
 					<h1 class="form-title">Редактирование профиля</h1>
@@ -162,7 +146,7 @@
 							onChange={() => fieldValidator.handleFieldChange(form, 'avatarUrl')}
 						/>
 
-						<div class="form-actions">
+						<div class="profile-page__form-actions">
 							<Button
 								type="submit"
 								variant="primary"
@@ -188,7 +172,7 @@
 			</div>
 		{/if}
 	{:else}
-		<p class="empty">Загрузка профиля...</p>
+		<p class="profile-page__empty">Загрузка профиля...</p>
 	{/if}
 </div>
 
@@ -201,42 +185,42 @@
 		text-align: center;
 	}
 
-	.view-mode {
+	.profile-page__view-mode {
 		display: flex;
 		flex-direction: column;
 		align-items: center;
 		gap: var(--space-6);
 	}
 
-	.user-info {
+	.profile-page__user-info {
 		display: flex;
 		flex-direction: column;
 		align-items: center;
 		gap: var(--space-3);
 	}
 
-	.name {
+	.profile-page__name {
 		font-size: var(--text-lg);
 		font-weight: var(--font-medium);
 		color: var(--text-primary);
 		margin: 0;
 	}
 
-	.email {
+	.profile-page__email {
 		font-size: var(--text-sm);
 		color: var(--text-secondary);
 		margin: 0;
 	}
 
-	.empty {
+	.profile-page__empty {
 		color: var(--text-secondary);
 	}
 
-	.profile-form-avatar-header {
+	.profile-page__avatar-header {
 		margin-bottom: var(--space-4);
 	}
 
-	.form-actions {
+	.profile-page__form-actions {
 		display: flex;
 		flex-direction: column;
 		gap: var(--space-2);
