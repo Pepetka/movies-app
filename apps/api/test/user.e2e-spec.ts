@@ -243,6 +243,18 @@ describe('User E2E', () => {
       );
     });
 
+    it('should clear avatar when empty string provided', async () => {
+      const { accessToken, userId } = await registerUser('user9@example.com');
+
+      const response = await request(app.getHttpServer())
+        .patch(`/users/${userId}`)
+        .set('Authorization', `Bearer ${accessToken}`)
+        .send({ avatar: '' })
+        .expect(200);
+
+      expect(response.body).toHaveProperty('avatar', null);
+    });
+
     it('should allow admin to update any user', async () => {
       const { userId: targetUserId } = await registerUser(
         'target2@example.com',
