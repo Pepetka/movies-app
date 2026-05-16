@@ -1527,7 +1527,11 @@
 				"type": "object",
 				"properties": {
 					"name": { "type": "string", "example": "John Doe" },
-					"avatar": { "type": "string", "example": "https://example.com/avatar.jpg" }
+					"avatar": {
+						"type": "string",
+						"example": "https://example.com/avatar.jpg",
+						"nullable": true
+					}
 				}
 			},
 			"AuthRegisterDto": {

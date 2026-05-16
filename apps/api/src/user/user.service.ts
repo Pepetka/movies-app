@@ -137,6 +137,7 @@ export class UserService {
       updateData.name = dto.name;
     }
     if (dto.avatar !== undefined) {
+      // Normalize empty string to null to clear avatar
       updateData.avatar = dto.avatar || null;
     }
 
