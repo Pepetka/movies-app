@@ -28,6 +28,22 @@ export type GroupMemberWithUser = {
 export class GroupsRepository {
   constructor(@Inject(DRIZZLE) private readonly db: DrizzleDb) {}
 
+  private _memberWithUserColumns() {
+    return {
+      id: groupMembers.id,
+      groupId: groupMembers.groupId,
+      userId: groupMembers.userId,
+      role: groupMembers.role,
+      createdAt: groupMembers.createdAt,
+      updatedAt: groupMembers.updatedAt,
+      user: {
+        id: users.id,
+        name: users.name,
+        avatar: users.avatar,
+      },
+    };
+  }
+
   async createGroup(data: NewGroup): Promise<Group> {
     const [result] = await this.db.insert(groups).values(data).returning();
     return result;
@@ -132,19 +148,7 @@ export class GroupsRepository {
     groupId: number,
   ): Promise<GroupMemberWithUser[]> {
     return this.db
-      .select({
-        id: groupMembers.id,
-        groupId: groupMembers.groupId,
-        userId: groupMembers.userId,
-        role: groupMembers.role,
-        createdAt: groupMembers.createdAt,
-        updatedAt: groupMembers.updatedAt,
-        user: {
-          id: users.id,
-          name: users.name,
-          avatar: users.avatar,
-        },
-      })
+      .select(this._memberWithUserColumns())
       .from(groupMembers)
       .innerJoin(users, eq(groupMembers.userId, users.id))
       .where(eq(groupMembers.groupId, groupId))
@@ -156,19 +160,7 @@ export class GroupsRepository {
     userId: number,
   ): Promise<GroupMemberWithUser | null> {
     const [result] = await this.db
-      .select({
-        id: groupMembers.id,
-        groupId: groupMembers.groupId,
-        userId: groupMembers.userId,
-        role: groupMembers.role,
-        createdAt: groupMembers.createdAt,
-        updatedAt: groupMembers.updatedAt,
-        user: {
-          id: users.id,
-          name: users.name,
-          avatar: users.avatar,
-        },
-      })
+      .select(this._memberWithUserColumns())
       .from(groupMembers)
       .innerJoin(users, eq(groupMembers.userId, users.id))
       .where(
