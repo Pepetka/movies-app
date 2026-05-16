@@ -21,7 +21,7 @@ export type GroupMemberWithUser = {
   role: GroupMember['role'];
   createdAt: Date;
   updatedAt: Date;
-  user: { id: number; name: string };
+  user: { id: number; name: string; avatar: string | null };
 };
 
 @Injectable()
@@ -142,6 +142,7 @@ export class GroupsRepository {
         user: {
           id: users.id,
           name: users.name,
+          avatar: users.avatar,
         },
       })
       .from(groupMembers)
@@ -165,6 +166,7 @@ export class GroupsRepository {
         user: {
           id: users.id,
           name: users.name,
+          avatar: users.avatar,
         },
       })
       .from(groupMembers)

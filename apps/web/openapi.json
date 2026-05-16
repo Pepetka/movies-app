@@ -1527,8 +1527,7 @@
 				"type": "object",
 				"properties": {
 					"name": { "type": "string", "example": "John Doe" },
-					"email": { "type": "string", "example": "john@example.com" },
-					"password": { "type": "string", "example": "NewSecurePass123!" }
+					"avatar": { "type": "string", "example": "https://example.com/avatar.jpg" }
 				}
 			},
 			"AuthRegisterDto": {
@@ -1712,8 +1711,12 @@
 			},
 			"GroupMemberUserDto": {
 				"type": "object",
-				"properties": { "id": { "type": "number" }, "name": { "type": "string" } },
-				"required": ["id", "name"]
+				"properties": {
+					"id": { "type": "number" },
+					"name": { "type": "string" },
+					"avatar": { "type": "string", "nullable": true }
+				},
+				"required": ["id", "name", "avatar"]
 			},
 			"GroupMemberResponseDto": {
 				"type": "object",
@@ -1806,6 +1809,7 @@
 					"groupMovieId": { "type": "number" },
 					"userId": { "type": "number" },
 					"userName": { "type": "string" },
+					"userAvatar": { "type": "string", "nullable": true },
 					"rating": { "type": "number" },
 					"text": { "type": "string", "nullable": true },
 					"createdAt": { "format": "date-time", "type": "string" },
@@ -1817,6 +1821,7 @@
 					"groupMovieId",
 					"userId",
 					"userName",
+					"userAvatar",
 					"rating",
 					"text",
 					"createdAt",

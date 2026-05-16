@@ -16,6 +16,7 @@ import { DRIZZLE } from '$db/db.module';
 
 export interface GroupMovieReviewWithUser extends GroupMovieReview {
   userName: string;
+  userAvatar: string | null;
 }
 
 @Injectable()
@@ -33,6 +34,7 @@ export class GroupMovieReviewsRepository {
         .select({
           ...getTableColumns(groupMovieReviews),
           userName: users.name,
+          userAvatar: users.avatar,
         })
         .from(groupMovieReviews)
         .innerJoin(users, eq(groupMovieReviews.userId, users.id))
@@ -55,6 +57,7 @@ export class GroupMovieReviewsRepository {
       .select({
         ...getTableColumns(groupMovieReviews),
         userName: users.name,
+        userAvatar: users.avatar,
       })
       .from(groupMovieReviews)
       .innerJoin(users, eq(groupMovieReviews.userId, users.id))
@@ -76,6 +79,7 @@ export class GroupMovieReviewsRepository {
       .select({
         ...getTableColumns(groupMovieReviews),
         userName: users.name,
+        userAvatar: users.avatar,
       })
       .from(groupMovieReviews)
       .innerJoin(users, eq(groupMovieReviews.userId, users.id))
@@ -92,6 +96,7 @@ export class GroupMovieReviewsRepository {
       .select({
         ...getTableColumns(groupMovieReviews),
         userName: users.name,
+        userAvatar: users.avatar,
       })
       .from(groupMovieReviews)
       .innerJoin(users, eq(groupMovieReviews.userId, users.id))
@@ -120,6 +125,7 @@ export class GroupMovieReviewsRepository {
         .select({
           ...getTableColumns(groupMovieReviews),
           userName: users.name,
+          userAvatar: users.avatar,
         })
         .from(groupMovieReviews)
         .innerJoin(users, eq(groupMovieReviews.userId, users.id))

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Pencil, Trash2 } from '@lucide/svelte';
-	import { Badge } from '@repo/ui';
+	import { Avatar, Badge } from '@repo/ui';
 
 	import type { ReviewResponseDto } from '$lib/api/generated/types';
 	import { formatDate } from '$lib/utils';
@@ -20,6 +20,7 @@
 <div class="review-card" class:own={isOwn}>
 	<div class="review-card__header">
 		<div class="review-card__author">
+			<Avatar src={review.userAvatar} name={review.userName} size="sm" />
 			<span class="review-card__name">{review.userName ?? 'Пользователь'}</span>
 			{#if isOwn}
 				<Badge variant="primary" size="sm">Ваш отзыв</Badge>

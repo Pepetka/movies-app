@@ -7,14 +7,15 @@ import {
 	type MutationResult,
 	type QueryResult
 } from '$lib/query';
-import type { AuthLoginDto, UserResponseDto } from '$lib/api/generated/types';
+import type { AuthLoginDto, UserResponseDto, UserUpdateDto } from '$lib/api/generated/types';
 import { BaseStore } from '$lib/stores/base.svelte';
 
 import {
 	getCurrentUser,
 	login as apiLogin,
 	logout as apiLogout,
-	refreshTokens as apiRefreshTokens
+	refreshTokens as apiRefreshTokens,
+	updateUser as apiUpdateUser
 } from '../api';
 import type { AuthStatus } from '../types';
 
@@ -22,6 +23,10 @@ class AuthStore extends BaseStore {
 	private readonly _query: QueryResult<UserResponseDto>;
 	private readonly _loginMutation: MutationResult<void, AuthLoginDto>;
 	private readonly _oauthSuccessMutation: MutationResult<void, void>;
+	private readonly _updateProfileMutation: MutationResult<
+		UserResponseDto,
+		{ id: number; data: UserUpdateDto }
+	>;
 	private _checkAuthPromise: Promise<void> | null = null;
 
 	isInitialized = $state(false);
@@ -51,6 +56,16 @@ class AuthStore extends BaseStore {
 			mutator: async () => {
 				await apiRefreshTokens();
 			},
+			debug: !__IS_PROD__
+		});
+
+		this._updateProfileMutation = createMutation<
+			UserResponseDto,
+			{ id: number; data: UserUpdateDto }
+		>({
+			key: ['auth', 'updateProfile'],
+			tags: ['user'],
+			mutator: ({ id, data }) => apiUpdateUser(id, data),
 			debug: !__IS_PROD__
 		});
 	}
@@ -119,6 +134,32 @@ class AuthStore extends BaseStore {
 		await untrack(() => this._oauthSuccessMutation.mutate());
 	}
 
+	// === Update profile mutation ===
+
+	get isUpdatingProfile(): boolean {
+		return this._updateProfileMutation.isSubmitting;
+	}
+
+	get isUpdateProfileSuccess(): boolean {
+		return this._updateProfileMutation.isSuccess;
+	}
+
+	get updateProfileError(): string | null {
+		if (!this._updateProfileMutation.error) return null;
+		return this._extractErrorMessage(
+			this._updateProfileMutation.error,
+			'Ошибка обновления профиля'
+		);
+	}
+
+	async updateProfile(id: number, data: UserUpdateDto): Promise<UserResponseDto | null> {
+		return untrack(() => this._updateProfileMutation.mutate({ id, data }));
+	}
+
+	resetProfileForm(): void {
+		this._updateProfileMutation.reset();
+	}
+
 	// === Logout ===
 
 	async logout(): Promise<void> {
@@ -166,6 +207,7 @@ class AuthStore extends BaseStore {
 	resetForm(): void {
 		this._loginMutation.reset();
 		this._oauthSuccessMutation.reset();
+		this._updateProfileMutation.reset();
 	}
 }
 

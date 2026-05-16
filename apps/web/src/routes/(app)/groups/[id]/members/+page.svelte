@@ -234,7 +234,7 @@
 				{@const user = member.user}
 				{@const isCurrentUser = member.userId === authStore.user?.id}
 				<li class="member-item">
-					<Avatar name={user.name} size="md" />
+					<Avatar src={user.avatar} name={user.name} size="md" />
 					<div class="member-item__info">
 						<span class="member-item__name">
 							<span class="member-item__name-text">{user.name}</span>

@@ -120,12 +120,11 @@ export class UserService {
   }
 
   /**
-   * Updates user data
+   * Updates user profile data (name and avatar only)
    * @param id - User ID
    * @param dto - User update data
    * @returns Updated user object
    * @throws NotFoundException if user not found
-   * @throws EmailAlreadyInUseException if email already exists
    */
   async update(id: number, dto: UserUpdateDto): Promise<User> {
     const user = await this._userRepository.findById(id);
@@ -133,25 +132,12 @@ export class UserService {
       throw new NotFoundException(`User with id ${id} not found`);
     }
 
-    const normalizedEmail = dto.email?.toLowerCase().trim();
-
-    if (normalizedEmail && normalizedEmail !== user.email) {
-      const existingUser =
-        await this._userRepository.findByEmail(normalizedEmail);
-      if (existingUser) {
-        throw new EmailAlreadyInUseException(normalizedEmail);
-      }
-    }
-
     const updateData: Partial<NewUser> = {};
     if (dto.name) {
       updateData.name = dto.name;
     }
-    if (normalizedEmail) {
-      updateData.email = normalizedEmail;
-    }
-    if (dto.password) {
-      updateData.passwordHash = await this._hashPassword(dto.password);
+    if (dto.avatar !== undefined) {
+      updateData.avatar = dto.avatar || null;
     }
 
     const updatedUser = await this._userRepository.update(id, updateData);

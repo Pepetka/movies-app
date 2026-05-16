@@ -2,13 +2,15 @@ import {
 	authControllerLoginV1,
 	authControllerLogoutV1,
 	authControllerRefreshV1,
-	userControllerGetMeV1
+	userControllerGetMeV1,
+	userControllerUpdateV1
 } from '$lib/api/generated/api';
 import type {
 	AuthLoginDto,
 	AuthResponseDto,
 	AuthProvider,
-	UserResponseDto
+	UserResponseDto,
+	UserUpdateDto
 } from '$lib/api/generated/types';
 import { httpClient } from '$lib/api/client';
 
@@ -24,6 +26,14 @@ export const logout = async (): Promise<void> => {
 
 export const getCurrentUser = async (signal?: AbortSignal): Promise<UserResponseDto> => {
 	return userControllerGetMeV1({ signal });
+};
+
+export const updateUser = async (
+	id: number,
+	data: UserUpdateDto,
+	signal?: AbortSignal
+): Promise<UserResponseDto> => {
+	return userControllerUpdateV1(id, data, { signal });
 };
 
 export const refreshTokens = async (): Promise<AuthResponseDto> => {

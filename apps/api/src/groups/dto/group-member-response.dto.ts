@@ -11,6 +11,10 @@ export class GroupMemberUserDto {
   @Expose()
   @ApiProperty()
   name: string;
+
+  @Expose()
+  @ApiProperty({ type: String, nullable: true })
+  avatar: string | null;
 }
 
 export class GroupMemberResponseDto {
