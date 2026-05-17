@@ -3,7 +3,7 @@ export type { AuthStatus, ValidationResult } from './types';
 export type { AuthProvider } from '$lib/api/generated/types';
 
 // API
-export { refreshTokens, buildOAuthRedirectUrl, updateUser } from './api';
+export { refreshTokens, buildOAuthRedirectUrl } from './api';
 
 // Components
 export { OAuthSection } from './components';
@@ -20,12 +20,7 @@ export {
 	checkPasswordStrength,
 	EMPTY_LOGIN_FORM,
 	loginFormToDto,
-	type LoginFormData,
-	validateProfileForm,
-	EMPTY_PROFILE_FORM,
-	profileFormToDto,
-	profileFormFromEntity,
-	type ProfileFormData
+	type LoginFormData
 } from './validation';
 
 // Re-export createFormFieldValidator for convenience

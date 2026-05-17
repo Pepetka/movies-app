@@ -1,8 +1,7 @@
 import { z } from 'zod';
 
-import { createValidator, trimString, trimToUndefined } from '$lib/utils/validation.svelte';
-import type { AuthLoginDto, UserUpdateDto } from '$lib/api/generated/types';
-import type { UserResponseDto } from '$lib/api/generated/types';
+import { createValidator, trimString } from '$lib/utils/validation.svelte';
+import type { AuthLoginDto } from '$lib/api/generated/types';
 
 export const PASSWORD_PATTERNS = {
 	lowercase: /[a-z]/,
@@ -41,38 +40,4 @@ export const validateLoginForm = createValidator(loginSchema);
 export const loginFormToDto = (form: LoginFormData): AuthLoginDto => ({
 	email: form.email,
 	password: form.password
-});
-
-// === Profile ===
-
-const optionalUrl = z.preprocess(
-	(val) => trimToUndefined(val as string),
-	z.string().url('Некорректный URL').optional()
-);
-
-export const profileSchema = z.object({
-	name: z.preprocess(
-		(val) => trimString(val as string),
-		z.string().min(2, 'Минимум 2 символа').max(100, 'Максимум 100 символов')
-	),
-	avatarUrl: optionalUrl
-});
-
-export type ProfileFormData = z.infer<typeof profileSchema>;
-
-export const EMPTY_PROFILE_FORM: ProfileFormData = {
-	name: '',
-	avatarUrl: ''
-};
-
-export const validateProfileForm = createValidator(profileSchema);
-
-export const profileFormToDto = (form: ProfileFormData): UserUpdateDto => ({
-	name: form.name,
-	avatar: form.avatarUrl?.trim() || null
-});
-
-export const profileFormFromEntity = (user: UserResponseDto): ProfileFormData => ({
-	name: user.name,
-	avatarUrl: user.avatar ?? ''
 });

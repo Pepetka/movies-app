@@ -1,17 +1,17 @@
 <script lang="ts">
 	import { Avatar, Button, Card, Input, toast } from '@repo/ui';
 	import { Pencil, Save, Undo2, Image } from '@lucide/svelte';
-	import { onDestroy, untrack } from 'svelte';
+	import { untrack } from 'svelte';
 
 	import {
 		EMPTY_PROFILE_FORM,
 		profileFormFromEntity,
 		profileFormToDto,
 		validateProfileForm,
-		type ProfileFormData,
-		authStore
-	} from '$lib/modules/auth';
+		type ProfileFormData
+	} from '$lib/modules/profile';
 	import { createFormFieldValidator } from '$lib/utils';
+	import { authStore } from '$lib/modules/auth';
 	import { topBarStore } from '$lib/stores';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
@@ -50,9 +50,11 @@
 	let form = $state<ProfileFormData>({ ...EMPTY_PROFILE_FORM });
 	const fieldValidator = createFormFieldValidator(validateProfileForm);
 
-	onDestroy(() => {
-		fieldValidator.cancel();
-		authStore.resetProfileForm();
+	$effect(() => {
+		return () => {
+			fieldValidator.cancel();
+			authStore.resetProfileForm();
+		};
 	});
 
 	const handleEdit = () => {
@@ -77,9 +79,9 @@
 		fieldValidator.setErrors(validation.errors);
 		if (!validation.isValid) return;
 
-		await authStore.updateProfile(authStore.user.id, profileFormToDto(form));
+		const result = await authStore.updateProfile(authStore.user.id, profileFormToDto(form));
 
-		if (authStore.isUpdateProfileSuccess) {
+		if (result) {
 			toast.success('Профиль обновлён');
 			isEditing = false;
 		} else {

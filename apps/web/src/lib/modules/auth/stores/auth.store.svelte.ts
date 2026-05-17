@@ -8,14 +8,14 @@ import {
 	type QueryResult
 } from '$lib/query';
 import type { AuthLoginDto, UserResponseDto, UserUpdateDto } from '$lib/api/generated/types';
+import { updateUser as apiUpdateUser } from '$lib/modules/profile/api';
 import { BaseStore } from '$lib/stores/base.svelte';
 
 import {
 	getCurrentUser,
 	login as apiLogin,
 	logout as apiLogout,
-	refreshTokens as apiRefreshTokens,
-	updateUser as apiUpdateUser
+	refreshTokens as apiRefreshTokens
 } from '../api';
 import type { AuthStatus } from '../types';
 
@@ -207,6 +207,7 @@ class AuthStore extends BaseStore {
 	resetForm(): void {
 		this._loginMutation.reset();
 		this._oauthSuccessMutation.reset();
+		this._updateProfileMutation.reset();
 	}
 }
 
