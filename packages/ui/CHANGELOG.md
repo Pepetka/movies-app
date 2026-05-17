@@ -1,5 +1,11 @@
 # @repo/ui
 
+## 0.12.1
+
+### Patch Changes
+
+- 129e122: Fix avatar vertical alignment
+
 ## 0.12.0
 
 ### Minor Changes

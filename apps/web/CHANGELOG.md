@@ -1,5 +1,20 @@
 # web
 
+## 0.23.0
+
+### Minor Changes
+
+- 129e122: Extract dedicated profile module from auth and improve avatar and rating UX
+  • Extract dedicated profile module from auth with its own store, mutations, and form normalization
+  • Allow clearing avatar on the profile page and invalidate related group members and movie reviews on update
+  • Improve StarRatingInput rating display and layout
+  • Synchronize AuthProvider enum with generated types and fix validation imports
+
+### Patch Changes
+
+- Updated dependencies [129e122]
+  - @repo/ui@0.12.1
+
 ## 0.22.0
 
 ### Minor Changes
