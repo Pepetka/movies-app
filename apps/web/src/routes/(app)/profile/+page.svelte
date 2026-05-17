@@ -53,7 +53,6 @@
 	$effect(() => {
 		return () => {
 			fieldValidator.cancel();
-			authStore.resetProfileForm();
 		};
 	});
 
@@ -79,9 +78,9 @@
 		fieldValidator.setErrors(validation.errors);
 		if (!validation.isValid) return;
 
-		const result = await authStore.updateProfile(authStore.user.id, profileFormToDto(form));
+		await authStore.updateProfile(authStore.user.id, profileFormToDto(form));
 
-		if (result) {
+		if (authStore.isUpdateProfileSuccess) {
 			toast.success('Профиль обновлён');
 			isEditing = false;
 		} else {
@@ -121,12 +120,12 @@
 				<Card variant="outlined" class="form-card">
 					{#snippet header()}
 						<div class="form-card-header">
-							<h2 class="form-card-title">Данные профиля</h2>
+							<h2 id="profile-form-title" class="form-card-title">Данные профиля</h2>
 							<p class="form-card-subtitle">Обновите информацию о себе</p>
 						</div>
 					{/snippet}
 
-					<form class="form-fields" onsubmit={handleSubmit}>
+					<form class="form-fields" onsubmit={handleSubmit} aria-labelledby="profile-form-title">
 						<Input
 							type="text"
 							label="Имя"
@@ -158,13 +157,7 @@
 								<Save size={16} />
 								Сохранить
 							</Button>
-							<Button
-								type="button"
-								variant="danger"
-								fullWidth
-								disabled={authStore.isUpdatingProfile}
-								onclick={handleCancel}
-							>
+							<Button type="button" variant="secondary" fullWidth onclick={handleCancel}>
 								<Undo2 size={16} />
 								Отмена
 							</Button>
