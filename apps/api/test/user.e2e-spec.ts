@@ -255,6 +255,16 @@ describe('User E2E', () => {
       expect(response.body).toHaveProperty('avatar', null);
     });
 
+    it('should reject invalid avatar URL', async () => {
+      const { accessToken, userId } = await registerUser('user10@example.com');
+
+      await request(app.getHttpServer())
+        .patch(`/users/${userId}`)
+        .set('Authorization', `Bearer ${accessToken}`)
+        .send({ avatar: 'not-a-url' })
+        .expect(400);
+    });
+
     it('should allow admin to update any user', async () => {
       const { userId: targetUserId } = await registerUser(
         'target2@example.com',
