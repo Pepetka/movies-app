@@ -1,4 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { plainToInstance } from 'class-transformer';
 import { NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
@@ -289,7 +290,7 @@ describe('UserService', () => {
     });
 
     it('should clear avatar when empty string provided', async () => {
-      const updateDto: UserUpdateDto = { avatar: '' };
+      const updateDto = plainToInstance(UserUpdateDto, { avatar: '' });
 
       userRepository.findById.mockResolvedValue(mockUser);
       userRepository.update.mockResolvedValue({

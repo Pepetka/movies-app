@@ -133,12 +133,11 @@ export class UserService {
     }
 
     const updateData: Partial<NewUser> = {};
-    if (dto.name) {
+    if (dto.name !== undefined) {
       updateData.name = dto.name;
     }
     if (dto.avatar !== undefined) {
-      // Normalize empty string to null to clear avatar
-      updateData.avatar = dto.avatar || null;
+      updateData.avatar = dto.avatar;
     }
 
     const updatedUser = await this._userRepository.update(id, updateData);
@@ -182,6 +181,10 @@ export class UserService {
    * @param id - User ID
    * @param avatar - Avatar URL or null
    * @param tx - Optional transaction
+   */
+  /**
+   * Updates user's avatar. Intended for OAuth account linkage only.
+   * For general profile updates use `update()` instead.
    */
   async updateAvatar(
     id: number,
