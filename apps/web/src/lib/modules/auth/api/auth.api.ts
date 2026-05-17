@@ -6,8 +6,8 @@ import {
 } from '$lib/api/generated/api';
 import type {
 	AuthLoginDto,
-	AuthResponseDto,
 	AuthProvider,
+	AuthResponseDto,
 	UserResponseDto
 } from '$lib/api/generated/types';
 import { httpClient } from '$lib/api/client';

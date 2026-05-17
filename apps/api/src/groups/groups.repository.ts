@@ -1,5 +1,5 @@
+import { eq, and, count, getTableColumns } from 'drizzle-orm';
 import { Inject, Injectable } from '@nestjs/common';
-import { eq, and, count } from 'drizzle-orm';
 
 import {
   users,
@@ -21,12 +21,23 @@ export type GroupMemberWithUser = {
   role: GroupMember['role'];
   createdAt: Date;
   updatedAt: Date;
-  user: { id: number; name: string };
+  user: { id: number; name: string; avatar: string | null };
 };
 
 @Injectable()
 export class GroupsRepository {
   constructor(@Inject(DRIZZLE) private readonly db: DrizzleDb) {}
+
+  private _memberWithUserColumns() {
+    return {
+      ...getTableColumns(groupMembers),
+      user: {
+        id: users.id,
+        name: users.name,
+        avatar: users.avatar,
+      },
+    };
+  }
 
   async createGroup(data: NewGroup): Promise<Group> {
     const [result] = await this.db.insert(groups).values(data).returning();
@@ -132,18 +143,7 @@ export class GroupsRepository {
     groupId: number,
   ): Promise<GroupMemberWithUser[]> {
     return this.db
-      .select({
-        id: groupMembers.id,
-        groupId: groupMembers.groupId,
-        userId: groupMembers.userId,
-        role: groupMembers.role,
-        createdAt: groupMembers.createdAt,
-        updatedAt: groupMembers.updatedAt,
-        user: {
-          id: users.id,
-          name: users.name,
-        },
-      })
+      .select(this._memberWithUserColumns())
       .from(groupMembers)
       .innerJoin(users, eq(groupMembers.userId, users.id))
       .where(eq(groupMembers.groupId, groupId))
@@ -155,18 +155,7 @@ export class GroupsRepository {
     userId: number,
   ): Promise<GroupMemberWithUser | null> {
     const [result] = await this.db
-      .select({
-        id: groupMembers.id,
-        groupId: groupMembers.groupId,
-        userId: groupMembers.userId,
-        role: groupMembers.role,
-        createdAt: groupMembers.createdAt,
-        updatedAt: groupMembers.updatedAt,
-        user: {
-          id: users.id,
-          name: users.name,
-        },
-      })
+      .select(this._memberWithUserColumns())
       .from(groupMembers)
       .innerJoin(users, eq(groupMembers.userId, users.id))
       .where(

@@ -26,6 +26,16 @@
 
 	const displayValue = $derived(hoverValue || value);
 
+	const formatRatingText = (val: number): string => {
+		if (Number.isInteger(val)) return `${val.toFixed(0)}/5`;
+		return `${val.toFixed(1)}/5`;
+	};
+
+	const formatRatingA11y = (val: number): string => {
+		if (Number.isInteger(val)) return `${val.toFixed(0)} из 5`;
+		return `${val.toFixed(1)} из 5`;
+	};
+
 	const getRatingFromX = (clientX: number): number => {
 		if (!starsRef) return value;
 		const rect = starsRef.getBoundingClientRect();
@@ -131,7 +141,7 @@
 	aria-valuemin={0}
 	aria-valuemax={5}
 	aria-valuenow={value}
-	aria-valuetext={value > 0 ? `${value.toFixed(1)} из 5` : 'Оценка не выставлена'}
+	aria-valuetext={value > 0 ? formatRatingA11y(value) : 'Оценка не выставлена'}
 	aria-disabled={disabled}
 	aria-label={label}
 	aria-labelledby={id ? `${id}-label` : undefined}
@@ -149,6 +159,8 @@
 		onpointercancel={handlePointerCancel}
 	>
 		{#each STAR_INDICES as starIndex (starIndex)}
+			{@const valueFill = getValueFill(starIndex)}
+			{@const starFill = getStarFill(starIndex)}
 			<div class="star-rating-input__wrapper" style="--star-size: {size}px;">
 				<!-- Background star (empty) -->
 				<svg viewBox="0 0 24 24" fill="none" class="star-rating-input__bg" aria-hidden="true">
@@ -164,9 +176,9 @@
 					viewBox="0 0 24 24"
 					fill="currentColor"
 					class="star-rating-input__star-value"
-					class:star-rating-input__star--hidden={getValueFill(starIndex) === 0}
+					class:star-rating-input__star--hidden={valueFill === 0}
 					aria-hidden="true"
-					style="clip-path: {getValueFill(starIndex) === 0.5 ? 'inset(0 50% 0 0)' : 'none'};"
+					style="clip-path: {valueFill === 0.5 ? 'inset(0 50% 0 0)' : 'none'};"
 				>
 					<path
 						d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
@@ -178,9 +190,9 @@
 					viewBox="0 0 24 24"
 					fill="currentColor"
 					class="star-rating-input__fill"
-					class:star-rating-input__star--hidden={getStarFill(starIndex) === 0}
+					class:star-rating-input__star--hidden={starFill === 0}
 					aria-hidden="true"
-					style="clip-path: {getStarFill(starIndex) === 0.5 ? 'inset(0 50% 0 0)' : 'none'};"
+					style="clip-path: {starFill === 0.5 ? 'inset(0 50% 0 0)' : 'none'};"
 				>
 					<path
 						d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
@@ -191,7 +203,7 @@
 	</div>
 
 	{#if displayValue > 0}
-		<span class="star-rating-input__text" aria-hidden="true">{displayValue.toFixed(1)}/5</span>
+		<span class="star-rating-input__text" aria-hidden="true">{formatRatingText(displayValue)}</span>
 	{/if}
 </div>
 
@@ -264,10 +276,12 @@
 	}
 
 	.star-rating-input__text {
-		margin-left: var(--space-2);
+		margin-left: var(--space-1);
 		font-size: var(--text-sm);
 		font-weight: var(--font-semibold);
 		color: var(--text-secondary);
 		min-width: 2.5rem;
+		text-align: right;
+		font-variant-numeric: tabular-nums;
 	}
 </style>

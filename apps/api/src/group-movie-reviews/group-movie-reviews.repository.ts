@@ -16,11 +16,20 @@ import { DRIZZLE } from '$db/db.module';
 
 export interface GroupMovieReviewWithUser extends GroupMovieReview {
   userName: string;
+  userAvatar: string | null;
 }
 
 @Injectable()
 export class GroupMovieReviewsRepository {
   constructor(@Inject(DRIZZLE) private readonly db: DrizzleDb) {}
+
+  private _withUserColumns() {
+    return {
+      ...getTableColumns(groupMovieReviews),
+      userName: users.name,
+      userAvatar: users.avatar,
+    };
+  }
 
   async create(data: NewGroupMovieReview): Promise<GroupMovieReviewWithUser> {
     return this.db.transaction(async (tx) => {
@@ -30,10 +39,7 @@ export class GroupMovieReviewsRepository {
         .returning();
 
       const [result] = await tx
-        .select({
-          ...getTableColumns(groupMovieReviews),
-          userName: users.name,
-        })
+        .select(this._withUserColumns())
         .from(groupMovieReviews)
         .innerJoin(users, eq(groupMovieReviews.userId, users.id))
         .where(eq(groupMovieReviews.id, inserted.id))
@@ -52,10 +58,7 @@ export class GroupMovieReviewsRepository {
     groupMovieId: number,
   ): Promise<GroupMovieReviewWithUser[]> {
     return this.db
-      .select({
-        ...getTableColumns(groupMovieReviews),
-        userName: users.name,
-      })
+      .select(this._withUserColumns())
       .from(groupMovieReviews)
       .innerJoin(users, eq(groupMovieReviews.userId, users.id))
       .where(eq(groupMovieReviews.groupMovieId, groupMovieId))
@@ -73,10 +76,7 @@ export class GroupMovieReviewsRepository {
 
   async findOneWithUser(id: number): Promise<GroupMovieReviewWithUser | null> {
     const [result] = await this.db
-      .select({
-        ...getTableColumns(groupMovieReviews),
-        userName: users.name,
-      })
+      .select(this._withUserColumns())
       .from(groupMovieReviews)
       .innerJoin(users, eq(groupMovieReviews.userId, users.id))
       .where(eq(groupMovieReviews.id, id))
@@ -89,10 +89,7 @@ export class GroupMovieReviewsRepository {
     groupMovieId: number,
   ): Promise<GroupMovieReviewWithUser | null> {
     const [result] = await this.db
-      .select({
-        ...getTableColumns(groupMovieReviews),
-        userName: users.name,
-      })
+      .select(this._withUserColumns())
       .from(groupMovieReviews)
       .innerJoin(users, eq(groupMovieReviews.userId, users.id))
       .where(
@@ -117,10 +114,7 @@ export class GroupMovieReviewsRepository {
         .returning();
 
       const [result] = await tx
-        .select({
-          ...getTableColumns(groupMovieReviews),
-          userName: users.name,
-        })
+        .select(this._withUserColumns())
         .from(groupMovieReviews)
         .innerJoin(users, eq(groupMovieReviews.userId, users.id))
         .where(eq(groupMovieReviews.id, updated.id))

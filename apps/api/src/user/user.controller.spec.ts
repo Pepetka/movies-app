@@ -147,13 +147,20 @@ describe('UserController', () => {
       );
     });
 
-    it('should propagate ConflictException for duplicate email', async () => {
-      const error = new ConflictException('Email already in use');
-      userService.update.mockRejectedValue(error);
+    it('should update user avatar', async () => {
+      const avatarUpdateDto: UserUpdateDto = {
+        avatar: 'https://example.com/avatar.jpg',
+      };
+      const updatedUser = {
+        ...mockUser,
+        avatar: 'https://example.com/avatar.jpg',
+      };
+      userService.update.mockResolvedValue(updatedUser);
 
-      await expect(
-        controller.update(1, { email: 'existing@example.com' }),
-      ).rejects.toThrow(ConflictException);
+      const result = await controller.update(1, avatarUpdateDto);
+
+      expect(result).toEqual(updatedUser);
+      expect(userService.update).toHaveBeenCalledWith(1, avatarUpdateDto);
     });
   });
 

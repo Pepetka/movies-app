@@ -1,9 +1,9 @@
 import {
-  IsEmail,
   IsString,
   IsOptional,
   MinLength,
   MaxLength,
+  IsUrl,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
@@ -14,19 +14,25 @@ export class UserUpdateDto {
   @IsOptional()
   @MinLength(2)
   @MaxLength(100)
-  @Transform(({ value }) => value?.trim())
+  @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value))
   name?: string;
 
-  @ApiProperty({ example: 'john@example.com', required: false })
-  @IsEmail()
+  @ApiProperty({
+    type: String,
+    example: 'https://example.com/avatar.jpg',
+    required: false,
+    nullable: true,
+  })
   @IsOptional()
-  @Transform(({ value }) => value?.toLowerCase().trim())
-  email?: string;
-
-  @ApiProperty({ example: 'NewSecurePass123!', required: false })
-  @IsString()
-  @IsOptional()
-  @MinLength(8)
-  @MaxLength(100)
-  password?: string;
+  @IsUrl(
+    { protocols: ['http', 'https'] },
+    { message: 'Avatar must be a valid URL' },
+  )
+  @MaxLength(512)
+  @Transform(({ value }) => {
+    if (typeof value !== 'string') return value;
+    const trimmed = value.trim();
+    return trimmed || null;
+  })
+  avatar?: string | null;
 }

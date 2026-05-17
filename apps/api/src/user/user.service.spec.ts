@@ -1,4 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { plainToInstance } from 'class-transformer';
 import { NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
@@ -269,40 +270,40 @@ describe('UserService', () => {
       expect(userRepository.update).toHaveBeenCalledWith(1, updateUserDto);
     });
 
-    it('should update email with uniqueness check', async () => {
-      const updateDto: UserUpdateDto = { email: 'new@example.com' };
+    it('should update user avatar', async () => {
+      const updateDto: UserUpdateDto = {
+        avatar: 'https://example.com/avatar.jpg',
+      };
 
       userRepository.findById.mockResolvedValue(mockUser);
-      userRepository.findByEmail.mockResolvedValue(null);
       userRepository.update.mockResolvedValue({
         ...mockUser,
-        email: 'new@example.com',
+        avatar: 'https://example.com/avatar.jpg',
       });
 
       const result = await service.update(1, updateDto);
 
-      expect(result.email).toBe('new@example.com');
-      expect(userRepository.findByEmail).toHaveBeenCalledWith(
-        'new@example.com',
-      );
+      expect(result.avatar).toBe('https://example.com/avatar.jpg');
+      expect(userRepository.update).toHaveBeenCalledWith(1, {
+        avatar: 'https://example.com/avatar.jpg',
+      });
     });
 
-    it('should hash password when updating', async () => {
-      const updateDto: UserUpdateDto = { password: 'NewPassword123!' };
+    it('should clear avatar when empty string provided', async () => {
+      const updateDto = plainToInstance(UserUpdateDto, { avatar: '' });
 
       userRepository.findById.mockResolvedValue(mockUser);
-      userRepository.update.mockResolvedValue(mockUser);
-
-      await service.update(1, updateDto);
-
-      expect(bcrypt.hash).toHaveBeenCalledWith('NewPassword123!', 12);
-      expect(userRepository.update).toHaveBeenCalledWith(1, {
-        passwordHash: mockHashedPassword,
+      userRepository.update.mockResolvedValue({
+        ...mockUser,
+        avatar: null,
       });
-      expect(userRepository.update).not.toHaveBeenCalledWith(
-        1,
-        expect.objectContaining({ password: expect.any(String) }),
-      );
+
+      const result = await service.update(1, updateDto);
+
+      expect(result.avatar).toBeNull();
+      expect(userRepository.update).toHaveBeenCalledWith(1, {
+        avatar: null,
+      });
     });
 
     it('should throw NotFoundException for non-existent user', async () => {
@@ -312,73 +313,6 @@ describe('UserService', () => {
         NotFoundException,
       );
       expect(userRepository.update).not.toHaveBeenCalled();
-    });
-
-    it('should throw EmailAlreadyInUseException for duplicate email', async () => {
-      const anotherUser = { ...mockUser, id: 2, email: 'another@example.com' };
-      const updateDto: UserUpdateDto = { email: 'another@example.com' };
-
-      userRepository.findById.mockResolvedValue(mockUser);
-      userRepository.findByEmail.mockResolvedValue(anotherUser);
-
-      await expect(service.update(1, updateDto)).rejects.toThrow(
-        EmailAlreadyInUseException,
-      );
-      expect(userRepository.update).not.toHaveBeenCalled();
-    });
-
-    it('should allow updating own email to same value', async () => {
-      const updateDto: UserUpdateDto = { email: 'test@example.com' };
-
-      userRepository.findById.mockResolvedValue(mockUser);
-      userRepository.update.mockResolvedValue(mockUser);
-
-      const result = await service.update(1, updateDto);
-
-      expect(result).toEqual(mockUser);
-      expect(userRepository.findByEmail).not.toHaveBeenCalled();
-      expect(userRepository.update).toHaveBeenCalledWith(1, updateDto);
-    });
-
-    it('should normalize email to lowercase on update', async () => {
-      const updateDto: UserUpdateDto = { email: 'User@Example.COM' };
-
-      userRepository.findById.mockResolvedValue(mockUser);
-      userRepository.findByEmail.mockResolvedValue(null);
-      userRepository.update.mockResolvedValue({
-        ...mockUser,
-        email: 'user@example.com',
-      });
-
-      const result = await service.update(1, updateDto);
-
-      expect(result.email).toBe('user@example.com');
-      expect(userRepository.findByEmail).toHaveBeenCalledWith(
-        'user@example.com',
-      );
-      expect(userRepository.update).toHaveBeenCalledWith(1, {
-        email: 'user@example.com',
-      });
-    });
-
-    it('should trim whitespace from email on update', async () => {
-      const updateDto: UserUpdateDto = { email: '  new@example.com  ' };
-
-      userRepository.findById.mockResolvedValue(mockUser);
-      userRepository.findByEmail.mockResolvedValue(null);
-      userRepository.update.mockResolvedValue({
-        ...mockUser,
-        email: 'new@example.com',
-      });
-
-      await service.update(1, updateDto);
-
-      expect(userRepository.findByEmail).toHaveBeenCalledWith(
-        'new@example.com',
-      );
-      expect(userRepository.update).toHaveBeenCalledWith(1, {
-        email: 'new@example.com',
-      });
     });
   });
 

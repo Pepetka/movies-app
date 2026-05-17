@@ -106,6 +106,7 @@ export class UserController {
     description: 'User updated',
     type: UserResponseDto,
   })
+  @ApiResponse({ status: 400, description: 'Validation error' })
   @ApiResponse({ status: 403, description: 'Forbidden - Not your resource' })
   @ApiResponse({ status: 404, description: 'User not found' })
   update(

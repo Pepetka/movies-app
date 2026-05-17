@@ -228,22 +228,41 @@ describe('User E2E', () => {
       expect(response.body).toHaveProperty('name', 'Updated Name');
     });
 
-    it('should allow user to update password', async () => {
+    it('should allow user to update avatar', async () => {
       const { accessToken, userId } = await registerUser('user8@example.com');
+
+      const response = await request(app.getHttpServer())
+        .patch(`/users/${userId}`)
+        .set('Authorization', `Bearer ${accessToken}`)
+        .send({ avatar: 'https://example.com/avatar.jpg' })
+        .expect(200);
+
+      expect(response.body).toHaveProperty(
+        'avatar',
+        'https://example.com/avatar.jpg',
+      );
+    });
+
+    it('should clear avatar when empty string provided', async () => {
+      const { accessToken, userId } = await registerUser('user9@example.com');
+
+      const response = await request(app.getHttpServer())
+        .patch(`/users/${userId}`)
+        .set('Authorization', `Bearer ${accessToken}`)
+        .send({ avatar: '' })
+        .expect(200);
+
+      expect(response.body).toHaveProperty('avatar', null);
+    });
+
+    it('should reject invalid avatar URL', async () => {
+      const { accessToken, userId } = await registerUser('user10@example.com');
 
       await request(app.getHttpServer())
         .patch(`/users/${userId}`)
         .set('Authorization', `Bearer ${accessToken}`)
-        .send({ password: 'NewSecurePass123!' })
-        .expect(200);
-
-      await request(app.getHttpServer())
-        .post('/auth/login')
-        .send({
-          email: 'user8@example.com',
-          password: 'NewSecurePass123!',
-        })
-        .expect(200);
+        .send({ avatar: 'not-a-url' })
+        .expect(400);
     });
 
     it('should allow admin to update any user', async () => {
@@ -270,17 +289,6 @@ describe('User E2E', () => {
         .set('Authorization', `Bearer ${accessToken}`)
         .send({ name: 'Should Fail' })
         .expect(403);
-    });
-
-    it('should reject duplicate email on update', async () => {
-      const { accessToken, userId } = await registerUser('user10@example.com');
-      await registerUser('existing@example.com');
-
-      await request(app.getHttpServer())
-        .patch(`/users/${userId}`)
-        .set('Authorization', `Bearer ${accessToken}`)
-        .send({ email: 'existing@example.com' })
-        .expect(409);
     });
   });
 

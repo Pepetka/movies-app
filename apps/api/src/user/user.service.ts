@@ -120,12 +120,11 @@ export class UserService {
   }
 
   /**
-   * Updates user data
+   * Updates user profile data (name and avatar only)
    * @param id - User ID
    * @param dto - User update data
    * @returns Updated user object
    * @throws NotFoundException if user not found
-   * @throws EmailAlreadyInUseException if email already exists
    */
   async update(id: number, dto: UserUpdateDto): Promise<User> {
     const user = await this._userRepository.findById(id);
@@ -133,25 +132,16 @@ export class UserService {
       throw new NotFoundException(`User with id ${id} not found`);
     }
 
-    const normalizedEmail = dto.email?.toLowerCase().trim();
-
-    if (normalizedEmail && normalizedEmail !== user.email) {
-      const existingUser =
-        await this._userRepository.findByEmail(normalizedEmail);
-      if (existingUser) {
-        throw new EmailAlreadyInUseException(normalizedEmail);
-      }
-    }
-
     const updateData: Partial<NewUser> = {};
-    if (dto.name) {
+    if (dto.name !== undefined) {
       updateData.name = dto.name;
     }
-    if (normalizedEmail) {
-      updateData.email = normalizedEmail;
+    if (dto.avatar !== undefined) {
+      updateData.avatar = dto.avatar;
     }
-    if (dto.password) {
-      updateData.passwordHash = await this._hashPassword(dto.password);
+
+    if (Object.keys(updateData).length === 0) {
+      return user;
     }
 
     const updatedUser = await this._userRepository.update(id, updateData);
@@ -191,7 +181,8 @@ export class UserService {
   }
 
   /**
-   * Updates user's avatar
+   * Updates user's avatar. Intended for OAuth account linkage only.
+   * For general profile updates use `update()` instead.
    * @param id - User ID
    * @param avatar - Avatar URL or null
    * @param tx - Optional transaction

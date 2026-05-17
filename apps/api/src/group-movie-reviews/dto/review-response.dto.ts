@@ -19,6 +19,10 @@ export class ReviewResponseDto {
   userName: string;
 
   @Expose()
+  @ApiProperty({ type: String, nullable: true })
+  userAvatar: string | null;
+
+  @Expose()
   @Type(() => Number)
   @ApiProperty({ type: Number })
   rating: number;

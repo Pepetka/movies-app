@@ -104,6 +104,7 @@
 		user-select: none;
 		flex-shrink: 0;
 		position: relative;
+		vertical-align: middle;
 	}
 
 	.ui-avatar img {
