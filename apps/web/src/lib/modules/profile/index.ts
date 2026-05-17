@@ -1,6 +1,9 @@
 // API
 export { updateUser } from './api';
 
+// Stores
+export { profileStore } from './stores';
+
 // Validation
 export {
 	validateProfileForm,

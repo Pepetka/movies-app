@@ -7,15 +7,7 @@ import type { UserResponseDto, UserUpdateDto } from '$lib/api/generated/types';
 
 const optionalUrl = z.preprocess(
 	(val) => trimToUndefined(typeof val === 'string' ? val : ''),
-	z
-		.string()
-		.url('Некорректный URL')
-		.refine(
-			(url) => url.startsWith('http://') || url.startsWith('https://'),
-			'URL должен начинаться с http:// или https://'
-		)
-		.max(512, 'Максимум 512 символов')
-		.optional()
+	z.string().url('Некорректный URL').max(512, 'Максимум 512 символов').optional()
 );
 
 export const profileSchema = z.object({

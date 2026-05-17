@@ -11,6 +11,7 @@
 		type ProfileFormData
 	} from '$lib/modules/profile';
 	import { createFormFieldValidator } from '$lib/utils';
+	import { profileStore } from '$lib/modules/profile';
 	import { authStore } from '$lib/modules/auth';
 	import { topBarStore } from '$lib/stores';
 	import { goto } from '$app/navigation';
@@ -53,6 +54,7 @@
 	$effect(() => {
 		return () => {
 			fieldValidator.cancel();
+			profileStore.resetProfileForm();
 		};
 	});
 
@@ -61,30 +63,31 @@
 			form = profileFormFromEntity(authStore.user);
 		}
 		fieldValidator.reset();
+		profileStore.resetProfileForm();
 		isEditing = true;
 	};
 
 	const handleCancel = () => {
 		isEditing = false;
 		fieldValidator.reset();
-		authStore.resetProfileForm();
+		profileStore.resetProfileForm();
 	};
 
 	const handleSubmit = async (e: Event) => {
 		e.preventDefault();
-		if (authStore.isUpdatingProfile || !authStore.user) return;
+		if (profileStore.isUpdatingProfile || !authStore.user) return;
 
 		const validation = validateProfileForm(form);
 		fieldValidator.setErrors(validation.errors);
 		if (!validation.isValid) return;
 
-		await authStore.updateProfile(authStore.user.id, profileFormToDto(form));
+		await profileStore.updateProfile(authStore.user.id, profileFormToDto(form));
 
-		if (authStore.isUpdateProfileSuccess) {
+		if (profileStore.isUpdateProfileSuccess) {
 			toast.success('Профиль обновлён');
 			isEditing = false;
 		} else {
-			toast.error(authStore.updateProfileError ?? 'Ошибка обновления профиля');
+			toast.error(profileStore.updateProfileError ?? 'Ошибка обновления профиля');
 		}
 	};
 </script>
@@ -132,7 +135,7 @@
 							bind:value={form.name}
 							error={fieldValidator.errors.name}
 							placeholder="Ваше имя"
-							disabled={authStore.isUpdatingProfile}
+							disabled={profileStore.isUpdatingProfile}
 							onChange={() => fieldValidator.handleFieldChange(form, 'name')}
 						/>
 
@@ -143,7 +146,7 @@
 							error={fieldValidator.errors.avatarUrl}
 							Icon={Image}
 							placeholder="https://example.com/avatar.jpg"
-							disabled={authStore.isUpdatingProfile}
+							disabled={profileStore.isUpdatingProfile}
 							onChange={() => fieldValidator.handleFieldChange(form, 'avatarUrl')}
 						/>
 
@@ -152,7 +155,7 @@
 								type="submit"
 								variant="primary"
 								fullWidth
-								loading={authStore.isUpdatingProfile}
+								loading={profileStore.isUpdatingProfile}
 							>
 								<Save size={16} />
 								Сохранить
@@ -212,6 +215,9 @@
 	}
 
 	.profile-page__avatar-header {
+		display: flex;
+		align-items: center;
+		justify-content: center;
 		margin-bottom: var(--space-4);
 	}
 
