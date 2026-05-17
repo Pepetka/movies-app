@@ -144,6 +144,7 @@
 							"application/json": { "schema": { "$ref": "#/components/schemas/UserResponseDto" } }
 						}
 					},
+					"400": { "description": "Validation error" },
 					"403": { "description": "Forbidden - Not your resource" },
 					"404": { "description": "User not found" }
 				},
