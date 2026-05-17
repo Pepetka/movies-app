@@ -17,7 +17,7 @@ class ProfileStore extends BaseStore {
 
 		this._updateMutation = createMutation<UserResponseDto, { id: number; data: UserUpdateDto }>({
 			key: ['profile', 'update'],
-			tags: ['user'],
+			tags: ['user', 'group-members', 'group-movie'],
 			mutator: ({ id, data }) => apiUpdateUser(id, data),
 			debug: !__IS_PROD__
 		});
