@@ -148,7 +148,7 @@ describe('UserController', () => {
     });
 
     it('should update user avatar', async () => {
-      const updateUserDto: UserUpdateDto = {
+      const avatarUpdateDto: UserUpdateDto = {
         avatar: 'https://example.com/avatar.jpg',
       };
       const updatedUser = {
@@ -157,10 +157,10 @@ describe('UserController', () => {
       };
       userService.update.mockResolvedValue(updatedUser);
 
-      const result = await controller.update(1, updateUserDto);
+      const result = await controller.update(1, avatarUpdateDto);
 
       expect(result).toEqual(updatedUser);
-      expect(userService.update).toHaveBeenCalledWith(1, updateUserDto);
+      expect(userService.update).toHaveBeenCalledWith(1, avatarUpdateDto);
     });
   });
 

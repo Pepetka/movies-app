@@ -1,5 +1,5 @@
+import { eq, and, count, getTableColumns } from 'drizzle-orm';
 import { Inject, Injectable } from '@nestjs/common';
-import { eq, and, count } from 'drizzle-orm';
 
 import {
   users,
@@ -30,12 +30,7 @@ export class GroupsRepository {
 
   private _memberWithUserColumns() {
     return {
-      id: groupMembers.id,
-      groupId: groupMembers.groupId,
-      userId: groupMembers.userId,
-      role: groupMembers.role,
-      createdAt: groupMembers.createdAt,
-      updatedAt: groupMembers.updatedAt,
+      ...getTableColumns(groupMembers),
       user: {
         id: users.id,
         name: users.name,
