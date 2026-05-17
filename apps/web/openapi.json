@@ -1557,7 +1557,7 @@
 				},
 				"required": ["email", "password"]
 			},
-			"AuthProvider": { "type": "string", "enum": ["google", "github"] },
+			"AuthProvider": { "type": "string", "enum": ["google"] },
 			"OAuthLinkInitResponseDto": {
 				"type": "object",
 				"properties": {
