@@ -159,6 +159,8 @@
 		onpointercancel={handlePointerCancel}
 	>
 		{#each STAR_INDICES as starIndex (starIndex)}
+			{@const valueFill = getValueFill(starIndex)}
+			{@const starFill = getStarFill(starIndex)}
 			<div class="star-rating-input__wrapper" style="--star-size: {size}px;">
 				<!-- Background star (empty) -->
 				<svg viewBox="0 0 24 24" fill="none" class="star-rating-input__bg" aria-hidden="true">
@@ -174,9 +176,9 @@
 					viewBox="0 0 24 24"
 					fill="currentColor"
 					class="star-rating-input__star-value"
-					class:star-rating-input__star--hidden={getValueFill(starIndex) === 0}
+					class:star-rating-input__star--hidden={valueFill === 0}
 					aria-hidden="true"
-					style="clip-path: {getValueFill(starIndex) === 0.5 ? 'inset(0 50% 0 0)' : 'none'};"
+					style="clip-path: {valueFill === 0.5 ? 'inset(0 50% 0 0)' : 'none'};"
 				>
 					<path
 						d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
@@ -188,9 +190,9 @@
 					viewBox="0 0 24 24"
 					fill="currentColor"
 					class="star-rating-input__fill"
-					class:star-rating-input__star--hidden={getStarFill(starIndex) === 0}
+					class:star-rating-input__star--hidden={starFill === 0}
 					aria-hidden="true"
-					style="clip-path: {getStarFill(starIndex) === 0.5 ? 'inset(0 50% 0 0)' : 'none'};"
+					style="clip-path: {starFill === 0.5 ? 'inset(0 50% 0 0)' : 'none'};"
 				>
 					<path
 						d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
