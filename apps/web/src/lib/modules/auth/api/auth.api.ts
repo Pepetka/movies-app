@@ -4,7 +4,12 @@ import {
 	authControllerRefreshV1,
 	userControllerGetMeV1
 } from '$lib/api/generated/api';
-import type { AuthLoginDto, AuthResponseDto, UserResponseDto } from '$lib/api/generated/types';
+import type {
+	AuthLoginDto,
+	AuthProvider,
+	AuthResponseDto,
+	UserResponseDto
+} from '$lib/api/generated/types';
 import { httpClient } from '$lib/api/client';
 
 export const login = async (data: AuthLoginDto, signal?: AbortSignal): Promise<void> => {
@@ -27,7 +32,7 @@ export const refreshTokens = async (): Promise<AuthResponseDto> => {
 	return response;
 };
 
-export const buildOAuthRedirectUrl = (provider: 'google' | 'github', redirect: string): string => {
+export const buildOAuthRedirectUrl = (provider: AuthProvider, redirect: string): string => {
 	const base = __API_URL__ || (typeof window !== 'undefined' ? window.location.origin : '');
 	const url = new URL(`/api/v1/auth/oauth/${provider}`, base || 'http://localhost');
 	url.searchParams.set('redirect', redirect);
