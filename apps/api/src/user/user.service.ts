@@ -140,6 +140,10 @@ export class UserService {
       updateData.avatar = dto.avatar;
     }
 
+    if (Object.keys(updateData).length === 0) {
+      return user;
+    }
+
     const updatedUser = await this._userRepository.update(id, updateData);
     return updatedUser;
   }
@@ -177,14 +181,11 @@ export class UserService {
   }
 
   /**
-   * Updates user's avatar
+   * Updates user's avatar. Intended for OAuth account linkage only.
+   * For general profile updates use `update()` instead.
    * @param id - User ID
    * @param avatar - Avatar URL or null
    * @param tx - Optional transaction
-   */
-  /**
-   * Updates user's avatar. Intended for OAuth account linkage only.
-   * For general profile updates use `update()` instead.
    */
   async updateAvatar(
     id: number,
