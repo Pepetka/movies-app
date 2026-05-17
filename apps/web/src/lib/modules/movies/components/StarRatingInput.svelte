@@ -26,6 +26,16 @@
 
 	const displayValue = $derived(hoverValue || value);
 
+	const formatRatingText = (val: number): string => {
+		if (Number.isInteger(val)) return `${val.toFixed(0)}/5`;
+		return `${val.toFixed(1)}/5`;
+	};
+
+	const formatRatingA11y = (val: number): string => {
+		if (Number.isInteger(val)) return `${val.toFixed(0)} из 5`;
+		return `${val.toFixed(1)} из 5`;
+	};
+
 	const getRatingFromX = (clientX: number): number => {
 		if (!starsRef) return value;
 		const rect = starsRef.getBoundingClientRect();
@@ -131,7 +141,7 @@
 	aria-valuemin={0}
 	aria-valuemax={5}
 	aria-valuenow={value}
-	aria-valuetext={value > 0 ? `${value.toFixed(1)} из 5` : 'Оценка не выставлена'}
+	aria-valuetext={value > 0 ? formatRatingA11y(value) : 'Оценка не выставлена'}
 	aria-disabled={disabled}
 	aria-label={label}
 	aria-labelledby={id ? `${id}-label` : undefined}
@@ -191,7 +201,7 @@
 	</div>
 
 	{#if displayValue > 0}
-		<span class="star-rating-input__text" aria-hidden="true">{displayValue.toFixed(1)}/5</span>
+		<span class="star-rating-input__text" aria-hidden="true">{formatRatingText(displayValue)}</span>
 	{/if}
 </div>
 
@@ -264,10 +274,12 @@
 	}
 
 	.star-rating-input__text {
-		margin-left: var(--space-2);
+		margin-left: var(--space-1);
 		font-size: var(--text-sm);
 		font-weight: var(--font-semibold);
 		color: var(--text-secondary);
 		min-width: 2.5rem;
+		text-align: right;
+		font-variant-numeric: tabular-nums;
 	}
 </style>
