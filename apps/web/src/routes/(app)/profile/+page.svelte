@@ -8,10 +8,10 @@
 		profileFormFromEntity,
 		profileFormToDto,
 		validateProfileForm,
+		profileStore,
 		type ProfileFormData
 	} from '$lib/modules/profile';
 	import { createFormFieldValidator } from '$lib/utils';
-	import { profileStore } from '$lib/modules/profile';
 	import { authStore } from '$lib/modules/auth';
 	import { topBarStore } from '$lib/stores';
 	import { goto } from '$app/navigation';
@@ -54,7 +54,7 @@
 	$effect(() => {
 		return () => {
 			fieldValidator.cancel();
-			profileStore.resetProfileForm();
+			profileStore.resetUpdate();
 		};
 	});
 
@@ -63,31 +63,31 @@
 			form = profileFormFromEntity(authStore.user);
 		}
 		fieldValidator.reset();
-		profileStore.resetProfileForm();
+		profileStore.resetUpdate();
 		isEditing = true;
 	};
 
 	const handleCancel = () => {
 		isEditing = false;
 		fieldValidator.reset();
-		profileStore.resetProfileForm();
+		profileStore.resetUpdate();
 	};
 
 	const handleSubmit = async (e: Event) => {
 		e.preventDefault();
-		if (profileStore.isUpdatingProfile || !authStore.user) return;
+		if (profileStore.isUpdating || !authStore.user) return;
 
 		const validation = validateProfileForm(form);
 		fieldValidator.setErrors(validation.errors);
-		if (!validation.isValid) return;
+		if (!validation.isValid || !validation.data) return;
 
-		await profileStore.updateProfile(authStore.user.id, profileFormToDto(form));
+		await profileStore.updateProfile(authStore.user.id, profileFormToDto(validation.data));
 
-		if (profileStore.isUpdateProfileSuccess) {
+		if (profileStore.isUpdateSuccess) {
 			toast.success('Профиль обновлён');
 			isEditing = false;
 		} else {
-			toast.error(profileStore.updateProfileError ?? 'Ошибка обновления профиля');
+			toast.error(profileStore.updateError ?? 'Ошибка обновления профиля');
 		}
 	};
 </script>
@@ -135,7 +135,7 @@
 							bind:value={form.name}
 							error={fieldValidator.errors.name}
 							placeholder="Ваше имя"
-							disabled={profileStore.isUpdatingProfile}
+							disabled={profileStore.isUpdating}
 							onChange={() => fieldValidator.handleFieldChange(form, 'name')}
 						/>
 
@@ -146,17 +146,12 @@
 							error={fieldValidator.errors.avatarUrl}
 							Icon={Image}
 							placeholder="https://example.com/avatar.jpg"
-							disabled={profileStore.isUpdatingProfile}
+							disabled={profileStore.isUpdating}
 							onChange={() => fieldValidator.handleFieldChange(form, 'avatarUrl')}
 						/>
 
 						<div class="profile-page__form-actions">
-							<Button
-								type="submit"
-								variant="primary"
-								fullWidth
-								loading={profileStore.isUpdatingProfile}
-							>
+							<Button type="submit" variant="primary" fullWidth loading={profileStore.isUpdating}>
 								<Save size={16} />
 								Сохранить
 							</Button>

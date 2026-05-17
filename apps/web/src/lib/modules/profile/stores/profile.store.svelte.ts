@@ -25,15 +25,15 @@ class ProfileStore extends BaseStore {
 
 	// === Update profile mutation ===
 
-	get isUpdatingProfile(): boolean {
+	get isUpdating(): boolean {
 		return this._updateMutation.isSubmitting;
 	}
 
-	get isUpdateProfileSuccess(): boolean {
+	get isUpdateSuccess(): boolean {
 		return this._updateMutation.isSuccess;
 	}
 
-	get updateProfileError(): string | null {
+	get updateError(): string | null {
 		if (!this._updateMutation.error) return null;
 		return this._extractErrorMessage(this._updateMutation.error, 'Ошибка обновления профиля');
 	}
@@ -42,7 +42,7 @@ class ProfileStore extends BaseStore {
 		return untrack(() => this._updateMutation.mutate({ id, data }));
 	}
 
-	resetProfileForm(): void {
+	resetUpdate(): void {
 		this._updateMutation.reset();
 	}
 }
