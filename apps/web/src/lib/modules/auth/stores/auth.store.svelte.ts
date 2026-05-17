@@ -8,7 +8,7 @@ import {
 	type QueryResult
 } from '$lib/query';
 import type { AuthLoginDto, UserResponseDto, UserUpdateDto } from '$lib/api/generated/types';
-import { updateUser as apiUpdateUser } from '$lib/modules/profile/api';
+import { updateUser as apiUpdateUser } from '$lib/modules/profile';
 import { BaseStore } from '$lib/stores/base.svelte';
 
 import {

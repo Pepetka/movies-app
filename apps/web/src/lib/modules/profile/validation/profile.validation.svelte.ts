@@ -6,7 +6,7 @@ import type { UserResponseDto, UserUpdateDto } from '$lib/api/generated/types';
 // === Schema ===
 
 const optionalUrl = z.preprocess(
-	(val) => trimToUndefined(val as string),
+	(val) => trimToUndefined(typeof val === 'string' ? val : ''),
 	z
 		.string()
 		.url('Некорректный URL')
@@ -20,7 +20,7 @@ const optionalUrl = z.preprocess(
 
 export const profileSchema = z.object({
 	name: z.preprocess(
-		(val) => trimString(val as string),
+		(val) => trimString(typeof val === 'string' ? val : ''),
 		z.string().min(2, 'Минимум 2 символа').max(100, 'Максимум 100 символов')
 	),
 	avatarUrl: optionalUrl
