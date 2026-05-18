@@ -5,10 +5,6 @@ import {
   MovieSearchGroupDto,
   GroupMovieResponseDto,
 } from '$src/group-movies/dto';
-import {
-  ReviewResponseDto,
-  ReviewReactionResponseDto,
-} from '$src/group-movie-reviews/dto';
 import { GroupMovieReviewsService } from '$src/group-movie-reviews/group-movie-reviews.service';
 import { ProviderSearchResult } from '$src/movies/providers/interfaces/provider-result.dto';
 import { GroupMoviesService } from '$src/group-movies/group-movies.service';
@@ -77,17 +73,11 @@ export class GroupMovieDetailsService {
       currentUserRole,
       reviews: reviews.map((r) => {
         const reactions = reactionsMap.get(r.id) ?? [];
-        return Object.assign(new ReviewResponseDto(), {
-          ...r,
-          rating: Number(r.rating),
-          isOwn: r.userId === userId,
-          reactions: reactions.map((react) =>
-            Object.assign(new ReviewReactionResponseDto(), {
-              ...react,
-              isOwn: react.userId === userId,
-            }),
-          ),
-        });
+        return this.groupMovieReviewsService.mapToResponseDto(
+          r,
+          userId,
+          reactions,
+        );
       }),
       averageRating,
       reviewCount: reviews.length,
