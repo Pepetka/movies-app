@@ -1,5 +1,9 @@
+import {
+  Inject,
+  Injectable,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { eq, and, inArray, getTableColumns } from 'drizzle-orm';
-import { Inject, Injectable } from '@nestjs/common';
 
 import {
   groupMovieReviewReactions,
@@ -21,7 +25,7 @@ export class GroupMovieReviewReactionsRepository {
 
   async create(
     data: NewGroupMovieReviewReaction,
-  ): Promise<ReviewReactionWithUser | null> {
+  ): Promise<ReviewReactionWithUser> {
     return this.db.transaction(async (tx) => {
       const [inserted] = await tx
         .insert(groupMovieReviewReactions)
@@ -39,7 +43,13 @@ export class GroupMovieReviewReactionsRepository {
         .where(eq(groupMovieReviewReactions.id, inserted.id))
         .limit(1);
 
-      return result ?? null;
+      if (!result) {
+        throw new InternalServerErrorException(
+          'Failed to fetch reaction after mutation',
+        );
+      }
+
+      return result;
     });
   }
 

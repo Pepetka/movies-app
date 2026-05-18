@@ -7,11 +7,11 @@ export class CreateReviewReactionDto {
   @ApiProperty({
     description: 'Emoji reaction',
     example: '👍',
-    maxLength: 10,
+    maxLength: 20,
   })
   @IsNotEmpty()
   @IsString()
   @IsIn(ALLOWED_REACTIONS)
-  @MaxLength(10)
+  @MaxLength(20)
   emoji: string;
 }
