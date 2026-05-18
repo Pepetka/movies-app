@@ -3,10 +3,10 @@
 	import { Sheet } from '@repo/ui';
 
 	import ReactionParticipants from './ReactionParticipants.svelte';
-	import type { Props } from './ReactionSheet.types.svelte';
+	import type { IProps } from './ReactionSheet.types.svelte';
 	import ReactionPicker from './ReactionPicker.svelte';
 
-	let { open = $bindable(false), reactions, isOwnReview, onSelect }: Props = $props();
+	let { open = $bindable(false), reactions, isOwnReview, onSelect }: IProps = $props();
 
 	const ownEmoji = $derived(reactions.find((r) => r.isOwn)?.emoji);
 
@@ -32,7 +32,7 @@
 
 	<div class="reaction-sheet__content">
 		{#if !isOwnReview}
-			<ReactionPicker {ownEmoji} disabled={isOwnReview} onSelect={handleSelect} />
+			<ReactionPicker {ownEmoji} onSelect={handleSelect} />
 		{/if}
 		{#if reactions.length > 0}
 			{#if !isOwnReview}

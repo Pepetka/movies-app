@@ -1,8 +1,8 @@
 <script lang="ts">
+	import type { IProps } from './ReactionPicker.types.svelte';
 	import { ALLOWED_REACTIONS } from '../constants/reactions';
-	import type { Props } from './ReactionPicker.types.svelte';
 
-	let { ownEmoji, disabled = false, onSelect }: Props = $props();
+	let { ownEmoji, disabled = false, onSelect }: IProps = $props();
 
 	const handleClick = (emoji: string) => {
 		if (disabled) return;
@@ -19,6 +19,7 @@
 			class:active={isActive}
 			{disabled}
 			onclick={() => handleClick(emoji)}
+			aria-pressed={isActive}
 			aria-label={isActive ? `Ваша реакция ${emoji}` : `Реакция ${emoji}`}
 		>
 			<span class="reaction-picker__emoji">{emoji}</span>

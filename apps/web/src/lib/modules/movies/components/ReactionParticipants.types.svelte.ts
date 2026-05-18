@@ -1,5 +1,5 @@
 import type { ReviewReactionResponseDto } from '$lib/api/generated/types';
 
-export interface Props {
+export interface IProps {
 	reactions: ReviewReactionResponseDto[];
 }

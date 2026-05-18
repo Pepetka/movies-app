@@ -170,6 +170,10 @@ class GroupMovieReviewsStore extends BaseStore {
 		return this._createReactionMutation.isSubmitting;
 	}
 
+	get isAddReactionSuccess(): boolean {
+		return this._createReactionMutation.isSuccess;
+	}
+
 	get addReactionError(): string | null {
 		if (!this._createReactionMutation.error) return null;
 		return this._extractErrorMessage(
@@ -182,6 +186,10 @@ class GroupMovieReviewsStore extends BaseStore {
 
 	get isRemovingReaction(): boolean {
 		return this._deleteReactionMutation.isSubmitting;
+	}
+
+	get isRemoveReactionSuccess(): boolean {
+		return this._deleteReactionMutation.isSuccess;
 	}
 
 	get removeReactionError(): string | null {
@@ -221,11 +229,8 @@ class GroupMovieReviewsStore extends BaseStore {
 		return untrack(() => this._createReactionMutation.mutate({ groupId, movieId, reviewId, data }));
 	}
 
-	async removeReaction(groupId: number, movieId: number, reviewId: number): Promise<boolean> {
-		const result = await untrack(() =>
-			this._deleteReactionMutation.mutate({ groupId, movieId, reviewId })
-		);
-		return result !== null;
+	async removeReaction(groupId: number, movieId: number, reviewId: number): Promise<void> {
+		await untrack(() => this._deleteReactionMutation.mutate({ groupId, movieId, reviewId }));
 	}
 
 	reset(): void {

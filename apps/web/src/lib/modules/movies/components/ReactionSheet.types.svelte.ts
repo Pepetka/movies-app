@@ -1,6 +1,6 @@
 import type { ReviewReactionResponseDto } from '$lib/api/generated/types';
 
-export interface Props {
+export interface IProps {
 	open?: boolean;
 	reactions: ReviewReactionResponseDto[];
 	isOwnReview: boolean;

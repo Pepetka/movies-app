@@ -4,9 +4,9 @@
 
 	import { formatDate, sortByDateField, pluralize } from '$lib/utils';
 
-	import type { Props } from './ReactionParticipants.types.svelte';
+	import type { IProps } from './ReactionParticipants.types.svelte';
 
-	let { reactions }: Props = $props();
+	let { reactions }: IProps = $props();
 
 	let expanded = $state(false);
 
@@ -51,7 +51,7 @@
 			</div>
 		{/if}
 
-		<span class="reaction-participants__chevron">
+		<span class="reaction-participants__chevron" aria-hidden="true">
 			{#if expanded}
 				<ChevronUp size={16} />
 			{:else}

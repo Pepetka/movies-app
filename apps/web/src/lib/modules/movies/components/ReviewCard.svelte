@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { Avatar, Badge, IconButton, toast } from '@repo/ui';
 	import { Pencil, Trash2, SmilePlus } from '@lucide/svelte';
+	import { SvelteMap } from 'svelte/reactivity';
 
 	import type {
 		ReviewReactionResponseDto,
@@ -9,15 +10,17 @@
 	import { formatDate } from '$lib/utils';
 
 	import { ALLOWED_REACTIONS } from '../constants/reactions';
+	import type { IProps } from './ReviewCard.types.svelte';
 	import StarRatingInput from './StarRatingInput.svelte';
-	import type { Props } from './ReviewCard.types.svelte';
 	import { groupMovieReviewsStore } from '../stores';
 	import ReactionSheet from './ReactionSheet.svelte';
 
-	let { review, isOwn, groupId, onEdit, onDelete }: Props = $props();
+	let { review, isOwn, groupId, onEdit, onDelete }: IProps = $props();
 
 	let sheetOpen = $state(false);
-	let isSubmitting = $state(false);
+	const isSubmitting = $derived(
+		groupMovieReviewsStore.isAddingReaction || groupMovieReviewsStore.isRemovingReaction
+	);
 
 	const reactions = $derived(review.reactions ?? []);
 	const ownReaction = $derived(reactions.find((r) => r.isOwn));
@@ -32,8 +35,6 @@
 
 	const activeEmojis = $derived(ALLOWED_REACTIONS.filter((emoji) => (aggregated[emoji] ?? 0) > 0));
 
-	import { SvelteMap } from 'svelte/reactivity';
-
 	const reactionsByEmoji = $derived.by(() => {
 		const map = new SvelteMap<string, ReviewReactionResponseDto[]>();
 		for (const r of reactions) {
@@ -46,48 +47,28 @@
 
 	const handleReactionToggle = async (emoji: string) => {
 		if (isOwn || isSubmitting) return;
-		isSubmitting = true;
-		try {
-			if (ownReaction?.emoji === emoji) {
-				const success = await groupMovieReviewsStore.removeReaction(
-					groupId,
-					review.groupMovieId,
-					review.id
-				);
-				if (!success) {
+
+		if (ownReaction?.emoji === emoji) {
+			await groupMovieReviewsStore.removeReaction(groupId, review.groupMovieId, review.id);
+			if (!groupMovieReviewsStore.isRemoveReactionSuccess) {
+				const error = groupMovieReviewsStore.removeReactionError;
+				toast.error(error ?? 'Ошибка удаления реакции');
+			}
+		} else {
+			if (ownReaction) {
+				await groupMovieReviewsStore.removeReaction(groupId, review.groupMovieId, review.id);
+				if (!groupMovieReviewsStore.isRemoveReactionSuccess) {
 					const error = groupMovieReviewsStore.removeReactionError;
 					toast.error(error ?? 'Ошибка удаления реакции');
 					return;
 				}
-			} else {
-				if (ownReaction) {
-					const success = await groupMovieReviewsStore.removeReaction(
-						groupId,
-						review.groupMovieId,
-						review.id
-					);
-					if (!success) {
-						const error = groupMovieReviewsStore.removeReactionError;
-						toast.error(error ?? 'Ошибка удаления реакции');
-						return;
-					}
-				}
-				const dto: CreateReviewReactionDto = { emoji };
-				const reaction = await groupMovieReviewsStore.addReaction(
-					groupId,
-					review.groupMovieId,
-					review.id,
-					dto
-				);
-				if (!reaction) {
-					const error = groupMovieReviewsStore.addReactionError;
-					toast.error(error ?? 'Ошибка добавления реакции');
-				}
 			}
-		} catch {
-			toast.error('Неизвестная ошибка');
-		} finally {
-			isSubmitting = false;
+			const dto: CreateReviewReactionDto = { emoji };
+			await groupMovieReviewsStore.addReaction(groupId, review.groupMovieId, review.id, dto);
+			if (!groupMovieReviewsStore.isAddReactionSuccess) {
+				const error = groupMovieReviewsStore.addReactionError;
+				toast.error(error ?? 'Ошибка добавления реакции');
+			}
 		}
 	};
 </script>
