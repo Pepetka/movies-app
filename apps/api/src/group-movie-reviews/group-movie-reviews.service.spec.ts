@@ -10,8 +10,8 @@ import {
 } from '$common/exceptions';
 import { GroupMoviesService } from '$src/group-movies/group-movies.service';
 
+import { GroupMovieReviewReactionsRepository } from './group-movie-review-reactions.repository';
 import { GroupMovieReviewsRepository } from './group-movie-reviews.repository';
-import { GroupMovieReviewReactionsRepository } from './reactions.repository';
 import { GroupMovieReviewsService } from './group-movie-reviews.service';
 
 const mockReview = {

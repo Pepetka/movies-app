@@ -1,0 +1,23 @@
+import type { ReviewReactionWithUser } from '../group-movie-review-reactions.repository';
+import type { GroupMovieReviewWithUser } from '../group-movie-reviews.repository';
+import { ReviewResponseDto, ReviewReactionResponseDto } from '../dto';
+
+export class ReviewResponseMapper {
+  static mapToResponseDto(
+    review: GroupMovieReviewWithUser,
+    userId?: number,
+    reactions: ReviewReactionWithUser[] = [],
+  ): ReviewResponseDto {
+    return Object.assign(new ReviewResponseDto(), {
+      ...review,
+      rating: Number(review.rating),
+      isOwn: userId !== undefined ? review.userId === userId : false,
+      reactions: reactions.map((r) =>
+        Object.assign(new ReviewReactionResponseDto(), {
+          ...r,
+          isOwn: userId !== undefined ? r.userId === userId : false,
+        }),
+      ),
+    });
+  }
+}

@@ -6,6 +6,7 @@ import {
   GroupMovieResponseDto,
 } from '$src/group-movies/dto';
 import { GroupMovieReviewsService } from '$src/group-movie-reviews/group-movie-reviews.service';
+import { ReviewResponseMapper } from '$src/group-movie-reviews/mappers/review-response.mapper';
 import { ProviderSearchResult } from '$src/movies/providers/interfaces/provider-result.dto';
 import { GroupMoviesService } from '$src/group-movies/group-movies.service';
 import { GroupMemberRole } from '$common/enums';
@@ -73,11 +74,7 @@ export class GroupMovieDetailsService {
       currentUserRole,
       reviews: reviews.map((r) => {
         const reactions = reactionsMap.get(r.id) ?? [];
-        return this.groupMovieReviewsService.mapToResponseDto(
-          r,
-          userId,
-          reactions,
-        );
+        return ReviewResponseMapper.mapToResponseDto(r, userId, reactions);
       }),
       averageRating,
       reviewCount: reviews.length,

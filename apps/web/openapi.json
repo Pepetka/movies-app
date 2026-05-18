@@ -1945,6 +1945,7 @@
 					"text",
 					"createdAt",
 					"updatedAt",
+					"isOwn",
 					"reactions"
 				]
 			},

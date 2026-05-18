@@ -42,8 +42,8 @@ export class ReviewResponseDto {
   updatedAt: Date;
 
   @Expose()
-  @ApiProperty({ type: Boolean, required: false })
-  isOwn?: boolean;
+  @ApiProperty({ type: Boolean })
+  isOwn: boolean;
 
   @Expose()
   @Type(() => ReviewReactionResponseDto)

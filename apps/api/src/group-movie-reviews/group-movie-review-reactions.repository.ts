@@ -23,6 +23,14 @@ export interface ReviewReactionWithUser extends GroupMovieReviewReaction {
 export class GroupMovieReviewReactionsRepository {
   constructor(@Inject(DRIZZLE) private readonly db: DrizzleDb) {}
 
+  private _withUserColumns() {
+    return {
+      ...getTableColumns(groupMovieReviewReactions),
+      userName: users.name,
+      userAvatar: users.avatar,
+    };
+  }
+
   async create(
     data: NewGroupMovieReviewReaction,
   ): Promise<ReviewReactionWithUser> {
@@ -33,11 +41,7 @@ export class GroupMovieReviewReactionsRepository {
         .returning();
 
       const [result] = await tx
-        .select({
-          ...getTableColumns(groupMovieReviewReactions),
-          userName: users.name,
-          userAvatar: users.avatar,
-        })
+        .select(this._withUserColumns())
         .from(groupMovieReviewReactions)
         .innerJoin(users, eq(groupMovieReviewReactions.userId, users.id))
         .where(eq(groupMovieReviewReactions.id, inserted.id))
@@ -59,11 +63,7 @@ export class GroupMovieReviewReactionsRepository {
     if (reviewIds.length === 0) return [];
 
     return this.db
-      .select({
-        ...getTableColumns(groupMovieReviewReactions),
-        userName: users.name,
-        userAvatar: users.avatar,
-      })
+      .select(this._withUserColumns())
       .from(groupMovieReviewReactions)
       .innerJoin(users, eq(groupMovieReviewReactions.userId, users.id))
       .where(inArray(groupMovieReviewReactions.reviewId, reviewIds))
@@ -75,11 +75,7 @@ export class GroupMovieReviewReactionsRepository {
     userId: number,
   ): Promise<ReviewReactionWithUser | null> {
     const [result] = await this.db
-      .select({
-        ...getTableColumns(groupMovieReviewReactions),
-        userName: users.name,
-        userAvatar: users.avatar,
-      })
+      .select(this._withUserColumns())
       .from(groupMovieReviewReactions)
       .innerJoin(users, eq(groupMovieReviewReactions.userId, users.id))
       .where(

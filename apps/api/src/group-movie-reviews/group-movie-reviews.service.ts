@@ -14,6 +14,10 @@ import { isUniqueViolation } from '$common/utils';
 import { GroupMovieStatus } from '$common/enums';
 
 import {
+  GroupMovieReviewReactionsRepository,
+  type ReviewReactionWithUser,
+} from './group-movie-review-reactions.repository';
+import {
   GroupMovieReviewsRepository,
   type GroupMovieReviewWithUser,
 } from './group-movie-reviews.repository';
@@ -23,10 +27,7 @@ import {
   ReviewResponseDto,
   ReviewReactionResponseDto,
 } from './dto';
-import {
-  GroupMovieReviewReactionsRepository,
-  type ReviewReactionWithUser,
-} from './reactions.repository';
+import { ReviewResponseMapper } from './mappers/review-response.mapper';
 
 @Injectable()
 export class GroupMovieReviewsService {
@@ -37,24 +38,6 @@ export class GroupMovieReviewsService {
     private readonly groupMovieReviewReactionsRepository: GroupMovieReviewReactionsRepository,
     private readonly groupMoviesService: GroupMoviesService,
   ) {}
-
-  mapToResponseDto(
-    review: GroupMovieReviewWithUser,
-    userId?: number,
-    reactions: ReviewReactionWithUser[] = [],
-  ): ReviewResponseDto {
-    return Object.assign(new ReviewResponseDto(), {
-      ...review,
-      rating: Number(review.rating),
-      isOwn: userId !== undefined ? review.userId === userId : false,
-      reactions: reactions.map((r) =>
-        Object.assign(new ReviewReactionResponseDto(), {
-          ...r,
-          isOwn: userId !== undefined ? r.userId === userId : false,
-        }),
-      ),
-    });
-  }
 
   async create(
     groupId: number,
@@ -93,7 +76,7 @@ export class GroupMovieReviewsService {
       this._logger.log(
         `Review created for group movie ${groupMovieId} by user ${userId}`,
       );
-      return this.mapToResponseDto(review, userId);
+      return ReviewResponseMapper.mapToResponseDto(review, userId);
     } catch (error) {
       if (isUniqueViolation(error)) {
         throw new ReviewAlreadyExistsException();

@@ -4,9 +4,9 @@ import { GroupMoviesModule } from '$src/group-movies/group-movies.module';
 import { GroupsModule } from '$src/groups/groups.module';
 import { DbModule } from '$src/db/db.module';
 
+import { GroupMovieReviewReactionsRepository } from './group-movie-review-reactions.repository';
 import { GroupMovieReviewsController } from './group-movie-reviews.controller';
 import { GroupMovieReviewsRepository } from './group-movie-reviews.repository';
-import { GroupMovieReviewReactionsRepository } from './reactions.repository';
 import { GroupMovieReviewsService } from './group-movie-reviews.service';
 import { ReviewAuthorGuard } from './guards';
 
