@@ -4,6 +4,9 @@ import {
   ReviewNotFoundException,
   ReviewAlreadyExistsException,
   MovieNotWatchedException,
+  CannotReactToOwnReviewException,
+  ReactionAlreadyExistsException,
+  ReactionNotFoundException,
 } from '$common/exceptions';
 import { GroupMovie, NewGroupMovieReview, GroupMovieReview } from '$db/schemas';
 import { GroupMoviesService } from '$src/group-movies/group-movies.service';
@@ -14,7 +17,16 @@ import {
   GroupMovieReviewsRepository,
   type GroupMovieReviewWithUser,
 } from './group-movie-reviews.repository';
-import { CreateReviewDto, UpdateReviewDto, ReviewResponseDto } from './dto';
+import {
+  CreateReviewDto,
+  UpdateReviewDto,
+  ReviewResponseDto,
+  ReviewReactionResponseDto,
+} from './dto';
+import {
+  GroupMovieReviewReactionsRepository,
+  type ReviewReactionWithUser,
+} from './reactions.repository';
 
 @Injectable()
 export class GroupMovieReviewsService {
@@ -22,17 +34,25 @@ export class GroupMovieReviewsService {
 
   constructor(
     private readonly groupMovieReviewsRepository: GroupMovieReviewsRepository,
+    private readonly groupMovieReviewReactionsRepository: GroupMovieReviewReactionsRepository,
     private readonly groupMoviesService: GroupMoviesService,
   ) {}
 
   private _mapToResponseDto(
     review: GroupMovieReviewWithUser,
     userId?: number,
+    reactions: ReviewReactionWithUser[] = [],
   ): ReviewResponseDto {
     return Object.assign(new ReviewResponseDto(), {
       ...review,
       rating: Number(review.rating),
       isOwn: userId !== undefined ? review.userId === userId : undefined,
+      reactions: reactions.map((r) =>
+        Object.assign(new ReviewReactionResponseDto(), {
+          ...r,
+          isOwn: userId !== undefined ? r.userId === userId : false,
+        }),
+      ),
     });
   }
 
@@ -151,6 +171,95 @@ export class GroupMovieReviewsService {
     groupMovieId: number,
   ): Promise<GroupMovieReviewWithUser[]> {
     return this.groupMovieReviewsRepository.findByGroupMovie(groupMovieId);
+  }
+
+  async addReaction(
+    reviewId: number,
+    groupMovieId: number,
+    userId: number,
+    emoji: string,
+  ): Promise<ReviewReactionResponseDto> {
+    const review = await this.groupMovieReviewsRepository.findOne(reviewId);
+
+    if (!review || review.groupMovieId !== groupMovieId) {
+      throw new ReviewNotFoundException();
+    }
+
+    if (review.userId === userId) {
+      throw new CannotReactToOwnReviewException();
+    }
+
+    const existingReaction =
+      await this.groupMovieReviewReactionsRepository.findByReviewAndUser(
+        reviewId,
+        userId,
+      );
+
+    if (existingReaction) {
+      throw new ReactionAlreadyExistsException();
+    }
+
+    const reaction = await this.groupMovieReviewReactionsRepository.create({
+      reviewId,
+      userId,
+      emoji,
+    });
+
+    if (!reaction) {
+      throw new ReactionNotFoundException();
+    }
+
+    this._logger.log(
+      `Reaction ${emoji} added to review ${reviewId} by user ${userId}`,
+    );
+
+    return Object.assign(new ReviewReactionResponseDto(), {
+      ...reaction,
+      isOwn: true,
+    });
+  }
+
+  async removeReaction(
+    reviewId: number,
+    groupMovieId: number,
+    userId: number,
+  ): Promise<void> {
+    const review = await this.groupMovieReviewsRepository.findOne(reviewId);
+
+    if (!review || review.groupMovieId !== groupMovieId) {
+      throw new ReviewNotFoundException();
+    }
+
+    const reaction =
+      await this.groupMovieReviewReactionsRepository.findByReviewAndUser(
+        reviewId,
+        userId,
+      );
+
+    if (!reaction) {
+      throw new ReactionNotFoundException();
+    }
+
+    await this.groupMovieReviewReactionsRepository.delete(reaction.id);
+
+    this._logger.log(
+      `Reaction removed from review ${reviewId} by user ${userId}`,
+    );
+  }
+
+  async getReactionsByReviewIds(
+    reviewIds: number[],
+  ): Promise<Map<number, ReviewReactionWithUser[]>> {
+    const reactions =
+      await this.groupMovieReviewReactionsRepository.findByReviewIds(reviewIds);
+
+    const map = new Map<number, ReviewReactionWithUser[]>();
+    for (const reaction of reactions) {
+      const list = map.get(reaction.reviewId) ?? [];
+      list.push(reaction);
+      map.set(reaction.reviewId, list);
+    }
+    return map;
   }
 
   private async _verifyGroupMovieOrThrow(

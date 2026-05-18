@@ -1,0 +1,1 @@
+ALTER TABLE "group_movie_review_reactions" ALTER COLUMN "emoji" SET DATA TYPE varchar(20);

@@ -6,6 +6,7 @@ import { DbModule } from '$src/db/db.module';
 
 import { GroupMovieReviewsController } from './group-movie-reviews.controller';
 import { GroupMovieReviewsRepository } from './group-movie-reviews.repository';
+import { GroupMovieReviewReactionsRepository } from './reactions.repository';
 import { GroupMovieReviewsService } from './group-movie-reviews.service';
 import { ReviewAuthorGuard } from './guards';
 
@@ -15,6 +16,7 @@ import { ReviewAuthorGuard } from './guards';
   providers: [
     GroupMovieReviewsService,
     GroupMovieReviewsRepository,
+    GroupMovieReviewReactionsRepository,
     ReviewAuthorGuard,
   ],
   exports: [GroupMovieReviewsService],

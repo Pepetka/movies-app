@@ -1,6 +1,8 @@
 import { Expose, Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
 
+import { ReviewReactionResponseDto } from './review-reaction-response.dto';
+
 export class ReviewResponseDto {
   @Expose()
   @ApiProperty()
@@ -42,4 +44,9 @@ export class ReviewResponseDto {
   @Expose()
   @ApiProperty({ type: Boolean, required: false })
   isOwn?: boolean;
+
+  @Expose()
+  @Type(() => ReviewReactionResponseDto)
+  @ApiProperty({ type: [ReviewReactionResponseDto] })
+  reactions: ReviewReactionResponseDto[];
 }
