@@ -5,12 +5,12 @@ import {
   MovieSearchGroupDto,
   GroupMovieResponseDto,
 } from '$src/group-movies/dto';
-import { GroupMovieReviewsService } from '$src/group-movie-reviews/group-movie-reviews.service';
-import { ProviderSearchResult } from '$src/movies/providers/interfaces/provider-result.dto';
 import {
   ReviewResponseDto,
   ReviewReactionResponseDto,
 } from '$src/group-movie-reviews/dto';
+import { GroupMovieReviewsService } from '$src/group-movie-reviews/group-movie-reviews.service';
+import { ProviderSearchResult } from '$src/movies/providers/interfaces/provider-result.dto';
 import { GroupMoviesService } from '$src/group-movies/group-movies.service';
 import { GroupMemberRole } from '$common/enums';
 import { GroupMovie } from '$db/schemas';
