@@ -154,6 +154,9 @@ describe('GroupMovieReviewsService', () => {
         rating: '5.0',
         text: 'Updated text',
       });
+      mocks.groupMovieReviewReactionsRepository.findByReviewIds.mockResolvedValue(
+        [],
+      );
 
       const result = await service.update(
         1,

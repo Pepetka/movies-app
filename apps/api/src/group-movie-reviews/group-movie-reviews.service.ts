@@ -120,8 +120,11 @@ export class GroupMovieReviewsService {
       updateData,
     );
 
+    const reactionsMap = await this.getReactionsByReviewIds([updated.id]);
+    const reactions = reactionsMap.get(updated.id) ?? [];
+
     this._logger.log(`Review ${id} updated by user ${userId}`);
-    return this.mapToResponseDto(updated, userId);
+    return ReviewResponseMapper.mapToResponseDto(updated, userId, reactions);
   }
 
   async delete(
