@@ -158,6 +158,8 @@
 	--color-error-ring: rgba(239, 68, 68, 0.15);
 
 	/* Avatar Sizes */
+	--avatar-xxs-size: 18px;
+	--avatar-xxs-font: 8px;
 	--avatar-xs-size: 24px;
 	--avatar-xs-font: 10px;
 	--avatar-sm-size: 32px;

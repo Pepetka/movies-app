@@ -1,4 +1,4 @@
-export type AvatarSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
+export type AvatarSize = 'xxs' | 'xs' | 'sm' | 'md' | 'lg' | 'xl';
 
 const AVATAR_COLORS = [
 	'var(--avatar-color-1)',
@@ -13,6 +13,8 @@ const AVATAR_COLORS = [
 
 export const getAvatarIconSize = (size: AvatarSize): number => {
 	switch (size) {
+		case 'xxs':
+			return 10;
 		case 'xs':
 			return 14;
 		case 'sm':

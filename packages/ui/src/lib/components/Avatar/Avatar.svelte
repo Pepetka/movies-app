@@ -127,6 +127,12 @@
 	}
 
 	/* Sizes */
+	.ui-avatar.xxs {
+		width: var(--avatar-xxs-size);
+		height: var(--avatar-xxs-size);
+		font-size: var(--avatar-xxs-font);
+	}
+
 	.ui-avatar.xs {
 		width: var(--avatar-xs-size);
 		height: var(--avatar-xs-size);
