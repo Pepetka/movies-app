@@ -39,8 +39,9 @@
 	const showMyReview = $derived(
 		(status === 'watched' && hasMyReview && !isEditing) || (status !== 'watched' && hasMyReview)
 	);
+	const showContent = $derived(showCreateForm || showMyReview || showEditForm);
 	const showEmptyState = $derived(
-		!isLoading && otherReviews.length === 0 && !showCreateForm && !showMyReview && !showEditForm
+		status === 'watched' && !isLoading && otherReviews.length === 0 && !showContent
 	);
 
 	const SKELETON_ITEMS = [0, 1, 2];
