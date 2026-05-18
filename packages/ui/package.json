@@ -52,7 +52,7 @@
 		"@eslint/compat": "catalog:",
 		"prettier": "catalog:",
 		"prettier-plugin-svelte": "catalog:",
-		"publint": "^0.3.20",
+		"publint": "^0.3.21",
 		"svelte": "catalog:",
 		"svelte-check": "catalog:",
 		"typescript": "catalog:",
