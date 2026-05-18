@@ -49,5 +49,8 @@ export {
 	StarRatingInput,
 	ReviewCard,
 	ReviewForm,
-	ReviewList
+	ReviewList,
+	ReactionPicker,
+	ReactionParticipants,
+	ReactionSheet
 } from './components';

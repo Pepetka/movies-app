@@ -1472,6 +1472,93 @@
 				"summary": "Delete a review (Author or global admin only)",
 				"tags": ["Groups / Movie Reviews"]
 			}
+		},
+		"/api/v1/groups/{groupId}/movies/{groupMovieId}/reviews/{id}/reactions": {
+			"post": {
+				"operationId": "GroupMovieReviewsController_createReaction_v1",
+				"parameters": [
+					{
+						"name": "groupId",
+						"required": true,
+						"in": "path",
+						"description": "Group ID",
+						"schema": { "type": "number" }
+					},
+					{
+						"name": "groupMovieId",
+						"required": true,
+						"in": "path",
+						"description": "Group Movie ID",
+						"schema": { "type": "number" }
+					},
+					{
+						"name": "id",
+						"required": true,
+						"in": "path",
+						"description": "Review ID",
+						"schema": { "type": "number" }
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": { "$ref": "#/components/schemas/CreateReviewReactionDto" }
+						}
+					}
+				},
+				"responses": {
+					"201": {
+						"description": "Reaction added",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/ReviewReactionResponseDto" }
+							}
+						}
+					},
+					"400": { "description": "Invalid emoji" },
+					"403": { "description": "Forbidden - Cannot react to own review" },
+					"404": { "description": "Review not found" },
+					"409": { "description": "Reaction already exists" }
+				},
+				"security": [{ "access-token": [] }],
+				"summary": "Add a reaction to a review (Group members only)",
+				"tags": ["Groups / Movie Reviews"]
+			},
+			"delete": {
+				"operationId": "GroupMovieReviewsController_deleteReaction_v1",
+				"parameters": [
+					{
+						"name": "groupId",
+						"required": true,
+						"in": "path",
+						"description": "Group ID",
+						"schema": { "type": "number" }
+					},
+					{
+						"name": "groupMovieId",
+						"required": true,
+						"in": "path",
+						"description": "Group Movie ID",
+						"schema": { "type": "number" }
+					},
+					{
+						"name": "id",
+						"required": true,
+						"in": "path",
+						"description": "Review ID",
+						"schema": { "type": "number" }
+					}
+				],
+				"responses": {
+					"204": { "description": "Reaction removed" },
+					"403": { "description": "Forbidden" },
+					"404": { "description": "Reaction not found" }
+				},
+				"security": [{ "access-token": [] }],
+				"summary": "Remove own reaction from a review (Group members only)",
+				"tags": ["Groups / Movie Reviews"]
+			}
 		}
 	},
 	"info": {
@@ -1807,6 +1894,29 @@
 					}
 				}
 			},
+			"ReviewReactionResponseDto": {
+				"type": "object",
+				"properties": {
+					"id": { "type": "number" },
+					"reviewId": { "type": "number" },
+					"userId": { "type": "number" },
+					"userName": { "type": "string" },
+					"userAvatar": { "type": "string", "nullable": true },
+					"emoji": { "type": "string" },
+					"isOwn": { "type": "boolean" },
+					"createdAt": { "format": "date-time", "type": "string" }
+				},
+				"required": [
+					"id",
+					"reviewId",
+					"userId",
+					"userName",
+					"userAvatar",
+					"emoji",
+					"isOwn",
+					"createdAt"
+				]
+			},
 			"ReviewResponseDto": {
 				"type": "object",
 				"properties": {
@@ -1819,7 +1929,11 @@
 					"text": { "type": "string", "nullable": true },
 					"createdAt": { "format": "date-time", "type": "string" },
 					"updatedAt": { "format": "date-time", "type": "string" },
-					"isOwn": { "type": "boolean" }
+					"isOwn": { "type": "boolean" },
+					"reactions": {
+						"type": "array",
+						"items": { "$ref": "#/components/schemas/ReviewReactionResponseDto" }
+					}
 				},
 				"required": [
 					"id",
@@ -1830,7 +1944,9 @@
 					"rating",
 					"text",
 					"createdAt",
-					"updatedAt"
+					"updatedAt",
+					"isOwn",
+					"reactions"
 				]
 			},
 			"GroupMovieResponseDto": {
@@ -1956,6 +2072,18 @@
 					},
 					"text": { "type": "string", "description": "Review text", "maxLength": 2000 }
 				}
+			},
+			"CreateReviewReactionDto": {
+				"type": "object",
+				"properties": {
+					"emoji": {
+						"type": "string",
+						"description": "Emoji reaction",
+						"example": "👍",
+						"maxLength": 20
+					}
+				},
+				"required": ["emoji"]
 			}
 		}
 	},

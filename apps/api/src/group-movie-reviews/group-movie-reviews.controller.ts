@@ -23,7 +23,13 @@ import { GroupMemberGuard } from '$src/groups/guards';
 import type { GroupMovieReview } from '$db/schemas';
 import { User, Review } from '$common/decorators';
 
-import { CreateReviewDto, UpdateReviewDto, ReviewResponseDto } from './dto';
+import {
+  CreateReviewDto,
+  UpdateReviewDto,
+  ReviewResponseDto,
+  CreateReviewReactionDto,
+  ReviewReactionResponseDto,
+} from './dto';
 import { GroupMovieReviewsService } from './group-movie-reviews.service';
 import { ReviewAuthorGuard } from './guards';
 
@@ -141,6 +147,70 @@ export class GroupMovieReviewsController {
       groupMovieId,
       userId,
       review,
+    );
+  }
+
+  @Post(':id/reactions')
+  @UseGuards(GroupMemberGuard)
+  @HttpCode(HttpStatus.CREATED)
+  @SerializeOptions({ type: ReviewReactionResponseDto })
+  @ApiOperation({
+    summary: 'Add a reaction to a review (Group members only)',
+  })
+  @ApiParam({ name: 'groupId', description: 'Group ID' })
+  @ApiParam({ name: 'groupMovieId', description: 'Group Movie ID' })
+  @ApiParam({ name: 'id', description: 'Review ID' })
+  @ApiResponse({
+    status: 201,
+    description: 'Reaction added',
+    type: ReviewReactionResponseDto,
+  })
+  @ApiResponse({ status: 400, description: 'Invalid emoji' })
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden - Cannot react to own review',
+  })
+  @ApiResponse({ status: 404, description: 'Review not found' })
+  @ApiResponse({ status: 409, description: 'Reaction already exists' })
+  async createReaction(
+    @Param('groupId', ParseIntPipe) groupId: number,
+    @Param('groupMovieId', ParseIntPipe) groupMovieId: number,
+    @Param('id', ParseIntPipe) reviewId: number,
+    @Body() dto: CreateReviewReactionDto,
+    @User('id') userId: number,
+  ): Promise<ReviewReactionResponseDto> {
+    return this.groupMovieReviewsService.addReaction(
+      groupId,
+      reviewId,
+      groupMovieId,
+      userId,
+      dto.emoji,
+    );
+  }
+
+  @Delete(':id/reactions')
+  @UseGuards(GroupMemberGuard)
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({
+    summary: 'Remove own reaction from a review (Group members only)',
+  })
+  @ApiParam({ name: 'groupId', description: 'Group ID' })
+  @ApiParam({ name: 'groupMovieId', description: 'Group Movie ID' })
+  @ApiParam({ name: 'id', description: 'Review ID' })
+  @ApiResponse({ status: 204, description: 'Reaction removed' })
+  @ApiResponse({ status: 404, description: 'Reaction not found' })
+  @ApiResponse({ status: 403, description: 'Forbidden' })
+  async deleteReaction(
+    @Param('groupId', ParseIntPipe) groupId: number,
+    @Param('groupMovieId', ParseIntPipe) groupMovieId: number,
+    @Param('id', ParseIntPipe) reviewId: number,
+    @User('id') userId: number,
+  ): Promise<void> {
+    return this.groupMovieReviewsService.removeReaction(
+      groupId,
+      reviewId,
+      groupMovieId,
+      userId,
     );
   }
 }

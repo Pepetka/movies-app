@@ -6,8 +6,8 @@ import { GroupMovieReview } from '$db/schemas';
 
 import { GroupMovieReviewsController } from './group-movie-reviews.controller';
 import { GroupMovieReviewsService } from './group-movie-reviews.service';
+import { ReviewResponseDto, ReviewReactionResponseDto } from './dto';
 import { ReviewAuthorGuard } from './guards';
-import { ReviewResponseDto } from './dto';
 
 class MockGuard implements CanActivate {
   canActivate() {
@@ -29,6 +29,8 @@ describe('GroupMovieReviewsController', () => {
             create: jest.fn(),
             update: jest.fn(),
             delete: jest.fn(),
+            addReaction: jest.fn(),
+            removeReaction: jest.fn(),
           },
         },
       ],
@@ -82,6 +84,31 @@ describe('GroupMovieReviewsController', () => {
       await controller.delete(1, 1, 1, 1, { id: 1 } as GroupMovieReview);
 
       expect(service.delete).toHaveBeenCalledWith(1, 1, 1, 1, { id: 1 });
+    });
+  });
+
+  describe('createReaction', () => {
+    it('should call service.addReaction with correct arguments', async () => {
+      const dto = { emoji: '👍' };
+      service.addReaction.mockResolvedValue({
+        id: 1,
+        emoji: '👍',
+      } as ReviewReactionResponseDto);
+
+      const result = await controller.createReaction(1, 1, 1, dto, 2);
+
+      expect(service.addReaction).toHaveBeenCalledWith(1, 1, 1, 2, '👍');
+      expect(result).toEqual({ id: 1, emoji: '👍' });
+    });
+  });
+
+  describe('deleteReaction', () => {
+    it('should call service.removeReaction with correct arguments', async () => {
+      service.removeReaction.mockResolvedValue(undefined);
+
+      await controller.deleteReaction(1, 1, 1, 2);
+
+      expect(service.removeReaction).toHaveBeenCalledWith(1, 1, 1, 2);
     });
   });
 });
