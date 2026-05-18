@@ -66,17 +66,17 @@ importers:
         specifier: ^9.1.7
         version: 9.1.7
       lint-staged:
-        specifier: ^17.0.4
-        version: 17.0.4
+        specifier: ^17.0.5
+        version: 17.0.5
       prettier-plugin-svelte:
         specifier: 'catalog:'
         version: 3.5.1(prettier@3.8.2)(svelte@5.55.5(@typescript-eslint/types@8.59.3))
       syncpack:
-        specifier: 15.1.2
-        version: 15.1.2
+        specifier: 15.2.0
+        version: 15.2.0
       turbo:
-        specifier: ^2.9.12
-        version: 2.9.12
+        specifier: ^2.9.14
+        version: 2.9.14
       typescript:
         specifier: 'catalog:'
         version: 5.9.3
@@ -294,7 +294,7 @@ importers:
         version: 10.1.8(eslint@10.3.0(jiti@2.6.1))
       eslint-config-turbo:
         specifier: ^2.9.12
-        version: 2.9.12(eslint@10.3.0(jiti@2.6.1))(turbo@2.9.12)
+        version: 2.9.12(eslint@10.3.0(jiti@2.6.1))(turbo@2.9.14)
       eslint-plugin-perfectionist:
         specifier: ^5.9.0
         version: 5.9.0(eslint@10.3.0(jiti@2.6.1))(typescript@5.9.3)
@@ -306,7 +306,7 @@ importers:
         version: 3.17.1(eslint@10.3.0(jiti@2.6.1))(svelte@5.55.5(@typescript-eslint/types@8.59.3))(ts-node@10.9.2(@swc/core@1.15.33)(@types/node@25.6.2)(typescript@5.9.3))
       eslint-plugin-turbo:
         specifier: ^2.9.12
-        version: 2.9.12(eslint@10.3.0(jiti@2.6.1))(turbo@2.9.12)
+        version: 2.9.12(eslint@10.3.0(jiti@2.6.1))(turbo@2.9.14)
       eslint-plugin-unused-imports:
         specifier: ^4.4.1
         version: 4.4.1(@typescript-eslint/eslint-plugin@8.59.3(@typescript-eslint/parser@8.59.3(eslint@10.3.0(jiti@2.6.1))(typescript@5.9.3))(eslint@10.3.0(jiti@2.6.1))(typescript@5.9.3))(eslint@10.3.0(jiti@2.6.1))
@@ -2451,33 +2451,33 @@ packages:
   '@tsconfig/node16@1.0.4':
     resolution: {integrity: sha512-vxhUy4J8lyeyinH7Azl1pdd43GJhZH/tP2weN8TntQblOY+A0XbT8DJk1/oCPuOOyg/Ja757rG0CgHcWC8OfMA==}
 
-  '@turbo/darwin-64@2.9.12':
-    resolution: {integrity: sha512-eu3eFRmE9NjgZ0wPdRJ44l+LGSeIky+tz5ZQd8zQkw/Yqi+BM7wq+8nbabeoiVUcICi/IZweMOKl/MCmkrd1+g==}
+  '@turbo/darwin-64@2.9.14':
+    resolution: {integrity: sha512-t7QiPflaEyBE4oayeZtSmu4mEfjgIrcNlNNl1z1dmIVPqEdtA7+CfTf8d7KXsOGPh6aNgWjKxyvQg9uGfDQF+A==}
     cpu: [x64]
     os: [darwin]
 
-  '@turbo/darwin-arm64@2.9.12':
-    resolution: {integrity: sha512-RUkAE404z/J8NsyrUosMcBaXT6M4bRFxTQrmkDQBLQVXaC8Jl0e9bMvYDSX0GW7Ffm2m3j9y7RXgR1foeUAM9w==}
+  '@turbo/darwin-arm64@2.9.14':
+    resolution: {integrity: sha512-d23147mC9BsCPA9mJ0h/ubcpbRgcJBXbcG3+Vq7YLhjz3IXuvQsJ1UXH8f4MD76ZjJ4m/E4aRdJV+MW88CDfbw==}
     cpu: [arm64]
     os: [darwin]
 
-  '@turbo/linux-64@2.9.12':
-    resolution: {integrity: sha512-InIUtH7cw/vqXNX1Gr7QgWfmw3ct08pV5CpfdEOR48z2u2rzdmpIuk00B/Q2xCb0PMWtKgiMQynfuphmEuUyTQ==}
+  '@turbo/linux-64@2.9.14':
+    resolution: {integrity: sha512-P3ZKB5tuUDdDQWuAsACGUR1qv9W7BNWxdxqVJ0kZNuNNPRaVYTPPikLcp79+GiEcW3npsR+KyP38lnQiBc5aSA==}
     cpu: [x64]
     os: [linux]
 
-  '@turbo/linux-arm64@2.9.12':
-    resolution: {integrity: sha512-lC6nD//Xh67fmJM0LKaLsg74Wry0aYrgMklpiNgCbUaMdPIOqj0A00iri3NU7Lb7pZHx8ViisgpeDKlpSgFUCA==}
+  '@turbo/linux-arm64@2.9.14':
+    resolution: {integrity: sha512-ZRTlzcUMrrPv9ZuDzRF9n60Ym13bKeG9jDB8WjxyLhWNzV+AJQN+zdpIk3NJYf2zQsGUm1mNar2P0elRzLw25g==}
     cpu: [arm64]
     os: [linux]
 
-  '@turbo/windows-64@2.9.12':
-    resolution: {integrity: sha512-conYri8VUl72JOdYnLDPYwzqbPcY5ECoHmo9FWoKznemhaAIilj4maHqs9Uar0aKfNoZIULniy+6iWaLtLO34A==}
+  '@turbo/windows-64@2.9.14':
+    resolution: {integrity: sha512-exanwN6sIduZwykYeiTQj8kCmOhazP5WOz3bvXMcYtjhL6Z3iRWLewKrXCBq0bqwSP3iBMb/AerRCnHI4lx46A==}
     cpu: [x64]
     os: [win32]
 
-  '@turbo/windows-arm64@2.9.12':
-    resolution: {integrity: sha512-XoR4bsg62/L/esRVcmoMESEiNZ36+YmyjYGLpoqk8nwMgXzzVjNOgX0lRSz5w/U/ajLGv3nhMsS0Q2QOdvp2AQ==}
+  '@turbo/windows-arm64@2.9.14':
+    resolution: {integrity: sha512-fVdCsnmYoKICsycbWuuGp6Jvi51/3G/UluFWuAUCvR8PIW5IJkAk5BM9UF8PSm0Q2IphWHFZjYEgjHsh3B9y/g==}
     cpu: [arm64]
     os: [win32]
 
@@ -4761,8 +4761,8 @@ packages:
   linkify-it@5.0.0:
     resolution: {integrity: sha512-5aHCbzQRADcdP+ATqnDuhhJ/MRIqDkZX5pyjFHRRysS8vZ5AbqGEoFIb6pYHPZ+L/OC2Lc+xT8uHVVR5CAK/wQ==}
 
-  lint-staged@17.0.4:
-    resolution: {integrity: sha512-+rU9lSUyVOZ/hDUmRLVGzyS2v73cDdQjX+XQz1AaOdIE4RysLq0HoPW2HrrgeNCLklkhi904VBU1bmgWLHVnkA==}
+  lint-staged@17.0.5:
+    resolution: {integrity: sha512-d12yC+/e8RhBjZtaxZn71FyrgU/P5e+uAPifhCLwdosQZP/zamSdKRWDC30ocVIbzDKiFG1McHc/LUgB92GIPw==}
     engines: {node: '>=22.22.1'}
     hasBin: true
 
@@ -5809,48 +5809,48 @@ packages:
     resolution: {integrity: sha512-Bh7QjT8/SuKUIfObSXNHNSK6WHo6J1tHCqJsuaFDP7gP0fkzSfTxI8y85JrppZ0h8l0maIgc2tfuZQ6/t3GtnQ==}
     engines: {node: ^14.18.0 || >=16.0.0}
 
-  syncpack-darwin-arm64@15.1.2:
-    resolution: {integrity: sha512-RQET2RNmX7yKorqCE6Q7kppC7eT9lw742QYPfWIL8Nh26RerT+erOp8zhdgv/3OmDkETF9olqyts79HY48V4SA==}
+  syncpack-darwin-arm64@15.2.0:
+    resolution: {integrity: sha512-7bvEQO8vwMen5Jn0HyHSj3Yke4ZOtle44XRKNPR4znY0p6RIJHxADLOT7yETYtkM7e2Oupi7WoGpFYT50iwaxQ==}
     cpu: [arm64]
     os: [darwin]
 
-  syncpack-darwin-x64@15.1.2:
-    resolution: {integrity: sha512-pmVr4Qw5o42aUfeZVaPXmnQNaoMhBNywcFK24FqSlo3MCK3WCJ0UwfhmcD7u82BGwASd4RFPGxgV18iJLFRnoA==}
+  syncpack-darwin-x64@15.2.0:
+    resolution: {integrity: sha512-Wvry6LE/idjsKlOsNk3syNWoQqeWB/hLYKqY5rIivvL+FGJOsYWUADwSTz8ThflNTefoIRvohapLlvt5ffA75g==}
     cpu: [x64]
     os: [darwin]
 
-  syncpack-linux-arm64-musl@15.1.2:
-    resolution: {integrity: sha512-Xs1wOUrMZqu0yo85NjAiccbBVkDYhT2P8yOh2+R56MK7ywtyBuM3TxR2IwEmXE8NPW3++hzdF0a7a7IbiW74bQ==}
+  syncpack-linux-arm64-musl@15.2.0:
+    resolution: {integrity: sha512-yuvghI2+TBQmYX3AsrVFQOhgq84QyRePFVQSRQp25I5BADppts1I/3ZQ06WITzBrKsOsbm2Ds74UhKdBSIW6Ug==}
     cpu: [arm64]
     os: [linux]
 
-  syncpack-linux-arm64@15.1.2:
-    resolution: {integrity: sha512-iRsv6tPNX9ZaDEjjpFdYwJj6EHerMVzl2euWt6qmYaW8/SaR6s5W+cc+qXPXijPsBlK65gibdHBfsBgJYB//CA==}
+  syncpack-linux-arm64@15.2.0:
+    resolution: {integrity: sha512-jBLPNEAyTBbGXJCMqnMY0KJg5MuihpHRod/ZihddLZin18/hk82GYXm9wk2YchFM3CwKD8Vti2SHxSweWUOcVg==}
     cpu: [arm64]
     os: [linux]
 
-  syncpack-linux-x64-musl@15.1.2:
-    resolution: {integrity: sha512-bBtQUTEECd1nefHWfQskwkFdaVXn54whSLHacc9bQijqn4p8lZ2JR3vokqVx8w/dKSrJsxkEM4K7zfHOori38w==}
+  syncpack-linux-x64-musl@15.2.0:
+    resolution: {integrity: sha512-F75wqGiW6l1amXXK0JSmtN6eg5syUz1SHMUNw6FkSBqZirdvltz/iBZc76Ms6ZMbleThV/QFZOinH0CL3bAKTg==}
     cpu: [x64]
     os: [linux]
 
-  syncpack-linux-x64@15.1.2:
-    resolution: {integrity: sha512-Vwc7HLu05rUTgoN2zwcM/F/KiSw7/1prb/S4P+P5UtLXHfQ3Y23dvW1el6ABg7pOBbk08Zgr3i4DSS7Wiw0rog==}
+  syncpack-linux-x64@15.2.0:
+    resolution: {integrity: sha512-5B3iqrdRKAUvXhmUAKbQHiJ3VpgKfkRR1yOpdxEBZmj18nopKwMME5EEVD7vaHvuqzajjyFmSdXaxRM1JIX0pg==}
     cpu: [x64]
     os: [linux]
 
-  syncpack-windows-arm64@15.1.2:
-    resolution: {integrity: sha512-WZnjy0zM9TNWCKxNVo6PGprBKusYykqiAj2qGYWgkMMtGECpFOfEsrmt3R4s58ttQMAg44N+HVDhXtIFQeJOpg==}
+  syncpack-windows-arm64@15.2.0:
+    resolution: {integrity: sha512-vzFz5WfHN6wgSBjmWxUoHRAIjKseCLClXxIxxYTnWfFKkP6vtnTJKV9/LM7HK3cAfz1GDa49dNL70DrYFMyeGw==}
     cpu: [arm64]
     os: [win32]
 
-  syncpack-windows-x64@15.1.2:
-    resolution: {integrity: sha512-xyWsvn2Bbvubt4sIZGguqbv8pXiGWKifIYgzZWWUIWdaNvGThNLlrEWBlHABDx+Ov1yKLiKHjBiXQMgplMN92w==}
+  syncpack-windows-x64@15.2.0:
+    resolution: {integrity: sha512-i5Ygq8GNPAuTZoftmR8VBdYsWKmpOcKKGKZkPqLPtEOuiSp56Dgievm+asR2DLMtm/qwkFE+tqYTVlKWw133Rw==}
     cpu: [x64]
     os: [win32]
 
-  syncpack@15.1.2:
-    resolution: {integrity: sha512-LDDT44/Skk5r6cDsbemGPD1t8p40iBqWz0Kkj5Khmx/e4blaXSA+nckYepHgb9xLY8Be+xuS0gVWHsYjKZufIw==}
+  syncpack@15.2.0:
+    resolution: {integrity: sha512-bRknhaR2FaVlFO62U8jy5+KYlZx3j8wTD4Z51GdzPWPfGY9Zj8xXwC07TYqz8ypQLaEXT4yB6xrRyi/GaiBsZQ==}
     engines: {node: '>=14.17.0'}
     hasBin: true
 
@@ -6030,8 +6030,8 @@ packages:
     engines: {node: '>=18.0.0'}
     hasBin: true
 
-  turbo@2.9.12:
-    resolution: {integrity: sha512-lCPgus1NuTiBdaITWqzSH/Ff6HVL8HHGBtOXHg1dHRfcshN79XkygSdh0M6g8b0td91ILLG5MTkLOkp5UvyPJw==}
+  turbo@2.9.14:
+    resolution: {integrity: sha512-BQqXRr4UoWI3UPFrtznCLykYHxwxWh53iCB57x092jPMjIlW1wnm3N895g5irpiXmnxUhREBB0n6+y8BHhs4nw==}
     hasBin: true
 
   type-check@0.4.0:
@@ -8440,22 +8440,22 @@ snapshots:
 
   '@tsconfig/node16@1.0.4': {}
 
-  '@turbo/darwin-64@2.9.12':
+  '@turbo/darwin-64@2.9.14':
     optional: true
 
-  '@turbo/darwin-arm64@2.9.12':
+  '@turbo/darwin-arm64@2.9.14':
     optional: true
 
-  '@turbo/linux-64@2.9.12':
+  '@turbo/linux-64@2.9.14':
     optional: true
 
-  '@turbo/linux-arm64@2.9.12':
+  '@turbo/linux-arm64@2.9.14':
     optional: true
 
-  '@turbo/windows-64@2.9.12':
+  '@turbo/windows-64@2.9.14':
     optional: true
 
-  '@turbo/windows-arm64@2.9.12':
+  '@turbo/windows-arm64@2.9.14':
     optional: true
 
   '@tybys/wasm-util@0.10.1':
@@ -9733,11 +9733,11 @@ snapshots:
     dependencies:
       eslint: 10.3.0(jiti@2.6.1)
 
-  eslint-config-turbo@2.9.12(eslint@10.3.0(jiti@2.6.1))(turbo@2.9.12):
+  eslint-config-turbo@2.9.12(eslint@10.3.0(jiti@2.6.1))(turbo@2.9.14):
     dependencies:
       eslint: 10.3.0(jiti@2.6.1)
-      eslint-plugin-turbo: 2.9.12(eslint@10.3.0(jiti@2.6.1))(turbo@2.9.12)
-      turbo: 2.9.12
+      eslint-plugin-turbo: 2.9.12(eslint@10.3.0(jiti@2.6.1))(turbo@2.9.14)
+      turbo: 2.9.14
 
   eslint-plugin-perfectionist@5.9.0(eslint@10.3.0(jiti@2.6.1))(typescript@5.9.3):
     dependencies:
@@ -9775,11 +9775,11 @@ snapshots:
     transitivePeerDependencies:
       - ts-node
 
-  eslint-plugin-turbo@2.9.12(eslint@10.3.0(jiti@2.6.1))(turbo@2.9.12):
+  eslint-plugin-turbo@2.9.12(eslint@10.3.0(jiti@2.6.1))(turbo@2.9.14):
     dependencies:
       dotenv: 16.0.3
       eslint: 10.3.0(jiti@2.6.1)
-      turbo: 2.9.12
+      turbo: 2.9.14
 
   eslint-plugin-unused-imports@4.4.1(@typescript-eslint/eslint-plugin@8.59.3(@typescript-eslint/parser@8.59.3(eslint@10.3.0(jiti@2.6.1))(typescript@5.9.3))(eslint@10.3.0(jiti@2.6.1))(typescript@5.9.3))(eslint@10.3.0(jiti@2.6.1)):
     dependencies:
@@ -11004,7 +11004,7 @@ snapshots:
     dependencies:
       uc.micro: 2.1.0
 
-  lint-staged@17.0.4:
+  lint-staged@17.0.5:
     dependencies:
       listr2: 10.2.1
       picomatch: 4.0.4
@@ -12062,40 +12062,40 @@ snapshots:
     dependencies:
       '@pkgr/core': 0.2.9
 
-  syncpack-darwin-arm64@15.1.2:
+  syncpack-darwin-arm64@15.2.0:
     optional: true
 
-  syncpack-darwin-x64@15.1.2:
+  syncpack-darwin-x64@15.2.0:
     optional: true
 
-  syncpack-linux-arm64-musl@15.1.2:
+  syncpack-linux-arm64-musl@15.2.0:
     optional: true
 
-  syncpack-linux-arm64@15.1.2:
+  syncpack-linux-arm64@15.2.0:
     optional: true
 
-  syncpack-linux-x64-musl@15.1.2:
+  syncpack-linux-x64-musl@15.2.0:
     optional: true
 
-  syncpack-linux-x64@15.1.2:
+  syncpack-linux-x64@15.2.0:
     optional: true
 
-  syncpack-windows-arm64@15.1.2:
+  syncpack-windows-arm64@15.2.0:
     optional: true
 
-  syncpack-windows-x64@15.1.2:
+  syncpack-windows-x64@15.2.0:
     optional: true
 
-  syncpack@15.1.2:
+  syncpack@15.2.0:
     optionalDependencies:
-      syncpack-darwin-arm64: 15.1.2
-      syncpack-darwin-x64: 15.1.2
-      syncpack-linux-arm64: 15.1.2
-      syncpack-linux-arm64-musl: 15.1.2
-      syncpack-linux-x64: 15.1.2
-      syncpack-linux-x64-musl: 15.1.2
-      syncpack-windows-arm64: 15.1.2
-      syncpack-windows-x64: 15.1.2
+      syncpack-darwin-arm64: 15.2.0
+      syncpack-darwin-x64: 15.2.0
+      syncpack-linux-arm64: 15.2.0
+      syncpack-linux-arm64-musl: 15.2.0
+      syncpack-linux-x64: 15.2.0
+      syncpack-linux-x64-musl: 15.2.0
+      syncpack-windows-arm64: 15.2.0
+      syncpack-windows-x64: 15.2.0
 
   tapable@2.3.2: {}
 
@@ -12273,14 +12273,14 @@ snapshots:
     optionalDependencies:
       fsevents: 2.3.3
 
-  turbo@2.9.12:
+  turbo@2.9.14:
     optionalDependencies:
-      '@turbo/darwin-64': 2.9.12
-      '@turbo/darwin-arm64': 2.9.12
-      '@turbo/linux-64': 2.9.12
-      '@turbo/linux-arm64': 2.9.12
-      '@turbo/windows-64': 2.9.12
-      '@turbo/windows-arm64': 2.9.12
+      '@turbo/darwin-64': 2.9.14
+      '@turbo/darwin-arm64': 2.9.14
+      '@turbo/linux-64': 2.9.14
+      '@turbo/linux-arm64': 2.9.14
+      '@turbo/windows-64': 2.9.14
+      '@turbo/windows-arm64': 2.9.14
 
   type-check@0.4.0:
     dependencies:
