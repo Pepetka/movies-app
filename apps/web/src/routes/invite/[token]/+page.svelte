@@ -1,6 +1,6 @@
 <script lang="ts">
+	import { Avatar, Button, Card, Container, Spinner, toast } from '@repo/ui';
 	import { AlertCircle, Film, LogIn, Users } from '@lucide/svelte';
-	import { Avatar, Button, Card, Spinner, toast } from '@repo/ui';
 
 	import { inviteStore } from '$lib/modules/groups';
 	import { ROUTES, buildPath } from '$lib/utils';
@@ -51,127 +51,129 @@
 </svelte:head>
 
 <div class="form-page auth-page">
-	<div class="form-branding">
-		<a href={ROUTES.HOME} class="auth-logo-link">
-			<div class="auth-logo">
-				<Film />
-			</div>
-			<h1 class="auth-app-name">Movies App</h1>
-		</a>
-		<p class="auth-tagline">Смотрите фильмы вместе с друзьями</p>
-	</div>
-
-	{#if inviteStore.isLoading}
-		<div class="invite__loading">
-			<Spinner size="lg" />
+	<Container>
+		<div class="form-branding">
+			<a href={ROUTES.HOME} class="auth-logo-link">
+				<div class="auth-logo">
+					<Film />
+				</div>
+				<h1 class="auth-app-name">Movies App</h1>
+			</a>
+			<p class="auth-tagline">Смотрите фильмы вместе с друзьями</p>
 		</div>
-	{:else if inviteStore.isTokenNotFound}
-		<Card variant="outlined" size="responsive" class="form-card">
-			{#snippet header()}
-				<div class="form-card-header">
-					<div class="invite__error-icon">
-						<AlertCircle size={40} />
+
+		{#if inviteStore.isLoading}
+			<div class="invite__loading">
+				<Spinner size="lg" />
+			</div>
+		{:else if inviteStore.isTokenNotFound}
+			<Card variant="outlined" size="responsive" class="form-card">
+				{#snippet header()}
+					<div class="form-card-header">
+						<div class="invite__error-icon">
+							<AlertCircle size={40} />
+						</div>
+						<h2 class="form-card-title">Приглашение не найдено</h2>
+						<p class="form-card-subtitle">Ссылка недействительна или была удалена</p>
 					</div>
-					<h2 class="form-card-title">Приглашение не найдено</h2>
-					<p class="form-card-subtitle">Ссылка недействительна или была удалена</p>
-				</div>
-			{/snippet}
+				{/snippet}
 
-			<div class="invite__actions">
-				<Button variant="primary" fullWidth href={ROUTES.HOME}>На главную</Button>
-			</div>
-		</Card>
-	{:else if showGroupInfo}
-		<Card variant="outlined" size="responsive" class="form-card">
-			{#snippet header()}
-				<div class="form-card-header">
-					<h2 class="form-card-title">Приглашение в группу</h2>
-					<p class="form-card-subtitle">Вас приглашают присоединиться</p>
-				</div>
-			{/snippet}
-
-			<div class="invite__group-info">
-				<Avatar
-					src={inviteStore.inviteInfo?.avatarUrl}
-					name={inviteStore.inviteInfo?.name}
-					size="lg"
-				/>
-				<div class="invite__group-details">
-					<h3 class="invite__group-name">{inviteStore.inviteInfo?.name}</h3>
-					{#if inviteStore.inviteInfo?.description}
-						<p class="invite__group-desc">{inviteStore.inviteInfo.description}</p>
-					{/if}
-					<span class="invite__member-count">
-						<Users size={14} />
-						{inviteStore.inviteInfo?.memberCount ?? 0} участников
-					</span>
-				</div>
-			</div>
-
-			{#if inviteStore.isAlreadyMember}
-				<div class="invite__status">
-					<p class="invite__status-text">Вы уже участник этой группы</p>
-					<Button
-						variant="primary"
-						fullWidth
-						href={inviteStore.inviteInfo?.id
-							? ROUTES.GROUP_DETAIL(inviteStore.inviteInfo.id)
-							: undefined}
-					>
-						Перейти в группу
-					</Button>
-				</div>
-			{:else if isNotLoggedIn}
 				<div class="invite__actions">
-					<Button variant="primary" fullWidth onclick={handleLogin}>
-						<LogIn size={18} />
-						Войти, чтобы присоединиться
-					</Button>
+					<Button variant="primary" fullWidth href={ROUTES.HOME}>На главную</Button>
 				</div>
-			{:else if inviteStore.isAcceptSuccess}
-				<div class="invite__status">
-					<p class="invite__status-text invite__status-text--success">Вы присоединились!</p>
-					<Button
-						variant="primary"
-						fullWidth
-						href={inviteStore.acceptedGroupId
-							? ROUTES.GROUP_DETAIL(inviteStore.acceptedGroupId)
-							: undefined}
-					>
-						Перейти в группу
-					</Button>
+			</Card>
+		{:else if showGroupInfo}
+			<Card variant="outlined" size="responsive" class="form-card">
+				{#snippet header()}
+					<div class="form-card-header">
+						<h2 class="form-card-title">Приглашение в группу</h2>
+						<p class="form-card-subtitle">Вас приглашают присоединиться</p>
+					</div>
+				{/snippet}
+
+				<div class="invite__group-info">
+					<Avatar
+						src={inviteStore.inviteInfo?.avatarUrl}
+						name={inviteStore.inviteInfo?.name}
+						size="lg"
+					/>
+					<div class="invite__group-details">
+						<h3 class="invite__group-name">{inviteStore.inviteInfo?.name}</h3>
+						{#if inviteStore.inviteInfo?.description}
+							<p class="invite__group-desc">{inviteStore.inviteInfo.description}</p>
+						{/if}
+						<span class="invite__member-count">
+							<Users size={14} />
+							{inviteStore.inviteInfo?.memberCount ?? 0} участников
+						</span>
+					</div>
 				</div>
-			{:else}
+
+				{#if inviteStore.isAlreadyMember}
+					<div class="invite__status">
+						<p class="invite__status-text">Вы уже участник этой группы</p>
+						<Button
+							variant="primary"
+							fullWidth
+							href={inviteStore.inviteInfo?.id
+								? ROUTES.GROUP_DETAIL(inviteStore.inviteInfo.id)
+								: undefined}
+						>
+							Перейти в группу
+						</Button>
+					</div>
+				{:else if isNotLoggedIn}
+					<div class="invite__actions">
+						<Button variant="primary" fullWidth onclick={handleLogin}>
+							<LogIn size={18} />
+							Войти, чтобы присоединиться
+						</Button>
+					</div>
+				{:else if inviteStore.isAcceptSuccess}
+					<div class="invite__status">
+						<p class="invite__status-text invite__status-text--success">Вы присоединились!</p>
+						<Button
+							variant="primary"
+							fullWidth
+							href={inviteStore.acceptedGroupId
+								? ROUTES.GROUP_DETAIL(inviteStore.acceptedGroupId)
+								: undefined}
+						>
+							Перейти в группу
+						</Button>
+					</div>
+				{:else}
+					<div class="invite__actions">
+						<Button
+							variant="primary"
+							fullWidth
+							loading={inviteStore.isAccepting}
+							onclick={handleAccept}
+						>
+							Присоединиться
+						</Button>
+					</div>
+				{/if}
+			</Card>
+		{:else if inviteStore.isError}
+			<Card variant="outlined" size="responsive" class="form-card">
+				{#snippet header()}
+					<div class="form-card-header">
+						<h2 class="form-card-title">Ошибка</h2>
+						<p class="form-card-subtitle">{inviteStore.error}</p>
+					</div>
+				{/snippet}
+
 				<div class="invite__actions">
 					<Button
 						variant="primary"
 						fullWidth
-						loading={inviteStore.isAccepting}
-						onclick={handleAccept}
+						onclick={() => token && inviteStore.fetchInviteInfo(token)}>Повторить</Button
 					>
-						Присоединиться
-					</Button>
 				</div>
-			{/if}
-		</Card>
-	{:else if inviteStore.isError}
-		<Card variant="outlined" size="responsive" class="form-card">
-			{#snippet header()}
-				<div class="form-card-header">
-					<h2 class="form-card-title">Ошибка</h2>
-					<p class="form-card-subtitle">{inviteStore.error}</p>
-				</div>
-			{/snippet}
-
-			<div class="invite__actions">
-				<Button
-					variant="primary"
-					fullWidth
-					onclick={() => token && inviteStore.fetchInviteInfo(token)}>Повторить</Button
-				>
-			</div>
-		</Card>
-	{/if}
+			</Card>
+		{/if}
+	</Container>
 </div>
 
 <style>
