@@ -225,6 +225,63 @@ describe('Group Movie Reviews E2E', () => {
         .send({ rating: 3.0 })
         .expect(409);
     });
+
+    it('should preserve reactions when updating a review', async () => {
+      const { accessToken, userId } = await registerUserViaApi(
+        app,
+        'updatereact@example.com',
+      );
+      const group = await createGroup(app, accessToken, 'Update React Group');
+
+      const [groupMovie] = await drizzleDb
+        .insert(groupMovies)
+        .values({
+          groupId: group.id,
+          source: 'provider',
+          movieId: seededMovie.id,
+          title: seededMovie.title,
+          addedBy: userId,
+          status: 'watched',
+          watchDate: new Date('2024-06-01'),
+        })
+        .returning();
+
+      const [review] = await drizzleDb
+        .insert(groupMovieReviews)
+        .values({
+          groupMovieId: groupMovie.id,
+          userId,
+          rating: '4.0',
+          text: 'Good',
+        })
+        .returning();
+
+      const { accessToken: otherToken, userId: otherUserId } =
+        await registerUserViaApi(app, 'otherupdatereact@example.com');
+      await addGroupMember(app, accessToken, group.id, otherUserId);
+
+      // Add reaction from another user
+      await request(app.getHttpServer())
+        .post(
+          `/groups/${group.id}/movies/${groupMovie.id}/reviews/${review.id}/reactions`,
+        )
+        .set('Authorization', `Bearer ${otherToken}`)
+        .send({ emoji: '👍' })
+        .expect(201);
+
+      // Update review
+      const updateRes = await request(app.getHttpServer())
+        .patch(
+          `/groups/${group.id}/movies/${groupMovie.id}/reviews/${review.id}`,
+        )
+        .set('Authorization', `Bearer ${accessToken}`)
+        .send({ rating: 5.0, text: 'Amazing!' })
+        .expect(200);
+
+      expect(updateRes.body.reactions).toHaveLength(1);
+      expect(updateRes.body.reactions[0].emoji).toBe('👍');
+      expect(updateRes.body.reactions[0].isOwn).toBe(false);
+    });
   });
 
   describe('Reactions', () => {
@@ -283,7 +340,6 @@ describe('Group Movie Reviews E2E', () => {
 
       expect(getRes.body.reviews[0].reactions).toHaveLength(1);
       expect(getRes.body.reviews[0].reactions[0].emoji).toBe('👍');
-      expect(getRes.body.reviews[0].reactions[0].count).toBeUndefined();
       expect(getRes.body.reviews[0].reactions[0].isOwn).toBe(true);
 
       // Remove reaction

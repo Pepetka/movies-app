@@ -50,6 +50,7 @@ const createMockRepositories = () => ({
     findByReviewAndUser: jest.fn(),
     create: jest.fn(),
     delete: jest.fn(),
+    deleteByReviewAndUser: jest.fn(),
   },
   groupMoviesService: {
     findById: jest.fn(),
@@ -334,18 +335,15 @@ describe('GroupMovieReviewsService', () => {
         status: 'watched',
       });
       mocks.groupMovieReviewsRepository.findOne.mockResolvedValue(mockReview);
-      mocks.groupMovieReviewReactionsRepository.findByReviewAndUser.mockResolvedValue(
+      mocks.groupMovieReviewReactionsRepository.deleteByReviewAndUser.mockResolvedValue(
         mockReaction,
-      );
-      mocks.groupMovieReviewReactionsRepository.delete.mockResolvedValue(
-        undefined,
       );
 
       await service.removeReaction(1, 1, 1, 2);
 
       expect(
-        mocks.groupMovieReviewReactionsRepository.delete,
-      ).toHaveBeenCalledWith(mockReaction.id);
+        mocks.groupMovieReviewReactionsRepository.deleteByReviewAndUser,
+      ).toHaveBeenCalledWith(1, 2);
     });
 
     it('should throw ReviewNotFoundException if review does not exist', async () => {
@@ -378,7 +376,7 @@ describe('GroupMovieReviewsService', () => {
         status: 'watched',
       });
       mocks.groupMovieReviewsRepository.findOne.mockResolvedValue(mockReview);
-      mocks.groupMovieReviewReactionsRepository.findByReviewAndUser.mockResolvedValue(
+      mocks.groupMovieReviewReactionsRepository.deleteByReviewAndUser.mockResolvedValue(
         null,
       );
 
