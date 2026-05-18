@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString, MaxLength, IsIn } from 'class-validator';
+import { IsNotEmpty, IsString, IsIn } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 import { ALLOWED_REACTIONS } from '../constants/reactions';
@@ -12,6 +12,5 @@ export class CreateReviewReactionDto {
   @IsNotEmpty()
   @IsString()
   @IsIn(ALLOWED_REACTIONS)
-  @MaxLength(20)
   emoji: string;
 }

@@ -185,14 +185,15 @@ export class GroupMovieReviewsService {
         emoji,
       });
 
+      if (!reaction) {
+        throw new ReactionNotFoundException();
+      }
+
       this._logger.log(
         `Reaction ${emoji} added to review ${reviewId} by user ${userId}`,
       );
 
-      return Object.assign(new ReviewReactionResponseDto(), {
-        ...reaction,
-        isOwn: true,
-      });
+      return ReviewResponseMapper.mapReactionToDto(reaction, userId);
     } catch (error) {
       if (isUniqueViolation(error)) {
         throw new ReactionAlreadyExistsException();
@@ -216,7 +217,7 @@ export class GroupMovieReviewsService {
     }
 
     const reaction =
-      await this.groupMovieReviewReactionsRepository.findByReviewAndUser(
+      await this.groupMovieReviewReactionsRepository.deleteByReviewAndUser(
         reviewId,
         userId,
       );
@@ -224,8 +225,6 @@ export class GroupMovieReviewsService {
     if (!reaction) {
       throw new ReactionNotFoundException();
     }
-
-    await this.groupMovieReviewReactionsRepository.delete(reaction.id);
 
     this._logger.log(
       `Reaction removed from review ${reviewId} by user ${userId}`,
