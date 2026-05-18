@@ -45,7 +45,7 @@
 			<div class="reaction-participants__avatars">
 				{#each topUsers as user, i (user.userId)}
 					<span class="reaction-participants__avatar-wrap" style:z-index={topUsers.length - i}>
-						<Avatar src={user.userAvatar} name={user.userName} size="sm" />
+						<Avatar src={user.userAvatar} name={user.userName} size="xs" />
 					</span>
 				{/each}
 				{#if remainingCount > 0}
@@ -67,7 +67,7 @@
 		<ul class="reaction-participants__list">
 			{#each sortedReactions as reaction (reaction.id)}
 				<li class="reaction-participants__item">
-					<Avatar src={reaction.userAvatar} name={reaction.userName} size="sm" />
+					<Avatar src={reaction.userAvatar} name={reaction.userName} size="xs" />
 					<div class="reaction-participants__info">
 						<span class="reaction-participants__name">
 							{reaction.userName}

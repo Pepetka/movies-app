@@ -35,6 +35,7 @@
 	.reaction-picker {
 		display: flex;
 		flex-wrap: wrap;
+		justify-content: center;
 		gap: var(--space-2);
 	}
 
@@ -42,10 +43,10 @@
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
-		padding: 6px 10px;
+		padding: 4px 8px;
 		background-color: var(--bg-tertiary);
 		border: 1px solid transparent;
-		border-radius: var(--radius-lg);
+		border-radius: var(--radius-xl);
 		cursor: pointer;
 		transition:
 			background-color 0.15s ease,
@@ -74,6 +75,6 @@
 
 	.reaction-picker__emoji {
 		line-height: 1;
-		font-size: 16px;
+		font-size: 18px;
 	}
 </style>

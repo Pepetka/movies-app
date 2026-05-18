@@ -316,10 +316,10 @@
 		display: inline-flex;
 		align-items: center;
 		gap: 2px;
-		padding: 2px 6px;
+		padding: 1px 4px;
 		background-color: var(--bg-tertiary);
 		border: 1px solid transparent;
-		border-radius: var(--radius-lg);
+		border-radius: var(--radius-xl);
 		font-size: var(--text-xs);
 		cursor: pointer;
 		transition:
@@ -344,7 +344,7 @@
 
 	.review-card__chip-emoji {
 		line-height: 1;
-		font-size: 14px;
+		font-size: 18px;
 	}
 
 	.review-card__chip-count {
@@ -363,10 +363,10 @@
 		display: inline-flex;
 		align-items: center;
 		gap: var(--space-1);
-		padding: 2px 6px;
+		padding: 1px 4px;
 		background-color: var(--bg-tertiary);
 		border: 1px solid transparent;
-		border-radius: var(--radius-lg);
+		border-radius: var(--radius-xl);
 		font-size: var(--text-xs);
 		cursor: pointer;
 		transition:
@@ -391,6 +391,7 @@
 
 	.review-card__group-emoji {
 		line-height: 1;
+		font-size: 18px;
 	}
 
 	.review-card__avatar-stack {
@@ -400,9 +401,9 @@
 
 	.review-card__avatar-wrap {
 		display: flex;
-		width: 18px;
-		height: 18px;
-		margin-left: -6px;
+		width: 16px;
+		height: 16px;
+		margin-left: -5px;
 		border-radius: var(--radius-full);
 		box-shadow: 0 0 0 2px var(--bg-secondary);
 		overflow: hidden;
