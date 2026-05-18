@@ -9,3 +9,4 @@ export {
 } from './movies.api';
 
 export { createReview, updateReview, deleteReview } from './reviews.api';
+export { createReaction, deleteReaction } from './reactions.api';

@@ -136,13 +136,19 @@
 				isSubmitting={groupMovieReviewsStore.isUpdating}
 			/>
 		{:else if showMyReview}
-			<ReviewCard review={myReview!} isOwn={true} onEdit={startEdit} onDelete={openDeleteSheet} />
+			<ReviewCard
+				review={myReview!}
+				isOwn={true}
+				{groupId}
+				onEdit={startEdit}
+				onDelete={openDeleteSheet}
+			/>
 		{/if}
 
 		{#if otherReviews.length > 0}
 			<div class="review-list__others">
 				{#each otherReviews as review (review.id)}
-					<ReviewCard {review} isOwn={false} />
+					<ReviewCard {review} isOwn={false} {groupId} />
 				{/each}
 			</div>
 		{:else if showEmptyState}
