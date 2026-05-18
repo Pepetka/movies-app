@@ -2,12 +2,9 @@
 	import { ChevronDown, ChevronUp } from '@lucide/svelte';
 	import { Avatar } from '@repo/ui';
 
-	import type { ReviewReactionResponseDto } from '$lib/api/generated/types';
 	import { formatDate, sortByDateField, pluralize } from '$lib/utils';
 
-	interface Props {
-		reactions: ReviewReactionResponseDto[];
-	}
+	import type { Props } from './ReactionParticipants.types.svelte';
 
 	let { reactions }: Props = $props();
 

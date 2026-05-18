@@ -1,11 +1,6 @@
 <script lang="ts">
 	import { ALLOWED_REACTIONS } from '../constants/reactions';
-
-	interface Props {
-		ownEmoji?: string;
-		disabled?: boolean;
-		onSelect: (emoji: string) => void;
-	}
+	import type { Props } from './ReactionPicker.types.svelte';
 
 	let { ownEmoji, disabled = false, onSelect }: Props = $props();
 

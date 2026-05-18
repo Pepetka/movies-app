@@ -2,21 +2,17 @@
 	import { Avatar, Badge, IconButton, toast } from '@repo/ui';
 	import { Pencil, Trash2, SmilePlus } from '@lucide/svelte';
 
-	import type { ReviewResponseDto, CreateReviewReactionDto } from '$lib/api/generated/types';
+	import type {
+		ReviewReactionResponseDto,
+		CreateReviewReactionDto
+	} from '$lib/api/generated/types';
 	import { formatDate } from '$lib/utils';
 
 	import { ALLOWED_REACTIONS } from '../constants/reactions';
 	import StarRatingInput from './StarRatingInput.svelte';
+	import type { Props } from './ReviewCard.types.svelte';
 	import { groupMovieReviewsStore } from '../stores';
 	import ReactionSheet from './ReactionSheet.svelte';
-
-	interface Props {
-		review: ReviewResponseDto;
-		isOwn: boolean;
-		groupId: number;
-		onEdit?: () => void;
-		onDelete?: () => void;
-	}
 
 	let { review, isOwn, groupId, onEdit, onDelete }: Props = $props();
 
@@ -35,6 +31,18 @@
 	});
 
 	const activeEmojis = $derived(ALLOWED_REACTIONS.filter((emoji) => (aggregated[emoji] ?? 0) > 0));
+
+	import { SvelteMap } from 'svelte/reactivity';
+
+	const reactionsByEmoji = $derived.by(() => {
+		const map = new SvelteMap<string, ReviewReactionResponseDto[]>();
+		for (const r of reactions) {
+			const list = map.get(r.emoji) ?? [];
+			list.push(r);
+			map.set(r.emoji, list);
+		}
+		return map;
+	});
 
 	const handleReactionToggle = async (emoji: string) => {
 		if (isOwn || isSubmitting) return;
@@ -134,7 +142,7 @@
 				{#if reactions.length <= 3}
 					<div class="review-card__reaction-groups">
 						{#each activeEmojis as emoji (emoji)}
-							{@const emojiReactions = reactions.filter((r) => r.emoji === emoji)}
+							{@const emojiReactions = reactionsByEmoji.get(emoji) ?? []}
 							{#if isOwn}
 								<button
 									type="button"

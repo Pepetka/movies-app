@@ -1,17 +1,10 @@
 <script lang="ts">
+	import { X } from '@lucide/svelte';
 	import { Sheet } from '@repo/ui';
 
-	import type { ReviewReactionResponseDto } from '$lib/api/generated/types';
-
 	import ReactionParticipants from './ReactionParticipants.svelte';
+	import type { Props } from './ReactionSheet.types.svelte';
 	import ReactionPicker from './ReactionPicker.svelte';
-
-	interface Props {
-		open?: boolean;
-		reactions: ReviewReactionResponseDto[];
-		isOwnReview: boolean;
-		onSelect: (emoji: string) => void;
-	}
 
 	let { open = $bindable(false), reactions, isOwnReview, onSelect }: Props = $props();
 
@@ -28,7 +21,7 @@
 		<div class="reaction-sheet__header">
 			<h3 class="reaction-sheet__title">Реакции</h3>
 			<button type="button" class="reaction-sheet__close" onclick={close} aria-label="Закрыть">
-				✕
+				<X size={20} />
 			</button>
 		</div>
 	{/snippet}
