@@ -41,25 +41,43 @@
 		isSubmitting = true;
 		try {
 			if (ownReaction?.emoji === emoji) {
-				await groupMovieReviewsStore.removeReaction(groupId, review.groupMovieId, review.id);
-				if (groupMovieReviewsStore.removeReactionError) {
-					toast.error(groupMovieReviewsStore.removeReactionError);
+				const success = await groupMovieReviewsStore.removeReaction(
+					groupId,
+					review.groupMovieId,
+					review.id
+				);
+				if (!success) {
+					const error = groupMovieReviewsStore.removeReactionError;
+					toast.error(error ?? 'Ошибка удаления реакции');
 					return;
 				}
 			} else {
 				if (ownReaction) {
-					await groupMovieReviewsStore.removeReaction(groupId, review.groupMovieId, review.id);
-					if (groupMovieReviewsStore.removeReactionError) {
-						toast.error(groupMovieReviewsStore.removeReactionError);
+					const success = await groupMovieReviewsStore.removeReaction(
+						groupId,
+						review.groupMovieId,
+						review.id
+					);
+					if (!success) {
+						const error = groupMovieReviewsStore.removeReactionError;
+						toast.error(error ?? 'Ошибка удаления реакции');
 						return;
 					}
 				}
 				const dto: CreateReviewReactionDto = { emoji };
-				await groupMovieReviewsStore.addReaction(groupId, review.groupMovieId, review.id, dto);
-				if (groupMovieReviewsStore.addReactionError) {
-					toast.error(groupMovieReviewsStore.addReactionError);
+				const reaction = await groupMovieReviewsStore.addReaction(
+					groupId,
+					review.groupMovieId,
+					review.id,
+					dto
+				);
+				if (!reaction) {
+					const error = groupMovieReviewsStore.addReactionError;
+					toast.error(error ?? 'Ошибка добавления реакции');
 				}
 			}
+		} catch {
+			toast.error('Неизвестная ошибка');
 		} finally {
 			isSubmitting = false;
 		}

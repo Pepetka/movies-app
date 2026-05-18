@@ -221,8 +221,11 @@ class GroupMovieReviewsStore extends BaseStore {
 		return untrack(() => this._createReactionMutation.mutate({ groupId, movieId, reviewId, data }));
 	}
 
-	async removeReaction(groupId: number, movieId: number, reviewId: number): Promise<void> {
-		await untrack(() => this._deleteReactionMutation.mutate({ groupId, movieId, reviewId }));
+	async removeReaction(groupId: number, movieId: number, reviewId: number): Promise<boolean> {
+		const result = await untrack(() =>
+			this._deleteReactionMutation.mutate({ groupId, movieId, reviewId })
+		);
+		return result !== null;
 	}
 
 	reset(): void {
