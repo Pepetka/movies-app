@@ -2079,7 +2079,7 @@
 						"type": "string",
 						"description": "Emoji reaction",
 						"example": "👍",
-						"maxLength": 10
+						"maxLength": 20
 					}
 				},
 				"required": ["emoji"]
