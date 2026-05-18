@@ -251,15 +251,15 @@ describe('GroupMovieReviewsService', () => {
 
   describe('addReaction', () => {
     it('should create a reaction', async () => {
+      mocks.groupMoviesService.findById.mockResolvedValue({
+        status: 'watched',
+      });
       mocks.groupMovieReviewsRepository.findOne.mockResolvedValue(mockReview);
-      mocks.groupMovieReviewReactionsRepository.findByReviewAndUser.mockResolvedValue(
-        null,
-      );
       mocks.groupMovieReviewReactionsRepository.create.mockResolvedValue(
         mockReaction,
       );
 
-      const result = await service.addReaction(1, 1, 2, '👍');
+      const result = await service.addReaction(1, 1, 1, 2, '👍');
 
       expect(result).toEqual({
         ...mockReaction,
@@ -275,39 +275,51 @@ describe('GroupMovieReviewsService', () => {
     });
 
     it('should throw ReviewNotFoundException if review does not exist', async () => {
+      mocks.groupMoviesService.findById.mockResolvedValue({
+        status: 'watched',
+      });
       mocks.groupMovieReviewsRepository.findOne.mockResolvedValue(null);
 
-      await expect(service.addReaction(999, 1, 2, '👍')).rejects.toThrow(
+      await expect(service.addReaction(1, 999, 1, 2, '👍')).rejects.toThrow(
         ReviewNotFoundException,
       );
     });
 
     it('should throw ReviewNotFoundException if review belongs to another group movie', async () => {
+      mocks.groupMoviesService.findById.mockResolvedValue({
+        status: 'watched',
+      });
       mocks.groupMovieReviewsRepository.findOne.mockResolvedValue({
         ...mockReview,
         groupMovieId: 999,
       });
 
-      await expect(service.addReaction(1, 1, 2, '👍')).rejects.toThrow(
+      await expect(service.addReaction(1, 1, 1, 2, '👍')).rejects.toThrow(
         ReviewNotFoundException,
       );
     });
 
     it('should throw CannotReactToOwnReviewException for own review', async () => {
+      mocks.groupMoviesService.findById.mockResolvedValue({
+        status: 'watched',
+      });
       mocks.groupMovieReviewsRepository.findOne.mockResolvedValue(mockReview);
 
-      await expect(service.addReaction(1, 1, 1, '👍')).rejects.toThrow(
+      await expect(service.addReaction(1, 1, 1, 1, '👍')).rejects.toThrow(
         CannotReactToOwnReviewException,
       );
     });
 
-    it('should throw ReactionAlreadyExistsException if user already reacted', async () => {
+    it('should throw ReactionAlreadyExistsException on unique violation', async () => {
+      mocks.groupMoviesService.findById.mockResolvedValue({
+        status: 'watched',
+      });
       mocks.groupMovieReviewsRepository.findOne.mockResolvedValue(mockReview);
-      mocks.groupMovieReviewReactionsRepository.findByReviewAndUser.mockResolvedValue(
-        mockReaction,
-      );
+      const error = new Error('Unique violation') as Error & { code: string };
+      error.code = '23505';
+      mocks.groupMovieReviewReactionsRepository.create.mockRejectedValue(error);
 
-      await expect(service.addReaction(1, 1, 2, '❤️')).rejects.toThrow(
+      await expect(service.addReaction(1, 1, 1, 2, '❤️')).rejects.toThrow(
         ReactionAlreadyExistsException,
       );
     });
@@ -315,6 +327,9 @@ describe('GroupMovieReviewsService', () => {
 
   describe('removeReaction', () => {
     it('should delete a reaction', async () => {
+      mocks.groupMoviesService.findById.mockResolvedValue({
+        status: 'watched',
+      });
       mocks.groupMovieReviewsRepository.findOne.mockResolvedValue(mockReview);
       mocks.groupMovieReviewReactionsRepository.findByReviewAndUser.mockResolvedValue(
         mockReaction,
@@ -323,7 +338,7 @@ describe('GroupMovieReviewsService', () => {
         undefined,
       );
 
-      await service.removeReaction(1, 1, 2);
+      await service.removeReaction(1, 1, 1, 2);
 
       expect(
         mocks.groupMovieReviewReactionsRepository.delete,
@@ -331,31 +346,40 @@ describe('GroupMovieReviewsService', () => {
     });
 
     it('should throw ReviewNotFoundException if review does not exist', async () => {
+      mocks.groupMoviesService.findById.mockResolvedValue({
+        status: 'watched',
+      });
       mocks.groupMovieReviewsRepository.findOne.mockResolvedValue(null);
 
-      await expect(service.removeReaction(1, 1, 2)).rejects.toThrow(
+      await expect(service.removeReaction(1, 999, 1, 2)).rejects.toThrow(
         ReviewNotFoundException,
       );
     });
 
     it('should throw ReviewNotFoundException if review belongs to another group movie', async () => {
+      mocks.groupMoviesService.findById.mockResolvedValue({
+        status: 'watched',
+      });
       mocks.groupMovieReviewsRepository.findOne.mockResolvedValue({
         ...mockReview,
         groupMovieId: 999,
       });
 
-      await expect(service.removeReaction(1, 1, 2)).rejects.toThrow(
+      await expect(service.removeReaction(1, 1, 1, 2)).rejects.toThrow(
         ReviewNotFoundException,
       );
     });
 
     it('should throw ReactionNotFoundException if reaction does not exist', async () => {
+      mocks.groupMoviesService.findById.mockResolvedValue({
+        status: 'watched',
+      });
       mocks.groupMovieReviewsRepository.findOne.mockResolvedValue(mockReview);
       mocks.groupMovieReviewReactionsRepository.findByReviewAndUser.mockResolvedValue(
         null,
       );
 
-      await expect(service.removeReaction(1, 1, 2)).rejects.toThrow(
+      await expect(service.removeReaction(1, 1, 1, 2)).rejects.toThrow(
         ReactionNotFoundException,
       );
     });

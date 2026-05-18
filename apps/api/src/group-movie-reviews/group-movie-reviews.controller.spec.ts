@@ -97,7 +97,7 @@ describe('GroupMovieReviewsController', () => {
 
       const result = await controller.createReaction(1, 1, 1, dto, 2);
 
-      expect(service.addReaction).toHaveBeenCalledWith(1, 1, 2, '👍');
+      expect(service.addReaction).toHaveBeenCalledWith(1, 1, 1, 2, '👍');
       expect(result).toEqual({ id: 1, emoji: '👍' });
     });
   });
@@ -108,7 +108,7 @@ describe('GroupMovieReviewsController', () => {
 
       await controller.deleteReaction(1, 1, 1, 2);
 
-      expect(service.removeReaction).toHaveBeenCalledWith(1, 1, 2);
+      expect(service.removeReaction).toHaveBeenCalledWith(1, 1, 1, 2);
     });
   });
 });
