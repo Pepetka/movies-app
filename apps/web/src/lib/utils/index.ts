@@ -3,6 +3,7 @@ export { ROUTES } from './routes';
 export { debounce } from './debounce';
 export { DEBOUNCE } from './config';
 export { formatDate, formatRuntime, sortByDateField } from './format';
+export { pluralize } from './pluralize';
 export { getSafeRedirect, goBack, withCurrentQuery, buildPath } from './navigation.svelte';
 export { isSafeRedirect } from './is-safe-redirect';
 export type { Route, RouteValue } from './routes';

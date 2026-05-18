@@ -3,7 +3,7 @@
 	import { Avatar } from '@repo/ui';
 
 	import type { ReviewReactionResponseDto } from '$lib/api/generated/types';
-	import { formatDate, sortByDateField } from '$lib/utils';
+	import { formatDate, sortByDateField, pluralize } from '$lib/utils';
 
 	interface Props {
 		reactions: ReviewReactionResponseDto[];
@@ -38,7 +38,7 @@
 	>
 		<span class="reaction-participants__label">
 			{totalCount}
-			{totalCount === 1 ? 'реакция' : totalCount < 5 ? 'реакции' : 'реакций'}
+			{pluralize(totalCount, ['реакция', 'реакции', 'реакций'])}
 		</span>
 
 		{#if topUsers.length > 0}
