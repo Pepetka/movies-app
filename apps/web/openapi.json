@@ -1904,7 +1904,8 @@
 					"userAvatar": { "type": "string", "nullable": true },
 					"emoji": { "type": "string" },
 					"isOwn": { "type": "boolean" },
-					"createdAt": { "format": "date-time", "type": "string" }
+					"createdAt": { "format": "date-time", "type": "string" },
+					"updatedAt": { "format": "date-time", "type": "string" }
 				},
 				"required": [
 					"id",
@@ -1914,7 +1915,8 @@
 					"userAvatar",
 					"emoji",
 					"isOwn",
-					"createdAt"
+					"createdAt",
+					"updatedAt"
 				]
 			},
 			"ReviewResponseDto": {
