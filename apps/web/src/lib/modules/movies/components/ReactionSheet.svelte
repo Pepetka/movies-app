@@ -2,14 +2,19 @@
 	import { X } from '@lucide/svelte';
 	import { Sheet } from '@repo/ui';
 
+	import { ALLOWED_REACTIONS, type ReactionEmoji } from '../constants/reactions';
 	import ReactionParticipants from './ReactionParticipants.svelte';
-	import type { ReactionEmoji } from '../constants/reactions';
 	import type { IProps } from './ReactionSheet.types.svelte';
 	import ReactionPicker from './ReactionPicker.svelte';
 
 	let { open = $bindable(false), reactions, isOwnReview, onSelect }: IProps = $props();
 
-	const ownEmoji = $derived(reactions.find((r) => r.isOwn)?.emoji as ReactionEmoji | undefined);
+	const ownEmoji = $derived.by(() => {
+		const emoji = reactions.find((r) => r.isOwn)?.emoji;
+		return ALLOWED_REACTIONS.includes(emoji as ReactionEmoji)
+			? (emoji as ReactionEmoji)
+			: undefined;
+	});
 
 	const handleSelect = (emoji: ReactionEmoji) => {
 		onSelect(emoji);

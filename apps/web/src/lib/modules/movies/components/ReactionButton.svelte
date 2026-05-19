@@ -30,13 +30,13 @@
 >
 	<span class="reaction-button__emoji">{emoji}</span>
 	{#if variant === 'avatars' && reactions}
-		<div class="reaction-button__avatars">
+		<span class="reaction-button__avatars">
 			{#each reactions as reaction, i (reaction.id)}
 				<span class="reaction-button__avatar-wrap" style:z-index={reactions.length - i}>
 					<Avatar src={reaction.userAvatar} name={reaction.userName} size="xxs" />
 				</span>
 			{/each}
-		</div>
+		</span>
 	{:else if variant === 'count' && count !== undefined}
 		<span class="reaction-button__count">{count}</span>
 	{/if}

@@ -39,7 +39,7 @@
 		</span>
 
 		{#if topUsers.length > 0}
-			<div class="reaction-participants__avatars">
+			<span class="reaction-participants__avatars">
 				{#each topUsers as user, i (user.userId)}
 					<span class="reaction-participants__avatar-wrap" style:z-index={topUsers.length - i}>
 						<Avatar src={user.userAvatar} name={user.userName} size="xs" />
@@ -48,7 +48,7 @@
 				{#if remainingCount > 0}
 					<span class="reaction-participants__remaining">+{remainingCount}</span>
 				{/if}
-			</div>
+			</span>
 		{/if}
 
 		<span class="reaction-participants__chevron" aria-hidden="true">
