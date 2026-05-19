@@ -3,10 +3,7 @@
 	import { Pencil, Trash2, SmilePlus } from '@lucide/svelte';
 	import { SvelteMap } from 'svelte/reactivity';
 
-	import type {
-		ReviewReactionResponseDto,
-		CreateReviewReactionDto
-	} from '$lib/api/generated/types';
+	import type { ReviewReactionResponseDto } from '$lib/api/generated/types';
 	import { formatDate } from '$lib/utils';
 
 	import { ALLOWED_REACTIONS, type ReactionEmoji } from '../constants/reactions';
@@ -19,10 +16,7 @@
 	let { review, isOwn, groupId, onEdit, onDelete }: IProps = $props();
 
 	let sheetOpen = $state(false);
-	const isSubmitting = $derived(
-		groupMovieReviewsStore.isAddingReactionFor(review.id) ||
-			groupMovieReviewsStore.isRemovingReactionFor(review.id)
-	);
+	const isThisSubmitting = $derived(groupMovieReviewsStore.isReactionSubmittingFor(review.id));
 
 	const reactions = $derived(review.reactions ?? []);
 	const ownReaction = $derived(reactions.find((r) => r.isOwn));
@@ -48,38 +42,29 @@
 	});
 
 	const handleReactionToggle = async (emoji: ReactionEmoji) => {
-		if (isOwn || isSubmitting) return;
+		if (isOwn || isThisSubmitting) return;
 
 		if (ownReaction?.emoji === emoji) {
-			const result = await groupMovieReviewsStore.removeReaction(
-				groupId,
-				review.groupMovieId,
-				review.id
-			);
-			if (!result.success) {
-				toast.error(result.error ?? 'Ошибка удаления реакции');
+			await groupMovieReviewsStore.removeReaction(groupId, review.groupMovieId, review.id);
+			if (!groupMovieReviewsStore.isRemoveReactionSuccess) {
+				toast.error(groupMovieReviewsStore.removeReactionError ?? 'Ошибка удаления реакции');
 			}
 		} else {
 			if (ownReaction) {
-				const removeResult = await groupMovieReviewsStore.removeReaction(
-					groupId,
-					review.groupMovieId,
-					review.id
-				);
-				if (!removeResult.success) {
-					toast.error(removeResult.error ?? 'Ошибка удаления реакции');
+				await groupMovieReviewsStore.removeReaction(groupId, review.groupMovieId, review.id);
+				if (!groupMovieReviewsStore.isRemoveReactionSuccess) {
+					toast.error(groupMovieReviewsStore.removeReactionError ?? 'Ошибка удаления реакции');
 					return;
 				}
 			}
-			const dto: CreateReviewReactionDto = { emoji };
-			const addResult = await groupMovieReviewsStore.addReaction(
+			const result = await groupMovieReviewsStore.addReaction(
 				groupId,
 				review.groupMovieId,
 				review.id,
-				dto
+				{ emoji }
 			);
-			if (!addResult.success) {
-				toast.error(addResult.error ?? 'Ошибка добавления реакции');
+			if (!result) {
+				toast.error(groupMovieReviewsStore.addReactionError ?? 'Ошибка добавления реакции');
 			}
 		}
 	};
@@ -141,7 +126,7 @@
 								{emoji}
 								reactions={emojiReactions}
 								{isActive}
-								disabled={isSubmitting}
+								disabled={isThisSubmitting}
 								onClick={isOwn ? () => (sheetOpen = true) : () => handleReactionToggle(emoji)}
 								variant="avatars"
 								ariaLabel={isOwn ? 'Посмотреть реакции' : undefined}
@@ -151,7 +136,7 @@
 								{emoji}
 								count={aggregated[emoji]}
 								{isActive}
-								disabled={isOwn || isSubmitting}
+								disabled={isOwn || isThisSubmitting}
 								onClick={() => handleReactionToggle(emoji)}
 								variant="count"
 							/>
