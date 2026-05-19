@@ -12,15 +12,19 @@ import request from 'supertest';
 import postgres from 'postgres';
 
 import {
+  createGroup,
+  registerUserViaApi,
+  seedGroupMovie,
+  seedReview,
+  createOtherMember,
+} from './helpers';
+import {
   users,
   groups,
   movies,
-  groupMovies,
   groupMovieReviews,
   groupMovieReviewReactions,
 } from '../src/db/schemas';
-import { createGroup, addGroupMember } from './helpers/groups.helper';
-import { registerUserViaApi } from './helpers/auth.helper';
 import { AppModule } from '../src/app.module';
 
 describe('Group Movie Reviews E2E', () => {
@@ -76,7 +80,6 @@ describe('Group Movie Reviews E2E', () => {
   beforeEach(async () => {
     await drizzleDb.delete(groupMovieReviewReactions);
     await drizzleDb.delete(groupMovieReviews);
-    await drizzleDb.delete(groupMovies);
     await drizzleDb.delete(groups);
     await drizzleDb.delete(movies);
     await drizzleDb.delete(users);
@@ -103,18 +106,13 @@ describe('Group Movie Reviews E2E', () => {
       );
       const group = await createGroup(app, accessToken, 'Review Group');
 
-      const [groupMovie] = await drizzleDb
-        .insert(groupMovies)
-        .values({
-          groupId: group.id,
-          source: 'provider',
-          movieId: seededMovie.id,
-          title: seededMovie.title,
-          addedBy: userId,
-          status: 'watched',
-          watchDate: new Date('2024-06-01'),
-        })
-        .returning();
+      const groupMovie = await seedGroupMovie(
+        drizzleDb,
+        group.id,
+        seededMovie.id,
+        userId,
+        { title: seededMovie.title },
+      );
 
       // Create review
       const createRes = await request(app.getHttpServer())
@@ -174,17 +172,13 @@ describe('Group Movie Reviews E2E', () => {
       );
       const group = await createGroup(app, accessToken, 'Unwatched Group');
 
-      const [groupMovie] = await drizzleDb
-        .insert(groupMovies)
-        .values({
-          groupId: group.id,
-          source: 'provider',
-          movieId: seededMovie.id,
-          title: seededMovie.title,
-          addedBy: userId,
-          status: 'tracking',
-        })
-        .returning();
+      const groupMovie = await seedGroupMovie(
+        drizzleDb,
+        group.id,
+        seededMovie.id,
+        userId,
+        { title: seededMovie.title, status: 'tracking' },
+      );
 
       await request(app.getHttpServer())
         .post(`/groups/${group.id}/movies/${groupMovie.id}/reviews`)
@@ -200,18 +194,13 @@ describe('Group Movie Reviews E2E', () => {
       );
       const group = await createGroup(app, accessToken, 'Dup Review Group');
 
-      const [groupMovie] = await drizzleDb
-        .insert(groupMovies)
-        .values({
-          groupId: group.id,
-          source: 'provider',
-          movieId: seededMovie.id,
-          title: seededMovie.title,
-          addedBy: userId,
-          status: 'watched',
-          watchDate: new Date('2024-06-01'),
-        })
-        .returning();
+      const groupMovie = await seedGroupMovie(
+        drizzleDb,
+        group.id,
+        seededMovie.id,
+        userId,
+        { title: seededMovie.title },
+      );
 
       await request(app.getHttpServer())
         .post(`/groups/${group.id}/movies/${groupMovie.id}/reviews`)
@@ -233,32 +222,25 @@ describe('Group Movie Reviews E2E', () => {
       );
       const group = await createGroup(app, accessToken, 'Update React Group');
 
-      const [groupMovie] = await drizzleDb
-        .insert(groupMovies)
-        .values({
-          groupId: group.id,
-          source: 'provider',
-          movieId: seededMovie.id,
-          title: seededMovie.title,
-          addedBy: userId,
-          status: 'watched',
-          watchDate: new Date('2024-06-01'),
-        })
-        .returning();
+      const groupMovie = await seedGroupMovie(
+        drizzleDb,
+        group.id,
+        seededMovie.id,
+        userId,
+        { title: seededMovie.title },
+      );
 
-      const [review] = await drizzleDb
-        .insert(groupMovieReviews)
-        .values({
-          groupMovieId: groupMovie.id,
-          userId,
-          rating: '4.0',
-          text: 'Good',
-        })
-        .returning();
+      const review = await seedReview(drizzleDb, groupMovie.id, userId, {
+        rating: '4.0',
+        text: 'Good',
+      });
 
-      const { accessToken: otherToken, userId: otherUserId } =
-        await registerUserViaApi(app, 'otherupdatereact@example.com');
-      await addGroupMember(app, accessToken, group.id, otherUserId);
+      const { accessToken: otherToken } = await createOtherMember(
+        app,
+        group.id,
+        accessToken,
+        'otherupdatereact@example.com',
+      );
 
       // Add reaction from another user
       await request(app.getHttpServer())
@@ -292,33 +274,25 @@ describe('Group Movie Reviews E2E', () => {
       );
       const group = await createGroup(app, accessToken, 'Reaction Group');
 
-      const [groupMovie] = await drizzleDb
-        .insert(groupMovies)
-        .values({
-          groupId: group.id,
-          source: 'provider',
-          movieId: seededMovie.id,
-          title: seededMovie.title,
-          addedBy: userId,
-          status: 'watched',
-          watchDate: new Date('2024-06-01'),
-        })
-        .returning();
+      const groupMovie = await seedGroupMovie(
+        drizzleDb,
+        group.id,
+        seededMovie.id,
+        userId,
+        { title: seededMovie.title },
+      );
 
-      const [review] = await drizzleDb
-        .insert(groupMovieReviews)
-        .values({
-          groupMovieId: groupMovie.id,
-          userId,
-          rating: '4.5',
-          text: 'Good movie',
-        })
-        .returning();
+      const review = await seedReview(drizzleDb, groupMovie.id, userId, {
+        rating: '4.5',
+        text: 'Good movie',
+      });
 
-      // Create another user to react
-      const { accessToken: otherToken, userId: otherUserId } =
-        await registerUserViaApi(app, 'other@example.com');
-      await addGroupMember(app, accessToken, group.id, otherUserId);
+      const { accessToken: otherToken } = await createOtherMember(
+        app,
+        group.id,
+        accessToken,
+        'other@example.com',
+      );
 
       // Add reaction
       const reactRes = await request(app.getHttpServer())
@@ -365,27 +339,15 @@ describe('Group Movie Reviews E2E', () => {
       );
       const group = await createGroup(app, accessToken, 'Own React Group');
 
-      const [groupMovie] = await drizzleDb
-        .insert(groupMovies)
-        .values({
-          groupId: group.id,
-          source: 'provider',
-          movieId: seededMovie.id,
-          title: seededMovie.title,
-          addedBy: userId,
-          status: 'watched',
-          watchDate: new Date('2024-06-01'),
-        })
-        .returning();
+      const groupMovie = await seedGroupMovie(
+        drizzleDb,
+        group.id,
+        seededMovie.id,
+        userId,
+        { title: seededMovie.title },
+      );
 
-      const [review] = await drizzleDb
-        .insert(groupMovieReviews)
-        .values({
-          groupMovieId: groupMovie.id,
-          userId,
-          rating: '4.5',
-        })
-        .returning();
+      const review = await seedReview(drizzleDb, groupMovie.id, userId);
 
       await request(app.getHttpServer())
         .post(
@@ -403,31 +365,22 @@ describe('Group Movie Reviews E2E', () => {
       );
       const group = await createGroup(app, accessToken, 'Dup React Group');
 
-      const [groupMovie] = await drizzleDb
-        .insert(groupMovies)
-        .values({
-          groupId: group.id,
-          source: 'provider',
-          movieId: seededMovie.id,
-          title: seededMovie.title,
-          addedBy: userId,
-          status: 'watched',
-          watchDate: new Date('2024-06-01'),
-        })
-        .returning();
+      const groupMovie = await seedGroupMovie(
+        drizzleDb,
+        group.id,
+        seededMovie.id,
+        userId,
+        { title: seededMovie.title },
+      );
 
-      const [review] = await drizzleDb
-        .insert(groupMovieReviews)
-        .values({
-          groupMovieId: groupMovie.id,
-          userId,
-          rating: '4.5',
-        })
-        .returning();
+      const review = await seedReview(drizzleDb, groupMovie.id, userId);
 
-      const { accessToken: otherToken, userId: otherUserId } =
-        await registerUserViaApi(app, 'otherdup@example.com');
-      await addGroupMember(app, accessToken, group.id, otherUserId);
+      const { accessToken: otherToken } = await createOtherMember(
+        app,
+        group.id,
+        accessToken,
+        'otherdup@example.com',
+      );
 
       await request(app.getHttpServer())
         .post(
@@ -465,44 +418,30 @@ describe('Group Movie Reviews E2E', () => {
         })
         .returning();
 
-      const [groupMovie1] = await drizzleDb
-        .insert(groupMovies)
-        .values({
-          groupId: group.id,
-          source: 'provider',
-          movieId: seededMovie.id,
-          title: seededMovie.title,
-          addedBy: userId,
-          status: 'watched',
-          watchDate: new Date('2024-06-01'),
-        })
-        .returning();
+      const groupMovie1 = await seedGroupMovie(
+        drizzleDb,
+        group.id,
+        seededMovie.id,
+        userId,
+        { title: seededMovie.title },
+      );
 
-      const [groupMovie2] = await drizzleDb
-        .insert(groupMovies)
-        .values({
-          groupId: group.id,
-          source: 'provider',
-          movieId: movie2.id,
-          title: movie2.title,
-          addedBy: userId,
-          status: 'watched',
-          watchDate: new Date('2024-06-01'),
-        })
-        .returning();
+      const groupMovie2 = await seedGroupMovie(
+        drizzleDb,
+        group.id,
+        movie2.id,
+        userId,
+        { title: movie2.title },
+      );
 
-      const [review] = await drizzleDb
-        .insert(groupMovieReviews)
-        .values({
-          groupMovieId: groupMovie1.id,
-          userId,
-          rating: '4.5',
-        })
-        .returning();
+      const review = await seedReview(drizzleDb, groupMovie1.id, userId);
 
-      const { accessToken: otherToken, userId: otherUserId } =
-        await registerUserViaApi(app, 'otherwronggm@example.com');
-      await addGroupMember(app, accessToken, group.id, otherUserId);
+      const { accessToken: otherToken } = await createOtherMember(
+        app,
+        group.id,
+        accessToken,
+        'otherwronggm@example.com',
+      );
 
       // Try to add reaction using wrong groupMovieId
       await request(app.getHttpServer())
@@ -529,31 +468,22 @@ describe('Group Movie Reviews E2E', () => {
       );
       const group = await createGroup(app, accessToken, 'Bad Emoji Group');
 
-      const [groupMovie] = await drizzleDb
-        .insert(groupMovies)
-        .values({
-          groupId: group.id,
-          source: 'provider',
-          movieId: seededMovie.id,
-          title: seededMovie.title,
-          addedBy: userId,
-          status: 'watched',
-          watchDate: new Date('2024-06-01'),
-        })
-        .returning();
+      const groupMovie = await seedGroupMovie(
+        drizzleDb,
+        group.id,
+        seededMovie.id,
+        userId,
+        { title: seededMovie.title },
+      );
 
-      const [review] = await drizzleDb
-        .insert(groupMovieReviews)
-        .values({
-          groupMovieId: groupMovie.id,
-          userId,
-          rating: '4.5',
-        })
-        .returning();
+      const review = await seedReview(drizzleDb, groupMovie.id, userId);
 
-      const { accessToken: otherToken, userId: otherUserId } =
-        await registerUserViaApi(app, 'otherbademoji@example.com');
-      await addGroupMember(app, accessToken, group.id, otherUserId);
+      const { accessToken: otherToken } = await createOtherMember(
+        app,
+        group.id,
+        accessToken,
+        'otherbademoji@example.com',
+      );
 
       await request(app.getHttpServer())
         .post(
@@ -571,31 +501,22 @@ describe('Group Movie Reviews E2E', () => {
       );
       const group = await createGroup(app, accessToken, 'No React Group');
 
-      const [groupMovie] = await drizzleDb
-        .insert(groupMovies)
-        .values({
-          groupId: group.id,
-          source: 'provider',
-          movieId: seededMovie.id,
-          title: seededMovie.title,
-          addedBy: userId,
-          status: 'watched',
-          watchDate: new Date('2024-06-01'),
-        })
-        .returning();
+      const groupMovie = await seedGroupMovie(
+        drizzleDb,
+        group.id,
+        seededMovie.id,
+        userId,
+        { title: seededMovie.title },
+      );
 
-      const [review] = await drizzleDb
-        .insert(groupMovieReviews)
-        .values({
-          groupMovieId: groupMovie.id,
-          userId,
-          rating: '4.5',
-        })
-        .returning();
+      const review = await seedReview(drizzleDb, groupMovie.id, userId);
 
-      const { accessToken: otherToken, userId: otherUserId } =
-        await registerUserViaApi(app, 'othernoreact@example.com');
-      await addGroupMember(app, accessToken, group.id, otherUserId);
+      const { accessToken: otherToken } = await createOtherMember(
+        app,
+        group.id,
+        accessToken,
+        'othernoreact@example.com',
+      );
 
       await request(app.getHttpServer())
         .delete(
