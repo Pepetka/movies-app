@@ -173,31 +173,10 @@ class GroupMovieReviewsStore extends BaseStore {
 		return this._addingReactionIds.includes(reviewId);
 	}
 
-	get isAddReactionSuccess(): boolean {
-		return this._createReactionMutation.isSuccess;
-	}
-
-	get addReactionError(): string | null {
-		if (!this._createReactionMutation.error) return null;
-		return this._extractErrorMessage(
-			this._createReactionMutation.error,
-			'Ошибка добавления реакции'
-		);
-	}
-
 	// === Reaction Delete ===
 
 	isRemovingReactionFor(reviewId: number): boolean {
 		return this._removingReactionIds.includes(reviewId);
-	}
-
-	get isRemoveReactionSuccess(): boolean {
-		return this._deleteReactionMutation.isSuccess;
-	}
-
-	get removeReactionError(): string | null {
-		if (!this._deleteReactionMutation.error) return null;
-		return this._extractErrorMessage(this._deleteReactionMutation.error, 'Ошибка удаления реакции');
 	}
 
 	// === Actions ===
@@ -228,21 +207,45 @@ class GroupMovieReviewsStore extends BaseStore {
 		movieId: number,
 		reviewId: number,
 		data: CreateReviewReactionDto
-	): Promise<ReviewReactionResponseDto | null> {
+	): Promise<{ success: boolean; data?: ReviewReactionResponseDto; error?: string }> {
 		this._addingReactionIds = [...this._addingReactionIds, reviewId];
 		try {
-			return await untrack(() =>
+			const result = await untrack(() =>
 				this._createReactionMutation.mutate({ groupId, movieId, reviewId, data })
 			);
+			if (result) {
+				return { success: true, data: result };
+			}
+			return {
+				success: false,
+				error: this._extractErrorMessage(
+					this._createReactionMutation.error,
+					'Ошибка добавления реакции'
+				)
+			};
 		} finally {
 			this._addingReactionIds = this._addingReactionIds.filter((id) => id !== reviewId);
 		}
 	}
 
-	async removeReaction(groupId: number, movieId: number, reviewId: number): Promise<void> {
+	async removeReaction(
+		groupId: number,
+		movieId: number,
+		reviewId: number
+	): Promise<{ success: boolean; error?: string }> {
 		this._removingReactionIds = [...this._removingReactionIds, reviewId];
 		try {
 			await untrack(() => this._deleteReactionMutation.mutate({ groupId, movieId, reviewId }));
+			if (this._deleteReactionMutation.error) {
+				return {
+					success: false,
+					error: this._extractErrorMessage(
+						this._deleteReactionMutation.error,
+						'Ошибка удаления реакции'
+					)
+				};
+			}
+			return { success: true };
 		} finally {
 			this._removingReactionIds = this._removingReactionIds.filter((id) => id !== reviewId);
 		}
