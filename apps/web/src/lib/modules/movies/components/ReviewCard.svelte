@@ -42,7 +42,7 @@
 	});
 
 	const handleReactionToggle = async (emoji: ReactionEmoji) => {
-		if (isOwn || isThisSubmitting) return;
+		if (isThisSubmitting) return;
 
 		if (ownReaction?.emoji === emoji) {
 			await groupMovieReviewsStore.removeReaction(groupId, review.groupMovieId, review.id);
