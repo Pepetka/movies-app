@@ -1,4 +1,8 @@
-import { Injectable, Logger } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  Logger,
+} from '@nestjs/common';
 
 import {
   ReviewNotFoundException,
@@ -185,6 +189,12 @@ export class GroupMovieReviewsService {
         userId,
         emoji,
       });
+
+      if (!reaction) {
+        throw new InternalServerErrorException(
+          'Failed to fetch reaction after creation',
+        );
+      }
 
       this._logger.log(
         `Reaction ${emoji} added to review ${reviewId} by user ${userId}`,
