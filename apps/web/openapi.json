@@ -1552,7 +1552,7 @@
 				],
 				"responses": {
 					"204": { "description": "Reaction removed" },
-					"403": { "description": "Forbidden" },
+					"403": { "description": "Forbidden — Not a group member" },
 					"404": { "description": "Reaction not found" }
 				},
 				"security": [{ "access-token": [] }],
@@ -2079,7 +2079,7 @@
 				"type": "object",
 				"properties": {
 					"emoji": {
-						"type": "string",
+						"type": "object",
 						"description": "Emoji reaction",
 						"example": "👍",
 						"maxLength": 20

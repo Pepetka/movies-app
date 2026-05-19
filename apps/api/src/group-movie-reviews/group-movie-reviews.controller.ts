@@ -199,7 +199,7 @@ export class GroupMovieReviewsController {
   @ApiParam({ name: 'id', description: 'Review ID' })
   @ApiResponse({ status: 204, description: 'Reaction removed' })
   @ApiResponse({ status: 404, description: 'Reaction not found' })
-  @ApiResponse({ status: 403, description: 'Forbidden' })
+  @ApiResponse({ status: 403, description: 'Forbidden — Not a group member' })
   async deleteReaction(
     @Param('groupId', ParseIntPipe) groupId: number,
     @Param('groupMovieId', ParseIntPipe) groupMovieId: number,

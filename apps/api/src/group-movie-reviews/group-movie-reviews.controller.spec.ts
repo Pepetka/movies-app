@@ -4,9 +4,13 @@ import { CanActivate } from '@nestjs/common';
 import { GroupMemberGuard } from '$src/groups/guards';
 import { GroupMovieReview } from '$db/schemas';
 
+import {
+  ReviewResponseDto,
+  ReviewReactionResponseDto,
+  CreateReviewReactionDto,
+} from './dto';
 import { GroupMovieReviewsController } from './group-movie-reviews.controller';
 import { GroupMovieReviewsService } from './group-movie-reviews.service';
-import { ReviewResponseDto, ReviewReactionResponseDto } from './dto';
 import { ReviewAuthorGuard } from './guards';
 
 class MockGuard implements CanActivate {
@@ -89,7 +93,7 @@ describe('GroupMovieReviewsController', () => {
 
   describe('createReaction', () => {
     it('should call service.addReaction with correct arguments', async () => {
-      const dto = { emoji: '👍' };
+      const dto: CreateReviewReactionDto = { emoji: '👍' };
       service.addReaction.mockResolvedValue({
         id: 1,
         emoji: '👍',
