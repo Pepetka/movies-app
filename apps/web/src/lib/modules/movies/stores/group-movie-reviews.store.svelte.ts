@@ -37,6 +37,9 @@ class GroupMovieReviewsStore extends BaseStore {
 		ReviewParams & { reviewId: number }
 	>;
 
+	private _addingReactionIds = $state<number[]>([]);
+	private _removingReactionIds = $state<number[]>([]);
+
 	constructor() {
 		super();
 
@@ -166,8 +169,8 @@ class GroupMovieReviewsStore extends BaseStore {
 
 	// === Reaction Create ===
 
-	get isAddingReaction(): boolean {
-		return this._createReactionMutation.isSubmitting;
+	isAddingReactionFor(reviewId: number): boolean {
+		return this._addingReactionIds.includes(reviewId);
 	}
 
 	get isAddReactionSuccess(): boolean {
@@ -184,8 +187,8 @@ class GroupMovieReviewsStore extends BaseStore {
 
 	// === Reaction Delete ===
 
-	get isRemovingReaction(): boolean {
-		return this._deleteReactionMutation.isSubmitting;
+	isRemovingReactionFor(reviewId: number): boolean {
+		return this._removingReactionIds.includes(reviewId);
 	}
 
 	get isRemoveReactionSuccess(): boolean {
@@ -226,11 +229,23 @@ class GroupMovieReviewsStore extends BaseStore {
 		reviewId: number,
 		data: CreateReviewReactionDto
 	): Promise<ReviewReactionResponseDto | null> {
-		return untrack(() => this._createReactionMutation.mutate({ groupId, movieId, reviewId, data }));
+		this._addingReactionIds = [...this._addingReactionIds, reviewId];
+		try {
+			return await untrack(() =>
+				this._createReactionMutation.mutate({ groupId, movieId, reviewId, data })
+			);
+		} finally {
+			this._addingReactionIds = this._addingReactionIds.filter((id) => id !== reviewId);
+		}
 	}
 
 	async removeReaction(groupId: number, movieId: number, reviewId: number): Promise<void> {
-		await untrack(() => this._deleteReactionMutation.mutate({ groupId, movieId, reviewId }));
+		this._removingReactionIds = [...this._removingReactionIds, reviewId];
+		try {
+			await untrack(() => this._deleteReactionMutation.mutate({ groupId, movieId, reviewId }));
+		} finally {
+			this._removingReactionIds = this._removingReactionIds.filter((id) => id !== reviewId);
+		}
 	}
 
 	reset(): void {
