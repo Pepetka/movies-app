@@ -1,9 +1,16 @@
 import { untrack } from 'svelte';
 
-import type { ReviewResponseDto, CreateReviewDto, UpdateReviewDto } from '$lib/api/generated/types';
+import type {
+	ReviewResponseDto,
+	CreateReviewDto,
+	UpdateReviewDto,
+	CreateReviewReactionDto,
+	ReviewReactionResponseDto
+} from '$lib/api/generated/types';
 import { createMutation, type MutationResult, type PostStatus } from '$lib/query';
 import { BaseStore } from '$lib/stores/base.svelte';
 
+import { createReaction, deleteReaction } from '../api/reactions.api';
 import { createReview, updateReview, deleteReview } from '../api';
 
 interface ReviewParams {
@@ -21,6 +28,16 @@ class GroupMovieReviewsStore extends BaseStore {
 		ReviewParams & { reviewId: number; data: UpdateReviewDto }
 	>;
 	private readonly _deleteMutation: MutationResult<void, ReviewParams & { reviewId: number }>;
+	private readonly _createReactionMutation: MutationResult<
+		ReviewReactionResponseDto,
+		ReviewParams & { reviewId: number; data: CreateReviewReactionDto }
+	>;
+	private readonly _deleteReactionMutation: MutationResult<
+		void,
+		ReviewParams & { reviewId: number }
+	>;
+
+	private _submittingReactionIds = $state<number[]>([]);
 
 	constructor() {
 		super();
@@ -58,6 +75,32 @@ class GroupMovieReviewsStore extends BaseStore {
 			key: ['group-movie-reviews', 'delete'],
 			tags: ['group-movies'],
 			mutator: ({ groupId, movieId, reviewId }) => deleteReview(groupId, movieId, reviewId),
+			invalidateKeys: (_, { groupId, movieId }) => [
+				['group-movie', groupId, movieId],
+				['group-movies', groupId]
+			],
+			debug: !__IS_PROD__
+		});
+
+		this._createReactionMutation = createMutation<
+			ReviewReactionResponseDto,
+			ReviewParams & { reviewId: number; data: CreateReviewReactionDto }
+		>({
+			key: ['group-movie-reviews', 'reaction', 'create'],
+			tags: ['group-movies'],
+			mutator: ({ groupId, movieId, reviewId, data }) =>
+				createReaction(groupId, movieId, reviewId, data),
+			invalidateKeys: (_, { groupId, movieId }) => [
+				['group-movie', groupId, movieId],
+				['group-movies', groupId]
+			],
+			debug: !__IS_PROD__
+		});
+
+		this._deleteReactionMutation = createMutation<void, ReviewParams & { reviewId: number }>({
+			key: ['group-movie-reviews', 'reaction', 'delete'],
+			tags: ['group-movies'],
+			mutator: ({ groupId, movieId, reviewId }) => deleteReaction(groupId, movieId, reviewId),
 			invalidateKeys: (_, { groupId, movieId }) => [
 				['group-movie', groupId, movieId],
 				['group-movies', groupId]
@@ -123,6 +166,41 @@ class GroupMovieReviewsStore extends BaseStore {
 		return this._extractErrorMessage(this._deleteMutation.error, 'Ошибка удаления отзыва');
 	}
 
+	// === Reaction getters ===
+
+	get isAddReactionSubmitting(): boolean {
+		return this._createReactionMutation.isSubmitting;
+	}
+
+	get isAddReactionSuccess(): boolean {
+		return this._createReactionMutation.isSuccess;
+	}
+
+	get addReactionError(): string | null {
+		if (!this._createReactionMutation.error) return null;
+		return this._extractErrorMessage(
+			this._createReactionMutation.error,
+			'Ошибка добавления реакции'
+		);
+	}
+
+	get isRemoveReactionSubmitting(): boolean {
+		return this._deleteReactionMutation.isSubmitting;
+	}
+
+	get isRemoveReactionSuccess(): boolean {
+		return this._deleteReactionMutation.isSuccess;
+	}
+
+	get removeReactionError(): string | null {
+		if (!this._deleteReactionMutation.error) return null;
+		return this._extractErrorMessage(this._deleteReactionMutation.error, 'Ошибка удаления реакции');
+	}
+
+	isReactionSubmittingFor(reviewId: number): boolean {
+		return this._submittingReactionIds.includes(reviewId);
+	}
+
 	// === Actions ===
 
 	async createReview(
@@ -146,10 +224,38 @@ class GroupMovieReviewsStore extends BaseStore {
 		await untrack(() => this._deleteMutation.mutate({ groupId, movieId, reviewId }));
 	}
 
+	async addReaction(
+		groupId: number,
+		movieId: number,
+		reviewId: number,
+		data: CreateReviewReactionDto
+	): Promise<ReviewReactionResponseDto | null> {
+		this._submittingReactionIds = [...this._submittingReactionIds, reviewId];
+		try {
+			return await untrack(() =>
+				this._createReactionMutation.mutate({ groupId, movieId, reviewId, data })
+			);
+		} finally {
+			this._submittingReactionIds = this._submittingReactionIds.filter((id) => id !== reviewId);
+		}
+	}
+
+	async removeReaction(groupId: number, movieId: number, reviewId: number): Promise<void> {
+		this._submittingReactionIds = [...this._submittingReactionIds, reviewId];
+		try {
+			await untrack(() => this._deleteReactionMutation.mutate({ groupId, movieId, reviewId }));
+		} finally {
+			this._submittingReactionIds = this._submittingReactionIds.filter((id) => id !== reviewId);
+		}
+	}
+
 	reset(): void {
 		this._createMutation.reset();
 		this._updateMutation.reset();
 		this._deleteMutation.reset();
+		this._createReactionMutation.reset();
+		this._deleteReactionMutation.reset();
+		this._submittingReactionIds = [];
 	}
 }
 

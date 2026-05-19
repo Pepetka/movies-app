@@ -1,20 +1,73 @@
 <script lang="ts">
-	import { Pencil, Trash2 } from '@lucide/svelte';
-	import { Avatar, Badge } from '@repo/ui';
+	import { Avatar, Badge, IconButton, toast } from '@repo/ui';
+	import { Pencil, Trash2, SmilePlus } from '@lucide/svelte';
+	import { SvelteMap } from 'svelte/reactivity';
 
-	import type { ReviewResponseDto } from '$lib/api/generated/types';
+	import type { ReviewReactionResponseDto } from '$lib/api/generated/types';
 	import { formatDate } from '$lib/utils';
 
+	import { ALLOWED_REACTIONS, type ReactionEmoji } from '../constants/reactions';
+	import type { IProps } from './ReviewCard.types.svelte';
 	import StarRatingInput from './StarRatingInput.svelte';
+	import ReactionButton from './ReactionButton.svelte';
+	import { groupMovieReviewsStore } from '../stores';
+	import ReactionSheet from './ReactionSheet.svelte';
 
-	interface Props {
-		review: ReviewResponseDto;
-		isOwn: boolean;
-		onEdit?: () => void;
-		onDelete?: () => void;
-	}
+	let { review, isOwn, groupId, onEdit, onDelete }: IProps = $props();
 
-	let { review, isOwn, onEdit, onDelete }: Props = $props();
+	let sheetOpen = $state(false);
+	const isThisSubmitting = $derived(groupMovieReviewsStore.isReactionSubmittingFor(review.id));
+
+	const reactions = $derived(review.reactions ?? []);
+	const ownReaction = $derived(reactions.find((r) => r.isOwn));
+
+	const aggregated = $derived.by(() => {
+		const record: Record<string, number> = {};
+		for (const r of reactions) {
+			record[r.emoji] = (record[r.emoji] ?? 0) + 1;
+		}
+		return record;
+	});
+
+	const activeEmojis = $derived(ALLOWED_REACTIONS.filter((emoji) => (aggregated[emoji] ?? 0) > 0));
+
+	const reactionsByEmoji = $derived.by(() => {
+		const map = new SvelteMap<string, ReviewReactionResponseDto[]>();
+		for (const r of reactions) {
+			const list = map.get(r.emoji) ?? [];
+			list.push(r);
+			map.set(r.emoji, list);
+		}
+		return map;
+	});
+
+	const handleReactionToggle = async (emoji: ReactionEmoji) => {
+		if (isThisSubmitting) return;
+
+		if (ownReaction?.emoji === emoji) {
+			await groupMovieReviewsStore.removeReaction(groupId, review.groupMovieId, review.id);
+			if (!groupMovieReviewsStore.isRemoveReactionSuccess) {
+				toast.error(groupMovieReviewsStore.removeReactionError ?? 'Ошибка удаления реакции');
+			}
+		} else {
+			if (ownReaction) {
+				await groupMovieReviewsStore.removeReaction(groupId, review.groupMovieId, review.id);
+				if (!groupMovieReviewsStore.isRemoveReactionSuccess) {
+					toast.error(groupMovieReviewsStore.removeReactionError ?? 'Ошибка удаления реакции');
+					return;
+				}
+			}
+			const result = await groupMovieReviewsStore.addReaction(
+				groupId,
+				review.groupMovieId,
+				review.id,
+				{ emoji }
+			);
+			if (!result) {
+				toast.error(groupMovieReviewsStore.addReactionError ?? 'Ошибка добавления реакции');
+			}
+		}
+	};
 </script>
 
 <div class="review-card" class:own={isOwn}>
@@ -60,7 +113,59 @@
 	{#if review.text}
 		<p class="review-card__text">{review.text}</p>
 	{/if}
+
+	{#if !isOwn || reactions.length > 0}
+		<div class="review-card__reactions">
+			{#if reactions.length > 0}
+				<div class="review-card__reaction-buttons">
+					{#each activeEmojis as emoji (emoji)}
+						{@const emojiReactions = reactionsByEmoji.get(emoji) ?? []}
+						{@const isActive = ownReaction?.emoji === emoji}
+						{#if reactions.length <= 3}
+							<ReactionButton
+								{emoji}
+								reactions={emojiReactions}
+								{isActive}
+								disabled={isThisSubmitting}
+								onClick={isOwn ? () => (sheetOpen = true) : () => handleReactionToggle(emoji)}
+								variant="avatars"
+								ariaLabel={isOwn ? 'Посмотреть реакции' : undefined}
+							/>
+						{:else}
+							<ReactionButton
+								{emoji}
+								count={aggregated[emoji]}
+								{isActive}
+								disabled={isOwn || isThisSubmitting}
+								onClick={() => handleReactionToggle(emoji)}
+								variant="count"
+							/>
+						{/if}
+					{/each}
+				</div>
+			{/if}
+
+			{#if !isOwn || reactions.length > 3}
+				<div class="review-card__reactions-action">
+					<IconButton
+						Icon={SmilePlus}
+						label={isOwn ? 'Посмотреть реакции' : 'Добавить реакцию'}
+						size="sm"
+						variant="ghost"
+						onclick={() => (sheetOpen = true)}
+					/>
+				</div>
+			{/if}
+		</div>
+	{/if}
 </div>
+
+<ReactionSheet
+	bind:open={sheetOpen}
+	{reactions}
+	isOwnReview={isOwn}
+	onSelect={handleReactionToggle}
+/>
 
 <style>
 	.review-card {
@@ -151,5 +256,17 @@
 		line-height: var(--leading-relaxed);
 		white-space: pre-wrap;
 		overflow-wrap: anywhere;
+	}
+
+	.review-card__reactions {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: var(--space-2);
+		margin-top: var(--space-2);
+	}
+
+	.review-card__reactions-action {
+		margin-left: auto;
 	}
 </style>

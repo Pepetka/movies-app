@@ -6,9 +6,9 @@ import {
   GroupMovieResponseDto,
 } from '$src/group-movies/dto';
 import { GroupMovieReviewsService } from '$src/group-movie-reviews/group-movie-reviews.service';
+import { ReviewResponseMapper } from '$src/group-movie-reviews/mappers/review-response.mapper';
 import { ProviderSearchResult } from '$src/movies/providers/interfaces/provider-result.dto';
 import { GroupMoviesService } from '$src/group-movies/group-movies.service';
-import { ReviewResponseDto } from '$src/group-movie-reviews/dto';
 import { GroupMemberRole } from '$common/enums';
 import { GroupMovie } from '$db/schemas';
 
@@ -62,6 +62,9 @@ export class GroupMovieDetailsService {
 
     const reviews =
       await this.groupMovieReviewsService.findByGroupMovieUnsafe(id);
+    const reviewIds = reviews.map((r) => r.id);
+    const reactionsMap =
+      await this.groupMovieReviewsService.getReactionsByReviewIds(reviewIds);
     const averageRating = calculateAverageRating(
       reviews.map((r) => Number(r.rating)),
     );
@@ -69,13 +72,10 @@ export class GroupMovieDetailsService {
     return Object.assign(new GroupMovieResponseDto(), {
       ...groupMovie,
       currentUserRole,
-      reviews: reviews.map((r) =>
-        Object.assign(new ReviewResponseDto(), {
-          ...r,
-          rating: Number(r.rating),
-          isOwn: r.userId === userId,
-        }),
-      ),
+      reviews: reviews.map((r) => {
+        const reactions = reactionsMap.get(r.id) ?? [];
+        return ReviewResponseMapper.mapToResponseDto(r, userId, reactions);
+      }),
       averageRating,
       reviewCount: reviews.length,
     });

@@ -20,3 +20,6 @@ export * from './review-not-found.exception';
 export * from './review-already-exists.exception';
 export * from './not-review-author.exception';
 export * from './movie-not-watched.exception';
+export * from './cannot-react-to-own-review.exception';
+export * from './reaction-already-exists.exception';
+export * from './reaction-not-found.exception';
