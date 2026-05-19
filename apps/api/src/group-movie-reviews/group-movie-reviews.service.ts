@@ -28,6 +28,7 @@ import {
   ReviewReactionResponseDto,
 } from './dto';
 import { ReviewResponseMapper } from './mappers/review-response.mapper';
+import { type AllowedReaction } from './constants/reactions';
 
 @Injectable()
 export class GroupMovieReviewsService {
@@ -164,7 +165,7 @@ export class GroupMovieReviewsService {
     groupMovieId: number,
     reviewId: number,
     userId: number,
-    emoji: string,
+    emoji: AllowedReaction,
   ): Promise<ReviewReactionResponseDto> {
     await this._verifyGroupMovieOrThrow(groupId, groupMovieId);
 
