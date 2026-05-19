@@ -33,4 +33,8 @@ export class ReviewReactionResponseDto {
   @Expose()
   @ApiProperty()
   createdAt: Date;
+
+  @Expose()
+  @ApiProperty()
+  updatedAt: Date;
 }

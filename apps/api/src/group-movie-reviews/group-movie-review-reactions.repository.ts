@@ -1,5 +1,9 @@
+import {
+  Inject,
+  Injectable,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { eq, and, asc, inArray, getTableColumns } from 'drizzle-orm';
-import { Inject, Injectable } from '@nestjs/common';
 
 import {
   groupMovieReviewReactions,
@@ -29,7 +33,7 @@ export class GroupMovieReviewReactionsRepository {
 
   async create(
     data: NewGroupMovieReviewReaction,
-  ): Promise<ReviewReactionWithUser | null> {
+  ): Promise<ReviewReactionWithUser> {
     return this.db.transaction(async (tx) => {
       const [inserted] = await tx
         .insert(groupMovieReviewReactions)
@@ -43,7 +47,13 @@ export class GroupMovieReviewReactionsRepository {
         .where(eq(groupMovieReviewReactions.id, inserted.id))
         .limit(1);
 
-      return result ?? null;
+      if (!result) {
+        throw new InternalServerErrorException(
+          'Failed to fetch reaction after creation',
+        );
+      }
+
+      return result;
     });
   }
 
@@ -60,52 +70,20 @@ export class GroupMovieReviewReactionsRepository {
       .orderBy(asc(groupMovieReviewReactions.createdAt));
   }
 
-  async findByReviewAndUser(
-    reviewId: number,
-    userId: number,
-  ): Promise<ReviewReactionWithUser | null> {
-    const [result] = await this.db
-      .select(this._withUserColumns())
-      .from(groupMovieReviewReactions)
-      .innerJoin(users, eq(groupMovieReviewReactions.userId, users.id))
-      .where(
-        and(
-          eq(groupMovieReviewReactions.reviewId, reviewId),
-          eq(groupMovieReviewReactions.userId, userId),
-        ),
-      )
-      .limit(1);
-    return result ?? null;
-  }
-
-  async delete(id: number): Promise<void> {
-    await this.db
-      .delete(groupMovieReviewReactions)
-      .where(eq(groupMovieReviewReactions.id, id));
-  }
-
   async deleteByReviewAndUser(
     reviewId: number,
     userId: number,
-  ): Promise<ReviewReactionWithUser | null> {
-    const [existing] = await this.db
-      .select(this._withUserColumns())
-      .from(groupMovieReviewReactions)
-      .innerJoin(users, eq(groupMovieReviewReactions.userId, users.id))
+  ): Promise<GroupMovieReviewReaction | null> {
+    const [deleted] = await this.db
+      .delete(groupMovieReviewReactions)
       .where(
         and(
           eq(groupMovieReviewReactions.reviewId, reviewId),
           eq(groupMovieReviewReactions.userId, userId),
         ),
       )
-      .limit(1);
+      .returning();
 
-    if (!existing) return null;
-
-    await this.db
-      .delete(groupMovieReviewReactions)
-      .where(eq(groupMovieReviewReactions.id, existing.id));
-
-    return existing;
+    return deleted ?? null;
   }
 }
