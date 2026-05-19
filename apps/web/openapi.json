@@ -2079,10 +2079,35 @@
 				"type": "object",
 				"properties": {
 					"emoji": {
-						"type": "object",
+						"type": "string",
 						"description": "Emoji reaction",
 						"example": "👍",
-						"maxLength": 20
+						"maxLength": 20,
+						"enum": [
+							"💩",
+							"👍",
+							"👎",
+							"🤡",
+							"🔥",
+							"❤️",
+							"🤝",
+							"😡",
+							"😱",
+							"😭",
+							"💯",
+							"🤔",
+							"😐",
+							"😂",
+							"🎉",
+							"🤯",
+							"👏",
+							"🍿",
+							"🤮",
+							"🥱",
+							"🤷",
+							"🎯",
+							"🫡"
+						]
 					}
 				},
 				"required": ["emoji"]

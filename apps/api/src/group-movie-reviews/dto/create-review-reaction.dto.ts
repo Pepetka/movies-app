@@ -11,6 +11,7 @@ export class CreateReviewReactionDto {
     description: 'Emoji reaction',
     example: '👍',
     maxLength: 20,
+    enum: ALLOWED_REACTIONS,
   })
   @IsNotEmpty()
   @IsString()
