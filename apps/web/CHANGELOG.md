@@ -1,5 +1,19 @@
 # web
 
+## 0.24.0
+
+### Minor Changes
+
+- 86d9318: Add review reactions interface
+  • Interactive reaction buttons on review cards with optimistic updates via Query Store
+  • Accessibility and error handling improvements for reaction interactions
+  • Invite page layout fixes for centering and container sizing
+
+### Patch Changes
+
+- Updated dependencies [86d9318]
+  - @repo/ui@0.13.0
+
 ## 0.23.0
 
 ### Minor Changes

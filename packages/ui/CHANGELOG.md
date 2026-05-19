@@ -1,5 +1,12 @@
 # @repo/ui
 
+## 0.13.0
+
+### Minor Changes
+
+- 86d9318: Add extra-small avatar size
+  • New xxs avatar variant for compact user representations
+
 ## 0.12.1
 
 ### Patch Changes
