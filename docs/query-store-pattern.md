@@ -749,6 +749,52 @@ queryRegistry.resetAll();
 {/if}
 ```
 
+## Per-item mutations (множественные элементы)
+
+Когда одна мутация применяется к множеству элементов на одной странице (например, реакции на отзывы в списке карточек), глобальные геттеры `isSuccess`/`error`/`isSubmitting` из `MutationResult` не подходят — статусы перетекают между элементами.
+
+### Рекомендуемый подход
+
+1. **Храните per-item submitting state в store:**
+   ```typescript
+   private _submittingIds = $state<number[]>([]);
+   
+   isSubmittingFor(id: number): boolean {
+     return this._submittingIds.includes(id);
+   }
+   ```
+
+2. **Методы мутации возвращают стандартные типы** — `Promise<T | null>` для non-void, `Promise<void>` для void. Не оборачивайте в кастомный объект `{success, error}`.
+
+3. **В компоненте читайте глобальные геттеры `isSuccess`/`error` сразу после `await`**, пока mutation state не сброшен следующим вызовом:
+   ```typescript
+   // Для мутации с возвращаемым значением
+   const result = await store.addItem(itemId, data);
+   if (result) {
+     toast.success('Добавлено');
+   } else {
+     toast.error(store.addError ?? 'Ошибка');
+   }
+
+   // Для void-мутации
+   await store.removeItem(itemId);
+   if (store.isRemoveSuccess) {
+     toast.success('Удалено');
+   } else {
+     toast.error(store.removeError ?? 'Ошибка');
+   }
+   ```
+
+### Почему это работает
+
+Кнопки per-item disabled через `isSubmittingFor(id)`, поэтому параллельные вызовы из разных компонентов редки. Даже если они случаются, `await` + синхронное чтение геттеров сразу после завершения захватывает корректное состояние конкретного вызова.
+
+### Чего избегать
+
+- ❌ Не возвращайте `{success: boolean; error?: string}` из методов store — это ломает единообразие с остальными модулями.
+- ❌ Не используйте глобальный `isSubmitting` для disabled состояния per-item кнопок.
+- ❌ Не дублируйте логику mutation вручную — `_submittingIds` только для per-item UI-стейта, основное состояние остаётся в `MutationResult`.
+
 ## Чек-лист создания нового модуля
 
 1. **types/items.types.ts**
