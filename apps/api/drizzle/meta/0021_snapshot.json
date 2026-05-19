@@ -137,7 +137,7 @@
         },
         "emoji": {
           "name": "emoji",
-          "type": "varchar(10)",
+          "type": "varchar(20)",
           "primaryKey": false,
           "notNull": true
         },

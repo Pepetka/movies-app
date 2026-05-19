@@ -2,7 +2,7 @@ CREATE TABLE "group_movie_review_reactions" (
 	"id" serial PRIMARY KEY NOT NULL,
 	"review_id" integer NOT NULL,
 	"user_id" integer NOT NULL,
-	"emoji" varchar(10) NOT NULL,
+	"emoji" varchar(20) NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL,
 	CONSTRAINT "group_movie_review_reactions_unique_idx" UNIQUE("review_id","user_id")
