@@ -47,9 +47,7 @@ const createMockRepositories = () => ({
   },
   groupMovieReviewReactionsRepository: {
     findByReviewIds: jest.fn(),
-    findByReviewAndUser: jest.fn(),
     create: jest.fn(),
-    delete: jest.fn(),
     deleteByReviewAndUser: jest.fn(),
   },
   groupMoviesService: {
@@ -284,7 +282,7 @@ describe('GroupMovieReviewsService', () => {
       });
       mocks.groupMovieReviewsRepository.findOne.mockResolvedValue(null);
 
-      await expect(service.addReaction(1, 999, 1, 2, '👍')).rejects.toThrow(
+      await expect(service.addReaction(1, 1, 999, 2, '👍')).rejects.toThrow(
         ReviewNotFoundException,
       );
     });
@@ -352,7 +350,7 @@ describe('GroupMovieReviewsService', () => {
       });
       mocks.groupMovieReviewsRepository.findOne.mockResolvedValue(null);
 
-      await expect(service.removeReaction(1, 999, 1, 2)).rejects.toThrow(
+      await expect(service.removeReaction(1, 1, 999, 2)).rejects.toThrow(
         ReviewNotFoundException,
       );
     });

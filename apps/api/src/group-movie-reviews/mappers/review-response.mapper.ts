@@ -22,7 +22,9 @@ export class ReviewResponseMapper {
       ...review,
       rating: Number(review.rating),
       isOwn: userId !== undefined ? review.userId === userId : false,
-      reactions: reactions.map((r) => this.mapReactionToDto(r, userId)),
+      reactions: reactions.map((r) =>
+        ReviewResponseMapper.mapReactionToDto(r, userId),
+      ),
     });
   }
 }

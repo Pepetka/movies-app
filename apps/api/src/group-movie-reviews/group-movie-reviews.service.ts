@@ -161,8 +161,8 @@ export class GroupMovieReviewsService {
 
   async addReaction(
     groupId: number,
-    reviewId: number,
     groupMovieId: number,
+    reviewId: number,
     userId: number,
     emoji: string,
   ): Promise<ReviewReactionResponseDto> {
@@ -185,10 +185,6 @@ export class GroupMovieReviewsService {
         emoji,
       });
 
-      if (!reaction) {
-        throw new ReactionNotFoundException();
-      }
-
       this._logger.log(
         `Reaction ${emoji} added to review ${reviewId} by user ${userId}`,
       );
@@ -204,8 +200,8 @@ export class GroupMovieReviewsService {
 
   async removeReaction(
     groupId: number,
-    reviewId: number,
     groupMovieId: number,
+    reviewId: number,
     userId: number,
   ): Promise<void> {
     await this._verifyGroupMovieOrThrow(groupId, groupMovieId);

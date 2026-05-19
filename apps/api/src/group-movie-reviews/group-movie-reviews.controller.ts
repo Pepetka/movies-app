@@ -181,8 +181,8 @@ export class GroupMovieReviewsController {
   ): Promise<ReviewReactionResponseDto> {
     return this.groupMovieReviewsService.addReaction(
       groupId,
-      reviewId,
       groupMovieId,
+      reviewId,
       userId,
       dto.emoji,
     );
@@ -208,8 +208,8 @@ export class GroupMovieReviewsController {
   ): Promise<void> {
     return this.groupMovieReviewsService.removeReaction(
       groupId,
-      reviewId,
       groupMovieId,
+      reviewId,
       userId,
     );
   }
