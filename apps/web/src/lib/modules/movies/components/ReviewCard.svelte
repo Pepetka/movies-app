@@ -9,9 +9,10 @@
 	} from '$lib/api/generated/types';
 	import { formatDate } from '$lib/utils';
 
-	import { ALLOWED_REACTIONS } from '../constants/reactions';
+	import { ALLOWED_REACTIONS, type ReactionEmoji } from '../constants/reactions';
 	import type { IProps } from './ReviewCard.types.svelte';
 	import StarRatingInput from './StarRatingInput.svelte';
+	import ReactionButton from './ReactionButton.svelte';
 	import { groupMovieReviewsStore } from '../stores';
 	import ReactionSheet from './ReactionSheet.svelte';
 
@@ -19,7 +20,8 @@
 
 	let sheetOpen = $state(false);
 	const isSubmitting = $derived(
-		groupMovieReviewsStore.isAddingReaction || groupMovieReviewsStore.isRemovingReaction
+		groupMovieReviewsStore.isAddingReactionFor(review.id) ||
+			groupMovieReviewsStore.isRemovingReactionFor(review.id)
 	);
 
 	const reactions = $derived(review.reactions ?? []);
@@ -45,7 +47,7 @@
 		return map;
 	});
 
-	const handleReactionToggle = async (emoji: string) => {
+	const handleReactionToggle = async (emoji: ReactionEmoji) => {
 		if (isOwn || isSubmitting) return;
 
 		if (ownReaction?.emoji === emoji) {
@@ -120,75 +122,32 @@
 	{#if !isOwn || reactions.length > 0}
 		<div class="review-card__reactions">
 			{#if reactions.length > 0}
-				{#if reactions.length <= 3}
-					<div class="review-card__reaction-groups">
-						{#each activeEmojis as emoji (emoji)}
-							{@const emojiReactions = reactionsByEmoji.get(emoji) ?? []}
-							{#if isOwn}
-								<button
-									type="button"
-									class="review-card__reaction-group"
-									disabled={isSubmitting}
-									onclick={() => (sheetOpen = true)}
-									aria-label="Посмотреть реакции"
-								>
-									<span class="review-card__group-emoji">{emoji}</span>
-									<div class="review-card__avatar-stack">
-										{#each emojiReactions as reaction, i (reaction.id)}
-											<span
-												class="review-card__avatar-wrap"
-												style:z-index={emojiReactions.length - i}
-											>
-												<Avatar src={reaction.userAvatar} name={reaction.userName} size="xxs" />
-											</span>
-										{/each}
-									</div>
-								</button>
-							{:else}
-								<button
-									type="button"
-									class="review-card__reaction-group"
-									class:active={ownReaction?.emoji === emoji}
-									disabled={isSubmitting}
-									onclick={() => handleReactionToggle(emoji)}
-									aria-label={ownReaction?.emoji === emoji
-										? `Убрать реакцию ${emoji}`
-										: `Добавить реакцию ${emoji}`}
-								>
-									<span class="review-card__group-emoji">{emoji}</span>
-									<div class="review-card__avatar-stack">
-										{#each emojiReactions as reaction, i (reaction.id)}
-											<span
-												class="review-card__avatar-wrap"
-												style:z-index={emojiReactions.length - i}
-											>
-												<Avatar src={reaction.userAvatar} name={reaction.userName} size="xxs" />
-											</span>
-										{/each}
-									</div>
-								</button>
-							{/if}
-						{/each}
-					</div>
-				{:else}
-					<div class="review-card__chips">
-						{#each activeEmojis as emoji (emoji)}
-							{@const count = aggregated[emoji]}
-							{@const isActive = ownReaction?.emoji === emoji}
-							<button
-								type="button"
-								class="review-card__chip"
-								class:active={isActive}
+				<div class="review-card__reaction-buttons">
+					{#each activeEmojis as emoji (emoji)}
+						{@const emojiReactions = reactionsByEmoji.get(emoji) ?? []}
+						{@const isActive = ownReaction?.emoji === emoji}
+						{#if reactions.length <= 3}
+							<ReactionButton
+								{emoji}
+								reactions={emojiReactions}
+								{isActive}
+								disabled={isSubmitting}
+								onClick={isOwn ? () => (sheetOpen = true) : () => handleReactionToggle(emoji)}
+								variant="avatars"
+								ariaLabel={isOwn ? 'Посмотреть реакции' : undefined}
+							/>
+						{:else}
+							<ReactionButton
+								{emoji}
+								count={aggregated[emoji]}
+								{isActive}
 								disabled={isOwn || isSubmitting}
-								onclick={() => handleReactionToggle(emoji)}
-								aria-label={isActive ? `Убрать реакцию ${emoji}` : `Добавить реакцию ${emoji}`}
-							>
-								<span class="review-card__chip-emoji">{emoji}</span>
-								<span class="review-card__chip-count">{count}</span>
-							</button>
-						{/each}
-					</div>
-				{/if}
+								onClick={() => handleReactionToggle(emoji)}
+								variant="count"
+							/>
+						{/if}
+					{/each}
+				</div>
 			{/if}
 
 			{#if !isOwn || reactions.length > 3}
@@ -310,114 +269,6 @@
 		justify-content: space-between;
 		gap: var(--space-2);
 		margin-top: var(--space-2);
-	}
-
-	.review-card__chips {
-		display: flex;
-		flex-wrap: wrap;
-		gap: var(--space-2);
-		min-width: 0;
-	}
-
-	.review-card__chip {
-		display: inline-flex;
-		align-items: center;
-		gap: 2px;
-		padding: 1px 4px;
-		background-color: var(--bg-tertiary);
-		border: 1px solid transparent;
-		border-radius: var(--radius-xl);
-		font-size: var(--text-xs);
-		cursor: pointer;
-		transition:
-			background-color 0.15s ease,
-			border-color 0.15s ease;
-	}
-
-	.review-card__chip:disabled {
-		cursor: not-allowed;
-	}
-
-	.review-card__chip.active {
-		background-color: color-mix(in srgb, var(--color-primary) 15%, var(--bg-tertiary));
-		border-color: var(--color-primary);
-	}
-
-	@media (hover: hover) {
-		.review-card__chip:hover:not(:disabled) {
-			background-color: var(--bg-hover);
-		}
-	}
-
-	.review-card__chip-emoji {
-		line-height: 1;
-		font-size: 18px;
-	}
-
-	.review-card__chip-count {
-		font-size: 10px;
-		color: var(--text-secondary);
-		font-weight: var(--font-medium);
-	}
-
-	.review-card__reaction-groups {
-		display: flex;
-		flex-wrap: wrap;
-		gap: var(--space-2);
-	}
-
-	.review-card__reaction-group {
-		display: inline-flex;
-		align-items: center;
-		gap: var(--space-1);
-		padding: 1px 4px;
-		background-color: var(--bg-tertiary);
-		border: 1px solid transparent;
-		border-radius: var(--radius-xl);
-		font-size: var(--text-xs);
-		cursor: pointer;
-		transition:
-			background-color 0.15s ease,
-			border-color 0.15s ease;
-	}
-
-	.review-card__reaction-group:disabled {
-		cursor: not-allowed;
-	}
-
-	.review-card__reaction-group.active {
-		background-color: color-mix(in srgb, var(--color-primary) 15%, var(--bg-tertiary));
-		border-color: var(--color-primary);
-	}
-
-	@media (hover: hover) {
-		.review-card__reaction-group:hover:not(:disabled) {
-			background-color: var(--bg-hover);
-		}
-	}
-
-	.review-card__group-emoji {
-		line-height: 1;
-		font-size: 18px;
-	}
-
-	.review-card__avatar-stack {
-		display: flex;
-		align-items: center;
-	}
-
-	.review-card__avatar-wrap {
-		display: flex;
-		width: 16px;
-		height: 16px;
-		margin-left: -5px;
-		border-radius: var(--radius-full);
-		box-shadow: 0 0 0 2px var(--bg-secondary);
-		overflow: hidden;
-	}
-
-	.review-card__avatar-wrap:first-child {
-		margin-left: 0;
 	}
 
 	.review-card__reactions-action {

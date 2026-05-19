@@ -1,10 +1,10 @@
 <script lang="ts">
+	import { ALLOWED_REACTIONS, type ReactionEmoji } from '../constants/reactions';
 	import type { IProps } from './ReactionPicker.types.svelte';
-	import { ALLOWED_REACTIONS } from '../constants/reactions';
 
 	let { ownEmoji, disabled = false, onSelect }: IProps = $props();
 
-	const handleClick = (emoji: string) => {
+	const handleClick = (emoji: ReactionEmoji) => {
 		if (disabled) return;
 		onSelect(emoji);
 	};

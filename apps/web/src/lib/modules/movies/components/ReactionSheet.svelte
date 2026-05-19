@@ -3,14 +3,15 @@
 	import { Sheet } from '@repo/ui';
 
 	import ReactionParticipants from './ReactionParticipants.svelte';
+	import type { ReactionEmoji } from '../constants/reactions';
 	import type { IProps } from './ReactionSheet.types.svelte';
 	import ReactionPicker from './ReactionPicker.svelte';
 
 	let { open = $bindable(false), reactions, isOwnReview, onSelect }: IProps = $props();
 
-	const ownEmoji = $derived(reactions.find((r) => r.isOwn)?.emoji);
+	const ownEmoji = $derived(reactions.find((r) => r.isOwn)?.emoji as ReactionEmoji | undefined);
 
-	const handleSelect = (emoji: string) => {
+	const handleSelect = (emoji: ReactionEmoji) => {
 		onSelect(emoji);
 		open = false;
 	};

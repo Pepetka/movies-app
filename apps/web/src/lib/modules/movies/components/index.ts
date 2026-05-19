@@ -10,4 +10,5 @@ export { default as ReviewForm } from './ReviewForm.svelte';
 export { default as ReviewList } from './ReviewList.svelte';
 export { default as ReactionPicker } from './ReactionPicker.svelte';
 export { default as ReactionParticipants } from './ReactionParticipants.svelte';
+export { default as ReactionButton } from './ReactionButton.svelte';
 export { default as ReactionSheet } from './ReactionSheet.svelte';

@@ -1,5 +1,7 @@
+import type { ReactionEmoji } from '../constants/reactions';
+
 export interface IProps {
-	ownEmoji?: string;
+	ownEmoji?: ReactionEmoji;
 	disabled?: boolean;
-	onSelect: (emoji: string) => void;
+	onSelect: (emoji: ReactionEmoji) => void;
 }
