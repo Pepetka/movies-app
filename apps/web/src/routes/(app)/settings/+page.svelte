@@ -1,10 +1,11 @@
 <script lang="ts">
 	import { Button, ThemeToggle, toast } from '@repo/ui';
 
+	import { ROUTES, buildPath } from '$lib/utils';
 	import { authStore } from '$lib/modules/auth';
 	import { topBarStore } from '$lib/stores';
 	import { goto } from '$app/navigation';
-	import { ROUTES } from '$lib/utils';
+	import { page } from '$app/state';
 
 	$effect(() => {
 		topBarStore.configure({
@@ -20,7 +21,8 @@
 		} catch {
 			toast.error('Ошибка выхода');
 		}
-		await goto(ROUTES.HOME, { replaceState: true });
+		const redirect = `${page.url.pathname}${page.url.search}`;
+		await goto(buildPath(ROUTES.LOGIN, { redirect }), { replaceState: true });
 	};
 </script>
 

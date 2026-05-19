@@ -1,14 +1,15 @@
-import { ROUTES, getSafeRedirect } from '$lib/utils';
+import { ROUTES, getSafeRedirect, buildPath } from '$lib/utils';
 import { browser } from '$app/environment';
 import { goto } from '$app/navigation';
 
 import { authStore } from '../stores';
 
-export const requireAuth = (): void => {
+export const requireAuth = (currentUrl?: URL): void => {
 	if (!browser || !authStore.isInitialized) return;
 
 	if (authStore.status === 'unauthenticated') {
-		void goto(ROUTES.LOGIN, { replaceState: true });
+		const redirect = currentUrl ? `${currentUrl.pathname}${currentUrl.search}` : undefined;
+		void goto(buildPath(ROUTES.LOGIN, { redirect }), { replaceState: true });
 	}
 };
 

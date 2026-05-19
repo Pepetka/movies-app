@@ -50,7 +50,7 @@
 	const activeNavId = $derived(navItems.find((item) => page.url.pathname === item.href)?.id ?? '');
 
 	$effect(() => {
-		requireAuth();
+		requireAuth(page.url);
 	});
 </script>
 
