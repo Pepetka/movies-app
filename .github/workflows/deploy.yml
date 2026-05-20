@@ -174,13 +174,16 @@ jobs:
             sleep 15
 
             echo "Checking API health..."
-            curl -f http://localhost/api/v1/health || exit 1
+            curl -fk https://localhost/api/v1/health || exit 1
 
             echo "Checking Web health..."
-            curl -f http://localhost/ || exit 1
+            curl -fk https://localhost/ || exit 1
+
+            echo "Cleaning up stopped containers..."
+            docker container prune -f
 
             echo "Cleaning up old images..."
-            docker image prune -f --filter "label=project=movies-app"
+            docker image prune -af
 
             echo "Logging out from GHCR..."
             docker logout ghcr.io
