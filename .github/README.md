@@ -62,6 +62,7 @@
 | `VPS_USER` | SSH пользователь (ubuntu/root) |
 | `VPS_PORT` | SSH порт VPS (если нестандартный) |
 | `VPS_SSH_KEY` | Приватный SSH ключ (полное содержимое) |
+| `API_URL` | URL API для сборки Docker образа (`https://yourdomain.com`) |
 | `GHCR_USERNAME` | Ваш GitHub username |
 | `GHCR_PAT` | Personal Access Token с правами `read:packages` и `repo` |
 

@@ -32,13 +32,25 @@ cp .env.example .env
 | `WEB_URL`           | URL фронтенда                             | `https://yourdomain.com`                |
 | `API_URL`           | URL API (без `/api`)                      | `https://yourdomain.com`                |
 | `COOKIE_SECRET`     | Секрет для cookies (мин. 32 символа)      | см. ниже                                |
-| `DATABASE_URL`      | Строка подключения PostgreSQL             | `postgresql://user:pass@db:5432/movies` |
+| `DATABASE_URL`      | Строка подключения PostgreSQL             | `postgresql://user:pass@db:5432/movies_db` |
+| `DB_HOST`           | Хост PostgreSQL (в Docker: `postgres`)    | `postgres`                              |
+| `DB_PORT`           | Порт PostgreSQL                           | `5432`                                  |
 | `POSTGRES_USER`     | Пользователь PostgreSQL                   | `movies`                                |
 | `POSTGRES_PASSWORD` | Пароль PostgreSQL                         | `<strong-password>`                     |
-| `POSTGRES_DB`       | Имя базы данных                           | `movies`                                |
+| `POSTGRES_DB`       | Имя базы данных                           | `movies_db`                             |
 | `DOMAIN`            | Домен (без протокола)                     | `yourdomain.com`                        |
 | `CERTBOT_EMAIL`     | Email для Let's Encrypt                   | `admin@yourdomain.com`                  |
 | `GITHUB_REPOSITORY` | Полное имя репозитория (для pull образов) | `username/movies-app`                   |
+| `JWT_ACCESS_SECRET` | Секрет для access токенов (мин. 32 симв.) | см. `openssl rand -base64 32`           |
+| `JWT_REFRESH_SECRET`| Секрет для refresh токенов (мин. 32 симв.)| см. `openssl rand -base64 32`           |
+| `JWT_ACCESS_EXPIRATION` | Время жизни access токена             | `15m`                                   |
+| `JWT_REFRESH_EXPIRATION`| Время жизни refresh токена            | `7d`                                    |
+| `BCRYPT_ROUNDS`     | Раунды bcrypt                             | `12`                                    |
+| `KINOPOISK_API_KEY` | API ключ провайдера фильмов               | `your_provider_api_key_here`            |
+| `KINOPOISK_BASE_URL`| Базовый URL API провайдера фильмов        | `https://api.movie-provider.com`        |
+| `GOOGLE_CLIENT_ID`  | Google OAuth Client ID (опционально)      | `your-google-client-id`                 |
+| `GOOGLE_CLIENT_SECRET` | Google OAuth Client Secret (опционально)| `your-google-client-secret`             |
+| `GOOGLE_REDIRECT_URI` | Callback URL для Google OAuth          | `https://yourdomain.com/api/v1/auth/oauth/google/callback` |
 
 > **Важно:** `API_URL` используется при сборке Docker образа в GitHub Actions. Нужно также обновить GitHub secret `API_URL` (Settings → Secrets → Actions).
 
