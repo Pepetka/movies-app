@@ -16,6 +16,7 @@ apps/web/src/lib/
 │   ├── auth/
 │   ├── groups/
 │   ├── movies/
+│   ├── profile/
 │   └── health/
 │
 ├── compositions/               # Cross-module operations (empty)
@@ -35,12 +36,25 @@ apps/web/src/routes/
 ├── (app)/                      # Protected routes (auth required)
 │   ├── groups/                 # Groups list, create, edit
 │   │   ├── [id]/              # Group detail, members, movies
+│   │   │   ├── movies/
+│   │   │   │   ├── new/       # Add movie to group
+│   │   │   │   ├── search/    # Search movies (provider + group)
+│   │   │   │   └── [movieId]/ # Movie detail, edit, reviews
+│   │   │   ├── members/       # Group members management
+│   │   │   └── edit/          # Edit group form
 │   │   └── new/               # Create group form
 │   ├── profile/               # User profile
+│   ├── settings/              # User settings
 │   └── +layout.svelte         # App layout with AuthGuard
 ├── (auth)/                     # Auth routes (public)
 │   ├── login/                 # Login form
-│   └── register/              # Register form
+│   ├── register/              # Register form
+│   └── oauth/                 # OAuth callbacks
+│       ├── success/
+│       ├── error/
+│       └── link-success/
+├── invite/
+│   └── [token]/               # Accept group invite
 ├── +layout.svelte              # Root layout
 ├── +page.svelte                # Landing
 └── +error.svelte               # Error page
@@ -161,7 +175,11 @@ import type { GroupFormData } from '../validation/groups.validation.svelte';
 
 **Groups:** `GroupCreateDto`, `GroupResponseDto`, `GroupUpdateDto`, `GroupMemberAddDto`, `GroupMemberResponseDto`, `GroupMemberRoleUpdateDto`, `GroupMovieResponseDto`, `EditGroupMovieDto`, `TransferOwnershipDto`
 
+**Reviews:** `CreateReviewDto`, `ReviewResponseDto`, `UpdateReviewDto`, `CreateReviewReactionDto`, `ReviewReactionResponseDto`
+
 **Custom Movies:** `CreateCustomMovieDto`, `CustomMovieResponseDto`, `UpdateCustomMovieDto`
+
+**OAuth:** `OAuthLinkInitResponseDto`, `OAuthRedirectQueryDto`
 
 ## API Client Features (Implemented)
 

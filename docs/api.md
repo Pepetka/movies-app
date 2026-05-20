@@ -186,7 +186,7 @@ API-запрос с заголовком Authorization
 | Метод | Endpoint              | Доступ       | Описание                          |
 | ----- | --------------------- | ------------ | --------------------------------- |
 | GET   | /                     | Member       | Список фильмов группы             |
-| GET   | /search               | Moderator+   | Поиск (Kinopoisk + группа)        |
+| GET   | /search               | Moderator+   | Поиск (провайдер + группа)        |
 | POST  | /                     | Moderator+   | Добавить фильм из провайдера      |
 | POST  | /custom               | Moderator+   | Создать кастомный фильм           |
 | GET   | /:id                  | Member       | Детали фильма                     |
@@ -195,11 +195,13 @@ API-запрос с заголовком Authorization
 
 ### Group Movie Reviews (`/groups/:groupId/movies/:groupMovieId/reviews`)
 
-| Метод | Endpoint  | Доступ     | Описание                              |
-| ----- | --------- | ---------- | ------------------------------------- |
-| POST  | /         | Member     | Создать отзыв (только для watched)    |
-| PATCH | /:id      | Author/Admin| Обновить свой отзыв                  |
-| DELETE| /:id      | Author/Admin| Удалить свой отзыв                   |
+| Метод | Endpoint         | Доступ       | Описание                              |
+| ----- | ---------------- | ------------ | ------------------------------------- |
+| POST  | /                | Member       | Создать отзыв (только для watched)    |
+| PATCH | /:id             | Author/Admin | Обновить свой отзыв                   |
+| DELETE| /:id             | Author/Admin | Удалить свой отзыв                    |
+| POST  | /:id/reactions   | Member       | Добавить реакцию на отзыв             |
+| DELETE| /:id/reactions   | Member       | Удалить свою реакцию                  |
 
 ### Transfer Ownership (`/groups/:id`)
 
@@ -211,7 +213,7 @@ API-запрос с заголовком Authorization
 
 | Метод | Endpoint  | Доступ  | Описание               |
 | ----- | --------- | ------- | ---------------------- |
-| GET   | /search   | Public  | Поиск в Kinopoisk      |
+| GET   | /search   | Public  | Поиск через провайдера |
 | GET   | /         | Admin   | Все фильмы из БД       |
 | POST  | /         | Admin   | Создать фильм          |
 | GET   | /:id      | Auth    | Детали фильма          |
@@ -255,6 +257,7 @@ curl http://localhost:8080/api/v1/users/me \
 | `@Cookies()`   | Получить cookies                                    |
 | `@Author()`    | Установить автора для аудита                       |
 | `@GroupMember()` | Получить участника группы из запроса (guards)    |
+| `@Review()`      | Получить отзыв из запроса (guards)               |
 
 ## Сериализация
 

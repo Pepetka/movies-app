@@ -93,22 +93,23 @@ pnpm run db:grant-admin         # Назначить роль админа
 ### Реализовано
 
 - JWT аутентификация с двухтокеновой схемой (access + refresh)
+- OAuth 2.0 вход и привязка аккаунтов (Google)
 - Ролевая модель (USER, ADMIN глобально; admin/moderator/member в группах)
+- Пригласительные ссылки в группы
 - Rate limiting с различными tier-ами
 - CSRF защита
 - Swagger документация API
 - Health check endpoints
 - Управление пользователями (CRUD)
 - Миграции базы данных через Drizzle
-- Интеграция с Kinopoisk API для поиска фильмов
+- Интеграция с провайдером фильмов для поиска
 - Группы пользователей (создание, управление участниками, роли)
-- Провайдерские фильмы (Kinopoisk) и кастомные фильмы
+- Провайдерские фильмы и кастомные фильмы
 - Статусы фильмов в группах (tracking, planned, watched)
+- Оценки и отзывы на фильмы с реакциями
 
 ### В разработке
 
-- Пригласительные ссылки в группы
-- Оценки и отзывы на фильмы
 - Telegram бот для уведомлений
 
 ## Release Management
@@ -185,6 +186,7 @@ apps/
       auth/                     # JWT аутентификация
         auth.controller.ts      # /auth/register, /auth/login, etc.
         auth.service.ts         # Логика с bcrypt
+        oauth/                  # OAuth 2.0 (Google)
         guards/                 # AuthGuard, RefreshGuard
         strategies/             # JWT стратегии
       user/                     # Управление пользователями
@@ -195,10 +197,11 @@ apps/
         groups.controller.ts    # CRUD + управление участниками
         groups.service.ts       # Business logic
         groups.repository.ts    # Database operations
-      movies/                   # Работа с фильмами (Kinopoisk)
+      movies/                   # Работа с фильмами (провайдер)
         movies.controller.ts    # Поиск, CRUD
-        movies.service.ts       # Kinopoisk интеграция
+        movies.service.ts       # Интеграция с провайдером фильмов
         movies.repository.ts    # Database operations
+      group-movie-reviews/      # Отзывы и оценки на фильмы группы
       health/                   # Health check endpoints
       csrf/                     # CSRF защита
       db/                       # Drizzle ORM
@@ -218,8 +221,6 @@ packages/
   ui/                           # UI компоненты (Svelte)
 docker/                         # Docker конфигурации
 docs/                           # Документация
-  product-roadmap.md            # Roadmap проекта
-  database-schema.md            # Схема БД
   movies-architecture.md        # Архитектура модуля фильмов
   deployment.md                 # Руководство по деплою
 ```
@@ -241,6 +242,11 @@ docs/                           # Документация
 | `JWT_ACCESS_EXPIRATION`  | Время жизни access токена (15m)              | API            |
 | `JWT_REFRESH_EXPIRATION` | Время жизни refresh токена (7d)              | API            |
 | `BCRYPT_ROUNDS`          | Раунды bcrypt (12)                           | API            |
+| `KINOPOISK_API_KEY`      | API ключ провайдера фильмов                  | API            |
+| `KINOPOISK_BASE_URL`     | Базовый URL API провайдера фильмов           | API            |
+| `GOOGLE_CLIENT_ID`       | Google OAuth Client ID                       | API            |
+| `GOOGLE_CLIENT_SECRET`   | Google OAuth Client Secret                   | API            |
+| `GOOGLE_REDIRECT_URI`    | Callback URL для Google OAuth                | API            |
 | `POSTGRES_*`             | Настройки PostgreSQL                         | Docker         |
 | `DOMAIN`                 | Домен без протокола (yourdomain.com)         | nginx, certbot |
 | `CERTBOT_EMAIL`          | Email для Let's Encrypt                      | certbot        |
@@ -296,8 +302,6 @@ GET /api/v1/health
 
 ## Документация
 
-- [Product Roadmap](docs/product-roadmap.md) - План развития приложения
-- [Database Schema](docs/database-schema.md) - Схема базы данных
 - [Movies Architecture](docs/movies-architecture.md) - Архитектура модуля фильмов
 - [Deployment Guide](docs/deployment.md) - Руководство по развёртыванию
 
