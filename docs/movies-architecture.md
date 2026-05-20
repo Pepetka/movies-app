@@ -4,7 +4,7 @@
 
 Архитектура модуля работы с фильмами использует **единую таблицу** `group_movies` для хранения двух типов контента:
 
-1. **Провайдерские фильмы** (`source='provider'`) — данные копируются из Kinopoisk при добавлении в группу (snapshot подход)
+1. **Провайдерские фильмы** (`source='provider'`) — данные копируются из внешнего провайдера при добавлении в группу (snapshot подход)
 2. **Кастомные фильмы** (`source='custom'`) — создаются пользователями вручную
 
 ## Ключевые решения
@@ -15,7 +15,7 @@
 | Дедупликация                | **imdbId приоритет**, затем `externalId`             |
 | Редактирование              | Прямое редактирование полей в `group_movies`         |
 | Удаление                    | **CASCADE** с группой                                |
-| Поиск                       | **Параллельный**: Kinopoisk + фильмы текущей группы  |
+| Поиск                       | **Параллельный**: провайдер + фильмы текущей группы  |
 
 ---
 
@@ -23,7 +23,7 @@
 
 ### movies (Провайдерские фильмы)
 
-Snapshot из Kinopoisk, immutable после создания.
+Snapshot из провайдера, immutable после создания.
 
 ```sql
 movies
@@ -64,7 +64,7 @@ group_movies
   rating              decimal(3,1)
   status              enum('tracking', 'planned', 'watched') DEFAULT 'tracking'
   watchDate           timestamp
-  addedBy             integer REFERENCES users(id) ON DELETE RESTRICT
+  addedBy             integer REFERENCES users(id) ON DELETE SET NULL
   createdAt           timestamp
   updatedAt           timestamp
 
@@ -151,7 +151,7 @@ UNIQUE(groupId, movieId)  -- только для provider фильмов (movieI
 ```typescript
 async searchInGroup(groupId: number, query: string, page = 1) {
   const [providerResults, groupMovies] = await Promise.all([
-    // 1. Kinopoisk API
+    // 1. Провайдер фильмов
     moviesService.search({ query, page }),
 
     // 2. Фильмы этой группы (provider + custom)
@@ -159,7 +159,7 @@ async searchInGroup(groupId: number, query: string, page = 1) {
   ]);
 
   return {
-    provider: providerResults,   // Результаты из Kinopoisk
+    provider: providerResults,   // Результаты из провайдера
     currentGroup: groupMovies,   // Фильмы этой группы
   };
 }
@@ -171,7 +171,7 @@ async searchInGroup(groupId: number, query: string, page = 1) {
 Поиск в группе "Избранное": "Matrix"
 
 ┌─ Результаты ─────────────────────┐
-│ 📦 Kinopoisk                     │
+│ 📦 Провайдер                     │
 │   └─ Inception                   │
 │   └─ The Matrix                  │
 │                                  │
@@ -188,7 +188,7 @@ async searchInGroup(groupId: number, query: string, page = 1) {
 ```typescript
 class GroupMoviesService {
   async findOrCreateMovie(dto: AddMovieDto): Promise<Movie> {
-    const provider = this.movieProvidersService.getProvider("kinopoisk");
+    const provider = this.movieProvidersService.getProvider("movie-provider");
 
     let movie: Movie | null = null;
 
@@ -248,7 +248,7 @@ async remove(groupId: number, id: number): Promise<void> {
 | Метод  | Роут             | Описание                                | Guard         |
 | ------ | ---------------- | --------------------------------------- | ------------- |
 | GET    | `/movies`        | Все провайдерские фильмы (с пагинацией) | Admin         |
-| GET    | `/movies/search` | Поиск через Kinopoisk API               | Public        |
+| GET    | `/movies/search` | Поиск через провайдера фильмов          | Public        |
 | POST   | `/movies`        | Создать фильм по imdbId/externalId      | Admin         |
 | GET    | `/movies/:id`    | Детали провайдерского фильма            | Authenticated |
 | PATCH  | `/movies/:id`    | Редактировать данные                    | Admin         |
@@ -259,7 +259,7 @@ async remove(groupId: number, id: number): Promise<void> {
 | Метод  | Роут                                 | Описание                         | Guard      |
 | ------ | ------------------------------------ | -------------------------------- | ---------- |
 | GET    | `/groups/:groupId/movies`            | Список всех фильмов группы      | Members    |
-| GET    | `/groups/:groupId/movies/search`     | Поиск (Kinopoisk + группа)      | Members    |
+| GET    | `/groups/:groupId/movies/search`     | Поиск (провайдер + группа)      | Members    |
 | POST   | `/groups/:groupId/movies`            | Добавить provider фильм         | Moderators |
 | POST   | `/groups/:groupId/movies/custom`     | Создать custom фильм            | Moderators |
 | GET    | `/groups/:groupId/movies/:id`        | Детали фильма                   | Members    |
@@ -292,7 +292,7 @@ enum GroupMovieStatus {
   // Либо IMDb ID (приоритет)
   imdbId?: string;  // "tt0133093"
 
-  // Либо externalId Kinopoisk
+  // Либо externalId провайдера
   externalId?: string;  // "301"
 }
 ```
@@ -349,9 +349,11 @@ interface MovieProvider {
 
 ### Реализации
 
-- **KinopoiskService** — Kinopoisk API (default для всех)
+- **MovieProviderService** — интеграция с провайдером фильмов (default для всех)
 
 ---
+
+> **Примечание:** В планах v2.0 статусы фильмов будут изменены на `backlog` / `planned` / `watched`, а даты просмотра перейдут в отдельную сущность «Киновечер» (`group_movie_events`). См. [design/v2.0.0/group-movies-and-events.md](../design/v2.0.0/group-movies-and-events.md).
 
 ## Ограничения
 
@@ -360,6 +362,7 @@ interface MovieProvider {
 - **CASCADE удаление** — при удалении группы удаляются все её фильмы
 - **Snapshot подход** — данные provider фильмов не обновляются после копирования
 - **Прямое редактирование** — любые поля можно изменить через PATCH
+- **Отзывы и реакции** — к фильмам со статусом `watched` можно оставлять отзывы с оценками и реакции (см. модуль `group-movie-reviews`)
 
 ### Provider фильмы
 

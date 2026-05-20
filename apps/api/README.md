@@ -100,11 +100,11 @@ src/
 │   ├── groups.repository.ts    # Database operations
 │   └── dto/                    # Groups DTOs
 │
-├── movies/                 # Провайдерские фильмы (Kinopoisk)
+├── movies/                 # Провайдерские фильмы
 │   ├── movies.controller.ts    # Поиск, глобальный CRUD
 │   ├── movies.service.ts       # Business logic
 │   ├── movies.repository.ts    # Database operations
-│   ├── kinopoisk.service.ts    # Kinopoisk API интеграция
+│   ├── movie-provider.service.ts # Интеграция с провайдером фильмов
 │   ├── movie-providers.service.ts  # Провайдеры фильмов
 │   └── dto/                    # Movies DTOs
 │
@@ -186,7 +186,7 @@ DELETE /api/v1/groups/:id/members/:uid   # Удалить участника (gr
 
 ```bash
 GET    /api/v1/movies                    # Список провайдерских фильмов (admin)
-GET    /api/v1/movies/search             # Поиск через Kinopoisk (authenticated)
+GET    /api/v1/movies/search             # Поиск через провайдера (authenticated)
 GET    /api/v1/movies/:id                # Детали фильма (authenticated)
 PATCH  /api/v1/movies/:id                # Обновить фильм (admin)
 DELETE /api/v1/movies/:id                # Удалить фильм (admin)
@@ -196,8 +196,8 @@ DELETE /api/v1/movies/:id                # Удалить фильм (admin)
 
 ```bash
 GET    /api/v1/groups/:id/movies         # Список фильмов группы (members)
-POST   /api/v1/groups/:id/movies         # Добавить фильм из Kinopoisk (moderator)
-GET    /api/v1/groups/:id/movies/search  # Поиск: Kinopoisk + local (members)
+POST   /api/v1/groups/:id/movies         # Добавить фильм из провайдера (moderator)
+GET    /api/v1/groups/:id/movies/search  # Поиск: провайдер + локальные (members)
 GET    /api/v1/groups/:id/movies/:mid    # Детали фильма в группе (members)
 PATCH  /api/v1/groups/:id/movies/:mid    # Изменить статус/дату (moderator)
 DELETE /api/v1/groups/:id/movies/:mid    # Удалить из группы (moderator)
@@ -270,8 +270,8 @@ Guards выполняются в порядке (определено в app.mod
 | `JWT_ACCESS_EXPIRATION`  | Access token TTL                    | 15m         |
 | `JWT_REFRESH_EXPIRATION` | Refresh token TTL                   | 7d          |
 | `BCRYPT_ROUNDS`          | Bcrypt rounds                       | 12          |
-| `KINOPOISK_BASE_URL`     | Kinopoisk API URL                   | -           |
-| `KINOPOISK_API_KEY`      | Kinopoisk API key                   | -           |
+| `KINOPOISK_BASE_URL`     | Базовый URL API провайдера фильмов  | -           |
+| `KINOPOISK_API_KEY`      | API ключ провайдера фильмов         | -           |
 
 ## Тестирование
 
