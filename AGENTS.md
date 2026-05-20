@@ -1,4 +1,4 @@
-# CLAUDE.md
+# AGENTS.md
 
 Movies App — Turborepo monorepo для отслеживания групповых просмотров фильмов.
 
@@ -56,16 +56,12 @@ cd apps/api && pnpm run db:generate / db:migrate / db:seed
 | ----- | ---- |
 | **Code Style** | [docs/code-style/](docs/code-style/index.md) — patterns, conventions (atomic docs) |
 | **API** | [docs/api.md](docs/api.md) — endpoints, auth, guards, decorators |
-| **Database** | [docs/database-schema.md](docs/database-schema.md) — tables, relations |
 | **Movies Module** | [docs/movies-architecture.md](docs/movies-architecture.md) — provider vs custom |
-| **Frontend Pages** | [docs/app-pages.md](docs/app-pages.md) — routes, navigation, UI patterns |
 | **Web Architecture** | [docs/web-architecture.md](docs/web-architecture.md) — modules, TODO |
 | **Query Store Pattern** | [docs/query-store-pattern.md](docs/query-store-pattern.md) — stores, query, mutation |
 | **Form Patterns** | [docs/form-patterns.md](docs/form-patterns.md) — validation, components, integration |
 | **Form Styles** | [docs/form-styles.md](docs/form-styles.md) — layout, card structure, CSS patterns |
 | **Deployment** | [docs/deployment.md](docs/deployment.md) — CI/CD, SSL, VPS setup |
-| **Roadmap** | [docs/product-roadmap.md](docs/product-roadmap.md) — status, plans |
-| **Future** | [docs/future-improvements.md](docs/future-improvements.md) — TODOs, ideas |
 
 Читай связанные файлы из Documentation Map по мере необходимости для получения контекста.
 
@@ -80,7 +76,7 @@ apps/
     src/auth/          # JWT, guards, strategies
     src/user/          # CRUD
     src/groups/        # Groups + members + movies
-    src/movies/        # Kinopoisk integration
+    src/movies/        # Movie provider integration
     src/db/schemas/    # Drizzle schemas
 packages/
   ui/                  # Shared Svelte components
@@ -95,4 +91,4 @@ See `.env.example` for full list. Key variables:
 - `DATABASE_URL` — PostgreSQL connection
 - `JWT_ACCESS_SECRET` / `JWT_REFRESH_SECRET` — min 32 chars
 - `COOKIE_SECRET` — min 32 chars
-- `KINOPOISK_API_KEY` / `KINOPOISK_BASE_URL` — movie provider
+- `KINOPOISK_API_KEY` / `KINOPOISK_BASE_URL` — movie provider API credentials
