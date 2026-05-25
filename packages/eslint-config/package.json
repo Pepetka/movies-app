@@ -21,6 +21,6 @@
     "eslint-plugin-unused-imports": "^4.4.1",
     "globals": "^17.6.0",
     "typescript-eslint": "^8.59.3",
-    "eslint-plugin-storybook": "^10.4.0"
+    "eslint-plugin-storybook": "^10.4.1"
   }
 }
