@@ -8,8 +8,8 @@ import { NestFactory } from '@nestjs/core';
 import { Logger } from '@nestjs/common';
 import helmet from '@fastify/helmet';
 
-import { AppConfigService } from '$common/app-config';
-import { getHelmetConfig } from '$common/security';
+import { AppConfigService } from '$infra/app-config';
+import { getHelmetConfig } from '$infra/security';
 
 import { AppModule } from './app.module';
 import 'dotenv/config';
