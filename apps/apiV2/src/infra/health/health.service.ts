@@ -1,6 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 
 import { AppConfigService } from '$infra/app-config';
+import { HealthCheckError } from '$infra/exceptions';
 
 import {
   HealthIndicator,
@@ -20,11 +21,18 @@ export class HealthService {
   ) {}
 
   async checkLiveness(): Promise<HealthResult> {
-    return this._check(this._liveness);
+    const result = await this._check(this._liveness);
+    return this._checkStatus(result);
   }
 
   async checkReadiness(): Promise<HealthResult> {
-    return this._check(this._readiness);
+    const result = await this._check(this._readiness);
+    return this._checkStatus(result);
+  }
+
+  private _checkStatus(result: HealthResult): HealthResult {
+    if (result.status === 'error') throw new HealthCheckError(result);
+    return result;
   }
 
   private async _check(indicators: HealthIndicator[]): Promise<HealthResult> {
