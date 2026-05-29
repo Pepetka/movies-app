@@ -1,4 +1,4 @@
-import { HealthIndicatorResult } from './health-result.interface';
+import type { HealthIndicatorResult } from './health-result.interface';
 
 export interface HealthResult {
   status: 'ok' | 'error';

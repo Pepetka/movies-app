@@ -1,8 +1,6 @@
-import {
-  FastifyAdapter,
-  NestFastifyApplication,
-} from '@nestjs/platform-fastify';
+import type { NestFastifyApplication } from '@nestjs/platform-fastify';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { FastifyAdapter } from '@nestjs/platform-fastify';
 import { VersioningType } from '@nestjs/common';
 import fastifyCookie from '@fastify/cookie';
 import csrf from '@fastify/csrf-protection';

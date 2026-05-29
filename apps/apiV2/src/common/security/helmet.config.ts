@@ -1,6 +1,6 @@
-import { FastifyHelmetOptions } from '@fastify/helmet';
+import type { FastifyHelmetOptions } from '@fastify/helmet';
 
-import { AppConfigService } from '$common/app-config';
+import type { AppConfigService } from '$common/app-config';
 
 export const getHelmetConfig = (
   config: AppConfigService,
