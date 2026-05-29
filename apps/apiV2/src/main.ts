@@ -8,6 +8,7 @@ import { NestFactory } from '@nestjs/core';
 import { Logger } from '@nestjs/common';
 import helmet from '@fastify/helmet';
 
+import { registerRequestIdHook } from '$infra/observability';
 import { AppConfigService } from '$infra/app-config';
 import { getHelmetConfig } from '$infra/security';
 
@@ -52,6 +53,7 @@ async function bootstrap() {
   });
 
   app.enableShutdownHooks();
+  registerRequestIdHook(app);
 
   if (configService.isDev) {
     const config = new DocumentBuilder()
