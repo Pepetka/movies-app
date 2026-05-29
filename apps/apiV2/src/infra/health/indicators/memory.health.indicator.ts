@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 
-import { AppConfigService } from '$common/app-config';
+import { AppConfigService } from '$infra/app-config';
 
 import {
   HealthIndicator,
