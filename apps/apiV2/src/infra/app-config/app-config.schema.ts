@@ -9,7 +9,15 @@ export enum Environment {
 export const configSchema = z.object({
   NODE_ENV: z.enum(Environment),
   PORT: z.coerce.number().min(0).max(65535).default(8080),
-  WEB_URL: z.string().transform((s) => s.split(',').map((u) => u.trim())),
+  WEB_URL: z
+    .string()
+    .transform((s) =>
+      s
+        .split(',')
+        .map((u) => u.trim())
+        .filter(Boolean),
+    )
+    .pipe(z.array(z.url()).min(1)),
   API_URL: z.url(),
   DATABASE_URL: z.string(),
   COOKIE_SECRET: z.string().min(32),
