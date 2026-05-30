@@ -9,6 +9,7 @@ import {
 import type { FastifyReply, FastifyRequest } from 'fastify';
 
 import { AppConfigService } from '$infra/app-config';
+import { ValidationError } from '$infra/validation';
 
 import { DomainError, HealthCheckError } from './errors';
 import { ERROR_MAP } from './error-map';
@@ -75,6 +76,18 @@ export class HttpExceptionFilter implements ExceptionFilter {
           },
         };
       }
+    }
+
+    if (error instanceof ValidationError) {
+      return {
+        status: error.getStatus(),
+        payload: {
+          code: 'VALIDATION_ERROR',
+          message: 'Validation failed',
+          details: error.details,
+          requestId,
+        },
+      };
     }
 
     if (error instanceof HttpException) {

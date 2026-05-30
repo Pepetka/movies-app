@@ -1,3 +1,6 @@
+import 'reflect-metadata';
+import 'dotenv/config';
+
 import type { NestFastifyApplication } from '@nestjs/platform-fastify';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { FastifyAdapter } from '@nestjs/platform-fastify';
@@ -13,7 +16,6 @@ import { AppConfigService } from '$infra/app-config';
 import { getHelmetConfig } from '$infra/security';
 
 import { AppModule } from './app.module';
-import 'dotenv/config';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestFastifyApplication>(
