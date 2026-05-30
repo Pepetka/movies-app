@@ -48,6 +48,9 @@ catalogs:
     typescript:
       specifier: 5.9.3
       version: 5.9.3
+    valibot:
+      specifier: ^1.4.1
+      version: 1.4.1
     vite:
       specifier: ^8.0.13
       version: 8.0.13
@@ -146,7 +149,7 @@ importers:
         version: 2.1.0(eslint@10.4.0(jiti@2.7.0))
       '@nestjs/cli':
         specifier: ^11.0.21
-        version: 11.0.21(@swc/cli@0.8.1(@swc/core@1.15.33))(@swc/core@1.15.33)(@types/node@25.6.2)(prettier@3.8.2)
+        version: 11.0.21(@swc/cli@0.8.1(@swc/core@1.15.33)(chokidar@4.0.3))(@swc/core@1.15.33)(@types/node@25.6.2)(prettier@3.8.2)
       '@nestjs/schematics':
         specifier: ^11.1.0
         version: 11.1.0(chokidar@4.0.3)(prettier@3.8.2)(typescript@5.9.3)
@@ -217,7 +220,7 @@ importers:
         specifier: 'catalog:'
         version: 5.9.3
 
-  apps/api2.0:
+  apps/apiV2:
     dependencies:
       '@fastify/cookie':
         specifier: ^11.0.2
@@ -249,16 +252,16 @@ importers:
       rxjs:
         specifier: ^7.8.1
         version: 7.8.2
-      zod:
+      valibot:
         specifier: 'catalog:'
-        version: 4.4.3
+        version: 1.4.1(typescript@5.9.3)
     devDependencies:
       '@eslint/compat':
         specifier: 'catalog:'
         version: 2.1.0(eslint@10.4.0(jiti@2.7.0))
       '@nestjs/cli':
         specifier: ^11.0.21
-        version: 11.0.21(@swc/cli@0.8.1(@swc/core@1.15.33))(@swc/core@1.15.33)(@types/node@25.6.2)(prettier@3.8.2)
+        version: 11.0.21(@swc/cli@0.8.1(@swc/core@1.15.33)(chokidar@5.0.0))(@swc/core@1.15.33)(@types/node@25.6.2)(prettier@3.8.2)
       '@nestjs/testing':
         specifier: ^11.1.21
         version: 11.1.21(@nestjs/common@11.1.21(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.21(@nestjs/common@11.1.21(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(reflect-metadata@0.2.2)(rxjs@7.8.2))
@@ -270,7 +273,7 @@ importers:
         version: link:../../packages/typescript-config
       '@swc/cli':
         specifier: ^0.8.1
-        version: 0.8.1(@swc/core@1.15.33)(chokidar@4.0.3)
+        version: 0.8.1(@swc/core@1.15.33)(chokidar@5.0.0)
       '@swc/core':
         specifier: ^1.15.33
         version: 1.15.33
@@ -6696,6 +6699,14 @@ packages:
     resolution: {integrity: sha512-kiGUalWN+rgBJ/1OHZsBtU4rXZOfj/7rKQxULKlIzwzQSvMJUUNgPwJEEh7gU6xEVxC0ahoOBvN2YI8GH6FNgA==}
     engines: {node: '>=10.12.0'}
 
+  valibot@1.4.1:
+    resolution: {integrity: sha512-klCmFTz2jeDluy9RwX+F884TCiogtdBJ/YaxSx1EOBYXa3NXNWj8kR1jjN8rzluwojJVWWaHJ4r1U5LfICnM3g==}
+    peerDependencies:
+      typescript: '>=5'
+    peerDependenciesMeta:
+      typescript:
+        optional: true
+
   validator@13.15.35:
     resolution: {integrity: sha512-TQ5pAGhd5whStmqWvYF4OjQROlmv9SMFVt37qoCBdqRffuuklWYQlCNnEs2ZaIBD1kZRNnikiZOS1eqgkar0iw==}
     engines: {node: '>= 0.10'}
@@ -8280,7 +8291,7 @@ snapshots:
       '@tybys/wasm-util': 0.10.2
     optional: true
 
-  '@nestjs/cli@11.0.21(@swc/cli@0.8.1(@swc/core@1.15.33))(@swc/core@1.15.33)(@types/node@25.6.2)(prettier@3.8.2)':
+  '@nestjs/cli@11.0.21(@swc/cli@0.8.1(@swc/core@1.15.33)(chokidar@4.0.3))(@swc/core@1.15.33)(@types/node@25.6.2)(prettier@3.8.2)':
     dependencies:
       '@angular-devkit/core': 19.2.24(chokidar@4.0.3)
       '@angular-devkit/schematics': 19.2.24(chokidar@4.0.3)
@@ -8302,6 +8313,45 @@ snapshots:
       webpack-node-externals: 3.0.0
     optionalDependencies:
       '@swc/cli': 0.8.1(@swc/core@1.15.33)(chokidar@4.0.3)
+      '@swc/core': 1.15.33
+    transitivePeerDependencies:
+      - '@minify-html/node'
+      - '@swc/css'
+      - '@swc/html'
+      - '@types/node'
+      - clean-css
+      - cssnano
+      - csso
+      - esbuild
+      - html-minifier-terser
+      - lightningcss
+      - postcss
+      - prettier
+      - uglify-js
+      - webpack-cli
+
+  '@nestjs/cli@11.0.21(@swc/cli@0.8.1(@swc/core@1.15.33)(chokidar@5.0.0))(@swc/core@1.15.33)(@types/node@25.6.2)(prettier@3.8.2)':
+    dependencies:
+      '@angular-devkit/core': 19.2.24(chokidar@4.0.3)
+      '@angular-devkit/schematics': 19.2.24(chokidar@4.0.3)
+      '@angular-devkit/schematics-cli': 19.2.24(@types/node@25.6.2)(chokidar@4.0.3)
+      '@inquirer/prompts': 7.10.1(@types/node@25.6.2)
+      '@nestjs/schematics': 11.1.0(chokidar@4.0.3)(prettier@3.8.2)(typescript@5.9.3)
+      ansis: 4.2.0
+      chokidar: 4.0.3
+      cli-table3: 0.6.5
+      commander: 4.1.1
+      fork-ts-checker-webpack-plugin: 9.1.0(typescript@5.9.3)(webpack@5.106.0(@swc/core@1.15.33))
+      glob: 13.0.6
+      node-emoji: 1.11.0
+      ora: 5.4.1
+      tsconfig-paths: 4.2.0
+      tsconfig-paths-webpack-plugin: 4.2.0
+      typescript: 5.9.3
+      webpack: 5.106.0(@swc/core@1.15.33)
+      webpack-node-externals: 3.0.0
+    optionalDependencies:
+      '@swc/cli': 0.8.1(@swc/core@1.15.33)(chokidar@5.0.0)
       '@swc/core': 1.15.33
     transitivePeerDependencies:
       - '@minify-html/node'
@@ -9090,6 +9140,25 @@ snapshots:
       tinyglobby: 0.2.16
     optionalDependencies:
       chokidar: 4.0.3
+    transitivePeerDependencies:
+      - bare-abort-controller
+      - react-native-b4a
+      - supports-color
+
+  '@swc/cli@0.8.1(@swc/core@1.15.33)(chokidar@5.0.0)':
+    dependencies:
+      '@swc/core': 1.15.33
+      '@swc/counter': 0.1.3
+      '@xhmikosr/bin-wrapper': 14.2.2
+      commander: 8.3.0
+      minimatch: 9.0.9
+      piscina: 4.9.2
+      semver: 7.7.4
+      slash: 3.0.0
+      source-map: 0.7.6
+      tinyglobby: 0.2.16
+    optionalDependencies:
+      chokidar: 5.0.0
     transitivePeerDependencies:
       - bare-abort-controller
       - react-native-b4a
@@ -13257,6 +13326,10 @@ snapshots:
       '@jridgewell/trace-mapping': 0.3.31
       '@types/istanbul-lib-coverage': 2.0.6
       convert-source-map: 2.0.0
+
+  valibot@1.4.1(typescript@5.9.3):
+    optionalDependencies:
+      typescript: 5.9.3
 
   validator@13.15.35: {}
 

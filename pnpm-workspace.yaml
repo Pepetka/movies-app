@@ -28,3 +28,4 @@ catalog:
 
   # Validation
   zod: "^4.4.3"
+  valibot: "^1.4.1"
