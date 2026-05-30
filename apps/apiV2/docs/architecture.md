@@ -9,7 +9,7 @@
 - **Вертикальные модули** — каждый feature изолирован со своими слоями.
 - **Прагматичная чистая архитектура** — domain не знает про NestJS/HTTP/ORM, но не гонимся за enterprise-бойлерплейтом.
 - **Dependency Rule** — domain → application → infrastructure. Внутренние слои не зависят от внешних.
-- **Один DTO-слой** — Swagger + Zod в одном месте, без дублирования application DTO.
+- **Один DTO-слой** — Swagger + Valibot в одном месте, без дублирования application DTO.
 - **Domain exceptions** — вместо `Result<T, E>`. Читаемость выше, проще в TypeScript.
 - **Верхний уровень модуля** — controller, facade, module, dto. Знакомая NestJS-структура, но с чистыми границами внутри.
 
@@ -34,7 +34,7 @@ src/
         guards/          # feature-specific guards
         listeners/       # domain event listeners
         mappers/         # ORM row ↔ entity (только если нужен)
-      dto/               # request/response DTO (class + @ApiProperty + zod)
+      dto/               # request/response DTO (class + @ApiProperty + valibot)
       <feature>.controller.ts
       <feature>.facade.ts
       <feature>.module.ts
@@ -49,11 +49,11 @@ src/
     health/
     exceptions/          # Global exception filter + domain→HTTP mapper
     guards/              # Global guards (auth, roles, throttler, csrf)
-    validation/          # ZodValidationPipe, decorators
+    validation/          # ValibotValidationPipe, @Schema decorator
 
   shared/              # Чистый shared код (zero deps)
     domain/              # Base types, primitives (UserId, Email, etc.)
-    schemas/             # Shared zod schemas
+    schemas/             # Shared valibot schemas
     types/               # Utility types
 ```
 
@@ -135,7 +135,7 @@ export class UserNotFoundError extends Error {
 }
 ```
 
-**Контроль:** ни один файл в `domain/` не импортирует `@nestjs/*`, `zod`, `drizzle-orm`.
+**Контроль:** ни один файл в `domain/` не импортирует `@nestjs/*`, `valibot`, `drizzle-orm`.
 
 ---
 
@@ -237,13 +237,15 @@ export class UserFacade {
 ```typescript
 // modules/user/dto/create-user.dto.ts
 import { ApiProperty } from '@nestjs/swagger';
-import { z } from 'zod';
+import * as v from 'valibot';
+import { Schema } from '$infra/validation';
 
-export const CreateUserSchema = z.object({
-  email: z.string().email(),
-  name: z.string().min(1).max(100),
+export const CreateUserSchema = v.object({
+  email: v.pipe(v.string(), v.email()),
+  name: v.pipe(v.string(), v.minLength(1), v.maxLength(100)),
 });
 
+@Schema(CreateUserSchema)
 export class CreateUserDto {
   @ApiProperty({ example: 'john@example.com' })
   email: string;
@@ -291,9 +293,7 @@ export class UserController {
   @Post()
   @ApiOperation({ summary: 'Create user' })
   @ApiResponse({ status: 201, type: UserResponseDto })
-  async create(
-    @Body(new ZodValidationPipe(CreateUserSchema)) dto: CreateUserDto,
-  ) {
+  async create(@Body() dto: CreateUserDto) {
     const user = await this.facade.create(dto);
     return UserResponseDto.fromEntity(user);
   }
@@ -309,7 +309,7 @@ export class UserController {
 }
 ```
 
-**Правило:** Swagger + Zod только в `dto/` и controller. Application/use-case работает с plain objects.
+**Правило:** Swagger + Valibot только в `dto/` и controller. Application/use-case работает с plain objects.
 
 ---
 
@@ -428,24 +428,36 @@ export class UserCreatedListener {
 
 ---
 
-## Интеграция Swagger + Zod
+## Интеграция Swagger + Valibot
 
-### ZodValidationPipe
+### Типы объектных схем
+
+| Valibot            | Zod                        | Поведение                           |
+| ------------------ | -------------------------- | ----------------------------------- |
+| `v.object()`       | `z.object().strip()`       | Удаляет unknown keys (по умолчанию) |
+| `v.looseObject()`  | `z.object().passthrough()` | Пропускает unknown keys             |
+| `v.strictObject()` | `z.object().strict()`      | Ошибка на unknown keys              |
+
+### ValibotValidationPipe
 
 ```typescript
-// infra/validation/zod-validation.pipe.ts
+// infra/validation/valibot-validation.pipe.ts
 import { PipeTransform, BadRequestException } from '@nestjs/common';
-import { ZodSchema } from 'zod';
+import { flatten, safeParse } from 'valibot';
 
-export class ZodValidationPipe implements PipeTransform {
-  constructor(private schema: ZodSchema) {}
+export class ValibotValidationPipe implements PipeTransform {
+  constructor(private schema: v.GenericSchema) {}
 
   transform(value: unknown) {
-    const parsed = this.schema.safeParse(value);
+    const parsed = safeParse(this.schema, value);
     if (!parsed.success) {
-      throw new BadRequestException(parsed.error.flatten());
+      const flat = flatten(parsed.issues);
+      throw new BadRequestException({
+        fieldErrors: flat.nested,
+        formErrors: flat.root,
+      });
     }
-    return parsed.data;
+    return parsed.output;
   }
 }
 ```
@@ -453,15 +465,16 @@ export class ZodValidationPipe implements PipeTransform {
 ### Использование
 
 ```typescript
+@Schema(CreateUserSchema)
+class CreateUserDto { ... }
+
 @Post()
-async create(
-  @Body(new ZodValidationPipe(CreateUserSchema)) dto: CreateUserDto,
-) {
+async create(@Body() dto: CreateUserDto) {
   return this.facade.create(dto);
 }
 ```
 
-**Правило:** Zod schema — единый источник правды для валидации. Swagger-декораторы (`@ApiProperty`) дублируют для документации. Если критично избежать дублирования — можно рассмотреть `@anatine/zod-nestjs` позже.
+**Правило:** Valibot schema — единый источник правды для валидации. Swagger-декораторы (`@ApiProperty`) дублируют для документации.
 
 ---
 
@@ -501,7 +514,7 @@ async create(
 - `events/` — domain events (если нужны)
 - `errors/` — специфичные ошибки
 
-**Контроль:** ни одного импорта из `@nestjs/*`, `zod` (кроме VO), `drizzle-orm`.
+**Контроль:** ни одного импорта из `@nestjs/*`, `valibot` (кроме VO), `drizzle-orm`.
 
 ### Шаг 2: Application
 
@@ -514,7 +527,7 @@ async create(
 
 ### Шаг 4: DTO + Controller
 
-- `dto/` — class + `@ApiProperty` + zod schema
+- `dto/` — class + `@ApiProperty` + valibot schema
 - `{name}.controller.ts` — NestJS controller, зовёт facade
 
 ### Шаг 5: Infrastructure
@@ -559,7 +572,7 @@ async create(
 - [ ] Application use-case `@Injectable()` с `@Inject(TOKEN)`
 - [ ] Port (interface) для каждой внешней зависимости
 - [ ] Facade маршрутизирует вызовы
-- [ ] Controller + DTO (Swagger + zod) на верхнем уровне
+- [ ] Controller + DTO (Swagger + valibot) на верхнем уровне
 - [ ] Infrastructure: repo impl (+ mapper если нужен)
 - [ ] Domain errors добавлены в `infra/exceptions/error-map.ts`
 - [ ] Модуль зарегистрирован в `AppModule`

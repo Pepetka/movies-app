@@ -266,7 +266,7 @@ export const ERROR_MAP = new Map<new (...args: any[]) => Error, number>([
 }
 ```
 
-### Validation error (Zod)
+### Validation error (Valibot)
 
 ```json
 {
@@ -341,24 +341,28 @@ async check(): Promise<HealthResultDto> {
 
 ---
 
-## Zod Validation
+## Valibot Validation
 
-`ZodValidationPipe` валидирует входные данные и кидает `BadRequestException` с flatten-объектом:
+`ValibotValidationPipe` валидирует входные данные и кидает `BadRequestException` с flatten-объектом:
 
 ```typescript
-// infra/validation/zod-validation.pipe.ts
+// infra/validation/valibot-validation.pipe.ts
 import { PipeTransform, BadRequestException } from '@nestjs/common';
-import { ZodError, ZodSchema } from 'zod';
+import { flatten, safeParse } from 'valibot';
 
-export class ZodValidationPipe implements PipeTransform {
-  constructor(private schema: ZodSchema) {}
+export class ValibotValidationPipe implements PipeTransform {
+  constructor(private schema: v.GenericSchema) {}
 
   transform(value: unknown): unknown {
-    const parsed = this.schema.safeParse(value);
+    const parsed = safeParse(this.schema, value);
     if (!parsed.success) {
-      throw new BadRequestException(parsed.error.flatten());
+      const flat = flatten(parsed.issues);
+      throw new BadRequestException({
+        fieldErrors: flat.nested,
+        formErrors: flat.root,
+      });
     }
-    return parsed.data;
+    return parsed.output;
   }
 }
 ```
@@ -366,7 +370,7 @@ export class ZodValidationPipe implements PipeTransform {
 Exception filter ловит `BadRequestException`:
 
 - Если payload содержит `fieldErrors` / `formErrors` → форматирует как `VALIDATION_ERROR`
-- Если обычный `BadRequestException` (не от zod) → оставляет message
+- Если обычный `BadRequestException` (не от valibot) → оставляет message
 
 ---
 

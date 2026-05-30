@@ -4,7 +4,7 @@
 
 DTO (Data Transfer Object) — контракт для HTTP-слоя. Используется только в controller'е для Swagger-документации и типизации входных/выходных данных.
 
-Facade и use-cases работают с plain objects (тип из zod схемы), не с DTO class.
+Facade и use-cases работают с plain objects (тип из valibot схемы), не с DTO class.
 
 ---
 
@@ -14,10 +14,10 @@ Facade и use-cases работают с plain objects (тип из zod схем�
 
 ```
 HTTP Body
-  ↓ ZodValidationPipe валидирует по CreateUserSchema
+  ↓ ValibotValidationPipe валидирует по CreateUserSchema
 Validated plain object (типизирован как CreateUserDto class)
   ↓ Controller вызывает facade
-CreateUserInput (z.infer<typeof CreateUserSchema>) — plain object
+CreateUserInput (v.InferOutput<typeof CreateUserSchema>) — plain object
   ↓ Facade вызывает use-case
 CreateUserInput
   ↓ Use-case вызывает domain
@@ -72,22 +72,24 @@ export class CreateUserDto {
 }
 ```
 
-### 3. Request — zod schema + type + DTO class
+### 3. Request — valibot schema + type + DTO class
 
 ```ts
 // modules/user/dto/create-user.dto.ts
-import { z } from 'zod';
+import * as v from 'valibot';
 import { ApiProperty } from '@nestjs/swagger';
+import { Schema } from '$infra/validation';
 
-export const CreateUserSchema = z.object({
-  name: z.string().min(1),
-  email: z.string().email(),
+export const CreateUserSchema = v.object({
+  name: v.pipe(v.string(), v.minLength(1)),
+  email: v.pipe(v.string(), v.email()),
 });
 
 // Тип для facade и use-case
-export type CreateUserInput = z.infer<typeof CreateUserSchema>;
+export type CreateUserInput = v.InferOutput<typeof CreateUserSchema>;
 
 // Class только для controller и Swagger
+@Schema(CreateUserSchema)
 export class CreateUserDto {
   @ApiProperty({ description: 'User name' })
   name: string;
@@ -97,7 +99,7 @@ export class CreateUserDto {
 }
 ```
 
-Валидация — через zod (`ZodValidationPipe`), типизация facade/use-case — через `CreateUserInput`, Swagger — через `@ApiProperty` на `CreateUserDto`.
+Валидация — через valibot (`ValibotValidationPipe`), типизация facade/use-case — через `CreateUserInput`, Swagger — через `@ApiProperty` на `CreateUserDto`.
 
 ### 4. Response DTO — только @ApiProperty + fromEntity()
 
@@ -150,9 +152,7 @@ export class UsersController {
   @ApiResponse({ status: 201, type: UserResponseDto })
   @ApiResponse({ status: 400, description: 'Validation error' })
   @ApiBearerAuth()
-  async create(
-    @Body(new ZodValidationPipe(CreateUserSchema)) dto: CreateUserDto,
-  ): Promise<UserResponseDto> {
+  async create(@Body() dto: CreateUserDto): Promise<UserResponseDto> {
     const user = await this.facade.create(dto);
     return UserResponseDto.fromEntity(user);
   }
@@ -180,7 +180,7 @@ async execute(input: CreateUserInput): Promise<User> {
 }
 ```
 
-**Важно:** facade и use-case принимают `CreateUserInput` (type из zod), не `CreateUserDto` (class со Swagger). `import type` — zero runtime deps от `@nestjs/swagger`.
+**Важно:** facade и use-case принимают `CreateUserInput` (type из valibot), не `CreateUserDto` (class со Swagger). `import type` — zero runtime deps от `@nestjs/swagger`.
 
 ---
 
@@ -210,9 +210,9 @@ src/modules/<feature>/
 
 ## Чек-лист для нового endpoint
 
-- [ ] Создан zod schema + `Input` type + Request DTO class
+- [ ] Создан valibot schema + `Input` type + Request DTO class
 - [ ] Создан Response DTO class + `static fromEntity()`
-- [ ] В controller: `@Body(new ZodValidationPipe(Schema))`
+- [ ] В controller: `@Body()` (с `@Schema()` на DTO class)
 - [ ] Контроллер: `@ApiTags`, `@ApiOperation`, `@ApiResponse`
 - [ ] Facade/use-case принимают `Input` type, не DTO class
 - [ ] Если response содержит `Record<string, Dto>` — добавлен `@ApiExtraModels`
