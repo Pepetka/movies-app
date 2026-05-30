@@ -1,4 +1,4 @@
-import z from 'zod';
+import * as v from 'valibot';
 
 export enum Environment {
   Development = 'development',
@@ -6,23 +6,34 @@ export enum Environment {
   Test = 'test',
 }
 
-export const configSchema = z.object({
-  NODE_ENV: z.enum(Environment),
-  PORT: z.coerce.number().min(0).max(65535).default(8080),
-  WEB_URL: z
-    .string()
-    .transform((s) =>
+export const configSchema = v.object({
+  NODE_ENV: v.enum(Environment),
+  PORT: v.fallback(
+    v.pipe(v.string(), v.toNumber(), v.minValue(0), v.maxValue(65535)),
+    8080,
+  ),
+  WEB_URL: v.pipe(
+    v.string(),
+    v.transform((s) =>
       s
         .split(',')
         .map((u) => u.trim())
         .filter(Boolean),
-    )
-    .pipe(z.array(z.url()).min(1)),
-  API_URL: z.url(),
-  DATABASE_URL: z.string(),
-  COOKIE_SECRET: z.string().min(32),
-  HEALTH_MEMORY_THRESHOLD_MB: z.coerce.number().min(64).default(512),
-  HEALTH_CHECK_TIMEOUT_MS: z.coerce.number().min(100).default(5000),
+    ),
+    v.array(v.pipe(v.string(), v.url())),
+    v.minLength(1),
+  ),
+  API_URL: v.pipe(v.string(), v.url()),
+  DATABASE_URL: v.pipe(v.string(), v.minLength(1)),
+  COOKIE_SECRET: v.pipe(v.string(), v.minLength(32)),
+  HEALTH_MEMORY_THRESHOLD_MB: v.fallback(
+    v.pipe(v.string(), v.toNumber(), v.minValue(64)),
+    512,
+  ),
+  HEALTH_CHECK_TIMEOUT_MS: v.fallback(
+    v.pipe(v.string(), v.toNumber(), v.minValue(100)),
+    5000,
+  ),
 });
 
-export type AppConfig = z.infer<typeof configSchema>;
+export type AppConfig = v.InferOutput<typeof configSchema>;

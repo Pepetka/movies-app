@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { parse } from 'valibot';
 
 import { AppConfig, configSchema, Environment } from './app-config.schema';
 
@@ -7,7 +8,7 @@ export class AppConfigService {
   private readonly _config: AppConfig;
 
   constructor() {
-    this._config = configSchema.parse(process.env);
+    this._config = parse(configSchema, process.env);
   }
 
   get<K extends keyof AppConfig>(key: K): AppConfig[K] {
