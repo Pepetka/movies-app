@@ -34,6 +34,13 @@ export const configSchema = v.object({
     v.pipe(v.string(), v.toNumber(), v.minValue(100)),
     5000,
   ),
+  LOG_LEVEL: v.optional(
+    v.picklist(['trace', 'debug', 'info', 'warn', 'error', 'fatal']),
+  ),
+  LOG_HTTP_REQUESTS: v.fallback(
+    v.pipe(v.string(), v.toBoolean(), v.boolean()),
+    true,
+  ),
 });
 
 export type AppConfig = v.InferOutput<typeof configSchema>;
