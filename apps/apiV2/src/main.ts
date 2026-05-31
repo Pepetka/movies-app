@@ -8,10 +8,10 @@ import { VersioningType } from '@nestjs/common';
 import fastifyCookie from '@fastify/cookie';
 import csrf from '@fastify/csrf-protection';
 import { NestFactory } from '@nestjs/core';
-import { Logger } from '@nestjs/common';
 import helmet from '@fastify/helmet';
 
-import { registerRequestIdHook } from '$infra/observability';
+import { AppLoggerService, registerHttpLoggerHooks } from '$infra/app-logger';
+import { registerRequestIdHooks } from '$infra/observability';
 import { AppConfigService } from '$infra/app-config';
 import { getHelmetConfig } from '$infra/security';
 
@@ -21,7 +21,12 @@ async function bootstrap() {
   const app = await NestFactory.create<NestFastifyApplication>(
     AppModule,
     new FastifyAdapter(),
+    { bufferLogs: true },
   );
+
+  const loggerService = app.get(AppLoggerService);
+
+  app.useLogger(loggerService);
   app.setGlobalPrefix('api');
 
   app.enableVersioning({
@@ -35,12 +40,18 @@ async function bootstrap() {
   const secret = configService.get('COOKIE_SECRET');
   const port = configService.get('PORT');
   const env = configService.get('NODE_ENV');
+  const logHttpRequests = configService.get('LOG_HTTP_REQUESTS');
 
   app.enableCors({
     origin: webUrls,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
     credentials: true,
-    allowedHeaders: ['Content-Type', 'Authorization', 'x-csrf-token'],
+    allowedHeaders: [
+      'Content-Type',
+      'Authorization',
+      'x-csrf-token',
+      'x-request-id',
+    ],
   });
 
   await app.register(helmet, getHelmetConfig(configService));
@@ -55,7 +66,10 @@ async function bootstrap() {
   });
 
   app.enableShutdownHooks();
-  registerRequestIdHook(app);
+  registerRequestIdHooks(app);
+  if (logHttpRequests) {
+    registerHttpLoggerHooks(app, loggerService);
+  }
 
   if (configService.isDev) {
     const config = new DocumentBuilder()
@@ -81,7 +95,9 @@ async function bootstrap() {
 
   await app.listen(port, '0.0.0.0');
 
-  const logger = new Logger('Bootstrap');
-  logger.log(`Application is running on port ${port} [${env}]`);
+  loggerService.log(
+    `Application is running on port ${port} [${env}]`,
+    'Bootstrap',
+  );
 }
 void bootstrap();

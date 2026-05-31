@@ -34,7 +34,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const requestId = request.requestId ?? 'unknown';
 
     const { status, payload } = this._resolve(error, requestId);
-    this._log(error, status, request, requestId);
+    this._log(error, status, request);
 
     response.status(status).send(payload);
   }
@@ -123,13 +123,8 @@ export class HttpExceptionFilter implements ExceptionFilter {
     return { status: HttpStatus.INTERNAL_SERVER_ERROR, payload };
   }
 
-  private _log(
-    error: unknown,
-    status: number,
-    request: FastifyRequest,
-    requestId?: string,
-  ): void {
-    const message = `[${request.method}] ${request.url} -> ${status} | requestId=${requestId}`;
+  private _log(error: unknown, status: number, request: FastifyRequest): void {
+    const message = `[${request.method}] ${request.url} -> ${status}`;
 
     if (error instanceof HealthCheckError) {
       this._logger.debug(message);

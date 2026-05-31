@@ -1,1 +1,1 @@
-export { registerRequestIdHook } from './request-id.hook';
+export { registerRequestIdHooks } from './request-id.hooks';
