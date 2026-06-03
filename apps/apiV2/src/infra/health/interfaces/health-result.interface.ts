@@ -6,5 +6,5 @@ export interface HealthIndicatorResult {
 
 export interface HealthIndicator {
   readonly name: string;
-  check(): Promise<HealthIndicatorResult>;
+  check(signal?: AbortSignal): Promise<HealthIndicatorResult>;
 }

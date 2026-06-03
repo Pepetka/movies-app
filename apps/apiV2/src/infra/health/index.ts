@@ -1,6 +1,9 @@
 export { HealthModule } from './health.module';
-export { HealthService } from './health.service';
-export { LIVENESS_INDICATORS, READINESS_INDICATORS } from './health.constants';
+export { HealthService } from './core/health.service';
+export {
+  LIVENESS_INDICATORS,
+  READINESS_INDICATORS,
+} from './core/health.constants';
 export { HealthResultDto, HealthIndicatorResultDto } from './dto';
 export type {
   HealthIndicator,

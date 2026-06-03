@@ -6,7 +6,7 @@ import {
 } from '@nestjs/swagger';
 import { Controller, Get } from '@nestjs/common';
 
-import { HealthIndicatorResultDto, HealthResultDto } from './dto';
+import { HealthIndicatorResultDto, HealthResultDto } from '../dto';
 import { HealthService } from './health.service';
 
 @ApiTags('health')

@@ -6,9 +6,9 @@ import { HealthCheckError } from '$infra/exceptions';
 import {
   HealthIndicator,
   HealthIndicatorResult,
-} from './interfaces/health-result.interface';
+} from '../interfaces/health-result.interface';
 import { LIVENESS_INDICATORS, READINESS_INDICATORS } from './health.constants';
-import { HealthResult } from './interfaces/health-indicator.interface';
+import { HealthResult } from '../interfaces/health-indicator.interface';
 
 @Injectable()
 export class HealthService {
@@ -40,19 +40,37 @@ export class HealthService {
 
     const results = await Promise.allSettled<HealthIndicatorResult>(
       indicators.map(async (indicator) => {
-        const check = indicator.check();
-        const timeout = new Promise((_, reject) =>
-          setTimeout(() => reject(new Error('Timeout')), timeoutMs),
+        const controller = new AbortController();
+        let timeoutRef: ReturnType<typeof setTimeout> | undefined;
+
+        const timeoutPromise = new Promise<HealthIndicatorResult>(
+          (_, reject) => {
+            timeoutRef = setTimeout(() => {
+              controller.abort();
+              reject(new Error('Timeout'));
+            }, timeoutMs);
+          },
         );
 
+        const checkPromise = indicator
+          .check(controller.signal)
+          .catch((err: unknown) => {
+            if (err instanceof Error && err.name === 'AbortError') {
+              throw new Error('Timeout');
+            }
+            throw err;
+          });
+
         try {
-          const result = await Promise.race([check, timeout]);
-          return result as HealthIndicatorResult;
+          const result = await Promise.race([checkPromise, timeoutPromise]);
+          return result;
         } catch (e: unknown) {
           return {
             status: 'down',
             message: e instanceof Error ? e.message : 'Unknown error',
           };
+        } finally {
+          clearTimeout(timeoutRef);
         }
       }),
     );
