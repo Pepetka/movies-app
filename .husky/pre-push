@@ -1,6 +1,5 @@
 set -e
 
-./scripts/generate-types.sh
 pnpm run check
 pnpm run deps:lint
 command -v ast-index >/dev/null && ast-index rebuild || true
