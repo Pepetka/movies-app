@@ -5,9 +5,13 @@
     "outDir": "./dist",
     "baseUrl": "./",
     "paths": {
+      "$src/*": ["./src/*"],
       "$modules/*": ["./src/modules/*"],
       "$infra/*": ["./src/infra/*"],
-      "$shared/*": ["./src/shared/*"]
+      "$shared/*": ["./src/shared/*"],
+      "$test/*": ["./test/*"]
     }
-  }
+  },
+  "include": ["**/*.ts"],
+  "exclude": ["node_modules", "dist"]
 }
