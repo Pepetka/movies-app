@@ -67,34 +67,51 @@ export const mockAbortableIndicator = (
   },
 });
 
-type Expecting = Record<string, HealthIndicatorResult>;
+type IndicatorResult = Record<string, HealthIndicatorResult>;
 
 export const EXPECT_RESULT_NUM = 4;
 export const EXPECT_ERROR_NUM = EXPECT_RESULT_NUM + 1;
 
-export const expectResult = (
-  result: HealthResult,
-  expecting: Expecting = {},
-  status: 'ok' | 'error' = 'ok',
-) => {
-  const { upExpecting, downExpecting } = Object.entries(expecting).reduce<{
-    upExpecting: Expecting;
-    downExpecting: Expecting;
+const getUpDownIndicatorsResults = (indicatorsResult: IndicatorResult) => {
+  return Object.entries(indicatorsResult).reduce<{
+    upResult: IndicatorResult;
+    downResult: IndicatorResult;
   }>(
     (acc, [name, result]) => {
       if (result.status === 'up') {
-        acc.upExpecting[name] = result;
+        acc.upResult[name] = result;
       }
       if (result.status === 'down') {
-        acc.downExpecting[name] = result;
+        acc.downResult[name] = result;
       }
       return acc;
     },
     {
-      upExpecting: {},
-      downExpecting: {},
+      upResult: {},
+      downResult: {},
     },
   );
+};
+
+export const mockResult = (indicatorsResult: IndicatorResult): HealthResult => {
+  const { upResult, downResult } = getUpDownIndicatorsResults(indicatorsResult);
+  const status = Object.keys(downResult).length ? 'error' : 'ok';
+
+  return {
+    status,
+    info: upResult,
+    error: downResult,
+    details: indicatorsResult,
+  };
+};
+
+export const expectResult = (
+  result: HealthResult,
+  expecting: IndicatorResult = {},
+  status: 'ok' | 'error' = 'ok',
+) => {
+  const { upResult: upExpecting, downResult: downExpecting } =
+    getUpDownIndicatorsResults(expecting);
 
   expect(result.status).toBe(status);
   expect(result.info).toEqual(upExpecting);

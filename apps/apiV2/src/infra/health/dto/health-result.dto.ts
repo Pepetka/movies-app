@@ -4,6 +4,13 @@ import { HealthIndicatorResultDto } from './health-indicator-result.dto';
 import { HealthResult } from '../interfaces/health-indicator.interface';
 
 export class HealthResultDto {
+  constructor(result: HealthResult) {
+    this.status = result.status;
+    this.info = result.info;
+    this.error = result.error;
+    this.details = result.details;
+  }
+
   @ApiProperty({ enum: ['ok', 'error'], description: 'Overall health status' })
   status: 'ok' | 'error';
 
@@ -29,11 +36,6 @@ export class HealthResultDto {
   details: Record<string, HealthIndicatorResultDto>;
 
   static fromResult(result: HealthResult): HealthResultDto {
-    return {
-      status: result.status,
-      info: result.info,
-      error: result.error,
-      details: result.details,
-    };
+    return new HealthResultDto(result);
   }
 }
