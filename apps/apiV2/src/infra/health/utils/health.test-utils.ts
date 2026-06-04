@@ -1,5 +1,5 @@
 import type { Provider, Type } from '@nestjs/common';
-import { expect } from 'vitest';
+import { expect, vi } from 'vitest';
 
 import { AppConfigService } from '$infra/app-config';
 import { HealthCheckError } from '$infra/exceptions';
@@ -8,21 +8,28 @@ import type {
   HealthIndicator,
   HealthIndicatorResult,
 } from '../interfaces/health-result.interface';
-import { LIVENESS_INDICATORS, READINESS_INDICATORS } from './health.constants';
+import {
+  LIVENESS_INDICATORS,
+  READINESS_INDICATORS,
+} from '../core/health.constants';
 import type { HealthResult } from '../interfaces/health-indicator.interface';
-import { HealthService } from './health.service';
+import { HealthService } from '../core/health.service';
+
+export const mockAppConfigService = (
+  config: Record<string, unknown>,
+): Provider => ({
+  provide: AppConfigService,
+  useValue: {
+    get: (key: string) => {
+      if (key in config) return config[key];
+      throw new Error(`Unexpected config key in test: ${key}`);
+    },
+  },
+});
 
 export const baseProviders: Array<Type<unknown> | Provider> = [
   HealthService,
-  {
-    provide: AppConfigService,
-    useValue: {
-      get: (key: string) => {
-        if (key === 'HEALTH_CHECK_TIMEOUT_MS') return 1;
-        throw new Error(`Unexpected config key in test: ${key}`);
-      },
-    },
-  },
+  mockAppConfigService({ HEALTH_CHECK_TIMEOUT_MS: 1 }),
   {
     provide: LIVENESS_INDICATORS,
     useValue: [],
@@ -127,4 +134,43 @@ export const expectError = (
   const typedErr = err as HealthCheckError;
 
   expectResult(typedErr.result, expecting, 'error');
+};
+
+const HEAP_TOTAL = 100 * 1024 * 1024;
+const RSS_TOTAL = 200 * 1024 * 1024;
+
+export const mockMemoryUsage = (heapUsedMb: number) => {
+  const mock = {
+    heapUsed: heapUsedMb * 1024 * 1024,
+    heapTotal: HEAP_TOTAL,
+    rss: RSS_TOTAL,
+    external: 0,
+    arrayBuffers: 0,
+  } as NodeJS.MemoryUsage;
+
+  const spy = vi.spyOn(process, 'memoryUsage').mockReturnValue(mock);
+  return { mock, spy };
+};
+
+export const EXPECT_MEMORY_DETAILS_NUM = 2;
+
+export const expectMemory = (
+  result: HealthIndicatorResult,
+  {
+    status,
+    thresholdMb,
+    heapUsed,
+  }: {
+    status: 'up' | 'down';
+    thresholdMb: number;
+    heapUsed: number;
+  },
+) => {
+  expect(result.status).toBe(status);
+  expect(result.details).toEqual({
+    heapUsed,
+    heapTotal: HEAP_TOTAL,
+    rss: RSS_TOTAL,
+    thresholdMb,
+  });
 };

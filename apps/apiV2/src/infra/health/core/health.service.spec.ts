@@ -13,7 +13,7 @@ import {
   mockDownIndicator,
   mockErrorIndicator,
   mockUpIndicator,
-} from './health.test-utils';
+} from '../utils';
 import { LIVENESS_INDICATORS, READINESS_INDICATORS } from './health.constants';
 import { HealthService } from './health.service';
 

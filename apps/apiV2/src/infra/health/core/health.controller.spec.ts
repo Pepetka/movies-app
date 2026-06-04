@@ -9,7 +9,7 @@ import {
   expectError,
   expectResult,
   mockResult,
-} from './health.test-utils';
+} from '../utils';
 import { HealthController } from './health.controller';
 import { HealthService } from './health.service';
 import { HealthResultDto } from '../dto';
