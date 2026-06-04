@@ -7,16 +7,18 @@ export interface TestModuleOverride {
 }
 
 export interface CreateTestModuleConfig {
-  providers: Array<Type<unknown> | Provider>;
+  controllers?: Type<unknown>[];
+  providers?: (Type<unknown> | Provider)[];
   overrides?: TestModuleOverride[];
 }
 
 export async function createTestModule(
   options: CreateTestModuleConfig,
 ): Promise<TestingModule> {
-  const { providers, overrides } = options;
+  const { controllers, providers, overrides } = options;
 
   const builder = Test.createTestingModule({
+    controllers,
     providers,
   });
 
