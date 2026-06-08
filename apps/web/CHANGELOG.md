@@ -1,5 +1,11 @@
 # web
 
+## 1.0.0
+
+### Major Changes
+
+- eaf2caa: First stable release
+
 ## 0.24.0
 
 ### Minor Changes
