@@ -1,5 +1,11 @@
 # api
 
+## 1.0.0
+
+### Major Changes
+
+- eaf2caa: First stable release
+
 ## 0.15.0
 
 ### Minor Changes
