@@ -41,6 +41,6 @@
 		"svelte-check": "catalog:",
 		"typescript": "catalog:",
 		"vite": "catalog:",
-		"vite-plugin-devtools-json": "^1.0.0"
+		"vite-plugin-devtools-json": "^1.1.0"
 	}
 }
